@@ -5,6 +5,9 @@ import { RouterProvider } from 'react-router'
 import './index.css'
 import { queryClient } from './lib/queryClient'
 import { router } from './router'
+import { initTheme } from './stores/theme'
+
+initTheme()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -1,13 +1,13 @@
 # CV Generator — Development Plan
 
-> Status: **Step 2 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
+> Status: **Step 3 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
 >
 > **Decision log**
 >
 > - App tabs: Dashboard · Documents (All documents / Cover letters / CVs) · Saved Jobs ✅
 > - Job statuses: To apply · Applied · Interviewing · Negotiating · Accepted · Rejected · No answer ✅
 > - Backend framework: Fastify; ORM: Drizzle ✅
-> - Step 0 closed. Step 1 (project setup) ✅. Step 2 (shared domain model) built; awaiting review before Step 3.
+> - Step 0 closed. Step 1 (project setup) ✅. Step 2 (shared domain model) ✅. Step 3 (app shell) built; awaiting review before Step 4.
 > - Frontend: React + TS + Vite + Tailwind + Axios + React Router + TanStack Query + Zustand ✅
 > - Backend: Node + TypeScript + PostgreSQL (JSONB) with shared Zod types ✅
 > - Only free plans that allow commercial use; keep everything portable so it can become paid later ✅
@@ -177,7 +177,7 @@ Implementation notes:
 
 ### Local development (free)
 
-- Docker Compose runs Postgres and MinIO (an S3-compatible stand-in for R2), so development needs no cloud accounts.
+- Docker Compose runs Postgres, so development needs no cloud accounts. A local S3-compatible store (stand-in for R2) is added in Step 8. MinIO no longer publishes Docker images, so we'll pick a maintained alternative then (e.g. Garage or SeaweedFS).
 
 ## 5. Core data model
 
@@ -237,7 +237,7 @@ Every step ends with a demo and a discussion before the next one starts.
 - ✅ API: Fastify 5 + Drizzle ORM + postgres.js, env validated with Zod, `GET /api/health` (checks the database).
 - ✅ Shared: Zod schemas consumed as TypeScript source by both apps (bundled into the API build).
 - ✅ ESLint, Prettier, Husky + lint-staged pre-commit hook; Vitest in every package.
-- ✅ Docker Compose for local Postgres and MinIO (S3 stand-in).
+- ✅ Docker Compose for local Postgres.
 - ✅ GitHub Actions CI: format check, lint, typecheck, tests, build.
 - **Output:** a start page that calls the API through axios + TanStack Query and shows API/database status.
 - Note: TypeScript is pinned to 6.0 because typescript-eslint does not support TypeScript 7 yet.
@@ -259,15 +259,17 @@ All in `packages/shared/src`, as Zod schemas with inferred TypeScript types:
 - `schemaVersion` on stored documents so we can migrate JSONB data later.
 - 45 unit tests.
 
-### Step 3: App shell & editor shell (frontend, mock data)
+### Step 3: App shell & editor shell (frontend, mock data) ✅ built (awaiting review)
 
-- **Main navigation** with the three tabs (Dashboard · Documents · Saved Jobs), with placeholder pages and the Documents sub-tabs.
-- Editor layout from the screenshots: top toolbar, centered page canvas, right icon rail.
-- Routing: `/`, `/documents/:subtab`, `/jobs`, `/cvs/:id/edit`, `/cvs/:id/preview`.
-- Top bar (AI Assistant toggle · center tools · undo/redo/History/help), switchable left side panel, right rail.
-- Toolbar and rail buttons wired to empty panels.
-- Light/dark app theme via Tailwind `dark:` classes.
-- **Output:** a clickable UI on mock data, no backend.
+- ✅ Main navigation: Dashboard · Documents · Saved Jobs, plus API status and a theme toggle (system → light → dark, saved in the browser, no flash on load).
+- ✅ Dashboard: quick actions, recent documents, job pipeline counts and reminders, from mock data.
+- ✅ Documents: All documents / Cover letters / CVs sub-tabs and a "Create new" button (menu on All documents).
+- ✅ Saved Jobs: read-only table with all 9 columns and colored status badges.
+- ✅ Editor (`/cvs/:id/edit`, `/cover-letters/:id/edit`): top bar (back, AI Assistant, the five tools, undo/redo, History, Help menu), switchable left panel (Templates, Design & Font, AI Assistant) with placeholder content, A4/Letter page canvas and the right rail (Preview, Download, Share, AI, Premium).
+- ✅ Preview route (`/cvs/:id/preview`) and a "Page not found" page. `/cvs/new/edit` opens a blank CV.
+- Buttons for later steps show a short message saying which step adds them.
+- The page canvas shows the real header text and section titles with placeholder lines; the real template renderer is Step 4.
+- Mock data lives in `apps/web/src/mocks/data.ts` and is replaced by the API in Step 9.
 
 ### Step 4: CV renderer & template system
 
@@ -307,7 +309,7 @@ Specification: §3.2 and §3.3.
   - `GET /cvs/:id/versions`, `POST /cvs/:id/versions/:vid/restore`
   - `GET /templates`, `GET /professions`
 - Postgres schema and migrations; request validation using the shared Zod schemas.
-- File storage for photos and logos through the S3 API: MinIO in dev, Cloudflare R2 in prod.
+- File storage for photos and logos through the S3 API: a local S3-compatible container in dev (added to Docker Compose here), Cloudflare R2 in prod.
 - Simple per-plan limits (e.g. max CVs on the free plan), enforced in one place so premium is easy to switch on later.
 
 ### Step 9: Connect frontend ↔ backend

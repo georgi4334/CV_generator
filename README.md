@@ -19,13 +19,13 @@ docs/         Plan and UI reference screenshots
 
 - Node.js 22+ (see `.nvmrc`)
 - pnpm 10 (`corepack enable` picks the version from `package.json`)
-- Docker, for the local Postgres and MinIO (S3) services
+- Docker Desktop, for the local Postgres database
 
 ## Getting started
 
 ```bash
 pnpm install
-pnpm db:up                                   # start Postgres + MinIO (docker compose)
+pnpm db:up                                   # start Postgres (docker compose)
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env
 pnpm dev                                     # web on :5173, api on :3001
