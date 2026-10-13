@@ -80,7 +80,9 @@ describe('documents sub-tabs', () => {
 describe('editor', () => {
   it('renders the CV from mock data', () => {
     renderRoute('/cvs/cv-1/edit')
-    expect(screen.getByText('Alex Petrov')).toBeDefined()
+    expect(
+      within(screen.getByRole('document', { name: 'CV' })).getByText('Alex Petrov'),
+    ).toBeDefined()
     expect(screen.getByRole('navigation', { name: 'Editor tools' })).toBeDefined()
   })
 
@@ -109,7 +111,9 @@ describe('editor', () => {
 
   it('opens a blank CV for /cvs/new/edit', () => {
     renderRoute('/cvs/new/edit')
-    expect(screen.getByText('Your Name')).toBeDefined()
+    expect(
+      within(screen.getByRole('document', { name: 'CV' })).getByText('Your Name'),
+    ).toBeDefined()
   })
 
   it('shows "Page not found" for an unknown document', () => {

@@ -31,7 +31,7 @@ export function EditorPage({ type }: { type: DocumentType }) {
         {activePanel && <EditorSidePanel panel={activePanel} />}
         <div className="flex-1 overflow-auto">
           <div className="flex min-w-max justify-center gap-4 px-6 py-8">
-            <PageCanvas cv={doc.cv} title={doc.title} />
+            <PageCanvas cv={doc.cv} title={doc.title} mode="edit" />
             <EditorRightRail previewTo={`${base}/${doc.id}/preview`} />
           </div>
         </div>

@@ -1,13 +1,13 @@
 # CV Generator — Development Plan
 
-> Status: **Step 3 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
+> Status: **Step 4 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
 >
 > **Decision log**
 >
 > - App tabs: Dashboard · Documents (All documents / Cover letters / CVs) · Saved Jobs ✅
 > - Job statuses: To apply · Applied · Interviewing · Negotiating · Accepted · Rejected · No answer ✅
 > - Backend framework: Fastify; ORM: Drizzle ✅
-> - Step 0 closed. Step 1 (project setup) ✅. Step 2 (shared domain model) ✅. Step 3 (app shell) built; awaiting review before Step 4.
+> - Step 0 closed. Step 1 (project setup) ✅. Step 2 (shared domain model) ✅. Step 3 (app shell) ✅. Step 4 (CV renderer) built; awaiting review before Step 5.
 > - Frontend: React + TS + Vite + Tailwind + Axios + React Router + TanStack Query + Zustand ✅
 > - Backend: Node + TypeScript + PostgreSQL (JSONB) with shared Zod types ✅
 > - Only free plans that allow commercial use; keep everything portable so it can become paid later ✅
@@ -271,13 +271,20 @@ All in `packages/shared/src`, as Zod schemas with inferred TypeScript types:
 - The page canvas shows the real header text and section titles with placeholder lines; the real template renderer is Step 4.
 - Mock data lives in `apps/web/src/mocks/data.ts` and is replaced by the API in Step 9.
 
-### Step 4: CV renderer & template system
+### Step 4: CV renderer & template system ✅ built (awaiting review)
 
-- Page component in **A4 (210×297 mm) and US Letter (8.5×11 in)**, using print-accurate units.
-- First 3 templates out of the 8 in the reference: **Polished** (two-column sidebar, as in the screenshot), **Single column**, **Compact**. The rest (_Contemporary, Creative, Timeline, Stylish, Multicolumn_) are added in Step 7 once the system is proven.
-- Templates read every design setting (§3.2) through CSS variables, so one template supports all margin, spacing, font, color, layout and background variations.
-- Multi-page support: content flows onto page 2 when it overflows. This is technically the hardest part, so we tackle it early.
-- **Discuss:** the template list per profession.
+Code in `apps/web/src/cv-renderer/`.
+
+- ✅ Real-size pages: A4 (794×1123 px) and US Letter, at 96 dpi.
+- ✅ Three templates: **Polished** (two columns, sidebar on the right, as in the reference), **Single column** (centered header; sidebar sections follow the main ones), **Compact** (full-width header, narrow sidebar on the left).
+- ✅ Every design setting is applied: margins, section spacing, font size and line height (5 steps each), accent color, font, column layout 1–4 (sidebar width and plain / tinted / solid background).
+- ✅ Multi-page: content is split into blocks (a section title always stays with its first item), measured in a hidden copy of the page, then poured page by page into each column. It re-measures when content, design or fonts change.
+- ✅ Edit mode shows grey placeholders ("Your Name", "Company Name", "Date period"…); preview hides empty fields and sections.
+- ✅ Dates ("Mar 2022 – Present"), level dots/bars/labels and section titles in English and Bulgarian.
+- ✅ 10 self-hosted fonts with Cyrillic (Fontsource, free); only fonts in use are downloaded.
+- ✅ Photo in the header for templates that support it (upload comes in Step 5).
+- The other 5 templates fall back to the closest built one until Step 7.
+- Known limit: a single item taller than a whole page is not split; it gets a page of its own and is cut off.
 
 ### Step 5: Inline editing
 
