@@ -4,3 +4,6 @@ packages:
 
 onlyBuiltDependencies:
   - esbuild
+
+# Install automatically when package.json/lockfile changed since the last install (e.g. after git pull).
+verifyDepsBeforeRun: install

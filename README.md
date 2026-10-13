@@ -33,6 +33,8 @@ pnpm dev                                     # web on :5173, api on :3001
 
 Open http://localhost:5173. The page shows whether the API and database are reachable.
 
+After a `git pull`, just run `pnpm dev` again: if dependencies changed, pnpm installs them first (`verifyDepsBeforeRun` in `pnpm-workspace.yaml`).
+
 ## Scripts
 
 | Command                             | What it does                                    |
