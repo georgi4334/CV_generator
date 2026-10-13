@@ -7,8 +7,9 @@ services:
       POSTGRES_USER: cv
       POSTGRES_PASSWORD: cv
       POSTGRES_DB: cv_generator
+    # Host port 5433, so it never clashes with a PostgreSQL installed directly on the computer (5432).
     ports:
-      - '5432:5432'
+      - '5433:5432'
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:

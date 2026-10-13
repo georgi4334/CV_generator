@@ -1,13 +1,13 @@
 # CV Generator — Development Plan
 
-> Status: **Step 7 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
+> Status: **Step 8 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
 >
 > **Decision log**
 >
 > - App tabs: Dashboard · Documents (All documents / Cover letters / CVs) · Saved Jobs ✅
 > - Job statuses: To apply · Applied · Interviewing · Negotiating · Accepted · Rejected · No answer ✅
 > - Backend framework: Fastify; ORM: Drizzle ✅
-> - Step 0 closed. Step 1 (project setup) ✅. Step 2 (shared domain model) ✅. Step 3 (app shell) ✅. Step 4 (CV renderer) ✅. Step 5 (inline editing) ✅. Step 6 (rearrange) ✅. Step 7 (templates & design) built; awaiting review before Step 8.
+> - Step 0 closed. Step 1 (project setup) ✅. Step 2 (shared domain model) ✅. Step 3 (app shell) ✅. Step 4 (CV renderer) ✅. Step 5 (inline editing) ✅. Step 6 (rearrange) ✅. Step 7 (templates & design) ✅. Step 8 (API & database) built; awaiting review before Step 9.
 > - Frontend: React + TS + Vite + Tailwind + Axios + React Router + TanStack Query + Zustand ✅
 > - Backend: Node + TypeScript + PostgreSQL (JSONB) with shared Zod types ✅
 > - Only free plans that allow commercial use; keep everything portable so it can become paid later ✅
@@ -177,7 +177,7 @@ Implementation notes:
 
 ### Local development (free)
 
-- Docker Compose runs Postgres, so development needs no cloud accounts. A local S3-compatible store (stand-in for R2) is added in Step 8. MinIO no longer publishes Docker images, so we'll pick a maintained alternative then (e.g. Garage or SeaweedFS).
+- Docker Compose runs Postgres, so development needs no cloud accounts. Uploaded images are stored on local disk (`apps/api/uploads/`) in development.
 
 ## 5. Core data model
 
@@ -318,16 +318,32 @@ Specification: §3.2 and §3.3.
 - Switching template keeps the user's colors and fonts; "Reset to defaults" applies the template's own suggestions (e.g. Creative → Montserrat).
 - Deferred: marking templates as premium (crown), profession-based "Recommended" badges (needs the profession on the saved CV, Step 9).
 
-### Step 8: Backend API & database
+### Step 8: Backend API & database ✅ built (awaiting review)
 
-- REST endpoints:
-  - `GET/POST /cvs`, `GET/PATCH/DELETE /cvs/:id`
-  - `POST /cvs/:id/duplicate`
-  - `GET /cvs/:id/versions`, `POST /cvs/:id/versions/:vid/restore`
-  - `GET /templates`, `GET /professions`
-- Postgres schema and migrations; request validation using the shared Zod schemas.
-- File storage for photos and logos through the S3 API: a local S3-compatible container in dev (added to Docker Compose here), Cloudflare R2 in prod.
-- Simple per-plan limits (e.g. max CVs on the free plan), enforced in one place so premium is easy to switch on later.
+- ✅ Tables (Drizzle, migration `0000_init`): `users` (with `plan`), `cvs` (document as JSONB, `revision`), `cv_versions`, `uploads`. Migrations run automatically when the API starts (`MIGRATE_ON_START`).
+- ✅ Endpoints (all under `/api`, validated with the shared Zod schemas, errors as `{ error: { code, message, details } }`):
+
+  | Method               | Path                                   | Purpose                                                                                     |
+  | -------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------- |
+  | GET                  | `/cvs`                                 | List the user's CVs (newest first, without content)                                         |
+  | POST                 | `/cvs`                                 | Create (empty, or with a document / profession)                                             |
+  | GET / PATCH / DELETE | `/cvs/:id`                             | Read, save, delete. PATCH needs the last `revision`; an outdated save gets **409 conflict** |
+  | POST                 | `/cvs/:id/duplicate`                   | Copy                                                                                        |
+  | GET / POST           | `/cvs/:id/versions`                    | History; POST saves a named version                                                         |
+  | GET                  | `/cvs/:id/versions/:versionId`         | One version with its content (for preview)                                                  |
+  | POST                 | `/cvs/:id/versions/:versionId/restore` | Restore (the replaced content is kept as "Before restore")                                  |
+  | POST / DELETE        | `/uploads`, `/uploads/:id`             | Upload or delete a photo/logo (PNG/JPEG/WebP, max 5 MB, type checked from the file's bytes) |
+  | GET                  | `/uploads/:id`                         | Serve an image (public by random id, cached)                                                |
+  | GET                  | `/professions`                         | Profession presets                                                                          |
+  | GET                  | `/health`                              | API and database status                                                                     |
+
+- ✅ Automatic version history: while saving, the previous content is kept as a snapshot at most every 10 minutes; versions beyond the plan limit are pruned.
+- ✅ Plan limits in one place (`PLAN_LIMITS` in `@cv/shared`): free = 20 CVs and 30 versions per CV.
+- ✅ Every query is scoped to the current user. Until login (Step 15) all requests act as one local "dev" user.
+- ✅ File storage behind a small interface; local disk for development. The Cloudflare R2 (S3) implementation is added at deployment (Step 17).
+- ✅ API tests run against a real Postgres test database (created and migrated automatically). CI runs Postgres as a service and requires these tests; locally they are skipped with a warning when Postgres isn't running.
+- Templates stay defined in the frontend code (no `/templates` endpoint needed).
+- The frontend still uses mock data until Step 9 connects it.
 
 ### Step 9: Connect frontend ↔ backend
 

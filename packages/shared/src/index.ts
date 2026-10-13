@@ -1,3 +1,4 @@
+export * from './api'
 export * from './coverLetter'
 export * from './cv'
 export * from './documents'

@@ -25,15 +25,23 @@ docs/         Plan and UI reference screenshots
 
 ```bash
 pnpm install
-pnpm db:up                                   # start Postgres (docker compose)
+pnpm db:up                                   # start Postgres (docker compose, port 5433)
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env
 pnpm dev                                     # web on :5173, api on :3001
 ```
 
+Docker's Postgres listens on port **5433** so it does not clash with a PostgreSQL installed directly on your computer (which usually uses 5432). If you created `apps/api/.env` before this change, update its `DATABASE_URL` to port 5433.
+
 Open http://localhost:5173. The page shows whether the API and database are reachable.
 
 After a `git pull`, just run `pnpm dev` again: if dependencies changed, pnpm installs them first (`verifyDepsBeforeRun` in `pnpm-workspace.yaml`).
+
+## API
+
+The API runs on http://localhost:3001 and applies database migrations when it starts. In development the web app proxies `/api` to it. See the endpoint table in [`docs/PLAN.md`](docs/PLAN.md) (Step 8).
+
+`pnpm test` also runs the API's database tests against a `cv_generator_test` database, created automatically on the Postgres from `pnpm db:up`. Without a running Postgres they are skipped with a warning (CI always runs them).
 
 ## Scripts
 

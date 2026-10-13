@@ -4,7 +4,7 @@ import postgres from 'postgres'
 import * as schema from './schema'
 
 export function createDb(url: string) {
-  const client = postgres(url, { max: 5, connect_timeout: 5 })
+  const client = postgres(url, { max: 5, connect_timeout: 5, onnotice: () => {} })
   const db = drizzle(client, { schema })
 
   return {
