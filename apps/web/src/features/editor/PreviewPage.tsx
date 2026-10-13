@@ -24,7 +24,7 @@ export function PreviewPage({ type }: { type: DocumentType }) {
         <span className="text-slate-500">Preview · {doc.title}</span>
       </header>
       <div className="flex justify-center overflow-auto px-6 py-8">
-        <PageCanvas cv={doc.cv} title={doc.title} />
+        <PageCanvas cv={doc.cv} title={doc.title} mode="preview" />
       </div>
     </div>
   )
