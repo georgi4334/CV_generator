@@ -19,6 +19,8 @@ export const CvRecordSchema = z.object({
   ...recordBase,
   type: z.literal('cv'),
   professionId: z.string().nullable(),
+  /** Increases on every save; a save based on an older revision is rejected (409). */
+  revision: z.number().int().positive(),
   document: CvDocumentSchema,
 })
 export type CvRecord = z.infer<typeof CvRecordSchema>

@@ -35,6 +35,12 @@ Open http://localhost:5173. The page shows whether the API and database are reac
 
 After a `git pull`, just run `pnpm dev` again: if dependencies changed, pnpm installs them first (`verifyDepsBeforeRun` in `pnpm-workspace.yaml`).
 
+## API
+
+The API runs on http://localhost:3001 and applies database migrations when it starts. In development the web app proxies `/api` to it. See the endpoint table in [`docs/PLAN.md`](docs/PLAN.md) (Step 8).
+
+`pnpm test` also runs the API's database tests against a `cv_generator_test` database, created automatically on the Postgres from `pnpm db:up`. Without a running Postgres they are skipped with a warning (CI always runs them).
+
 ## Scripts
 
 | Command                             | What it does                                    |
