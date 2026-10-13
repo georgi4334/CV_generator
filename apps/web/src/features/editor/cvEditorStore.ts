@@ -1,7 +1,17 @@
-import { createId, createItem, type CvDocument, type CvHeader, type Section } from '@cv/shared'
+import {
+  createId,
+  createItem,
+  createSection,
+  type Column,
+  type CvDocument,
+  type CvHeader,
+  type Section,
+  type SectionType,
+} from '@cv/shared'
 import { produce, type Draft } from 'immer'
 import { create } from 'zustand'
 import { setAtPath } from './documentPath'
+import { moveSection } from './sectionOrder'
 
 const HISTORY_LIMIT = 100
 
@@ -34,6 +44,14 @@ interface CvEditorState {
   moveItem: (sectionId: string, itemId: string, direction: -1 | 1) => void
   addBullet: (sectionId: string, itemId: string, afterIndex: number) => void
   removeBullet: (sectionId: string, itemId: string, index: number) => void
+
+  /** `coalesceKey` lets a whole drag count as one undo step. */
+  moveSection: (sectionId: string, toColumn: Column, toIndex: number, coalesceKey?: string) => void
+  setSectionVisible: (sectionId: string, visible: boolean) => void
+  /** Empty or null restores the default title for the CV language. */
+  renameSection: (sectionId: string, title: string | null) => void
+  addSection: (type: SectionType, column: Column) => string
+  removeSection: (sectionId: string) => void
 }
 
 function findItemSection(draft: Draft<CvDocument>, sectionId: string) {
@@ -157,4 +175,43 @@ export const useCvEditor = create<CvEditorState>()((set, get) => ({
     if (index > 0)
       set({ focusedPath: `sections.${sectionId}.items.${itemId}.bullets.${index - 1}` })
   },
+
+  moveSection: (sectionId, toColumn, toIndex, coalesceKey) =>
+    get().change((draft) => {
+      const next = moveSection(draft.sections as Section[], sectionId, toColumn, toIndex)
+      const changed = next.some(
+        (s, i) => s.id !== draft.sections[i]?.id || s.column !== draft.sections[i]?.column,
+      )
+      if (changed) draft.sections = next as Draft<Section>[]
+    }, coalesceKey),
+
+  setSectionVisible: (sectionId, visible) =>
+    get().change((draft) => {
+      const section = draft.sections.find((s) => s.id === sectionId)
+      if (section) section.visible = visible
+    }),
+
+  renameSection: (sectionId, title) =>
+    get().change((draft) => {
+      const section = draft.sections.find((s) => s.id === sectionId)
+      if (section) section.title = title?.trim() ? title : null
+    }, `title:${sectionId}`),
+
+  addSection: (type, column) => {
+    const section = createSection(type, column)
+    get().change((draft) => {
+      draft.sections = moveSection(
+        [...(draft.sections as Section[]), section],
+        section.id,
+        column,
+        Infinity,
+      ) as Draft<Section>[]
+    })
+    return section.id
+  },
+
+  removeSection: (sectionId) =>
+    get().change((draft) => {
+      draft.sections = draft.sections.filter((s) => s.id !== sectionId)
+    }),
 }))

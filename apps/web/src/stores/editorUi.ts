@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 
 /** Panels that open in the editor's left side panel. */
-export type EditorPanel = 'ai' | 'templates' | 'design'
+export type EditorPanel = 'ai' | 'templates' | 'design' | 'rearrange'
 
 interface EditorUiState {
   activePanel: EditorPanel | null

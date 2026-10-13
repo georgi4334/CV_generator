@@ -1,11 +1,13 @@
 import { TEMPLATE_IDS } from '@cv/shared'
 import { X } from 'lucide-react'
 import { useEditorUi, type EditorPanel } from '../../stores/editorUi'
+import { RearrangePanel } from './RearrangePanel'
 
 const TITLES: Record<EditorPanel, string> = {
   ai: 'AI Assistant',
   templates: 'Templates',
   design: 'Design & Font',
+  rearrange: 'Rearrange',
 }
 
 const templateName = (id: string) => id.replace('-', ' ').replace(/^\w/, (c) => c.toUpperCase())
@@ -95,6 +97,7 @@ export function EditorSidePanel({ panel }: { panel: EditorPanel }) {
       {panel === 'templates' && <TemplatesPanel />}
       {panel === 'design' && <DesignPanel />}
       {panel === 'ai' && <AiPanel />}
+      {panel === 'rearrange' && <RearrangePanel />}
     </aside>
   )
 }
