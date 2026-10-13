@@ -1,16 +1,19 @@
 import type { CvDocument } from '@cv/shared'
 import { CvRenderer } from '../../cv-renderer'
 import type { RenderMode } from '../../cv-renderer/context'
+import type { EditorApi } from '../../cv-renderer/editorApi'
 
 /** The document pages in the editor and preview. */
 export function PageCanvas({
   cv,
   title,
   mode,
+  editor,
 }: {
   cv: CvDocument | null
   title: string
   mode: RenderMode
+  editor?: EditorApi
 }) {
   if (!cv) {
     return (
@@ -23,5 +26,5 @@ export function PageCanvas({
       </div>
     )
   }
-  return <CvRenderer cv={cv} mode={mode} pageClassName="shrink-0 shadow-lg" />
+  return <CvRenderer cv={cv} mode={mode} editor={editor} pageClassName="shrink-0 shadow-lg" />
 }

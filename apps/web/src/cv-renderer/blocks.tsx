@@ -1,6 +1,7 @@
 import { getSectionTitle, type CvLanguage, type Section } from '@cv/shared'
 import type { ReactNode } from 'react'
 import type { RenderMode } from './context'
+import { ItemControls, SectionControls } from './controls'
 import {
   AchievementView,
   CertificateView,
@@ -40,24 +41,25 @@ export function isItemEmpty(item: Record<string, unknown>): boolean {
   })
 }
 
-function renderItem(section: Section, item: unknown): ReactNode {
+function renderItem(section: Section, item: { id: string }): ReactNode {
+  const refs = { sectionId: section.id, itemId: item.id }
   switch (section.type) {
     case 'experience':
-      return <ExperienceView item={item as never} showLogo={section.showLogos} />
+      return <ExperienceView item={item as never} showLogo={section.showLogos} refs={refs} />
     case 'education':
-      return <EducationView item={item as never} />
+      return <EducationView item={item as never} refs={refs} />
     case 'achievements':
-      return <AchievementView item={item as never} />
+      return <AchievementView item={item as never} refs={refs} />
     case 'courses':
-      return <CourseView item={item as never} />
+      return <CourseView item={item as never} refs={refs} />
     case 'projects':
-      return <ProjectView item={item as never} />
+      return <ProjectView item={item as never} refs={refs} />
     case 'certificates':
-      return <CertificateView item={item as never} />
+      return <CertificateView item={item as never} refs={refs} />
     case 'languages':
-      return <LanguageView item={item as never} display={section.levelDisplay} />
+      return <LanguageView item={item as never} display={section.levelDisplay} refs={refs} />
     case 'custom':
-      return <CustomView item={item as never} />
+      return <CustomView item={item as never} refs={refs} />
     default:
       return null
   }
@@ -72,7 +74,12 @@ export function buildBlocks(sections: Section[], language: CvLanguage, mode: Ren
 
   for (const section of sections) {
     if (!section.visible) continue
-    const title = <SectionTitle>{getSectionTitle(section, language)}</SectionTitle>
+    const canAdd = section.type !== 'summary'
+    const title = (
+      <SectionControls sectionId={section.id} canAdd={canAdd}>
+        <SectionTitle>{getSectionTitle(section, language)}</SectionTitle>
+      </SectionControls>
+    )
 
     if (section.type === 'summary') {
       if (mode === 'preview' && !section.text.trim()) continue
@@ -82,7 +89,7 @@ export function buildBlocks(sections: Section[], language: CvLanguage, mode: Ren
         node: (
           <>
             {title}
-            <SummaryView text={section.text} />
+            <SummaryView text={section.text} sectionId={section.id} />
           </>
         ),
       })
@@ -97,7 +104,11 @@ export function buildBlocks(sections: Section[], language: CvLanguage, mode: Ren
         node: (
           <>
             {title}
-            <SkillsView items={section.items} display={section.levelDisplay} />
+            <SkillsView
+              items={section.items}
+              display={section.levelDisplay}
+              sectionId={section.id}
+            />
           </>
         ),
       })
@@ -114,7 +125,19 @@ export function buildBlocks(sections: Section[], language: CvLanguage, mode: Ren
     }
 
     items.forEach((item, index) => {
-      const content = renderItem(section, item)
+      const bullets = (item as { bullets?: string[] }).bullets
+      const content = (
+        <ItemControls
+          sectionId={section.id}
+          itemId={item.id}
+          index={index}
+          count={items.length}
+          hasBullets={bullets !== undefined}
+          bulletCount={bullets?.length ?? 0}
+        >
+          {renderItem(section, item)}
+        </ItemControls>
+      )
       blocks.push(
         index === 0
           ? {

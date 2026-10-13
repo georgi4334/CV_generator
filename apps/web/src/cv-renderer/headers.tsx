@@ -23,7 +23,7 @@ function Contacts({ header, layout }: { header: CvHeader; layout: 'row' | 'colum
       {shown.map(({ key, icon: Icon }) => (
         <span key={key} className="inline-flex items-center gap-[0.3em]">
           <Icon className="size-[1em] shrink-0" />
-          <Field value={header[key]} placeholder={P[key]} />
+          <Field value={header[key]} path={`header.${key}`} placeholder={P[key]} />
         </span>
       ))}
     </div>
@@ -44,12 +44,14 @@ export function PolishedHeader({ header }: { header: CvHeader }) {
       <div className="min-w-0">
         <Field
           value={header.name}
+          path="header.name"
           placeholder={P.name}
           className="block text-[2.2em] leading-tight font-semibold uppercase"
           style={{ color: 'var(--cv-strong)' }}
         />
         <Field
           value={header.headline}
+          path="header.headline"
           placeholder={P.headline}
           className="mt-[0.15em] block text-[1.25em]"
           style={{ color: 'var(--cv-accent-text)' }}
@@ -67,12 +69,14 @@ export function SingleColumnHeader({ header }: { header: CvHeader }) {
     <div className="text-center">
       <Field
         value={header.name}
+        path="header.name"
         placeholder={P.name}
         className="block text-[2.1em] leading-tight font-semibold"
         style={{ color: 'var(--cv-strong)' }}
       />
       <Field
         value={header.headline}
+        path="header.headline"
         placeholder={P.headline}
         className="mt-[0.15em] block text-[1.2em]"
         style={{ color: 'var(--cv-accent-text)' }}
@@ -93,12 +97,14 @@ export function CompactHeader({ header }: { header: CvHeader }) {
       <div className="min-w-0">
         <Field
           value={header.name}
+          path="header.name"
           placeholder={P.name}
           className="block text-[1.9em] leading-tight font-bold"
           style={{ color: 'var(--cv-strong)' }}
         />
         <Field
           value={header.headline}
+          path="header.headline"
           placeholder={P.headline}
           className="block text-[1.1em]"
           style={{ color: 'var(--cv-accent-text)' }}

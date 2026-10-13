@@ -2,3 +2,22 @@
 
 /* Dark mode follows a `.dark` class on <html>, so the app can offer a theme toggle. */
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* In-place editing on the CV page */
+.cv-editable {
+  border-radius: 2px;
+  outline: none;
+  cursor: text;
+}
+.cv-editable:hover,
+.cv-editable:focus,
+.cv-editable[aria-expanded='true'] {
+  background: var(--cv-hover);
+}
+.cv-editable:empty::before {
+  content: attr(data-placeholder);
+  opacity: 0.45;
+}
+button.cv-editable {
+  cursor: pointer;
+}
