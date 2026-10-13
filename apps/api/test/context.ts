@@ -6,12 +6,13 @@ import { afterAll, beforeEach, inject } from 'vitest'
 import { buildApp } from '../src/app'
 import { createDb, type Database } from '../src/db/client'
 import { createLocalStorage } from '../src/lib/storage'
+import { TEST_DATABASE_URL } from './env'
 
 export const dbAvailable = inject('dbAvailable')
 
 /** A real app on the test database, emptied before every test. */
 export function useTestApp() {
-  const url = process.env.TEST_DATABASE_URL ?? 'postgres://cv:cv@localhost:5432/cv_generator_test'
+  const url = TEST_DATABASE_URL
   const context = {} as { app: Awaited<ReturnType<typeof buildApp>>; database: Database }
 
   beforeEach(async () => {

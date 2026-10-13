@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { cvs, cvVersions, users } from '../src/db/schema'
 import { DEV_USER_EMAIL } from '../src/plugins/currentUser'
 import { dbAvailable, useTestApp } from './context'
+import { TEST_DATABASE_URL } from './env'
 
 describe.skipIf(!dbAvailable)('CV API', () => {
   const ctx = useTestApp()
@@ -194,9 +195,7 @@ describe.skipIf(!dbAvailable)('database not ready yet', () => {
     const { createDb } = await import('../src/db/client')
     const { createMigrator } = await import('../src/db/migrate')
     const { createLocalStorage } = await import('../src/lib/storage')
-    const database = createDb(
-      process.env.TEST_DATABASE_URL ?? 'postgres://cv:cv@localhost:5432/cv_generator_test',
-    )
+    const database = createDb(TEST_DATABASE_URL)
     let reachable = false
     const app = await buildApp({
       corsOrigin: 'http://localhost:5173',

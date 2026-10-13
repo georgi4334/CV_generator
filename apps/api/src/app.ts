@@ -47,10 +47,13 @@ export async function buildApp(opts: AppOptions) {
               await ensureMigrated()
             } catch (error) {
               request.log.error(error, 'database not ready')
+              const cause =
+                (error as Error & { cause?: Error }).cause?.message ?? (error as Error).message
               throw new HttpError(
                 503,
                 'database_unavailable',
-                'The database is not reachable. Is it running? (pnpm db:up)',
+                'Cannot use the database. Is it running (pnpm db:up), and does DATABASE_URL in apps/api/.env match docker-compose.yml?',
+                opts.exposeErrors ? { cause } : undefined,
               )
             }
           })

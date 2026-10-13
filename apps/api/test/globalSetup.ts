@@ -3,8 +3,7 @@ import type { TestProject } from 'vitest/node'
 import { createDb } from '../src/db/client'
 import { runMigrations } from '../src/db/migrate'
 
-export const TEST_DATABASE_URL =
-  process.env.TEST_DATABASE_URL ?? 'postgres://cv:cv@localhost:5432/cv_generator_test'
+import { TEST_DATABASE_URL } from './env'
 
 declare module 'vitest' {
   export interface ProvidedContext {
