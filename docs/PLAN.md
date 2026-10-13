@@ -1,10 +1,12 @@
 # CV Generator — Development Plan
 
-> Status: **Step 0 in progress.** Stack and free-tier hosting decided (see §4). No code yet. Each step ends with a review where we discuss ideas before moving on.
+> Status: **Step 1 in progress.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
 >
 > **Decision log**
 > - App tabs: Dashboard · Documents (All documents / Cover letters / CVs) · Saved Jobs ✅
-> - Job statuses: Applied · Interviewing · Negotiating · Accepted · Rejected · No answer ✅
+> - Job statuses: To apply · Applied · Interviewing · Negotiating · Accepted · Rejected · No answer ✅
+> - Backend framework: Fastify; ORM: Drizzle ✅
+> - Step 0 closed. **Step 1 (project setup) in progress.**
 > - Frontend: React + TS + Vite + Tailwind + Axios + React Router + TanStack Query + Zustand ✅
 > - Backend: Node + TypeScript + PostgreSQL (JSONB) with shared Zod types ✅
 > - Only free plans that allow commercial use; keep everything portable so it can become paid later ✅
@@ -34,8 +36,8 @@ The app has a persistent main navigation with **three major tabs**. The CV edito
 ### 2.1 Dashboard ✅ approved
 - **Quick actions:** New CV · New cover letter · Add job.
 - **Recent documents:** the last 3–4 edited CVs and cover letters, with thumbnails.
-- **Job pipeline summary:** counts per status (Applied → Interviewing → Negotiating → Accepted / Rejected / No answer).
-- **Reminders:** e.g. jobs still "Applied" after 14+ days with a suggestion to mark them "No answer", and saved jobs with no status yet.
+- **Job pipeline summary:** counts per status (To apply → Applied → Interviewing → Negotiating → Accepted / Rejected / No answer).
+- **Reminders:** e.g. jobs still "Applied" after 14+ days with a suggestion to mark them "No answer", and jobs in "To apply" for 7+ days.
 
 ### 2.2 Documents (3 sub-tabs) ✅ decided
 
@@ -59,7 +61,7 @@ All three sub-tabs share the same list component with these features:
 |---|---|---|
 | Position | text | Click opens the job details drawer |
 | Company | text | |
-| Status | badge / dropdown | `Applied · Interviewing · Negotiating · Accepted · Rejected · No answer` ✅, editable inline, color per status |
+| Status | badge / dropdown | `To apply · Applied · Interviewing · Negotiating · Accepted · Rejected · No answer` ✅, editable inline, color per status. New jobs default to **To apply** |
 | Date saved | date | Set automatically |
 | Date applied | date | Set automatically the first time the status becomes Applied; editable |
 | Type | badge | `Remote · On-site · Hybrid` |
@@ -178,8 +180,7 @@ CoverLetter { id, userId, title, cvId?, jobId?, design (JSON), content (JSONB), 
 Job         { id, userId, position, company, status, type: 'remote' | 'onsite' | 'hybrid',
               dateSaved, dateApplied?, cvId?, coverLetterId?, notes,
               url?, description?, location?, salary?, contact? }
-JobStatus   = 'applied' | 'interviewing' | 'negotiating' | 'accepted' | 'rejected' | 'no_answer'
-// Job.status is nullable: a job that is saved but not applied to yet has no status (see open questions)
+JobStatus   = 'to_apply' | 'applied' | 'interviewing' | 'negotiating' | 'accepted' | 'rejected' | 'no_answer'  // default: 'to_apply'
 ShareLink   { id, documentType: 'cv' | 'coverLetter', documentId, slug, isActive, createdAt }
 Template    { id, name, layout, defaultDesign, supportsPhoto, tags[] } // defined in code; thumbnails are live renders
 Profession  { id, name, recommendedTemplateIds[], defaultSections[], exampleContent }
@@ -210,16 +211,17 @@ Splitting **content** from **design** is what lets a user switch template or sty
 
 Every step ends with a demo and a discussion before the next one starts.
 
-### Step 0: Discovery & decisions *(now)*
+### Step 0: Discovery & decisions ✅ done
 - ✅ Frontend stack, backend direction, and the free-tier hosting rule.
-- Still open: MVP scope, accounts on day one or later, and which features are out of scope for v1.
+- ✅ App structure, Documents sub-tabs, Saved Jobs columns and statuses, Dashboard, editor panels.
+- Remaining questions are deferred to the step where they matter (§7).
 - List the first professions and templates to support.
 - **Output:** this plan, updated with the decisions.
 
-### Step 1: Project setup
+### Step 1: Project setup *(in progress)*
 - Monorepo (pnpm workspaces): `apps/web`, `apps/api`, `packages/shared`.
 - Vite + React + TS + Tailwind; ESLint, Prettier, Husky pre-commit hooks.
-- Pick Fastify vs NestJS and Drizzle vs Prisma.
+- ✅ Fastify + Drizzle chosen.
 - Docker Compose for local Postgres and MinIO (S3 stand-in).
 - GitHub Actions CI: lint, typecheck, tests.
 - **Output:** empty app that builds, runs and passes CI.
@@ -332,15 +334,17 @@ Specification: §2.1.
 - The crown icon suggests premium features (more templates, AI credits, unlimited CVs). Payments via Stripe, which has no monthly fee.
 - Going paid means upgrading hosting plans (Render instance, Neon), not migrating, because the stack is portable.
 
-## 7. Open questions for discussion
+## 7. Open questions (deferred)
 
-1. **Accounts:** login required from day one, or allow anonymous editing first?
-2. **Professions:** which job types and templates should v1 support?
-3. **Languages:** English only, or also Bulgarian/other (affects fonts and UI i18n)?
-4. **AI:** in scope for v1 or a later phase?
-5. **Photo on CV:** optional photo support (common in EU CVs, discouraged for US/ATS)?
-6. **Import:** do we need to import existing CVs (PDF/DOCX/LinkedIn), and when?
-7. **Repo visibility:** public or private? Public gets unlimited free GitHub Actions minutes; private gets 2,000 min/month.
-8. **App theme:** your screenshots show both dark and light. Should we offer a toggle (default: follow the system setting), or only one?
-9. **Resume languages:** which languages should the "Resume language" dropdown offer first (e.g. English US/UK, Bulgarian)?
-10. **Status of a newly saved job:** a job is often saved *before* applying. Should its status be empty (shown as "—" or "Not applied"), or should we add a first status like `Saved` / `To apply`?
+None of these block the early steps. Each one is answered in the step listed; the default applies unless you decide otherwise.
+
+| Question | Decide in | Default assumption |
+|---|---|---|
+| Login required from day one? | Step 15 | Single-user dev mode until Step 15; data model already has `userId` |
+| Which professions/templates for v1? | Steps 2 & 7 | Generic set, e.g. Software, Design, Sales/Marketing, Healthcare, Academic |
+| English only or Bulgarian too? | Step 7 | Cyrillic-capable fonts; resume language EN-US, EN-GB, BG |
+| AI in v1? | Step 16 | Later phase |
+| Photo on CV? | Step 4 | Optional, only in templates that support it |
+| Import existing CVs? | After v1 | Later |
+| Repo visibility | Step 1 | CI runs on either |
+| Light/dark app theme? | Step 3 | Toggle that follows the system setting by default |
