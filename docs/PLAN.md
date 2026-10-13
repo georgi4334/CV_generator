@@ -19,12 +19,54 @@ A web app where a user can:
 
 ## 2. Reference UI breakdown (edit mode)
 
+Screenshots are in [`docs/ui-reference/`](ui-reference/):
+[editor](ui-reference/01-editor.jpg) · [Design & Font panel](ui-reference/02-design-and-font-panel.jpg) · [Templates panel](ui-reference/03-templates-panel.jpg)
+
+### 2.1 Editor layout
+
 | Area | What it contains | Notes |
 |---|---|---|
-| **Top toolbar** | Fix Mistakes · Check & Tailor (ATS) · Rearrange · Templates · Design & Font | Fix Mistakes and Check & Tailor are AI features (later phase). |
-| **Canvas** | A4 page, two columns: main column (name, headline, contacts, Summary, Experience) and a colored sidebar (Key Achievements, Skills, Courses, Education) | Every field is edited in place; empty fields show grey placeholder text. |
+| **Top bar, left** | "AI Assistant" toggle | Opens the left side panel with the AI chat (later phase). |
+| **Top bar, center** | Fix Mistakes · Check & Tailor (ATS) · Rearrange · **Templates** · **Design & Font** | Templates and Design & Font open in the **left side panel**. The active button is highlighted. Fix Mistakes and Check & Tailor are AI features (later phase). |
+| **Top bar, right** | Undo · Redo · **History** · Help menu (Help Center, Contact Us) | History lists saved versions with restore. |
+| **Left side panel** | One panel at a time: Templates, Design & Font, or AI Assistant. Closes with ✕. | The canvas stays visible and updates **live** while settings change. |
+| **Canvas** | A CV page (A4 or US Letter). Two columns: main column (name, headline, contacts, Summary, Experience) and a colored sidebar (Key Achievements, Skills, Courses, Education) | Every field is edited in place; empty fields show grey placeholder text. |
 | **Right rail** | Preview · Download · Share link · AI assistant · Premium (crown) | Preview = read-only mode without placeholders. |
-| **Theme** | Dark app chrome, teal accent | Accent and sidebar color come from the CV design settings, not the app theme. |
+| **App theme** | Screenshots show both a dark and a light app theme | Probably a light/dark toggle (see open questions). The CV colors come from the CV design settings, not the app theme. |
+
+### 2.2 Design & Font panel
+
+| Control | UI | Stored as (`design.*`) |
+|---|---|---|
+| Page margins | Slider with −/+, labels "narrow" to "wide" | `pageMargins: 1–5` |
+| Section spacing | Slider with −/+, "compact" to "more space" | `sectionSpacing: 1–5` |
+| Colors | ~6 preset swatches plus "Use custom color" (color picker) | `accentColor: '#hex'`. Sidebar and heading colors are derived from it. |
+| Font style | Dropdown (e.g. Rubik) | `fontFamily` |
+| Font size | Slider "−A" to "+A", with a label (small / medium / large) | `fontSize: 1–5` |
+| Line height | Slider, "condensed" to "spacious" | `lineHeight: 1–5` |
+| Column layout | 4 thumbnails: variations of sidebar width and filled vs plain sidebar | `columnLayout: 1–4` |
+| Backgrounds | Grid of subtle patterns (plain, hexagons, waves, lines, dots, gradients…) | `background: patternId` |
+
+Implementation notes:
+- Each slider step maps to a CSS variable value (e.g. `--cv-margin`, `--cv-section-gap`, `--cv-font-size`, `--cv-line-height`), so changes render instantly without re-layout code.
+- Fonts are free **Google Fonts, self-hosted** for print and PDF reliability. We pick fonts that also support **Cyrillic**; Rubik does.
+- Backgrounds are lightweight **SVG patterns** that print cleanly and are tinted by the accent color.
+- Colors: we check contrast so text on the sidebar stays readable.
+
+### 2.3 Templates panel
+
+| Control | UI | Stored as |
+|---|---|---|
+| Template gallery | 2-column grid of thumbnails with names: *Polished, Contemporary, Creative, Timeline, Stylish, Single column, Compact, Multicolumn*. Some include a photo. | `design.templateId` |
+| Continue Editing | Primary button that closes the panel | — |
+| Document size | Toggle **A4 / US Letter** | `design.pageSize: 'A4' \| 'Letter'` |
+| Resume language | Dropdown, e.g. English (US), with an info tooltip | `content.language` |
+
+Implementation notes:
+- **Switching template keeps all content.** A template only changes layout and default design values, and the user's own design tweaks can be kept or reset.
+- **Thumbnails are live mini-renders** of each template, filled with sample content and scaled down with CSS `transform: scale()`. There are no image files to maintain, and they always match the real templates.
+- **"Resume language"** controls the CV's default section titles and placeholders (e.g. "Experience" → "Опит") and spell-check. It is separate from the app's interface language.
+- Templates are the visual styles. **Professions** recommend templates and default sections (e.g. a designer → Creative; academic → Single column), but users can pick any template.
 
 ## 3. Tech stack
 
@@ -75,7 +117,7 @@ User        { id, email, name, passwordHash | oauthId, plan: 'free' | 'pro', cre
 Cv          { id, userId, title, professionId, templateId, design (JSON), content (JSONB), updatedAt }
 CvVersion   { id, cvId, snapshot (JSONB), label, createdAt }        // history / restore
 ShareLink   { id, cvId, slug, isActive, createdAt }
-Template    { id, name, layout, defaultDesign, previewImage, tags[] } // could start as code, not DB
+Template    { id, name, layout, defaultDesign, supportsPhoto, tags[] } // defined in code; thumbnails are live renders
 Profession  { id, name, recommendedTemplateIds[], defaultSections[], exampleContent }
 ```
 
@@ -85,7 +127,13 @@ The CV document (`content` + `design`):
 CvDocument {
   header:   { name, headline, phone, email, link, location, photo? }
   sections: Section[]        // ordered; each one has a column: "main" | "sidebar"
-  design:   { templateId, accentColor, sidebarColor, font, fontSize, spacing, showIcons, ... }
+  language: 'en-US' | 'en-GB' | 'bg' | ...   // "Resume language": section titles, placeholders, spell-check
+  design:   {
+    templateId, pageSize: 'A4' | 'Letter',
+    pageMargins, sectionSpacing, fontSize, lineHeight,   // 1–5 slider steps
+    accentColor, fontFamily, columnLayout, background,
+    showIcons, ...
+  }
 }
 Section = { id, type, title, column, visible, items[] }
 type ∈ summary | experience | education | skills | achievements | courses
@@ -120,13 +168,15 @@ Every step ends with a demo and a discussion before the next one starts.
 ### Step 3: Editor shell (frontend, mock data)
 - App layout from the screenshot: dark chrome, top toolbar, centered A4 canvas, right icon rail.
 - Routing: Dashboard → Editor → Preview.
-- Toolbar and rail buttons wired to empty panels/modals.
+- Top bar (AI Assistant toggle · center tools · undo/redo/History/help), switchable left side panel, right rail.
+- Toolbar and rail buttons wired to empty panels.
+- Light/dark app theme via Tailwind `dark:` classes.
 - **Output:** a clickable UI on mock data, no backend.
 
 ### Step 4: CV renderer & template system
-- A4 page component (210×297 mm, print-accurate units).
-- First 2–3 templates: **Two-column sidebar** (as in the screenshot), **Classic single column**, **Modern/compact**.
-- Templates read design tokens (colors, font, spacing) through CSS variables.
+- Page component in **A4 (210×297 mm) and US Letter (8.5×11 in)**, using print-accurate units.
+- First 3 templates out of the 8 in the reference: **Polished** (two-column sidebar, as in the screenshot), **Single column**, **Compact**. The rest (*Contemporary, Creative, Timeline, Stylish, Multicolumn*) are added in Step 7 once the system is proven.
+- Templates read every design setting (§2.2) through CSS variables, so one template supports all margin, spacing, font, color, layout and background variations.
 - Multi-page support: content flows onto page 2 when it overflows. This is technically the hardest part, so we tackle it early.
 - **Discuss:** the template list per profession.
 
@@ -141,8 +191,12 @@ Every step ends with a demo and a discussion before the next one starts.
 - Show/hide sections; add custom sections.
 
 ### Step 7: Templates & Design/Font panels
-- Template picker with live previews, filtered or recommended by profession.
-- Design panel: accent and sidebar color, font family (with **Cyrillic support** if you need Bulgarian CVs), font size, spacing, icons on/off.
+Specification: §2.2 and §2.3.
+- **Templates panel:** gallery of live thumbnails (all 8 templates), Continue Editing, A4/US Letter toggle, Resume language dropdown.
+- **Design & Font panel:** margin, section spacing, font size and line height sliders; color swatches plus a custom color picker; font dropdown; 4 column layouts; background patterns.
+- Every change applies live to the canvas and goes on the undo stack.
+- "Reset to template defaults" action.
+- **Discuss:** the final font list and color presets, which templates show a photo, and whether some templates or backgrounds become premium (crown).
 
 ### Step 8: Backend API & database
 - REST endpoints:
@@ -157,6 +211,7 @@ Every step ends with a demo and a discussion before the next one starts.
 ### Step 9: Connect frontend ↔ backend
 - Axios client (base URL, interceptors, error normalization) plus TanStack Query hooks.
 - Debounced **autosave** with a "Saved ✓" indicator, and handling for conflicts and offline.
+- **History** panel (top-right): list of automatic and named versions with preview and restore.
 - Dashboard: list, create, rename, duplicate and delete CVs.
 
 ### Step 10: "Create new CV" flow
@@ -201,3 +256,5 @@ Every step ends with a demo and a discussion before the next one starts.
 5. **Photo on CV:** optional photo support (common in EU CVs, discouraged for US/ATS)?
 6. **Import:** do we need to import existing CVs (PDF/DOCX/LinkedIn), and when?
 7. **Repo visibility:** public or private? Public gets unlimited free GitHub Actions minutes; private gets 2,000 min/month.
+8. **App theme:** your screenshots show both dark and light. Should we offer a toggle (default: follow the system setting), or only one?
+9. **Resume languages:** which languages should the "Resume language" dropdown offer first (e.g. English US/UK, Bulgarian)?
