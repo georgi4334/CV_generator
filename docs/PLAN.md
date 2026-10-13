@@ -1,6 +1,6 @@
 # CV Generator — Development Plan
 
-> Status: **Step 0 in progress.** Stack and free-tier hosting decided (see §3). No code yet. Each step ends with a review where we discuss ideas before moving on.
+> Status: **Step 0 in progress.** Stack and free-tier hosting decided (see §4). No code yet. Each step ends with a review where we discuss ideas before moving on.
 >
 > **Decision log**
 > - Frontend: React + TS + Vite + Tailwind + Axios + React Router + TanStack Query + Zustand ✅
@@ -16,13 +16,59 @@ A web app where a user can:
 - **Switch styles**: pick a template that fits their job (e.g. developer, designer, sales, academic, healthcare), and change colors, fonts and layout without losing content.
 - **Keep variants**: duplicate a CV and tailor it for a specific job posting.
 - **Export / share**: download a PDF, share a read-only link.
+- **Write cover letters** that match their CV.
+- **Track job applications** in a Saved Jobs table linked to the CV and cover letter used for each one.
 
-## 2. Reference UI breakdown (edit mode)
+## 2. App structure & navigation
+
+The app has a persistent main navigation with **three major tabs**. The CV editor (§3) opens full-screen from Documents.
+
+| Tab | Route | Purpose |
+|---|---|---|
+| **Dashboard** | `/` | Overview and quick actions |
+| **Documents** | `/documents/:subtab` | Saved CVs and cover letters, with a "Create new" button |
+| **Saved Jobs** | `/jobs` | Job application tracker (table) |
+
+### 2.1 Dashboard *(proposal, to discuss)*
+- **Quick actions:** New CV · New cover letter · Add job.
+- **Recent documents:** the last 3–4 edited CVs and cover letters, with thumbnails.
+- **Job pipeline summary:** counts per status (Saved → Applied → Interview → Offer / Rejected).
+- **Reminders:** e.g. jobs saved more than 7 days ago that haven't been applied to.
+
+### 2.2 Documents (3 sub-tabs)
+- **Resumes:** grid of saved CVs (live thumbnail, title, last edited, linked job). Card actions: open, rename, duplicate, download, share, delete.
+- **Cover letters:** same grid for cover letters.
+- **Third sub-tab:** *to confirm.* My proposal is **Tailored / Job-specific**, meaning copies of a CV or letter made for a specific saved job.
+- **"+ Create new"** button. It creates a resume or cover letter depending on the active sub-tab, or opens a small menu.
+- Sort by last edited or name; search by title.
+
+### 2.3 Saved Jobs (table)
+
+| Column | Type | Notes |
+|---|---|---|
+| Position | text | Click opens the job details drawer |
+| Company | text | |
+| Status | badge / dropdown | `Saved · Applied · Interview · Offer · Rejected · Withdrawn` (to confirm), editable inline |
+| Date saved | date | Set automatically |
+| Date applied | date | Set automatically when status changes to Applied; editable |
+| Type | badge | `Remote · On-site · Hybrid` |
+| Resume | link to a CV | Pick an existing CV or "Create tailored copy" |
+| Cover letter | link to a cover letter | Pick an existing one or create a new one |
+| Notes | text | Short preview in the table; full text in the drawer |
+
+Table features:
+- Sort by any column; filter by status and type; text search.
+- Inline editing of status, dates, type and notes.
+- "+ Add job" button opens a form or drawer.
+- Details drawer: all fields plus **job URL, job description, salary, location, contact person** (proposed extra fields). The job description is what **Check & Tailor** uses later.
+- Built with **TanStack Table** (free, MIT; it matches TanStack Query). On mobile the table becomes stacked cards.
+
+## 3. CV editor UI (reference screenshots)
 
 Screenshots are in [`docs/ui-reference/`](ui-reference/):
 [editor](ui-reference/01-editor.jpg) · [Design & Font panel](ui-reference/02-design-and-font-panel.jpg) · [Templates panel](ui-reference/03-templates-panel.jpg)
 
-### 2.1 Editor layout
+### 3.1 Editor layout
 
 | Area | What it contains | Notes |
 |---|---|---|
@@ -34,7 +80,7 @@ Screenshots are in [`docs/ui-reference/`](ui-reference/):
 | **Right rail** | Preview · Download · Share link · AI assistant · Premium (crown) | Preview = read-only mode without placeholders. |
 | **App theme** | Screenshots show both a dark and a light app theme | Probably a light/dark toggle (see open questions). The CV colors come from the CV design settings, not the app theme. |
 
-### 2.2 Design & Font panel
+### 3.2 Design & Font panel
 
 | Control | UI | Stored as (`design.*`) |
 |---|---|---|
@@ -53,7 +99,7 @@ Implementation notes:
 - Backgrounds are lightweight **SVG patterns** that print cleanly and are tinted by the accent color.
 - Colors: we check contrast so text on the sidebar stays readable.
 
-### 2.3 Templates panel
+### 3.3 Templates panel
 
 | Control | UI | Stored as |
 |---|---|---|
@@ -68,7 +114,7 @@ Implementation notes:
 - **"Resume language"** controls the CV's default section titles and placeholders (e.g. "Experience" → "Опит") and spell-check. It is separate from the app's interface language.
 - Templates are the visual styles. **Professions** recommend templates and default sections (e.g. a designer → Creative; academic → Single column), but users can pick any template.
 
-## 3. Tech stack
+## 4. Tech stack
 
 **Constraint:** this is a hobby project that may become paid. Every service must have a **free plan that also allows commercial use**, so going paid later means upgrading a plan, not migrating. To avoid lock-in we stick to portable standards: plain PostgreSQL, the S3 storage API, and standard JWT auth.
 
@@ -77,6 +123,7 @@ Implementation notes:
 - **Tailwind CSS** (CV design values passed in as CSS variables so templates can be recolored at runtime)
 - **Axios** for REST calls (one shared instance with interceptors for auth and errors)
 - **React Router** for routes like `/cvs` (dashboard) and `/cvs/:id/edit`
+- **TanStack Table** for the Saved Jobs table *(free, MIT)*
 - **TanStack Query** on top of axios for caching, autosave mutations and loading/error states
 - **Zustand** for local editor state (current CV document, selection, undo/redo)
 - **dnd-kit** for "Rearrange" drag-and-drop *(free, MIT)*
@@ -110,13 +157,18 @@ Implementation notes:
 ### Local development (free)
 - Docker Compose runs Postgres and MinIO (an S3-compatible stand-in for R2), so development needs no cloud accounts.
 
-## 4. Core data model (draft)
+## 5. Core data model (draft)
 
 ```
 User        { id, email, name, passwordHash | oauthId, plan: 'free' | 'pro', createdAt }  // plan field ready for premium later
-Cv          { id, userId, title, professionId, templateId, design (JSON), content (JSONB), updatedAt }
+Cv          { id, userId, title, professionId, templateId, jobId?, design (JSON), content (JSONB), updatedAt } // jobId set for tailored copies
 CvVersion   { id, cvId, snapshot (JSONB), label, createdAt }        // history / restore
-ShareLink   { id, cvId, slug, isActive, createdAt }
+CoverLetter { id, userId, title, cvId?, jobId?, design (JSON), content (JSONB), updatedAt } // can reuse the linked CV's header & design
+Job         { id, userId, position, company, status, type: 'remote' | 'onsite' | 'hybrid',
+              dateSaved, dateApplied?, cvId?, coverLetterId?, notes,
+              url?, description?, location?, salary?, contact? }
+JobStatus   = 'saved' | 'applied' | 'interview' | 'offer' | 'rejected' | 'withdrawn'
+ShareLink   { id, documentType: 'cv' | 'coverLetter', documentId, slug, isActive, createdAt }
 Template    { id, name, layout, defaultDesign, supportsPhoto, tags[] } // defined in code; thumbnails are live renders
 Profession  { id, name, recommendedTemplateIds[], defaultSections[], exampleContent }
 ```
@@ -142,7 +194,7 @@ type ∈ summary | experience | education | skills | achievements | courses
 
 Splitting **content** from **design** is what lets a user switch template or style without losing anything.
 
-## 5. Step plan
+## 6. Step plan
 
 Every step ends with a demo and a discussion before the next one starts.
 
@@ -165,9 +217,10 @@ Every step ends with a demo and a discussion before the next one starts.
 - Write a few sample CVs as JSON fixtures (one per profession).
 - **Discuss:** the exact section types and fields.
 
-### Step 3: Editor shell (frontend, mock data)
-- App layout from the screenshot: dark chrome, top toolbar, centered A4 canvas, right icon rail.
-- Routing: Dashboard → Editor → Preview.
+### Step 3: App shell & editor shell (frontend, mock data)
+- **Main navigation** with the three tabs (Dashboard · Documents · Saved Jobs), with placeholder pages and the Documents sub-tabs.
+- Editor layout from the screenshots: top toolbar, centered page canvas, right icon rail.
+- Routing: `/`, `/documents/:subtab`, `/jobs`, `/cvs/:id/edit`, `/cvs/:id/preview`.
 - Top bar (AI Assistant toggle · center tools · undo/redo/History/help), switchable left side panel, right rail.
 - Toolbar and rail buttons wired to empty panels.
 - Light/dark app theme via Tailwind `dark:` classes.
@@ -176,7 +229,7 @@ Every step ends with a demo and a discussion before the next one starts.
 ### Step 4: CV renderer & template system
 - Page component in **A4 (210×297 mm) and US Letter (8.5×11 in)**, using print-accurate units.
 - First 3 templates out of the 8 in the reference: **Polished** (two-column sidebar, as in the screenshot), **Single column**, **Compact**. The rest (*Contemporary, Creative, Timeline, Stylish, Multicolumn*) are added in Step 7 once the system is proven.
-- Templates read every design setting (§2.2) through CSS variables, so one template supports all margin, spacing, font, color, layout and background variations.
+- Templates read every design setting (§3.2) through CSS variables, so one template supports all margin, spacing, font, color, layout and background variations.
 - Multi-page support: content flows onto page 2 when it overflows. This is technically the hardest part, so we tackle it early.
 - **Discuss:** the template list per profession.
 
@@ -191,7 +244,7 @@ Every step ends with a demo and a discussion before the next one starts.
 - Show/hide sections; add custom sections.
 
 ### Step 7: Templates & Design/Font panels
-Specification: §2.2 and §2.3.
+Specification: §3.2 and §3.3.
 - **Templates panel:** gallery of live thumbnails (all 8 templates), Continue Editing, A4/US Letter toggle, Resume language dropdown.
 - **Design & Font panel:** margin, section spacing, font size and line height sliders; color swatches plus a custom color picker; font dropdown; 4 column layouts; background patterns.
 - Every change applies live to the canvas and goes on the undo stack.
@@ -212,7 +265,7 @@ Specification: §2.2 and §2.3.
 - Axios client (base URL, interceptors, error normalization) plus TanStack Query hooks.
 - Debounced **autosave** with a "Saved ✓" indicator, and handling for conflicts and offline.
 - **History** panel (top-right): list of automatic and named versions with preview and restore.
-- Dashboard: list, create, rename, duplicate and delete CVs.
+- **Documents → Resumes** sub-tab: list, create, rename, duplicate and delete CVs, with live thumbnails.
 
 ### Step 10: "Create new CV" flow
 - Wizard: choose profession → recommended templates → start blank or from example content.
@@ -224,30 +277,50 @@ Specification: §2.2 and §2.3.
 - PDF download, phase 2 (when paid hosting exists): server-side headless Chromium for a one-click download that is identical in every browser.
 - Public read-only share link (`/s/:slug`) that can be turned on and off.
 
-### Step 12: Authentication & accounts
+### Step 12: Saved Jobs tracker
+Specification: §2.3.
+- Backend: `GET/POST /jobs`, `PATCH/DELETE /jobs/:id`, with filters and sorting.
+- Table with sorting, filters, search and inline editing; "+ Add job" form; details drawer.
+- Link a job to a resume or cover letter, including "Create tailored copy" (duplicates the CV with `jobId` set).
+- Status changes automatically fill in "Date applied".
+- **Discuss:** the final status list, extra fields, and whether to add a Kanban board view later.
+
+### Step 13: Cover letters
+- Cover letter editor that reuses the editor shell, Design & Font panel and PDF export.
+- Header (name and contacts) and design can be **inherited from a linked CV**, so letter and CV match.
+- Sections: recipient, date, greeting, body paragraphs, closing and signature.
+- **Documents → Cover letters** sub-tab, plus the third sub-tab (to confirm).
+- (Step 16, AI) Generate a draft from a saved job's description plus the linked CV.
+
+### Step 14: Dashboard
+Specification: §2.1.
+- Quick actions, recent documents, job pipeline counts, reminders.
+- Built last among the pages because it summarizes data from Documents and Saved Jobs.
+
+### Step 15: Authentication & accounts
 - Email/password and Google OAuth; JWT in httpOnly cookies.
 - Ownership checks on every CV endpoint.
 - (Possible earlier option: anonymous CVs in local storage, then "sign up to save".)
 
-### Step 13: AI features
+### Step 16: AI features
 - **Fix Mistakes:** grammar and spelling pass with accept/reject per suggestion.
-- **Check & Tailor:** paste a job posting → ATS keyword match score, missing skills, suggested rewrites → save as a tailored copy.
+- **Check & Tailor:** paste a job posting, or pick a **Saved Job** → ATS keyword match score, missing skills, suggested rewrites → save as a tailored copy.
 - **AI assistant:** generate or improve the summary and experience bullets.
 - Calls go through the backend so the API key never reaches the browser.
 - Provider behind a small interface, so we can start with a free tier (Gemini/Groq) and switch providers without touching the UI.
 - Per-user rate limits to stay inside free quotas. Later these become "AI credits" for premium.
 
-### Step 14: Quality & release
+### Step 17: Quality & release
 - Unit tests (Vitest), component tests, E2E (Playwright).
 - Accessibility, performance, i18n (EN/BG?).
 - Deployment on free plans: frontend on Cloudflare Pages, API on Render, DB on Neon, files on Cloudflare R2.
 - Sentry for errors; a keep-warm ping is optional, because Render's free plan sleeps when idle.
 
-### Step 15 (optional): Premium
+### Step 18 (optional): Premium
 - The crown icon suggests premium features (more templates, AI credits, unlimited CVs). Payments via Stripe, which has no monthly fee.
 - Going paid means upgrading hosting plans (Render instance, Neon), not migrating, because the stack is portable.
 
-## 6. Open questions for discussion
+## 7. Open questions for discussion
 
 1. **Accounts:** login required from day one, or allow anonymous editing first?
 2. **Professions:** which job types and templates should v1 support?
@@ -258,3 +331,6 @@ Specification: §2.2 and §2.3.
 7. **Repo visibility:** public or private? Public gets unlimited free GitHub Actions minutes; private gets 2,000 min/month.
 8. **App theme:** your screenshots show both dark and light. Should we offer a toggle (default: follow the system setting), or only one?
 9. **Resume languages:** which languages should the "Resume language" dropdown offer first (e.g. English US/UK, Bulgarian)?
+10. **Documents sub-tabs:** what is the third sub-tab? Proposal: Resumes · Cover letters · Tailored (job-specific copies).
+11. **Job statuses:** is `Saved · Applied · Interview · Offer · Rejected · Withdrawn` the right list?
+12. **Dashboard content:** do the widgets in §2.1 match what you want?
