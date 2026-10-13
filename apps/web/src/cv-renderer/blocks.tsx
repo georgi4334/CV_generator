@@ -14,7 +14,9 @@ import {
   SkillsView,
   SummaryView,
 } from './items'
-import { SectionTitle } from './primitives'
+import { SectionTitle, TimelineEntry } from './primitives'
+
+const DATED_TYPES = new Set<Section['type']>(['experience', 'education', 'projects'])
 
 /** The smallest unit that pagination moves between pages. */
 export interface Block {
@@ -135,7 +137,9 @@ export function buildBlocks(sections: Section[], language: CvLanguage, mode: Ren
           hasBullets={bullets !== undefined}
           bulletCount={bullets?.length ?? 0}
         >
-          {renderItem(section, item)}
+          <TimelineEntry dated={DATED_TYPES.has(section.type)}>
+            {renderItem(section, item)}
+          </TimelineEntry>
         </ItemControls>
       )
       blocks.push(

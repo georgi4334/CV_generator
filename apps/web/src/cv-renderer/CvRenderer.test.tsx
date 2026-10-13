@@ -57,11 +57,25 @@ describe('CvRenderer', () => {
   })
 })
 
-describe('getTemplate', () => {
-  it('falls back to an implemented template', () => {
-    expect(getTemplate('timeline').id).toBe('single-column')
-    expect(getTemplate('creative').id).toBe('polished')
-    expect(getTemplate('compact').id).toBe('compact')
+describe('templates', () => {
+  it('has its own definition for every template id', () => {
+    for (const id of TEMPLATE_IDS) expect(getTemplate(id).id).toBe(id)
+  })
+
+  it('draws dated entries on a line in the Timeline template', () => {
+    const cv = createExampleCv('software-developer')
+    cv.design.templateId = 'timeline'
+    const { container } = render(<CvRenderer cv={cv} mode="preview" />)
+    const pages = container.querySelector('[role=document]')!
+    expect(pages.querySelectorAll('.border-l-2').length).toBeGreaterThan(0)
+  })
+
+  it('applies the background pattern to the page', () => {
+    const cv = createExampleCv('designer')
+    cv.design.background = 'dots'
+    const { container } = render(<CvRenderer cv={cv} mode="preview" />)
+    const page = container.querySelector('[role=document] > div') as HTMLElement
+    expect(page.style.backgroundImage).toContain('data:image/svg+xml')
   })
 })
 

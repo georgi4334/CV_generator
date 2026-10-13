@@ -3,8 +3,10 @@ import {
   createItem,
   createSection,
   type Column,
+  type CvDesign,
   type CvDocument,
   type CvHeader,
+  type CvLanguage,
   type Section,
   type SectionType,
 } from '@cv/shared'
@@ -52,6 +54,10 @@ interface CvEditorState {
   renameSection: (sectionId: string, title: string | null) => void
   addSection: (type: SectionType, column: Column) => string
   removeSection: (sectionId: string) => void
+
+  /** Pass a key per control so dragging a slider is one undo step. */
+  updateDesign: (patch: Partial<CvDesign>, coalesceKey?: string) => void
+  setLanguage: (language: CvLanguage) => void
 }
 
 function findItemSection(draft: Draft<CvDocument>, sectionId: string) {
@@ -213,5 +219,17 @@ export const useCvEditor = create<CvEditorState>()((set, get) => ({
   removeSection: (sectionId) =>
     get().change((draft) => {
       draft.sections = draft.sections.filter((s) => s.id !== sectionId)
+    }),
+
+  updateDesign: (patch, coalesceKey) =>
+    get().change((draft) => {
+      for (const [key, value] of Object.entries(patch) as Array<[keyof CvDesign, never]>) {
+        if (draft.design[key] !== value) draft.design[key] = value
+      }
+    }, coalesceKey),
+
+  setLanguage: (language) =>
+    get().change((draft) => {
+      draft.language = language
     }),
 }))

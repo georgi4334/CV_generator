@@ -3,7 +3,7 @@ import { createContext, useContext } from 'react'
 import type { EditorApi } from './editorApi'
 
 export type RenderMode = 'edit' | 'preview'
-export type TitleVariant = 'underline' | 'accent-rule' | 'accent-small'
+export type TitleVariant = 'underline' | 'accent-rule' | 'accent-small' | 'bar' | 'pill'
 
 export interface RenderContextValue {
   mode: RenderMode
@@ -11,6 +11,8 @@ export interface RenderContextValue {
   titleVariant: TitleVariant
   /** Single-column templates list skills inline instead of one per line. */
   inlineSkills: boolean
+  /** Entries are drawn on a vertical timeline (Timeline template). */
+  timeline: boolean
   /** True inside the hidden copy used for measuring: render static text, no controls. */
   measuring: boolean
   editor: EditorApi | null
@@ -21,6 +23,7 @@ export const RenderContext = createContext<RenderContextValue>({
   language: 'en-US',
   titleVariant: 'underline',
   inlineSkills: false,
+  timeline: false,
   measuring: false,
   editor: null,
 })

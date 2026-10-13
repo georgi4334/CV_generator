@@ -83,7 +83,11 @@ export function CvRenderer({ cv, mode, editor, pageClassName }: CvRendererProps)
   const pages = useMemo(() => {
     if (!measured) return [{ main, sidebar }]
     const content = tokens.page.height - 2 * tokens.margin
-    const first = content - measured.header - tokens.sectionGap
+    // A full-width header is measured including the top margin; a header in the
+    // main column is measured without it.
+    const headerSpace =
+      template.headerPlacement === 'full' ? measured.header - tokens.margin : measured.header
+    const first = content - headerSpace - tokens.sectionGap
     const toMeasured = (blocks: Block[]) =>
       blocks.map((b) => ({
         height: measured.blocks[b.key] ?? 0,
@@ -104,6 +108,7 @@ export function CvRenderer({ cv, mode, editor, pageClassName }: CvRendererProps)
     tokens.margin,
     tokens.sectionGap,
     tokens.itemGap,
+    template.headerPlacement,
   ])
 
   const frameProps = {
@@ -118,6 +123,7 @@ export function CvRenderer({ cv, mode, editor, pageClassName }: CvRendererProps)
     language: cv.language,
     titleVariant: template.titleVariant,
     inlineSkills: template.columns === 1,
+    timeline: template.timeline ?? false,
     measuring: false,
     editor: editor ?? null,
   }

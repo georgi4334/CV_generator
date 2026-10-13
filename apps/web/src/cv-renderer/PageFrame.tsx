@@ -3,7 +3,8 @@ import type { CSSProperties } from 'react'
 import type { Block } from './blocks'
 import { HeaderControls } from './controls'
 import { FONT_STACKS } from './fonts'
-import type { SidebarFill, TemplateDefinition } from './templates'
+import { backgroundImage } from './backgrounds'
+import { sidebarFor, type SidebarFill, type TemplateDefinition } from './templates'
 import { withAlpha, type LayoutTokens } from './tokens'
 
 const SOLID_SIDEBAR_VARS = {
@@ -71,20 +72,24 @@ export function PageFrame({
   const { margin, sectionGap, itemGap } = tokens
   const { Header } = template
   const fullHeader = template.headerPlacement === 'full'
-  const { width: sidebarWidth, fill } = template.sidebar(design.columnLayout)
+  const { width: sidebarWidth, fill } = sidebarFor(template, design.columnLayout)
   const twoColumns = template.columns === 2
   const filledSidebar = fill !== 'none'
 
-  const headerNode = isFirstPage ? (
-    <div data-measure-header={measuring || undefined}>
-      <HeaderControls
-        supportsPhoto={template.supportsPhoto}
-        hasPhoto={header.showPhoto && header.photoUrl !== null}
-      >
-        <Header header={header} />
-      </HeaderControls>
-    </div>
+  // A full-width header is measured with its padding (and band), a header in
+  // the main column without it; see the capacity calculation in CvRenderer.
+  const headerContent = isFirstPage ? (
+    <HeaderControls
+      supportsPhoto={template.supportsPhoto}
+      hasPhoto={header.showPhoto && header.photoUrl !== null}
+    >
+      <Header header={header} />
+    </HeaderControls>
   ) : null
+  const headerNode =
+    headerContent && !fullHeader ? (
+      <div data-measure-header={measuring || undefined}>{headerContent}</div>
+    ) : null
 
   const renderBlocks = (blocks: Block[]) =>
     blocks.map((block, index) => {
@@ -157,11 +162,30 @@ export function PageFrame({
   return (
     <div
       className={`relative flex flex-col overflow-hidden bg-white ${className ?? ''}`}
-      style={{ ...pageStyle(design, tokens), height: measuring ? undefined : tokens.page.height }}
+      style={{
+        ...pageStyle(design, tokens),
+        backgroundImage: backgroundImage(design.background, design.accentColor),
+        height: measuring ? undefined : tokens.page.height,
+      }}
     >
-      {fullHeader && headerNode && (
-        <div style={{ paddingTop: margin, paddingLeft: margin, paddingRight: margin }}>
-          {headerNode}
+      {fullHeader && headerContent && (
+        <div
+          data-measure-header={measuring || undefined}
+          style={{
+            paddingTop: margin,
+            paddingLeft: margin,
+            paddingRight: margin,
+            ...(template.headerBand
+              ? {
+                  ...SOLID_SIDEBAR_VARS,
+                  background: design.accentColor,
+                  color: 'var(--cv-text)',
+                  paddingBottom: Math.round(margin * 0.7),
+                }
+              : {}),
+          }}
+        >
+          {headerContent}
         </div>
       )}
       <div
