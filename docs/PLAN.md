@@ -1,6 +1,11 @@
 # CV Generator — Development Plan
 
-> Status: **Draft for discussion.** No code yet. Each step ends with a review where we discuss ideas before moving on.
+> Status: **Step 0 in progress.** Stack and free-tier hosting decided (see §3). No code yet. Each step ends with a review where we discuss ideas before moving on.
+>
+> **Decision log**
+> - Frontend: React + TS + Vite + Tailwind + Axios + React Router + TanStack Query + Zustand ✅
+> - Backend: Node + TypeScript + PostgreSQL (JSONB) with shared Zod types ✅
+> - Only free plans that allow commercial use; keep everything portable so it can become paid later ✅
 
 ## 1. Goal
 
@@ -21,42 +26,52 @@ A web app where a user can:
 | **Right rail** | Preview · Download · Share link · AI assistant · Premium (crown) | Preview = read-only mode without placeholders. |
 | **Theme** | Dark app chrome, teal accent | Accent and sidebar color come from the CV design settings, not the app theme. |
 
-## 3. Proposed tech stack
+## 3. Tech stack
 
-### Frontend (decided)
+**Constraint:** this is a hobby project that may become paid. Every service must have a **free plan that also allows commercial use**, so going paid later means upgrading a plan, not migrating. To avoid lock-in we stick to portable standards: plain PostgreSQL, the S3 storage API, and standard JWT auth.
+
+### Frontend ✅ decided
 - **React + TypeScript**, built with **Vite**
 - **Tailwind CSS** (CV design values passed in as CSS variables so templates can be recolored at runtime)
 - **Axios** for REST calls (one shared instance with interceptors for auth and errors)
+- **React Router** for routes like `/cvs` (dashboard) and `/cvs/:id/edit`
+- **TanStack Query** on top of axios for caching, autosave mutations and loading/error states
+- **Zustand** for local editor state (current CV document, selection, undo/redo)
+- **dnd-kit** for "Rearrange" drag-and-drop *(free, MIT)*
+- **Zod** for schema validation, shared with the backend *(free, MIT)*
 
-### Frontend (proposed, open for discussion)
-- **React Router**: routes like `/cvs` (dashboard) and `/cvs/:id/edit`
-- **TanStack Query** on top of axios: caching, autosave mutations, loading/error states
-- **Zustand**: local editor state (current CV document, selection, undo/redo)
-- **dnd-kit**: the "Rearrange" drag-and-drop
-- **Zod**: schema validation, shared with the backend
-- **TipTap** (optional): rich text for bullet points and summary
+### Backend ✅ decided
+- **Node.js + TypeScript**
+- Framework: **Fastify** recommended over NestJS. It is lighter and starts fast, which matters on free instances with 512 MB RAM and cold starts. Final pick in Step 1.
+- **PostgreSQL** with a **JSONB** column for CV content
+- ORM: **Drizzle** or **Prisma**, both free. Final pick in Step 1.
+- Shared package `packages/shared` holds TypeScript types and Zod schemas used by both apps.
 
-### Backend (open for discussion)
-**Recommendation: Node.js + TypeScript (NestJS or Fastify) + PostgreSQL + Prisma/Drizzle.**
+### Free-tier services
 
-Why:
-- One language across the stack. Types and Zod schemas for the CV document live in a shared package used by both frontend and backend.
-- **PostgreSQL with JSONB** fits this domain: users, CVs, versions and share links are relational, while the CV *content* (sections and items that vary by template) is a flexible JSON document stored in a `JSONB` column and validated by Zod.
-- PDF export can reuse the same React templates rendered in headless Chromium (Playwright/Puppeteer), so the PDF matches the editor exactly.
+| Need | Choice (free plan) | Why | When it becomes paid |
+|---|---|---|---|
+| Database | **Neon** Postgres (free tier) | Plain Postgres, scales to zero, branching per environment | Paid plan when storage or compute outgrows the free tier |
+| API hosting | **Render** free web service (alt: Koyeb) | Deploys from GitHub; Docker or Node | Free instances sleep after ~15 min idle (cold start ~30–60 s). Upgrade to the smallest paid instance to remove that. |
+| Frontend hosting | **Cloudflare Pages** (alt: Netlify) | Generous free plan, commercial use allowed | Rarely needed |
+| File storage (photos, logos) | **Cloudflare R2** | S3-compatible, free tier ~10 GB, no egress fees | Above free storage |
+| Auth | **Self-built** (email/password + Google OAuth, JWT in httpOnly cookies) | Zero cost, no per-user pricing, no lock-in | Never |
+| Email (verification, password reset) | **Resend** or **Brevo** free tier | Simple API | Above the daily/monthly free limit |
+| PDF export | **Browser print** (`window.print()` + print CSS) first | Zero server cost, selectable text (ATS-friendly) | Later: server-side headless Chromium on a paid instance for one-click download |
+| AI features | **Google Gemini** free tier or **Groq** free tier for prototyping | Free while low volume | Switch or upgrade to a paid model when it's a premium feature |
+| CI | **GitHub Actions** | Free for public repos; 2,000 min/month for private ones | Unlikely |
+| Error monitoring | **Sentry** free developer plan | Frontend and backend errors | Higher event volume |
+| Payments (later) | **Stripe** | No monthly fee, only per-transaction | Only when money comes in |
 
-| Option | Pros | Cons |
-|---|---|---|
-| **PostgreSQL (JSONB)** ⭐ | Relational + flexible document; mature; free hosting options (Supabase, Neon) | Needs migrations |
-| MongoDB | Document model maps directly to a CV | Weaker for relations (users, versions, sharing) |
-| Supabase (Postgres + Auth + Storage) | Auth and file storage (photos, logos) built in, less backend code | Vendor coupling |
-| Firebase / Firestore | Fastest to start | Vendor lock-in, harder querying, not SQL |
+> ⚠️ **Avoid Vercel Hobby** for the frontend: its free plan forbids commercial use. Avoid Render's free Postgres too, because it expires after 30 days; that's why the database is on Neon. Free-tier limits change, so we re-check them when signing up in Step 14.
 
-Alternative backends if you prefer: Java/Spring Boot, .NET or Python/FastAPI. They all work, but we lose the shared TypeScript types.
+### Local development (free)
+- Docker Compose runs Postgres and MinIO (an S3-compatible stand-in for R2), so development needs no cloud accounts.
 
 ## 4. Core data model (draft)
 
 ```
-User        { id, email, name, passwordHash | oauthId, createdAt }
+User        { id, email, name, passwordHash | oauthId, plan: 'free' | 'pro', createdAt }  // plan field ready for premium later
 Cv          { id, userId, title, professionId, templateId, design (JSON), content (JSONB), updatedAt }
 CvVersion   { id, cvId, snapshot (JSONB), label, createdAt }        // history / restore
 ShareLink   { id, cvId, slug, isActive, createdAt }
@@ -84,14 +99,16 @@ Splitting **content** from **design** is what lets a user switch template or sty
 Every step ends with a demo and a discussion before the next one starts.
 
 ### Step 0: Discovery & decisions *(now)*
-- Agree on MVP scope, backend/DB choice, auth approach, and which features are out of scope for v1.
+- ✅ Frontend stack, backend direction, and the free-tier hosting rule.
+- Still open: MVP scope, accounts on day one or later, and which features are out of scope for v1.
 - List the first professions and templates to support.
 - **Output:** this plan, updated with the decisions.
 
 ### Step 1: Project setup
 - Monorepo (pnpm workspaces): `apps/web`, `apps/api`, `packages/shared`.
 - Vite + React + TS + Tailwind; ESLint, Prettier, Husky pre-commit hooks.
-- Docker Compose for local Postgres.
+- Pick Fastify vs NestJS and Drizzle vs Prisma.
+- Docker Compose for local Postgres and MinIO (S3 stand-in).
 - GitHub Actions CI: lint, typecheck, tests.
 - **Output:** empty app that builds, runs and passes CI.
 
@@ -134,7 +151,8 @@ Every step ends with a demo and a discussion before the next one starts.
   - `GET /cvs/:id/versions`, `POST /cvs/:id/versions/:vid/restore`
   - `GET /templates`, `GET /professions`
 - Postgres schema and migrations; request validation using the shared Zod schemas.
-- File storage for photos and logos (local disk in dev, S3-compatible in prod).
+- File storage for photos and logos through the S3 API: MinIO in dev, Cloudflare R2 in prod.
+- Simple per-plan limits (e.g. max CVs on the free plan), enforced in one place so premium is easy to switch on later.
 
 ### Step 9: Connect frontend ↔ backend
 - Axios client (base URL, interceptors, error normalization) plus TanStack Query hooks.
@@ -147,7 +165,8 @@ Every step ends with a demo and a discussion before the next one starts.
 
 ### Step 11: Preview, PDF export & sharing
 - Preview mode: placeholders and empty sections hidden.
-- PDF download, rendered server-side with headless Chromium for pixel-perfect output with selectable text (ATS-friendly).
+- PDF download, phase 1 (free): browser print with dedicated print CSS (`@page` A4, no margins, colors kept). The text stays selectable, which keeps it ATS-friendly.
+- PDF download, phase 2 (when paid hosting exists): server-side headless Chromium for a one-click download that is identical in every browser.
 - Public read-only share link (`/s/:slug`) that can be turned on and off.
 
 ### Step 12: Authentication & accounts
@@ -160,22 +179,25 @@ Every step ends with a demo and a discussion before the next one starts.
 - **Check & Tailor:** paste a job posting → ATS keyword match score, missing skills, suggested rewrites → save as a tailored copy.
 - **AI assistant:** generate or improve the summary and experience bullets.
 - Calls go through the backend so the API key never reaches the browser.
+- Provider behind a small interface, so we can start with a free tier (Gemini/Groq) and switch providers without touching the UI.
+- Per-user rate limits to stay inside free quotas. Later these become "AI credits" for premium.
 
 ### Step 14: Quality & release
 - Unit tests (Vitest), component tests, E2E (Playwright).
 - Accessibility, performance, i18n (EN/BG?).
-- Deployment, e.g. frontend on Vercel/Netlify, API and DB on Render/Fly/Railway with Neon/Supabase Postgres.
+- Deployment on free plans: frontend on Cloudflare Pages, API on Render, DB on Neon, files on Cloudflare R2.
+- Sentry for errors; a keep-warm ping is optional, because Render's free plan sleeps when idle.
 
 ### Step 15 (optional): Premium
-- The crown icon suggests premium features (more templates, AI credits, unlimited CVs). Payments via Stripe.
+- The crown icon suggests premium features (more templates, AI credits, unlimited CVs). Payments via Stripe, which has no monthly fee.
+- Going paid means upgrading hosting plans (Render instance, Neon), not migrating, because the stack is portable.
 
 ## 6. Open questions for discussion
 
-1. **Backend/DB:** Node + PostgreSQL as recommended, or do you prefer another language, MongoDB, or Supabase/Firebase?
-2. **Accounts:** login required from day one, or allow anonymous editing first?
-3. **Professions:** which job types and templates should v1 support?
-4. **Languages:** English only, or also Bulgarian/other (affects fonts and UI i18n)?
-5. **AI:** in scope for v1 or a later phase? Which provider?
-6. **Photo on CV:** optional photo support (common in EU CVs, discouraged for US/ATS)?
-7. **Import:** do we need to import existing CVs (PDF/DOCX/LinkedIn), and when?
-8. **Hosting & budget:** any constraints on where it runs?
+1. **Accounts:** login required from day one, or allow anonymous editing first?
+2. **Professions:** which job types and templates should v1 support?
+3. **Languages:** English only, or also Bulgarian/other (affects fonts and UI i18n)?
+4. **AI:** in scope for v1 or a later phase?
+5. **Photo on CV:** optional photo support (common in EU CVs, discouraged for US/ATS)?
+6. **Import:** do we need to import existing CVs (PDF/DOCX/LinkedIn), and when?
+7. **Repo visibility:** public or private? Public gets unlimited free GitHub Actions minutes; private gets 2,000 min/month.
