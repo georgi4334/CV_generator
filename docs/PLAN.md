@@ -177,7 +177,7 @@ Implementation notes:
 
 ### Local development (free)
 
-- Docker Compose runs Postgres and MinIO (an S3-compatible stand-in for R2), so development needs no cloud accounts.
+- Docker Compose runs Postgres, so development needs no cloud accounts. A local S3-compatible store (stand-in for R2) is added in Step 8. MinIO no longer publishes Docker images, so we'll pick a maintained alternative then (e.g. Garage or SeaweedFS).
 
 ## 5. Core data model
 
@@ -237,7 +237,7 @@ Every step ends with a demo and a discussion before the next one starts.
 - ✅ API: Fastify 5 + Drizzle ORM + postgres.js, env validated with Zod, `GET /api/health` (checks the database).
 - ✅ Shared: Zod schemas consumed as TypeScript source by both apps (bundled into the API build).
 - ✅ ESLint, Prettier, Husky + lint-staged pre-commit hook; Vitest in every package.
-- ✅ Docker Compose for local Postgres and MinIO (S3 stand-in).
+- ✅ Docker Compose for local Postgres.
 - ✅ GitHub Actions CI: format check, lint, typecheck, tests, build.
 - **Output:** a start page that calls the API through axios + TanStack Query and shows API/database status.
 - Note: TypeScript is pinned to 6.0 because typescript-eslint does not support TypeScript 7 yet.
@@ -307,7 +307,7 @@ Specification: §3.2 and §3.3.
   - `GET /cvs/:id/versions`, `POST /cvs/:id/versions/:vid/restore`
   - `GET /templates`, `GET /professions`
 - Postgres schema and migrations; request validation using the shared Zod schemas.
-- File storage for photos and logos through the S3 API: MinIO in dev, Cloudflare R2 in prod.
+- File storage for photos and logos through the S3 API: a local S3-compatible container in dev (added to Docker Compose here), Cloudflare R2 in prod.
 - Simple per-plan limits (e.g. max CVs on the free plan), enforced in one place so premium is easy to switch on later.
 
 ### Step 9: Connect frontend ↔ backend
