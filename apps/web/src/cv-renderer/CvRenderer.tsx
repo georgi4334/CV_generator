@@ -2,6 +2,7 @@ import type { CvDocument } from '@cv/shared'
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { buildBlocks, type Block } from './blocks'
 import { RenderContext, type RenderMode } from './context'
+import type { EditorApi } from './editorApi'
 import { PageFrame } from './PageFrame'
 import { paginateColumn } from './paginate'
 import { getTemplate } from './templates'
@@ -27,6 +28,8 @@ const sameMeasurements = (a: Measurements | null, b: Measurements) =>
 interface CvRendererProps {
   cv: CvDocument
   mode: RenderMode
+  /** Makes the pages editable in place (edit mode only). */
+  editor?: EditorApi
   pageClassName?: string
 }
 
@@ -35,7 +38,7 @@ interface CvRendererProps {
  * unpaginated copy of the page to measure their heights; the visible pages are
  * then filled block by block, so content flows onto as many pages as needed.
  */
-export function CvRenderer({ cv, mode, pageClassName }: CvRendererProps) {
+export function CvRenderer({ cv, mode, editor, pageClassName }: CvRendererProps) {
   const template = getTemplate(cv.design.templateId)
   const tokens = layoutTokens(cv.design)
   const measureRef = useRef<HTMLDivElement>(null)
@@ -115,7 +118,10 @@ export function CvRenderer({ cv, mode, pageClassName }: CvRendererProps) {
     language: cv.language,
     titleVariant: template.titleVariant,
     inlineSkills: template.columns === 1,
+    measuring: false,
+    editor: editor ?? null,
   }
+  const measuringContext = { ...context, measuring: true, editor: null }
 
   return (
     <RenderContext.Provider value={context}>
@@ -141,7 +147,9 @@ export function CvRenderer({ cv, mode, pageClassName }: CvRendererProps) {
         aria-hidden
         className="pointer-events-none fixed top-0 -left-[10000px] invisible"
       >
-        <PageFrame {...frameProps} isFirstPage main={main} sidebar={sidebar} measuring />
+        <RenderContext.Provider value={measuringContext}>
+          <PageFrame {...frameProps} isFirstPage main={main} sidebar={sidebar} measuring />
+        </RenderContext.Provider>
       </div>
     </RenderContext.Provider>
   )

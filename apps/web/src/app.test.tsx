@@ -1,5 +1,6 @@
 import { fireEvent, screen, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { useCvEditor } from './features/editor/cvEditorStore'
 import { useEditorUi } from './stores/editorUi'
 import { renderRoute } from './test/renderRoute'
 
@@ -111,9 +112,39 @@ describe('editor', () => {
 
   it('opens a blank CV for /cvs/new/edit', () => {
     renderRoute('/cvs/new/edit')
-    expect(
-      within(screen.getByRole('document', { name: 'CV' })).getByText('Your Name'),
-    ).toBeDefined()
+    const name = within(screen.getByRole('document', { name: 'CV' })).getByRole('textbox', {
+      name: 'Your Name',
+    })
+    expect(name.textContent).toBe('')
+  })
+
+  it('edits text in place and undoes it', () => {
+    renderRoute('/cvs/new/edit')
+    const page = within(screen.getByRole('document', { name: 'CV' }))
+    const name = page.getByRole('textbox', { name: 'Your Name' })
+
+    name.textContent = 'Maria'
+    fireEvent.input(name)
+    expect(useCvEditor.getState().cv?.header.name).toBe('Maria')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Undo' }))
+    expect(useCvEditor.getState().cv?.header.name).toBe('')
+    expect(name.textContent).toBe('')
+  })
+
+  it('adds an entry from the entry toolbar', () => {
+    renderRoute('/cvs/new/edit')
+    const experience = useCvEditor.getState().cv!.sections.find((s) => s.type === 'experience')!
+    const before = 'items' in experience ? experience.items.length : 0
+    fireEvent.click(screen.getAllByRole('button', { name: 'Add entry below' })[0]!)
+    const after = useCvEditor.getState().cv!.sections.find((s) => s.id === experience.id)!
+    expect('items' in after && after.items.length).toBe(before + 1)
+  })
+
+  it('does not show editing controls in preview', () => {
+    renderRoute('/cvs/cv-1/preview')
+    expect(screen.queryAllByRole('textbox')).toHaveLength(0)
+    expect(screen.queryAllByRole('toolbar')).toHaveLength(0)
   })
 
   it('shows "Page not found" for an unknown document', () => {

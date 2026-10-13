@@ -1,6 +1,7 @@
 import type { CvDesign, CvHeader } from '@cv/shared'
 import type { CSSProperties } from 'react'
 import type { Block } from './blocks'
+import { HeaderControls } from './controls'
 import { FONT_STACKS } from './fonts'
 import type { SidebarFill, TemplateDefinition } from './templates'
 import { withAlpha, type LayoutTokens } from './tokens'
@@ -12,6 +13,7 @@ const SOLID_SIDEBAR_VARS = {
   '--cv-muted-strong': 'rgba(255, 255, 255, 0.88)',
   '--cv-accent-text': '#ffffff',
   '--cv-rule': 'rgba(255, 255, 255, 0.3)',
+  '--cv-hover': 'rgba(255, 255, 255, 0.14)',
 } as CSSProperties
 
 function pageStyle(design: CvDesign, tokens: LayoutTokens): CSSProperties {
@@ -28,6 +30,7 @@ function pageStyle(design: CvDesign, tokens: LayoutTokens): CSSProperties {
     '--cv-accent': design.accentColor,
     '--cv-accent-text': design.accentColor,
     '--cv-rule': 'rgba(15, 23, 42, 0.14)',
+    '--cv-hover': 'rgba(15, 23, 42, 0.06)',
   } as CSSProperties
 }
 
@@ -74,7 +77,12 @@ export function PageFrame({
 
   const headerNode = isFirstPage ? (
     <div data-measure-header={measuring || undefined}>
-      <Header header={header} />
+      <HeaderControls
+        supportsPhoto={template.supportsPhoto}
+        hasPhoto={header.showPhoto && header.photoUrl !== null}
+      >
+        <Header header={header} />
+      </HeaderControls>
     </div>
   ) : null
 

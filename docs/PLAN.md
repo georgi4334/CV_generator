@@ -1,13 +1,13 @@
 # CV Generator — Development Plan
 
-> Status: **Step 4 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
+> Status: **Step 5 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
 >
 > **Decision log**
 >
 > - App tabs: Dashboard · Documents (All documents / Cover letters / CVs) · Saved Jobs ✅
 > - Job statuses: To apply · Applied · Interviewing · Negotiating · Accepted · Rejected · No answer ✅
 > - Backend framework: Fastify; ORM: Drizzle ✅
-> - Step 0 closed. Step 1 (project setup) ✅. Step 2 (shared domain model) ✅. Step 3 (app shell) ✅. Step 4 (CV renderer) built; awaiting review before Step 5.
+> - Step 0 closed. Step 1 (project setup) ✅. Step 2 (shared domain model) ✅. Step 3 (app shell) ✅. Step 4 (CV renderer) ✅. Step 5 (inline editing) built; awaiting review before Step 6.
 > - Frontend: React + TS + Vite + Tailwind + Axios + React Router + TanStack Query + Zustand ✅
 > - Backend: Node + TypeScript + PostgreSQL (JSONB) with shared Zod types ✅
 > - Only free plans that allow commercial use; keep everything portable so it can become paid later ✅
@@ -286,12 +286,18 @@ Code in `apps/web/src/cv-renderer/`.
 - The other 5 templates fall back to the closest built one until Step 7.
 - Known limit: a single item taller than a whole page is not split; it gets a page of its own and is cut off.
 
-### Step 5: Inline editing
+### Step 5: Inline editing ✅ built (awaiting review)
 
-- Click any text to edit in place, with placeholders like "Company Name" and "Date period".
-- Add/remove/duplicate items, edit bullet lists, pick achievement icons, upload company logo or photo.
-- Hover controls per section and per item.
-- Undo/redo; keyboard friendly.
+- ✅ Click any text on the page to edit it in place (plain text; paste is cleaned). Empty fields show the grey placeholder and are clickable.
+- ✅ Bullets: Enter adds the next bullet, Backspace in an empty bullet removes it. Skills work the same way.
+- ✅ Hover toolbar on every entry: move up/down, add bullet, add entry below, duplicate, delete. "Add entry" on section titles.
+- ✅ Date picker (month + year, "Present") for date ranges; single-date picker for courses and certificates.
+- ✅ Icon picker for Key Achievements; click dots/bars to set skill and language levels; click a text level to cycle it.
+- ✅ Photo (header toolbar) and company logo upload, resized in the browser and stored in the document until file storage exists (Step 8).
+- ✅ Undo/redo: toolbar buttons and Ctrl+Z / Ctrl+Shift+Z / Ctrl+Y. Typing in one field is one undo step.
+- ✅ The cursor stays in the field when its entry moves to another page while typing.
+- Edits are kept in memory (mock data) until the API exists (Step 9); a page reload resets them. Edits to a brand-new CV are not kept after leaving the editor.
+- Also: pnpm now installs changed dependencies automatically before running a script (`verifyDepsBeforeRun`).
 
 ### Step 6: Rearrange
 

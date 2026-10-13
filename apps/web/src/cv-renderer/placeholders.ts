@@ -11,6 +11,8 @@ export const PLACEHOLDERS = {
   experienceTitle: 'Title',
   company: 'Company Name',
   datePeriod: 'Date period',
+  date: 'Date',
+  linkUrl: 'Link',
   bullet: 'Highlight your accomplishments, using numbers if possible.',
   degree: 'Degree and Field of Study',
   institution: 'School or University',

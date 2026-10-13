@@ -15,9 +15,10 @@ import { useState, type ComponentType } from 'react'
 import { Link } from 'react-router'
 import { ThemeToggle } from '../../components/ThemeToggle'
 import { useEditorUi, type EditorPanel } from '../../stores/editorUi'
+import { useCvEditor } from './cvEditorStore'
 
 const toolButton =
-  'inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
+  'inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 py-1.5 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
 const activeTool = 'bg-teal-50 text-teal-700 dark:bg-teal-950 dark:text-teal-300'
 const iconButton =
   'rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900 disabled:opacity-40 disabled:hover:bg-transparent dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100'
@@ -39,6 +40,10 @@ const CENTER_TOOLS: Tool[] = [
 
 export function EditorTopBar({ title, backTo }: { title: string; backTo: string }) {
   const { activePanel, togglePanel, notify } = useEditorUi()
+  const canUndo = useCvEditor((s) => s.past.length > 0)
+  const canRedo = useCvEditor((s) => s.future.length > 0)
+  const undo = useCvEditor((s) => s.undo)
+  const redo = useCvEditor((s) => s.redo)
   const [helpOpen, setHelpOpen] = useState(false)
 
   return (
@@ -86,18 +91,20 @@ export function EditorTopBar({ title, backTo }: { title: string; backTo: string 
         <button
           type="button"
           className={iconButton}
-          disabled
+          disabled={!canUndo}
+          onClick={undo}
           aria-label="Undo"
-          title="Undo (Step 5)"
+          title="Undo (Ctrl+Z)"
         >
           <Undo2 className="size-4" />
         </button>
         <button
           type="button"
           className={iconButton}
-          disabled
+          disabled={!canRedo}
+          onClick={redo}
           aria-label="Redo"
-          title="Redo (Step 5)"
+          title="Redo (Ctrl+Shift+Z)"
         >
           <Redo2 className="size-4" />
         </button>
