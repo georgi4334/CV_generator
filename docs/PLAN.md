@@ -1,13 +1,13 @@
 # CV Generator — Development Plan
 
-> Status: **Step 1 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
+> Status: **Step 2 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
 >
 > **Decision log**
 >
 > - App tabs: Dashboard · Documents (All documents / Cover letters / CVs) · Saved Jobs ✅
 > - Job statuses: To apply · Applied · Interviewing · Negotiating · Accepted · Rejected · No answer ✅
 > - Backend framework: Fastify; ORM: Drizzle ✅
-> - Step 0 closed. Step 1 (project setup) built; awaiting review before Step 2.
+> - Step 0 closed. Step 1 (project setup) ✅. Step 2 (shared domain model) built; awaiting review before Step 3.
 > - Frontend: React + TS + Vite + Tailwind + Axios + React Router + TanStack Query + Zustand ✅
 > - Backend: Node + TypeScript + PostgreSQL (JSONB) with shared Zod types ✅
 > - Only free plans that allow commercial use; keep everything portable so it can become paid later ✅
@@ -179,7 +179,9 @@ Implementation notes:
 
 - Docker Compose runs Postgres and MinIO (an S3-compatible stand-in for R2), so development needs no cloud accounts.
 
-## 5. Core data model (draft)
+## 5. Core data model
+
+> The source of truth is now the Zod schemas in `packages/shared/src` (Step 2). This section is the overview.
 
 ```
 User        { id, email, name, passwordHash | oauthId, plan: 'free' | 'pro', createdAt }  // plan field ready for premium later
@@ -240,11 +242,22 @@ Every step ends with a demo and a discussion before the next one starts.
 - **Output:** a start page that calls the API through axios + TanStack Query and shows API/database status.
 - Note: TypeScript is pinned to 6.0 because typescript-eslint does not support TypeScript 7 yet.
 
-### Step 2: Shared domain model
+### Step 2: Shared domain model ✅ built (awaiting review)
 
-- Define `CvDocument`, `Section` and item types as Zod schemas in `packages/shared`.
-- Write a few sample CVs as JSON fixtures (one per profession).
-- **Discuss:** the exact section types and fields.
+All in `packages/shared/src`, as Zod schemas with inferred TypeScript types:
+
+- **`cv/`**: `CvDocument` = `schemaVersion` + `language` + `header` + ordered `sections` + `design`.
+  - 10 section types: summary, experience, education, skills, achievements, courses, projects, languages, certificates, custom. Each has `column` (main/sidebar), `visible`, and `title: null` meaning "use the default title for the CV language".
+  - Dates are `YYYY` or `YYYY-MM` plus `isCurrent` ("Present").
+  - Skills and languages have an optional 1–5 level; the section chooses how to show it (none / bar / dots / text).
+  - `design` holds every Templates and Design & Font setting (§3.2–3.3); `DEFAULT_DESIGN` matches the reference screenshot.
+  - Default section titles in English (US/UK) and Bulgarian.
+  - `createEmptyCv()`, `createSection()`, `createItem()` factories.
+- **`professions.ts` + `examples/`**: 5 professions (Software Developer, Designer, Sales & Marketing, Healthcare, Academic & Research), each with recommended templates, a default section layout and a full example CV. Examples are functions, not JSON files, so each copy gets fresh ids.
+- **`jobs.ts`**: Saved Jobs fields, 7 statuses with labels, job types, and `withStatus()` which fills in "Date applied".
+- **`coverLetter.ts`, `documents.ts`**: cover letter document and the stored record and list-row shapes for Documents.
+- `schemaVersion` on stored documents so we can migrate JSONB data later.
+- 45 unit tests.
 
 ### Step 3: App shell & editor shell (frontend, mock data)
 

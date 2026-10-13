@@ -1,0 +1,68 @@
+import { describe, expect, it } from 'vitest'
+import { CvDocumentSchema } from './document'
+import { createEmptyCv, createSection } from './factories'
+import { getSectionTitle } from './i18n'
+import { SECTION_TYPES } from './sections'
+
+describe('createEmptyCv', () => {
+  it('produces a valid document with the reference layout', () => {
+    const cv = createEmptyCv()
+    expect(CvDocumentSchema.parse(cv)).toEqual(cv)
+    expect(cv.sections.map((s) => [s.type, s.column])).toEqual([
+      ['summary', 'main'],
+      ['experience', 'main'],
+      ['achievements', 'sidebar'],
+      ['skills', 'sidebar'],
+      ['courses', 'sidebar'],
+      ['education', 'sidebar'],
+    ])
+  })
+
+  it('does not share the design object between documents', () => {
+    const a = createEmptyCv()
+    const b = createEmptyCv()
+    a.design.accentColor = '#000000'
+    expect(b.design.accentColor).not.toBe('#000000')
+  })
+})
+
+describe('createSection', () => {
+  it.each(SECTION_TYPES)('creates a valid %s section', (type) => {
+    const cv = { ...createEmptyCv(), sections: [createSection(type, 'main')] }
+    expect(CvDocumentSchema.safeParse(cv).success).toBe(true)
+  })
+})
+
+describe('CvDocumentSchema', () => {
+  it('rejects an invalid date', () => {
+    const cv = createEmptyCv()
+    const experience = cv.sections.find((s) => s.type === 'experience')!
+    if (experience.type === 'experience') experience.items[0]!.startDate = '2024-13'
+    expect(CvDocumentSchema.safeParse(cv).success).toBe(false)
+  })
+
+  it('rejects an invalid accent color', () => {
+    const cv = createEmptyCv()
+    cv.design.accentColor = 'teal'
+    expect(CvDocumentSchema.safeParse(cv).success).toBe(false)
+  })
+
+  it('rejects an unknown section type', () => {
+    const cv = createEmptyCv() as unknown as { sections: Array<{ type: string }> }
+    cv.sections[0]!.type = 'hobbies'
+    expect(CvDocumentSchema.safeParse(cv).success).toBe(false)
+  })
+})
+
+describe('getSectionTitle', () => {
+  it('uses the language default when the title is not customised', () => {
+    const section = createSection('experience', 'main')
+    expect(getSectionTitle(section, 'en-US')).toBe('Experience')
+    expect(getSectionTitle(section, 'bg')).toBe('Професионален опит')
+  })
+
+  it('prefers a custom title', () => {
+    const section = { ...createSection('experience', 'main'), title: 'Work History' }
+    expect(getSectionTitle(section, 'bg')).toBe('Work History')
+  })
+})
