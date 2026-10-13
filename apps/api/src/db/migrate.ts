@@ -15,6 +15,24 @@ export const MIGRATIONS_FOLDER =
   ].find((dir) => existsSync(join(dir, 'meta', '_journal.json'))) ??
   join(import.meta.dirname, '..', '..', 'drizzle')
 
-export async function runMigrations(database: Database) {
+export async function runMigrations(database: Pick<Database, 'db'>) {
   await migrate(database.db, { migrationsFolder: MIGRATIONS_FOLDER })
+}
+
+/**
+ * Returns a function that applies migrations once and remembers success. If the
+ * database is not reachable yet (e.g. Docker started after the API), the next
+ * call tries again instead of leaving the API without tables.
+ */
+export function createMigrator(apply: () => Promise<void>) {
+  let done: Promise<void> | null = null
+  return function ensureMigrated(): Promise<void> {
+    if (!done) {
+      done = apply().catch((error: unknown) => {
+        done = null
+        throw error
+      })
+    }
+    return done
+  }
 }

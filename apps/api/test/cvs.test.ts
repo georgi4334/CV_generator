@@ -187,3 +187,33 @@ describe.skipIf(!dbAvailable)('CV API', () => {
     expect(res.json().map((p: { id: string }) => p.id)).toContain('software-developer')
   })
 })
+
+describe.skipIf(!dbAvailable)('database not ready yet', () => {
+  it('answers 503 while migrations fail, then works once they succeed', async () => {
+    const { buildApp } = await import('../src/app')
+    const { createDb } = await import('../src/db/client')
+    const { createMigrator } = await import('../src/db/migrate')
+    const { createLocalStorage } = await import('../src/lib/storage')
+    const database = createDb(
+      process.env.TEST_DATABASE_URL ?? 'postgres://cv:cv@localhost:5432/cv_generator_test',
+    )
+    let reachable = false
+    const app = await buildApp({
+      corsOrigin: 'http://localhost:5173',
+      database,
+      storage: createLocalStorage('/tmp/unused'),
+      ensureMigrated: createMigrator(async () => {
+        if (!reachable) throw new Error('connect ECONNREFUSED')
+      }),
+    })
+
+    const down = await app.inject({ method: 'GET', url: '/api/cvs' })
+    expect(down.statusCode).toBe(503)
+    expect(down.json().error.code).toBe('database_unavailable')
+
+    reachable = true
+    expect((await app.inject({ method: 'GET', url: '/api/cvs' })).statusCode).toBe(200)
+    await app.close()
+    await database.close()
+  })
+})

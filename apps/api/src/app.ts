@@ -1,7 +1,7 @@
 import cors from '@fastify/cors'
 import Fastify from 'fastify'
 import type { Database } from './db/client'
-import { registerErrorHandler } from './lib/errors'
+import { HttpError, registerErrorHandler } from './lib/errors'
 import type { Storage } from './lib/storage'
 import { useCurrentUser } from './plugins/currentUser'
 import { cvRoutes } from './routes/cvs'
@@ -13,12 +13,16 @@ export interface AppOptions {
   corsOrigin: string
   database: Pick<Database, 'db' | 'isHealthy'>
   storage: Storage
+  /** Makes sure the tables exist before data routes run (retries until it works). */
+  ensureMigrated?: () => Promise<void>
+  /** Include the underlying error in 500 responses (development only). */
+  exposeErrors?: boolean
   logger?: boolean
 }
 
 export async function buildApp(opts: AppOptions) {
   const app = Fastify({ logger: opts.logger ?? false, bodyLimit: 2 * 1024 * 1024 })
-  registerErrorHandler(app)
+  registerErrorHandler(app, { exposeErrors: opts.exposeErrors ?? false })
 
   await app.register(cors, {
     origin: opts.corsOrigin.split(',').map((origin) => origin.trim()),
@@ -36,6 +40,21 @@ export async function buildApp(opts: AppOptions) {
 
       // Routes acting for the current user
       await api.register(async (scope) => {
+        const { ensureMigrated } = opts
+        if (ensureMigrated) {
+          scope.addHook('onRequest', async (request) => {
+            try {
+              await ensureMigrated()
+            } catch (error) {
+              request.log.error(error, 'database not ready')
+              throw new HttpError(
+                503,
+                'database_unavailable',
+                'The database is not reachable. Is it running? (pnpm db:up)',
+              )
+            }
+          })
+        }
         useCurrentUser(scope, { database })
         await scope.register(cvRoutes, { database })
         await scope.register(uploadRoutes, { database, storage: opts.storage })
