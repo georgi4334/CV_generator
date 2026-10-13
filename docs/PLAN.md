@@ -1,13 +1,13 @@
 # CV Generator — Development Plan
 
-> Status: **Step 5 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
+> Status: **Step 6 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
 >
 > **Decision log**
 >
 > - App tabs: Dashboard · Documents (All documents / Cover letters / CVs) · Saved Jobs ✅
 > - Job statuses: To apply · Applied · Interviewing · Negotiating · Accepted · Rejected · No answer ✅
 > - Backend framework: Fastify; ORM: Drizzle ✅
-> - Step 0 closed. Step 1 (project setup) ✅. Step 2 (shared domain model) ✅. Step 3 (app shell) ✅. Step 4 (CV renderer) ✅. Step 5 (inline editing) built; awaiting review before Step 6.
+> - Step 0 closed. Step 1 (project setup) ✅. Step 2 (shared domain model) ✅. Step 3 (app shell) ✅. Step 4 (CV renderer) ✅. Step 5 (inline editing) ✅. Step 6 (rearrange) built; awaiting review before Step 7.
 > - Frontend: React + TS + Vite + Tailwind + Axios + React Router + TanStack Query + Zustand ✅
 > - Backend: Node + TypeScript + PostgreSQL (JSONB) with shared Zod types ✅
 > - Only free plans that allow commercial use; keep everything portable so it can become paid later ✅
@@ -299,10 +299,13 @@ Code in `apps/web/src/cv-renderer/`.
 - Edits are kept in memory (mock data) until the API exists (Step 9); a page reload resets them. Edits to a brand-new CV are not kept after leaving the editor.
 - Also: pnpm now installs changed dependencies automatically before running a script (`verifyDepsBeforeRun`).
 
-### Step 6: Rearrange
+### Step 6: Rearrange ✅ built (awaiting review)
 
-- Drag-and-drop sections within a column and between main and sidebar.
-- Show/hide sections; add custom sections.
+- ✅ "Rearrange" opens a left panel with two lists, Main column and Sidebar, in page order.
+- ✅ Drag sections (dnd-kit) to reorder them or move them to the other column; also works with the keyboard (Space, arrows, Space). One drag = one undo step.
+- ✅ Show/hide a section (eye icon), rename it (empty title = default title in the CV language), delete it (undo with Ctrl+Z).
+- ✅ "Add section": any type not on the CV yet, plus any number of Custom sections; summary, experience, education and projects go to the main column, the rest to the sidebar.
+- Single-column templates show a note: main sections first, then sidebar sections.
 
 ### Step 7: Templates & Design/Font panels
 

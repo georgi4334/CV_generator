@@ -74,3 +74,38 @@ describe('cvEditorStore', () => {
     expect(store().past).toHaveLength(0)
   })
 })
+
+describe('section actions', () => {
+  const sections = () => store().cv!.sections
+  const columnOrder = (column: 'main' | 'sidebar') =>
+    sections()
+      .filter((s) => s.column === column)
+      .map((s) => s.type)
+
+  it('moves a section between columns and undoes a whole drag in one step', () => {
+    const skills = sections().find((s) => s.type === 'skills')!
+    store().moveSection(skills.id, 'main', 0, 'drag:1')
+    store().moveSection(skills.id, 'main', 1, 'drag:1')
+    expect(columnOrder('main')).toEqual(['summary', 'skills', 'experience'])
+    store().endTyping()
+    store().undo()
+    expect(columnOrder('main')).toEqual(['summary', 'experience'])
+    expect(columnOrder('sidebar')).toContain('skills')
+  })
+
+  it('hides, renames and resets a section title', () => {
+    const summary = sections().find((s) => s.type === 'summary')!
+    store().setSectionVisible(summary.id, false)
+    store().renameSection(summary.id, 'About me')
+    expect(sections()[0]).toMatchObject({ visible: false, title: 'About me' })
+    store().renameSection(summary.id, '  ')
+    expect(sections()[0]!.title).toBeNull()
+  })
+
+  it('adds a section at the end of its column and removes it', () => {
+    const id = store().addSection('languages', 'sidebar')
+    expect(columnOrder('sidebar').at(-1)).toBe('languages')
+    store().removeSection(id)
+    expect(sections().some((s) => s.id === id)).toBe(false)
+  })
+})

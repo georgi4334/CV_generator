@@ -106,8 +106,8 @@ describe('editor', () => {
 
   it('explains features that are not built yet', () => {
     renderRoute('/cvs/cv-1/edit')
-    fireEvent.click(screen.getByRole('button', { name: 'Rearrange' }))
-    expect(screen.getByRole('status').textContent).toContain('Step 6')
+    fireEvent.click(screen.getByRole('button', { name: 'Fix Mistakes' }))
+    expect(screen.getByRole('status').textContent).toContain('Step 16')
   })
 
   it('opens a blank CV for /cvs/new/edit', () => {

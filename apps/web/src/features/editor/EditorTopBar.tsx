@@ -33,7 +33,7 @@ interface Tool {
 const CENTER_TOOLS: Tool[] = [
   { label: 'Fix Mistakes', icon: CircleCheck, comingIn: 'Step 16 (AI features)' },
   { label: 'Check & Tailor', icon: ScanSearch, comingIn: 'Step 16 (AI features)' },
-  { label: 'Rearrange', icon: ArrowDownUp, comingIn: 'Step 6' },
+  { label: 'Rearrange', icon: ArrowDownUp, panel: 'rearrange' },
   { label: 'Templates', icon: LayoutTemplate, panel: 'templates' },
   { label: 'Design & Font', icon: Palette, panel: 'design' },
 ]
