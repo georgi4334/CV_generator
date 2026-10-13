@@ -117,3 +117,90 @@ export function CompactHeader({ header }: { header: CvHeader }) {
     </div>
   )
 }
+
+/** Name and contacts on a colored band across the page (Contemporary). */
+export function ContemporaryHeader({ header }: { header: CvHeader }) {
+  return (
+    <div className="flex items-center justify-between gap-[1.5em]">
+      <div className="min-w-0">
+        <Field
+          value={header.name}
+          path="header.name"
+          placeholder={P.name}
+          className="block text-[2.3em] leading-tight font-bold"
+          style={{ color: 'var(--cv-strong)' }}
+        />
+        <Field
+          value={header.headline}
+          path="header.headline"
+          placeholder={P.headline}
+          className="mt-[0.1em] block text-[1.15em]"
+          style={{ color: 'var(--cv-muted-strong)' }}
+        />
+        <div className="mt-[0.6em]">
+          <Contacts header={header} layout="row" />
+        </div>
+      </div>
+      <Photo header={header} />
+    </div>
+  )
+}
+
+/** Large accent-colored name with a spaced-out headline (Creative). */
+export function CreativeHeader({ header }: { header: CvHeader }) {
+  return (
+    <div className="flex items-center gap-[1.2em]">
+      <Photo header={header} />
+      <div className="min-w-0">
+        <Field
+          value={header.name}
+          path="header.name"
+          placeholder={P.name}
+          className="block text-[2.5em] leading-none font-extrabold"
+          style={{ color: 'var(--cv-accent-text)' }}
+        />
+        <Field
+          value={header.headline}
+          path="header.headline"
+          placeholder={P.headline}
+          className="mt-[0.4em] block text-[0.95em] font-medium tracking-[0.18em] uppercase"
+          style={{ color: 'var(--cv-strong)' }}
+        />
+        <div className="mt-[0.6em]">
+          <Contacts header={header} layout="row" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/** Centered, photo on top, name between thin accent rules (Stylish). */
+export function StylishHeader({ header }: { header: CvHeader }) {
+  return (
+    <div className="flex flex-col items-center text-center">
+      <Photo header={header} />
+      <div
+        className="mt-[0.6em] w-full border-y py-[0.35em]"
+        style={{ borderColor: 'var(--cv-accent)' }}
+      >
+        <Field
+          value={header.name}
+          path="header.name"
+          placeholder={P.name}
+          className="block text-[2em] leading-tight font-light tracking-[0.12em] uppercase"
+          style={{ color: 'var(--cv-strong)' }}
+        />
+      </div>
+      <Field
+        value={header.headline}
+        path="header.headline"
+        placeholder={P.headline}
+        className="mt-[0.4em] block text-[1em] tracking-[0.2em] uppercase"
+        style={{ color: 'var(--cv-accent-text)' }}
+      />
+      <div className="mt-[0.5em] w-full">
+        <Contacts header={header} layout="centered" />
+      </div>
+    </div>
+  )
+}

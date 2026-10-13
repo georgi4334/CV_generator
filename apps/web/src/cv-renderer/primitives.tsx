@@ -75,6 +75,28 @@ export function SectionTitle({ children }: { children: ReactNode }) {
       </h2>
     )
   }
+  if (titleVariant === 'bar') {
+    return (
+      <h2
+        className="mb-[0.55em] border-l-4 pl-[0.5em] text-[1.1em] leading-tight font-semibold"
+        style={{ borderColor: 'var(--cv-accent-text)' }}
+      >
+        {children}
+      </h2>
+    )
+  }
+  if (titleVariant === 'pill') {
+    return (
+      <h2 className="mb-[0.6em]">
+        <span
+          className="inline-block rounded-full px-[0.8em] py-[0.15em] text-[0.85em] font-semibold tracking-wider text-white uppercase"
+          style={{ background: 'var(--cv-accent)' }}
+        >
+          {children}
+        </span>
+      </h2>
+    )
+  }
   if (titleVariant === 'accent-small') {
     return (
       <h2
@@ -286,3 +308,18 @@ export function SingleDateField({
 }
 
 export { PopoverTrigger }
+
+/** On the Timeline template, dated entries sit on a vertical line with a dot. */
+export function TimelineEntry({ dated, children }: { dated: boolean; children: ReactNode }) {
+  const { timeline } = useRender()
+  if (!timeline || !dated) return <>{children}</>
+  return (
+    <div className="relative border-l-2 pl-[1.1em]" style={{ borderColor: 'var(--cv-rule)' }}>
+      <span
+        className="absolute top-[0.35em] -left-[0.4em] size-[0.7em] rounded-full border-2 bg-white"
+        style={{ borderColor: 'var(--cv-accent)' }}
+      />
+      {children}
+    </div>
+  )
+}

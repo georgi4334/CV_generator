@@ -1,13 +1,13 @@
 # CV Generator — Development Plan
 
-> Status: **Step 6 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
+> Status: **Step 7 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
 >
 > **Decision log**
 >
 > - App tabs: Dashboard · Documents (All documents / Cover letters / CVs) · Saved Jobs ✅
 > - Job statuses: To apply · Applied · Interviewing · Negotiating · Accepted · Rejected · No answer ✅
 > - Backend framework: Fastify; ORM: Drizzle ✅
-> - Step 0 closed. Step 1 (project setup) ✅. Step 2 (shared domain model) ✅. Step 3 (app shell) ✅. Step 4 (CV renderer) ✅. Step 5 (inline editing) ✅. Step 6 (rearrange) built; awaiting review before Step 7.
+> - Step 0 closed. Step 1 (project setup) ✅. Step 2 (shared domain model) ✅. Step 3 (app shell) ✅. Step 4 (CV renderer) ✅. Step 5 (inline editing) ✅. Step 6 (rearrange) ✅. Step 7 (templates & design) built; awaiting review before Step 8.
 > - Frontend: React + TS + Vite + Tailwind + Axios + React Router + TanStack Query + Zustand ✅
 > - Backend: Node + TypeScript + PostgreSQL (JSONB) with shared Zod types ✅
 > - Only free plans that allow commercial use; keep everything portable so it can become paid later ✅
@@ -307,15 +307,16 @@ Code in `apps/web/src/cv-renderer/`.
 - ✅ "Add section": any type not on the CV yet, plus any number of Custom sections; summary, experience, education and projects go to the main column, the rest to the sidebar.
 - Single-column templates show a note: main sections first, then sidebar sections.
 
-### Step 7: Templates & Design/Font panels
+### Step 7: Templates & Design/Font panels ✅ built (awaiting review)
 
 Specification: §3.2 and §3.3.
 
-- **Templates panel:** gallery of live thumbnails (all 8 templates), Continue Editing, A4/US Letter toggle, Resume language dropdown.
-- **Design & Font panel:** margin, section spacing, font size and line height sliders; color swatches plus a custom color picker; font dropdown; 4 column layouts; background patterns.
-- Every change applies live to the canvas and goes on the undo stack.
-- "Reset to template defaults" action.
-- **Discuss:** the final font list and color presets, which templates show a photo, and whether some templates or backgrounds become premium (crown).
+- ✅ All 8 templates: Polished, **Contemporary** (colored header band), **Creative** (bold accent name, solid left sidebar, bar titles), **Timeline** (one column, entries on a vertical line), **Stylish** (centered header between rules, pill titles, tinted left sidebar), Single column, Compact, **Multicolumn** (two near-equal columns).
+- ✅ Templates panel: live thumbnails of the user's own CV in every template, Continue Editing, A4 / US Letter, Resume language (English US/UK, Bulgarian) with an info tooltip.
+- ✅ Design & Font panel: page margins, section spacing, font size (Extra small … Extra large) and line height sliders with −/+; 6 color presets plus custom color (picker + hex) with a readability warning for light colors; font list shown in each font; 4 column layouts drawn per template; 8 background patterns; "Reset to <template> defaults".
+- ✅ Every change applies live; a slider drag is one undo step.
+- Switching template keeps the user's colors and fonts; "Reset to defaults" applies the template's own suggestions (e.g. Creative → Montserrat).
+- Deferred: marking templates as premium (crown), profession-based "Recommended" badges (needs the profession on the saved CV, Step 9).
 
 ### Step 8: Backend API & database
 
