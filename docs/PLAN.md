@@ -3,6 +3,8 @@
 > Status: **Step 0 in progress.** Stack and free-tier hosting decided (see §4). No code yet. Each step ends with a review where we discuss ideas before moving on.
 >
 > **Decision log**
+> - App tabs: Dashboard · Documents (All documents / Cover letters / CVs) · Saved Jobs ✅
+> - Job statuses: Applied · Interviewing · Negotiating · Accepted · Rejected · No answer ✅
 > - Frontend: React + TS + Vite + Tailwind + Axios + React Router + TanStack Query + Zustand ✅
 > - Backend: Node + TypeScript + PostgreSQL (JSONB) with shared Zod types ✅
 > - Only free plans that allow commercial use; keep everything portable so it can become paid later ✅
@@ -29,18 +31,27 @@ The app has a persistent main navigation with **three major tabs**. The CV edito
 | **Documents** | `/documents/:subtab` | Saved CVs and cover letters, with a "Create new" button |
 | **Saved Jobs** | `/jobs` | Job application tracker (table) |
 
-### 2.1 Dashboard *(proposal, to discuss)*
+### 2.1 Dashboard ✅ approved
 - **Quick actions:** New CV · New cover letter · Add job.
 - **Recent documents:** the last 3–4 edited CVs and cover letters, with thumbnails.
-- **Job pipeline summary:** counts per status (Saved → Applied → Interview → Offer / Rejected).
-- **Reminders:** e.g. jobs saved more than 7 days ago that haven't been applied to.
+- **Job pipeline summary:** counts per status (Applied → Interviewing → Negotiating → Accepted / Rejected / No answer).
+- **Reminders:** e.g. jobs still "Applied" after 14+ days with a suggestion to mark them "No answer", and saved jobs with no status yet.
 
-### 2.2 Documents (3 sub-tabs)
-- **Resumes:** grid of saved CVs (live thumbnail, title, last edited, linked job). Card actions: open, rename, duplicate, download, share, delete.
-- **Cover letters:** same grid for cover letters.
-- **Third sub-tab:** *to confirm.* My proposal is **Tailored / Job-specific**, meaning copies of a CV or letter made for a specific saved job.
-- **"+ Create new"** button. It creates a resume or cover letter depending on the active sub-tab, or opens a small menu.
-- Sort by last edited or name; search by title.
+### 2.2 Documents (3 sub-tabs) ✅ decided
+
+| Sub-tab | Route | Content |
+|---|---|---|
+| **All documents** (default) | `/documents/all` | Every CV and cover letter in one list, with a type badge (CV / Cover letter) |
+| **Cover letters** | `/documents/cover-letters` | Cover letters only |
+| **CVs** | `/documents/cvs` | CVs only |
+
+All three sub-tabs share the same list component with these features:
+- **Sort** by name, type, last edited or date created; search by title.
+- **Select** with a checkbox per row plus "select all".
+- **Per-document actions:** open, copy (duplicate), download (PDF), delete. Rename and share are also in the menu.
+- **Bulk actions** on the selection: copy, download, delete (with a confirm dialog).
+- **"+ Create new"** button. On *All documents* it opens a small menu (CV / Cover letter); on the other sub-tabs it creates that type directly.
+- Each row shows a small live thumbnail, title, type, linked job (if any) and last edited date. A list/grid view toggle is optional.
 
 ### 2.3 Saved Jobs (table)
 
@@ -48,9 +59,9 @@ The app has a persistent main navigation with **three major tabs**. The CV edito
 |---|---|---|
 | Position | text | Click opens the job details drawer |
 | Company | text | |
-| Status | badge / dropdown | `Saved · Applied · Interview · Offer · Rejected · Withdrawn` (to confirm), editable inline |
+| Status | badge / dropdown | `Applied · Interviewing · Negotiating · Accepted · Rejected · No answer` ✅, editable inline, color per status |
 | Date saved | date | Set automatically |
-| Date applied | date | Set automatically when status changes to Applied; editable |
+| Date applied | date | Set automatically the first time the status becomes Applied; editable |
 | Type | badge | `Remote · On-site · Hybrid` |
 | Resume | link to a CV | Pick an existing CV or "Create tailored copy" |
 | Cover letter | link to a cover letter | Pick an existing one or create a new one |
@@ -152,7 +163,7 @@ Implementation notes:
 | Error monitoring | **Sentry** free developer plan | Frontend and backend errors | Higher event volume |
 | Payments (later) | **Stripe** | No monthly fee, only per-transaction | Only when money comes in |
 
-> ⚠️ **Avoid Vercel Hobby** for the frontend: its free plan forbids commercial use. Avoid Render's free Postgres too, because it expires after 30 days; that's why the database is on Neon. Free-tier limits change, so we re-check them when signing up in Step 14.
+> ⚠️ **Avoid Vercel Hobby** for the frontend: its free plan forbids commercial use. Avoid Render's free Postgres too, because it expires after 30 days; that's why the database is on Neon. Free-tier limits change, so we re-check them when signing up in Step 17.
 
 ### Local development (free)
 - Docker Compose runs Postgres and MinIO (an S3-compatible stand-in for R2), so development needs no cloud accounts.
@@ -167,7 +178,8 @@ CoverLetter { id, userId, title, cvId?, jobId?, design (JSON), content (JSONB), 
 Job         { id, userId, position, company, status, type: 'remote' | 'onsite' | 'hybrid',
               dateSaved, dateApplied?, cvId?, coverLetterId?, notes,
               url?, description?, location?, salary?, contact? }
-JobStatus   = 'saved' | 'applied' | 'interview' | 'offer' | 'rejected' | 'withdrawn'
+JobStatus   = 'applied' | 'interviewing' | 'negotiating' | 'accepted' | 'rejected' | 'no_answer'
+// Job.status is nullable: a job that is saved but not applied to yet has no status (see open questions)
 ShareLink   { id, documentType: 'cv' | 'coverLetter', documentId, slug, isActive, createdAt }
 Template    { id, name, layout, defaultDesign, supportsPhoto, tags[] } // defined in code; thumbnails are live renders
 Profession  { id, name, recommendedTemplateIds[], defaultSections[], exampleContent }
@@ -265,7 +277,7 @@ Specification: §3.2 and §3.3.
 - Axios client (base URL, interceptors, error normalization) plus TanStack Query hooks.
 - Debounced **autosave** with a "Saved ✓" indicator, and handling for conflicts and offline.
 - **History** panel (top-right): list of automatic and named versions with preview and restore.
-- **Documents → Resumes** sub-tab: list, create, rename, duplicate and delete CVs, with live thumbnails.
+- **Documents** page: the shared list component (sort, select, copy, delete, bulk actions) used by the *All documents* and *CVs* sub-tabs.
 
 ### Step 10: "Create new CV" flow
 - Wizard: choose profession → recommended templates → start blank or from example content.
@@ -283,13 +295,13 @@ Specification: §2.3.
 - Table with sorting, filters, search and inline editing; "+ Add job" form; details drawer.
 - Link a job to a resume or cover letter, including "Create tailored copy" (duplicates the CV with `jobId` set).
 - Status changes automatically fill in "Date applied".
-- **Discuss:** the final status list, extra fields, and whether to add a Kanban board view later.
+- **Discuss:** the extra fields, and whether to add a Kanban board view later.
 
 ### Step 13: Cover letters
 - Cover letter editor that reuses the editor shell, Design & Font panel and PDF export.
 - Header (name and contacts) and design can be **inherited from a linked CV**, so letter and CV match.
 - Sections: recipient, date, greeting, body paragraphs, closing and signature.
-- **Documents → Cover letters** sub-tab, plus the third sub-tab (to confirm).
+- **Documents → Cover letters** sub-tab; cover letters also appear in *All documents*.
 - (Step 16, AI) Generate a draft from a saved job's description plus the linked CV.
 
 ### Step 14: Dashboard
@@ -331,6 +343,4 @@ Specification: §2.1.
 7. **Repo visibility:** public or private? Public gets unlimited free GitHub Actions minutes; private gets 2,000 min/month.
 8. **App theme:** your screenshots show both dark and light. Should we offer a toggle (default: follow the system setting), or only one?
 9. **Resume languages:** which languages should the "Resume language" dropdown offer first (e.g. English US/UK, Bulgarian)?
-10. **Documents sub-tabs:** what is the third sub-tab? Proposal: Resumes · Cover letters · Tailored (job-specific copies).
-11. **Job statuses:** is `Saved · Applied · Interview · Offer · Rejected · Withdrawn` the right list?
-12. **Dashboard content:** do the widgets in §2.1 match what you want?
+10. **Status of a newly saved job:** a job is often saved *before* applying. Should its status be empty (shown as "—" or "Not applied"), or should we add a first status like `Saved` / `To apply`?
