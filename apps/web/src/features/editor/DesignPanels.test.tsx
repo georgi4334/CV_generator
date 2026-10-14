@@ -1,5 +1,5 @@
 import { createEmptyCv } from '@cv/shared'
-import { fireEvent, render, screen, within } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { useCvEditor } from './cvEditorStore'
 import { DesignPanel } from './DesignPanel'
@@ -18,6 +18,29 @@ describe('TemplatesPanel', () => {
     fireEvent.click(list.getByRole('button', { name: 'Timeline' }))
     expect(design().templateId).toBe('timeline')
     expect(list.getByRole('button', { name: 'Timeline' }).getAttribute('aria-pressed')).toBe('true')
+  })
+
+  it("applies the template's suggested font and layout, keeping the color", () => {
+    state().updateDesign({ accentColor: '#6b21a8', fontFamily: 'Rubik' })
+    render(<TemplatesPanel />)
+    fireEvent.click(screen.getByRole('button', { name: 'Stylish' }))
+    expect(design()).toMatchObject({
+      templateId: 'stylish',
+      fontFamily: 'Lora',
+      columnLayout: 3,
+      accentColor: '#6b21a8',
+    })
+  })
+
+  it('lets the user change the font after choosing a template', () => {
+    render(<TemplatesPanel />)
+    fireEvent.click(screen.getByRole('button', { name: 'Creative' }))
+    expect(design().fontFamily).toBe('Montserrat')
+    cleanup()
+    render(<DesignPanel />)
+    fireEvent.click(screen.getByRole('button', { name: 'Font: Montserrat' }))
+    fireEvent.click(screen.getByRole('option', { name: 'Inter' }))
+    expect(design()).toMatchObject({ templateId: 'creative', fontFamily: 'Inter' })
   })
 
   it('switches document size and resume language', () => {

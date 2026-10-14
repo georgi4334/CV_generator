@@ -30,7 +30,11 @@ const TemplateThumbnail = memo(function TemplateThumbnail({
 }) {
   const page = PAGE_SIZE_PX[cv.design.pageSize]
   const scale = THUMB_WIDTH / page.width
-  const preview = { ...cv, design: { ...cv.design, templateId } }
+  // Show the template the way choosing it would: with its suggested font and layout.
+  const preview = {
+    ...cv,
+    design: { ...cv.design, templateId, ...getTemplate(templateId).suggested },
+  }
   return (
     <div
       aria-hidden
@@ -65,7 +69,7 @@ export function TemplatesPanel() {
               <button
                 type="button"
                 aria-pressed={selected}
-                onClick={() => updateDesign({ templateId: id })}
+                onClick={() => updateDesign({ templateId: id, ...getTemplate(id).suggested })}
                 className={`group w-full rounded-lg p-1 text-center text-xs ${
                   selected
                     ? 'ring-2 ring-teal-600'

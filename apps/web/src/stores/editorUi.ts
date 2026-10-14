@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 
 /** Panels that open in the editor's left side panel. */
-export type EditorPanel = 'ai' | 'templates' | 'design' | 'rearrange'
+export type EditorPanel = 'ai' | 'templates' | 'design' | 'rearrange' | 'history'
 
 interface EditorUiState {
   activePanel: EditorPanel | null
@@ -11,14 +11,22 @@ interface EditorUiState {
   notice: string | null
   notify: (message: string) => void
   clearNotice: () => void
+  /** A saved version shown instead of the editable CV (History panel). */
+  previewVersionId: string | null
+  setPreviewVersion: (versionId: string | null) => void
 }
 
 export const useEditorUi = create<EditorUiState>()((set) => ({
   activePanel: null,
   togglePanel: (panel) =>
-    set((state) => ({ activePanel: state.activePanel === panel ? null : panel })),
-  closePanel: () => set({ activePanel: null }),
+    set((state) => ({
+      activePanel: state.activePanel === panel ? null : panel,
+      previewVersionId: null,
+    })),
+  closePanel: () => set({ activePanel: null, previewVersionId: null }),
   notice: null,
   notify: (message) => set({ notice: message }),
   clearNotice: () => set({ notice: null }),
+  previewVersionId: null,
+  setPreviewVersion: (previewVersionId) => set({ previewVersionId }),
 }))

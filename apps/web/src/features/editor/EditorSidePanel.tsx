@@ -1,6 +1,7 @@
 import { X } from 'lucide-react'
 import { useEditorUi, type EditorPanel } from '../../stores/editorUi'
 import { DesignPanel } from './DesignPanel'
+import { HistoryPanel } from './HistoryPanel'
 import { RearrangePanel } from './RearrangePanel'
 import { TemplatesPanel } from './TemplatesPanel'
 
@@ -9,6 +10,7 @@ const TITLES: Record<EditorPanel, string> = {
   templates: 'Templates',
   design: 'Design & Font',
   rearrange: 'Rearrange',
+  history: 'History',
 }
 
 function AiPanel() {
@@ -20,7 +22,7 @@ function AiPanel() {
   )
 }
 
-export function EditorSidePanel({ panel }: { panel: EditorPanel }) {
+export function EditorSidePanel({ panel, cvId }: { panel: EditorPanel; cvId?: string }) {
   const closePanel = useEditorUi((s) => s.closePanel)
   return (
     <aside
@@ -42,6 +44,7 @@ export function EditorSidePanel({ panel }: { panel: EditorPanel }) {
       {panel === 'design' && <DesignPanel />}
       {panel === 'ai' && <AiPanel />}
       {panel === 'rearrange' && <RearrangePanel />}
+      {panel === 'history' && cvId && <HistoryPanel cvId={cvId} />}
     </aside>
   )
 }

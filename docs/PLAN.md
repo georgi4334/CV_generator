@@ -1,13 +1,14 @@
 # CV Generator — Development Plan
 
-> Status: **Step 8 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
+> Status: **Step 9 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
 >
 > **Decision log**
 >
 > - App tabs: Dashboard · Documents (All documents / Cover letters / CVs) · Saved Jobs ✅
 > - Job statuses: To apply · Applied · Interviewing · Negotiating · Accepted · Rejected · No answer ✅
 > - Backend framework: Fastify; ORM: Drizzle ✅
-> - Step 0 closed. Step 1 (project setup) ✅. Step 2 (shared domain model) ✅. Step 3 (app shell) ✅. Step 4 (CV renderer) ✅. Step 5 (inline editing) ✅. Step 6 (rearrange) ✅. Step 7 (templates & design) ✅. Step 8 (API & database) built; awaiting review before Step 9.
+> - Step 0 closed. Step 1 (project setup) ✅. Step 2 (shared domain model) ✅. Step 3 (app shell) ✅. Step 4 (CV renderer) ✅. Step 5 (inline editing) ✅. Step 6 (rearrange) ✅. Step 7 (templates & design) ✅. Step 8 (API & database) ✅. Step 9 (frontend ↔ API) built; awaiting review before Step 10.
+> - Choosing a template applies its suggested font, column layout and spacing; the user can change them afterwards ✅
 > - Frontend: React + TS + Vite + Tailwind + Axios + React Router + TanStack Query + Zustand ✅
 > - Backend: Node + TypeScript + PostgreSQL (JSONB) with shared Zod types ✅
 > - Only free plans that allow commercial use; keep everything portable so it can become paid later ✅
@@ -345,12 +346,18 @@ Specification: §3.2 and §3.3.
 - Templates stay defined in the frontend code (no `/templates` endpoint needed).
 - The frontend still uses mock data until Step 9 connects it.
 
-### Step 9: Connect frontend ↔ backend
+### Step 9: Connect frontend ↔ backend ✅ built (awaiting review)
 
-- Axios client (base URL, interceptors, error normalization) plus TanStack Query hooks.
-- Debounced **autosave** with a "Saved ✓" indicator, and handling for conflicts and offline.
-- **History** panel (top-right): list of automatic and named versions with preview and restore.
-- **Documents** page: the shared list component (sort, select, copy, delete, bulk actions) used by the _All documents_ and _CVs_ sub-tabs.
+- ✅ Axios client turns every failure into one error type with a stable `code` (API codes, `network_error`); typed `cvApi` calls validated with the shared Zod schemas; TanStack Query hooks keep the list and open CV in sync.
+- ✅ **Autosave**: about 1 s after typing stops; one save at a time; every save carries the document revision. Status next to the title: _Saving… / Saved / Not saved, retrying… / Changed elsewhere_. Network or server errors retry with backoff (2, 5, 10, 30 s). Leaving the editor saves immediately; closing the tab with unsaved changes asks first.
+- ✅ **Conflicts**: if another tab or device saved first, a banner offers _Load the other version_ or _Keep my version_.
+- ✅ **Documents** (All / CVs, from the database): search, sort (last edited, created, name, type), checkboxes with select all, per-document menu (Open, Rename, Copy, Download*, Delete) and bulk Copy / Delete with a confirmation. Empty and error states.
+- ✅ "Create new CV" creates it on the server and opens it; the title is editable in the editor's top bar.
+- ✅ **History** panel: save a named version, list automatic and named versions, preview one read-only, restore it (current content kept as "Before restore").
+- ✅ Photos and logos are uploaded to the API (still resized in the browser first) instead of being stored inside the CV.
+- ✅ Choosing a template applies its suggested font, column layout and spacing; color, margins, background and page size stay. Everything remains changeable in Design & Font.
+- API: renaming no longer needs or changes the document revision (so a rename never conflicts with an open editor); lost database connections answer 503 _database_unavailable_.
+- Still sample data: cover letters (Step 13), saved jobs (Step 12), dashboard job pipeline (Step 14). *Download arrives in Step 11.
 
 ### Step 10: "Create new CV" flow
 

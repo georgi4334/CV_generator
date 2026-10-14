@@ -14,6 +14,10 @@ export interface EditorApi {
   moveItem: (sectionId: string, itemId: string, direction: -1 | 1) => void
   addBullet: (sectionId: string, itemId: string, afterIndex: number) => void
   removeBullet: (sectionId: string, itemId: string, index: number) => void
+  /** Uploads an image (photo, logo) and returns the URL to store in the CV. */
+  uploadImage: (image: Blob) => Promise<string>
+  /** Shows a short message to the user. */
+  notify: (message: string) => void
 }
 
 export const itemPath = (sectionId: string, itemId: string) =>

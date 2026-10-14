@@ -5,7 +5,8 @@ import { DocumentTypeBadge } from '../components/Badges'
 import { card, PageHeader } from '../components/PageHeader'
 import { daysBetween, formatDate } from '../lib/format'
 import { editPath } from '../lib/paths'
-import { MOCK_DOCUMENTS, MOCK_JOBS, MOCK_TODAY } from '../mocks/data'
+import { useCvList } from '../lib/cvQueries'
+import { MOCK_COVER_LETTERS, MOCK_JOBS, MOCK_TODAY } from '../mocks/data'
 
 const QUICK_ACTIONS = [
   { to: '/cvs/new/edit', label: 'New CV', icon: FilePlus2 },
@@ -14,7 +15,8 @@ const QUICK_ACTIONS = [
 ]
 
 export function DashboardPage() {
-  const recent = [...MOCK_DOCUMENTS]
+  const cvs = useCvList()
+  const recent = [...(cvs.data ?? []), ...MOCK_COVER_LETTERS]
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
     .slice(0, 4)
   const counts = JOB_STATUSES.map((status) => ({

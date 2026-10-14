@@ -1,5 +1,6 @@
 import type { CvHeader } from '@cv/shared'
 import { AtSign, Link2, MapPin, Phone, type LucideIcon } from 'lucide-react'
+import { assetUrl } from '../lib/api'
 import { useRender } from './context'
 import { Field } from './primitives'
 import { PLACEHOLDERS as P } from './placeholders'
@@ -33,7 +34,11 @@ function Contacts({ header, layout }: { header: CvHeader; layout: 'row' | 'colum
 function Photo({ header }: { header: CvHeader }) {
   if (!header.showPhoto || !header.photoUrl) return null
   return (
-    <img src={header.photoUrl} alt="" className="size-[5.5em] shrink-0 rounded-full object-cover" />
+    <img
+      src={assetUrl(header.photoUrl)}
+      alt=""
+      className="size-[5.5em] shrink-0 rounded-full object-cover"
+    />
   )
 }
 

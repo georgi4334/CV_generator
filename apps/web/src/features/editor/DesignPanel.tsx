@@ -340,7 +340,7 @@ export function DesignPanel() {
 
   const resetToTemplateDefaults = () => {
     // Keep the chosen template and page size; reset everything else.
-    const defaults: Partial<CvDesign> = { ...DEFAULT_DESIGN, ...template.defaults }
+    const defaults: Partial<CvDesign> = { ...DEFAULT_DESIGN, ...template.suggested }
     delete defaults.templateId
     delete defaults.pageSize
     updateDesign(defaults)
