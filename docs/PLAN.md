@@ -1,13 +1,14 @@
 # CV Generator — Development Plan
 
-> Status: **Step 8 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
+> Status: **Step 10 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
 >
 > **Decision log**
 >
 > - App tabs: Dashboard · Documents (All documents / Cover letters / CVs) · Saved Jobs ✅
 > - Job statuses: To apply · Applied · Interviewing · Negotiating · Accepted · Rejected · No answer ✅
 > - Backend framework: Fastify; ORM: Drizzle ✅
-> - Step 0 closed. Step 1 (project setup) ✅. Step 2 (shared domain model) ✅. Step 3 (app shell) ✅. Step 4 (CV renderer) ✅. Step 5 (inline editing) ✅. Step 6 (rearrange) ✅. Step 7 (templates & design) ✅. Step 8 (API & database) built; awaiting review before Step 9.
+> - Step 0 closed. Step 1 (project setup) ✅. Step 2 (shared domain model) ✅. Step 3 (app shell) ✅. Step 4 (CV renderer) ✅. Step 5 (inline editing) ✅. Step 6 (rearrange) ✅. Step 7 (templates & design) ✅. Step 8 (API & database) ✅. Step 9 (frontend ↔ API) ✅. Step 10 ("Create new CV" wizard) built; awaiting review before Step 11.
+> - Choosing a template applies its suggested font, column layout and spacing; the user can change them afterwards ✅
 > - Frontend: React + TS + Vite + Tailwind + Axios + React Router + TanStack Query + Zustand ✅
 > - Backend: Node + TypeScript + PostgreSQL (JSONB) with shared Zod types ✅
 > - Only free plans that allow commercial use; keep everything portable so it can become paid later ✅
@@ -316,7 +317,7 @@ Specification: §3.2 and §3.3.
 - ✅ Design & Font panel: page margins, section spacing, font size (Extra small … Extra large) and line height sliders with −/+; 6 color presets plus custom color (picker + hex) with a readability warning for light colors; font list shown in each font; 4 column layouts drawn per template; 8 background patterns; "Reset to <template> defaults".
 - ✅ Every change applies live; a slider drag is one undo step.
 - Switching template keeps the user's colors and fonts; "Reset to defaults" applies the template's own suggestions (e.g. Creative → Montserrat).
-- Deferred: marking templates as premium (crown), profession-based "Recommended" badges (needs the profession on the saved CV, Step 9).
+- Deferred: marking templates as premium (crown). Profession-based "Recommended" badges were added in Step 10.
 
 ### Step 8: Backend API & database ✅ built (awaiting review)
 
@@ -345,16 +346,29 @@ Specification: §3.2 and §3.3.
 - Templates stay defined in the frontend code (no `/templates` endpoint needed).
 - The frontend still uses mock data until Step 9 connects it.
 
-### Step 9: Connect frontend ↔ backend
+### Step 9: Connect frontend ↔ backend ✅ built (awaiting review)
 
-- Axios client (base URL, interceptors, error normalization) plus TanStack Query hooks.
-- Debounced **autosave** with a "Saved ✓" indicator, and handling for conflicts and offline.
-- **History** panel (top-right): list of automatic and named versions with preview and restore.
-- **Documents** page: the shared list component (sort, select, copy, delete, bulk actions) used by the _All documents_ and _CVs_ sub-tabs.
+- ✅ Axios client turns every failure into one error type with a stable `code` (API codes, `network_error`); typed `cvApi` calls validated with the shared Zod schemas; TanStack Query hooks keep the list and open CV in sync.
+- ✅ **Autosave**: about 1 s after typing stops; one save at a time; every save carries the document revision. Status next to the title: _Saving… / Saved / Not saved, retrying… / Changed elsewhere_. Network or server errors retry with backoff (2, 5, 10, 30 s). Leaving the editor saves immediately; closing the tab with unsaved changes asks first.
+- ✅ **Conflicts**: if another tab or device saved first, a banner offers _Load the other version_ or _Keep my version_.
+- ✅ **Documents** (All / CVs, from the database): search, sort (last edited, created, name, type), checkboxes with select all, per-document menu (Open, Rename, Copy, Download*, Delete) and bulk Copy / Delete with a confirmation. Empty and error states.
+- ✅ "Create new CV" creates it on the server and opens it; the title is editable in the editor's top bar.
+- ✅ **History** panel: save a named version, list automatic and named versions, preview one read-only, restore it (current content kept as "Before restore").
+- ✅ Photos and logos are uploaded to the API (still resized in the browser first) instead of being stored inside the CV.
+- ✅ Choosing a template applies its suggested font, column layout and spacing; color, margins, background and page size stay. Everything remains changeable in Design & Font.
+- API: renaming no longer needs or changes the document revision (so a rename never conflicts with an open editor); lost database connections answer 503 _database_unavailable_.
+- Still sample data: cover letters (Step 13), saved jobs (Step 12), dashboard job pipeline (Step 14). *Download arrives in Step 11.
 
-### Step 10: "Create new CV" flow
+### Step 10: "Create new CV" flow ✅ built (awaiting review)
 
-- Wizard: choose profession → recommended templates → start blank or from example content.
+- ✅ Wizard at `/cvs/new` in three steps. The choices are kept in the URL (`?profession=…&template=…`), so the browser's Back button goes back one step. A step indicator shows what was chosen and lets the user jump back.
+  1. **Profession:** Software Developer, Designer, Sales & Marketing, Healthcare, Academic & Research, or **Other** (general layout, no example).
+  2. **Template:** the profession's 3 recommended templates come first, with a _Recommended_ badge, then the other 5. Thumbnails show the profession's example in each template, with that template's suggested look.
+  3. **Start:** _Start from an example_ (the profession's complete sample CV) or _Start blank_ (the sections that profession usually has, with placeholders), each shown as a preview. Also a CV name (default "<Profession> CV") and the CV language. _Create CV_ saves it and opens the editor.
+- ✅ The new CV uses the chosen template with its suggested font and layout, and the profession's accent color. The profession is saved with the CV.
+- ✅ The editor's Templates panel marks the templates recommended for the CV's profession.
+- ✅ The "Create new CV" buttons (Documents, Dashboard) open the wizard, and the old `/cvs/new/edit` address redirects to it. The Documents tab stays highlighted while creating.
+- Fixed: the top navigation was 16 px too wide on phones.
 - (Later) import an existing CV from PDF/DOCX or from a LinkedIn export.
 
 ### Step 11: Preview, PDF export & sharing

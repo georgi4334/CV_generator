@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate, type RouteObject } from 'react-router'
 import { EditorPage } from './features/editor/EditorPage'
 import { PreviewPage } from './features/editor/PreviewPage'
+import { NewCvPage } from './features/new-cv/NewCvPage'
 import { AppLayout } from './layouts/AppLayout'
 import { DashboardPage } from './pages/DashboardPage'
 import { DocumentsPage } from './pages/DocumentsPage'
@@ -15,8 +16,11 @@ export const routes: RouteObject[] = [
       { path: 'documents', element: <Navigate to="/documents/all" replace /> },
       { path: 'documents/:subtab', element: <DocumentsPage /> },
       { path: 'jobs', element: <JobsPage /> },
+      { path: 'cvs/new', element: <NewCvPage /> },
     ],
   },
+  // Old address of "Create new CV".
+  { path: 'cvs/new/edit', element: <Navigate to="/cvs/new" replace /> },
   { path: 'cvs/:id/edit', element: <EditorPage type="cv" /> },
   { path: 'cvs/:id/preview', element: <PreviewPage type="cv" /> },
   { path: 'cover-letters/:id/edit', element: <EditorPage type="coverLetter" /> },

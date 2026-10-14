@@ -1,26 +1,21 @@
 import {
   CV_LANGUAGES,
+  PROFESSIONS,
   TEMPLATE_IDS,
   type CvDocument,
   type CvLanguage,
+  type ProfessionId,
   type TemplateId,
 } from '@cv/shared'
 import { Info } from 'lucide-react'
 import { memo } from 'react'
-import { CvRenderer, getTemplate } from '../../cv-renderer'
-import { PAGE_SIZE_PX } from '../../cv-renderer/tokens'
+import { RecommendedBadge } from '../../components/Badges'
+import { CvThumbnail, getTemplate, templateChoice, withTemplate } from '../../cv-renderer'
+import { CV_LANGUAGE_NAMES } from '../../lib/languages'
 import { useEditorUi } from '../../stores/editorUi'
 import { useCvEditor } from './cvEditorStore'
 
-const LANGUAGE_NAMES: Record<CvLanguage, string> = {
-  'en-US': 'English (US)',
-  'en-GB': 'English (UK)',
-  bg: 'Български (Bulgarian)',
-}
-
-const THUMB_WIDTH = 120
-
-/** First page of the user's CV in another template, scaled down. */
+/** The user's CV in another template, the way choosing it would look. */
 const TemplateThumbnail = memo(function TemplateThumbnail({
   cv,
   templateId,
@@ -28,45 +23,36 @@ const TemplateThumbnail = memo(function TemplateThumbnail({
   cv: CvDocument
   templateId: TemplateId
 }) {
-  const page = PAGE_SIZE_PX[cv.design.pageSize]
-  const scale = THUMB_WIDTH / page.width
-  const preview = { ...cv, design: { ...cv.design, templateId } }
-  return (
-    <div
-      aria-hidden
-      inert
-      className="pointer-events-none overflow-hidden rounded border border-slate-200 bg-white dark:border-slate-700"
-      style={{ width: THUMB_WIDTH, height: Math.round(page.height * scale) }}
-    >
-      <div style={{ width: page.width, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
-        <CvRenderer cv={preview} mode="preview" />
-      </div>
-    </div>
-  )
+  return <CvThumbnail cv={withTemplate(cv, templateId)} width={120} />
 })
 
 const segment = 'flex-1 rounded-md py-1.5 text-sm font-medium'
 
-export function TemplatesPanel() {
+/** `professionId` marks the templates recommended for the CV's profession. */
+export function TemplatesPanel({ professionId = null }: { professionId?: ProfessionId | null }) {
   const cv = useCvEditor((s) => s.cv)
   const updateDesign = useCvEditor((s) => s.updateDesign)
   const setLanguage = useCvEditor((s) => s.setLanguage)
   const closePanel = useEditorUi((s) => s.closePanel)
   if (!cv) return null
   const current = cv.design.templateId
+  const recommended: readonly TemplateId[] = professionId
+    ? PROFESSIONS[professionId].recommendedTemplates
+    : []
 
   return (
     <>
       <ul className="grid grid-cols-2 gap-3" aria-label="Templates">
         {TEMPLATE_IDS.map((id) => {
           const selected = id === current
+          const isRecommended = recommended.includes(id)
           return (
             <li key={id}>
               <button
                 type="button"
                 aria-pressed={selected}
-                onClick={() => updateDesign({ templateId: id })}
-                className={`group w-full rounded-lg p-1 text-center text-xs ${
+                onClick={() => updateDesign(templateChoice(id))}
+                className={`group relative w-full rounded-lg p-1 text-center text-xs ${
                   selected
                     ? 'ring-2 ring-teal-600'
                     : 'hover:ring-2 hover:ring-slate-300 dark:hover:ring-slate-600'
@@ -78,6 +64,12 @@ export function TemplatesPanel() {
                 >
                   {getTemplate(id).name}
                 </span>
+                {isRecommended && (
+                  <>
+                    {' '}
+                    <RecommendedBadge compact className="absolute top-1.5 left-1.5" />
+                  </>
+                )}
               </button>
             </li>
           )
@@ -135,7 +127,7 @@ export function TemplatesPanel() {
         >
           {CV_LANGUAGES.map((language) => (
             <option key={language} value={language}>
-              {LANGUAGE_NAMES[language]}
+              {CV_LANGUAGE_NAMES[language]}
             </option>
           ))}
         </select>

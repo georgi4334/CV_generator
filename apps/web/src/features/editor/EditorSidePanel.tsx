@@ -1,6 +1,9 @@
+import { isProfessionId } from '@cv/shared'
 import { X } from 'lucide-react'
+import { useCv } from '../../lib/cvQueries'
 import { useEditorUi, type EditorPanel } from '../../stores/editorUi'
 import { DesignPanel } from './DesignPanel'
+import { HistoryPanel } from './HistoryPanel'
 import { RearrangePanel } from './RearrangePanel'
 import { TemplatesPanel } from './TemplatesPanel'
 
@@ -9,6 +12,7 @@ const TITLES: Record<EditorPanel, string> = {
   templates: 'Templates',
   design: 'Design & Font',
   rearrange: 'Rearrange',
+  history: 'History',
 }
 
 function AiPanel() {
@@ -20,8 +24,10 @@ function AiPanel() {
   )
 }
 
-export function EditorSidePanel({ panel }: { panel: EditorPanel }) {
+export function EditorSidePanel({ panel, cvId }: { panel: EditorPanel; cvId?: string }) {
   const closePanel = useEditorUi((s) => s.closePanel)
+  const savedProfession = useCv(cvId).data?.professionId
+  const professionId = isProfessionId(savedProfession) ? savedProfession : null
   return (
     <aside
       aria-label={TITLES[panel]}
@@ -38,10 +44,11 @@ export function EditorSidePanel({ panel }: { panel: EditorPanel }) {
           <X className="size-4" />
         </button>
       </div>
-      {panel === 'templates' && <TemplatesPanel />}
+      {panel === 'templates' && <TemplatesPanel professionId={professionId} />}
       {panel === 'design' && <DesignPanel />}
       {panel === 'ai' && <AiPanel />}
       {panel === 'rearrange' && <RearrangePanel />}
+      {panel === 'history' && cvId && <HistoryPanel cvId={cvId} />}
     </aside>
   )
 }

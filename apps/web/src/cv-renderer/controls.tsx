@@ -11,7 +11,7 @@ import {
 } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useEditor } from './context'
-import { pickImage } from './image'
+import { pickAndUpload } from './image'
 
 const toolbar =
   'cv-controls absolute z-10 hidden items-center gap-0.5 rounded-md border border-slate-200 bg-white p-0.5 text-slate-600 shadow-md group-hover/ctl:flex group-focus-within/ctl:flex'
@@ -149,9 +149,9 @@ export function HeaderControls({
   const editor = useEditor()
   if (!editor || !supportsPhoto) return <>{children}</>
   const upload = () =>
-    pickImage(320).then(
+    pickAndUpload(320, editor.uploadImage).then(
       (url) => url && editor.updateHeader({ photoUrl: url, showPhoto: true }),
-      (e: Error) => alert(e.message),
+      (e: Error) => editor.notify(`Photo not uploaded: ${e.message}`),
     )
   return (
     <div className={outline}>

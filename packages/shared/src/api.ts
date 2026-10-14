@@ -26,14 +26,22 @@ export const CreateCvInputSchema = z.object({
 })
 export type CreateCvInput = z.infer<typeof CreateCvInputSchema>
 
-export const UpdateCvInputSchema = z.object({
-  /** The revision the client last saw. */
-  revision: z.number().int().positive(),
-  title: TitleSchema.optional(),
-  professionId: ProfessionIdSchema.nullable().optional(),
-  jobId: IdSchema.nullable().optional(),
-  document: CvDocumentSchema.optional(),
-})
+export const UpdateCvInputSchema = z
+  .object({
+    /**
+     * The document revision the client last saw. Required when sending a
+     * document; renaming or relinking alone does not need (or change) it.
+     */
+    revision: z.number().int().positive().optional(),
+    title: TitleSchema.optional(),
+    professionId: ProfessionIdSchema.nullable().optional(),
+    jobId: IdSchema.nullable().optional(),
+    document: CvDocumentSchema.optional(),
+  })
+  .refine((input) => input.document === undefined || input.revision !== undefined, {
+    message: 'revision is required when saving the document',
+    path: ['revision'],
+  })
 export type UpdateCvInput = z.infer<typeof UpdateCvInputSchema>
 
 export const CvVersionSummarySchema = z.object({

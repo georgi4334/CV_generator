@@ -1,4 +1,4 @@
-import type { CvDesign, CvHeader, TemplateId } from '@cv/shared'
+import type { CvDesign, CvDocument, CvHeader, TemplateId } from '@cv/shared'
 import type { FC } from 'react'
 import type { TitleVariant } from './context'
 import {
@@ -11,6 +11,11 @@ import {
 } from './headers'
 
 export type SidebarFill = 'none' | 'tint' | 'solid'
+
+export type TemplateSuggestion = Pick<
+  CvDesign,
+  'fontFamily' | 'columnLayout' | 'sectionSpacing' | 'fontSize' | 'lineHeight'
+>
 type SidebarOption = { width: number; fill: SidebarFill }
 
 export interface TemplateDefinition {
@@ -29,8 +34,11 @@ export interface TemplateDefinition {
   Header: FC<{ header: CvHeader }>
   /** Sidebar width (fraction of the page) and background for each Column layout option (1–4). */
   sidebarOptions: [SidebarOption, SidebarOption, SidebarOption, SidebarOption]
-  /** Design values applied by "Reset to template defaults". */
-  defaults?: Partial<CvDesign>
+  /**
+   * The template's suggested look, applied when the template is chosen (and by
+   * "Reset to defaults"). The user can change every value afterwards.
+   */
+  suggested: TemplateSuggestion
 }
 
 const NO_SIDEBAR: TemplateDefinition['sidebarOptions'] = [
@@ -56,7 +64,13 @@ export const TEMPLATES: Record<TemplateId, TemplateDefinition> = {
       { width: 0.34, fill: 'tint' },
       { width: 0.36, fill: 'solid' },
     ],
-    defaults: { columnLayout: 4 },
+    suggested: {
+      fontFamily: 'Rubik',
+      columnLayout: 4,
+      sectionSpacing: 2,
+      fontSize: 2,
+      lineHeight: 2,
+    },
   },
   contemporary: {
     id: 'contemporary',
@@ -74,7 +88,13 @@ export const TEMPLATES: Record<TemplateId, TemplateDefinition> = {
       { width: 0.34, fill: 'tint' },
       { width: 0.36, fill: 'tint' },
     ],
-    defaults: { columnLayout: 3 },
+    suggested: {
+      fontFamily: 'Inter',
+      columnLayout: 3,
+      sectionSpacing: 2,
+      fontSize: 2,
+      lineHeight: 2,
+    },
   },
   creative: {
     id: 'creative',
@@ -91,7 +111,13 @@ export const TEMPLATES: Record<TemplateId, TemplateDefinition> = {
       { width: 0.36, fill: 'tint' },
       { width: 0.38, fill: 'solid' },
     ],
-    defaults: { columnLayout: 4, fontFamily: 'Montserrat' },
+    suggested: {
+      fontFamily: 'Montserrat',
+      columnLayout: 4,
+      sectionSpacing: 2,
+      fontSize: 2,
+      lineHeight: 2,
+    },
   },
   timeline: {
     id: 'timeline',
@@ -104,6 +130,13 @@ export const TEMPLATES: Record<TemplateId, TemplateDefinition> = {
     timeline: true,
     Header: CompactHeader,
     sidebarOptions: NO_SIDEBAR,
+    suggested: {
+      fontFamily: 'Roboto',
+      columnLayout: 1,
+      sectionSpacing: 2,
+      fontSize: 2,
+      lineHeight: 2,
+    },
   },
   stylish: {
     id: 'stylish',
@@ -121,7 +154,13 @@ export const TEMPLATES: Record<TemplateId, TemplateDefinition> = {
       { width: 0.34, fill: 'tint' },
       { width: 0.38, fill: 'tint' },
     ],
-    defaults: { columnLayout: 3, fontFamily: 'Lora' },
+    suggested: {
+      fontFamily: 'Lora',
+      columnLayout: 3,
+      sectionSpacing: 2,
+      fontSize: 2,
+      lineHeight: 3,
+    },
   },
   'single-column': {
     id: 'single-column',
@@ -133,6 +172,13 @@ export const TEMPLATES: Record<TemplateId, TemplateDefinition> = {
     titleVariant: 'accent-rule',
     Header: SingleColumnHeader,
     sidebarOptions: NO_SIDEBAR,
+    suggested: {
+      fontFamily: 'Source Sans 3',
+      columnLayout: 1,
+      sectionSpacing: 2,
+      fontSize: 3,
+      lineHeight: 2,
+    },
   },
   compact: {
     id: 'compact',
@@ -149,7 +195,13 @@ export const TEMPLATES: Record<TemplateId, TemplateDefinition> = {
       { width: 0.32, fill: 'tint' },
       { width: 0.32, fill: 'solid' },
     ],
-    defaults: { columnLayout: 3, sectionSpacing: 1, fontSize: 1, lineHeight: 1 },
+    suggested: {
+      fontFamily: 'Open Sans',
+      columnLayout: 3,
+      sectionSpacing: 1,
+      fontSize: 1,
+      lineHeight: 1,
+    },
   },
   multicolumn: {
     id: 'multicolumn',
@@ -166,12 +218,28 @@ export const TEMPLATES: Record<TemplateId, TemplateDefinition> = {
       { width: 0.5, fill: 'none' },
       { width: 0.5, fill: 'tint' },
     ],
-    defaults: { columnLayout: 3 },
+    suggested: {
+      fontFamily: 'PT Sans',
+      columnLayout: 3,
+      sectionSpacing: 2,
+      fontSize: 2,
+      lineHeight: 2,
+    },
   },
 }
 
 export function getTemplate(id: TemplateId): TemplateDefinition {
   return TEMPLATES[id] ?? TEMPLATES.polished
+}
+
+/** What choosing a template changes: the template itself plus its suggested look. */
+export function templateChoice(id: TemplateId): Partial<CvDesign> {
+  return { templateId: id, ...getTemplate(id).suggested }
+}
+
+/** The CV as it would look after choosing another template. */
+export function withTemplate(cv: CvDocument, id: TemplateId): CvDocument {
+  return { ...cv, design: { ...cv.design, ...templateChoice(id) } }
 }
 
 /** Sidebar width and background for the chosen Column layout option. */

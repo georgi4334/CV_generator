@@ -1,55 +1,12 @@
-// Mock data for the UI until the API exists (Steps 8–9).
-import {
-  createExampleCv,
-  PROFESSIONS,
-  type CvDocument,
-  type DocumentSummary,
-  type Job,
-  type ProfessionId,
-} from '@cv/shared'
+// Mock data for parts of the UI that are not connected to the API yet (Steps 12–14).
+import type { DocumentSummary, Job } from '@cv/shared'
 
 export const MOCK_TODAY = '2026-10-13'
 
-const cvSeeds: Array<{
-  id: string
-  professionId: ProfessionId
-  updatedAt: string
-  jobId: string | null
-}> = [
-  {
-    id: 'cv-1',
-    professionId: 'software-developer',
-    updatedAt: '2026-10-12T16:20:00Z',
-    jobId: null,
-  },
-  {
-    id: 'cv-2',
-    professionId: 'software-developer',
-    updatedAt: '2026-10-10T09:05:00Z',
-    jobId: 'job-2',
-  },
-  { id: 'cv-3', professionId: 'designer', updatedAt: '2026-10-02T11:40:00Z', jobId: null },
-  { id: 'cv-4', professionId: 'sales-marketing', updatedAt: '2026-09-21T14:00:00Z', jobId: null },
-  { id: 'cv-5', professionId: 'healthcare', updatedAt: '2026-09-05T08:30:00Z', jobId: null },
-  { id: 'cv-6', professionId: 'academic', updatedAt: '2026-08-28T17:45:00Z', jobId: null },
-]
-
-export const MOCK_CV_DOCUMENTS: Record<string, CvDocument> = Object.fromEntries(
-  cvSeeds.map((seed) => [seed.id, createExampleCv(seed.professionId)]),
-)
-
-export const MOCK_DOCUMENTS: DocumentSummary[] = [
-  ...cvSeeds.map((seed) => ({
-    id: seed.id,
-    type: 'cv' as const,
-    title:
-      seed.jobId === null
-        ? `${PROFESSIONS[seed.professionId].name} CV`
-        : `${PROFESSIONS[seed.professionId].name} CV – Northwind Labs`,
-    jobId: seed.jobId,
-    createdAt: '2026-08-01T10:00:00Z',
-    updatedAt: seed.updatedAt,
-  })),
+/**
+ * Cover letters until their editor exists (Step 13). CVs come from the API.
+ */
+export const MOCK_COVER_LETTERS: DocumentSummary[] = [
   {
     id: 'cl-1',
     type: 'coverLetter',
@@ -151,6 +108,12 @@ export const MOCK_JOBS: Job[] = [
   }),
 ]
 
+/** Titles of the CVs the sample jobs mention (plain text until jobs are real, Step 12). */
+export const MOCK_JOB_CV_TITLES: Record<string, string> = {
+  'cv-1': 'Software Developer CV',
+  'cv-2': 'Software Developer CV – Northwind Labs',
+}
+
 export function findDocument(id: string) {
-  return MOCK_DOCUMENTS.find((doc) => doc.id === id)
+  return MOCK_COVER_LETTERS.find((doc) => doc.id === id)
 }

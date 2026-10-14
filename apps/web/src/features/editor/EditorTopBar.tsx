@@ -11,7 +11,7 @@ import {
   ScanSearch,
   Undo2,
 } from 'lucide-react'
-import { useState, type ComponentType } from 'react'
+import { useState, type ComponentType, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { ThemeToggle } from '../../components/ThemeToggle'
 import { useEditorUi, type EditorPanel } from '../../stores/editorUi'
@@ -38,7 +38,17 @@ const CENTER_TOOLS: Tool[] = [
   { label: 'Design & Font', icon: Palette, panel: 'design' },
 ]
 
-export function EditorTopBar({ title, backTo }: { title: string; backTo: string }) {
+interface EditorTopBarProps {
+  /** The document title (editable for CVs). */
+  title: ReactNode
+  /** Save status shown next to the title. */
+  status?: ReactNode
+  backTo: string
+  /** Version history is only available for saved CVs. */
+  historyEnabled?: boolean
+}
+
+export function EditorTopBar({ title, status, backTo, historyEnabled = false }: EditorTopBarProps) {
   const { activePanel, togglePanel, notify } = useEditorUi()
   const canUndo = useCvEditor((s) => s.past.length > 0)
   const canRedo = useCvEditor((s) => s.future.length > 0)
@@ -65,7 +75,10 @@ export function EditorTopBar({ title, backTo }: { title: string; backTo: string 
         >
           <PanelLeft className="size-4" /> <span className="hidden lg:inline">AI Assistant</span>
         </button>
-        <span className="ml-2 hidden truncate text-sm text-slate-500 xl:inline">{title}</span>
+        <span className="ml-2 hidden min-w-0 items-center gap-2 text-sm text-slate-500 xl:flex">
+          {title}
+          {status}
+        </span>
       </div>
 
       <nav aria-label="Editor tools" className="flex items-center gap-0.5">
@@ -110,8 +123,13 @@ export function EditorTopBar({ title, backTo }: { title: string; backTo: string 
         </button>
         <button
           type="button"
-          className={toolButton}
-          onClick={() => notify('Version history is coming in Step 9.')}
+          className={`${toolButton} ${activePanel === 'history' ? activeTool : ''}`}
+          aria-pressed={activePanel === 'history'}
+          onClick={() =>
+            historyEnabled
+              ? togglePanel('history')
+              : notify('Version history is available for CVs.')
+          }
         >
           <History className="size-4" /> <span className="hidden lg:inline">History</span>
         </button>

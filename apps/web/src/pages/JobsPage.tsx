@@ -3,12 +3,17 @@ import { Link } from 'react-router'
 import { JobStatusBadge, JobTypeBadge } from '../components/Badges'
 import { card, PageHeader, primaryButton } from '../components/PageHeader'
 import { formatDate } from '../lib/format'
-import { findDocument, MOCK_JOBS } from '../mocks/data'
+import { findDocument, MOCK_JOB_CV_TITLES, MOCK_JOBS } from '../mocks/data'
 
 function DocLink({ id, type }: { id: string | null; type: 'cv' | 'coverLetter' }) {
+  if (type === 'cv') {
+    // Sample jobs point at sample CVs; real links arrive with the jobs API (Step 12).
+    const title = id ? MOCK_JOB_CV_TITLES[id] : undefined
+    return title ? <span>{title}</span> : <span className="text-slate-400">—</span>
+  }
   const doc = id ? findDocument(id) : undefined
   if (!doc) return <span className="text-slate-400">—</span>
-  const to = type === 'cv' ? `/cvs/${doc.id}/edit` : `/cover-letters/${doc.id}/edit`
+  const to = `/cover-letters/${doc.id}/edit`
   return (
     <Link to={to} className="text-teal-700 hover:underline dark:text-teal-300">
       {doc.title}

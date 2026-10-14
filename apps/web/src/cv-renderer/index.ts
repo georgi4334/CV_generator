@@ -1,2 +1,3 @@
 export { CvRenderer } from './CvRenderer'
-export { getTemplate } from './templates'
+export { CvThumbnail } from './CvThumbnail'
+export { getTemplate, templateChoice, withTemplate } from './templates'

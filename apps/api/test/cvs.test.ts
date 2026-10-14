@@ -55,10 +55,26 @@ describe.skipIf(!dbAvailable)('CV API', () => {
 
   it('rejects a save based on an old revision (409) and reports the current one', async () => {
     const cv = await create()
-    await call('PATCH', `/cvs/${cv.id}`, { revision: 1, title: 'First tab' })
-    const res = await call('PATCH', `/cvs/${cv.id}`, { revision: 1, title: 'Second tab' })
+    await call('PATCH', `/cvs/${cv.id}`, { revision: 1, document: cv.document })
+    const res = await call('PATCH', `/cvs/${cv.id}`, { revision: 1, document: cv.document })
     expect(res.statusCode).toBe(409)
     expect(res.json().error).toMatchObject({ code: 'conflict', details: { revision: 2 } })
+  })
+
+  it('renames without a revision and without changing it', async () => {
+    const cv = await create()
+    const res = await call('PATCH', `/cvs/${cv.id}`, { title: 'Renamed' })
+    expect(res.statusCode).toBe(200)
+    expect(res.json()).toMatchObject({ title: 'Renamed', revision: 1 })
+    // An editor still holding revision 1 can keep saving.
+    const save = await call('PATCH', `/cvs/${cv.id}`, { revision: 1, document: cv.document })
+    expect(save.statusCode).toBe(200)
+  })
+
+  it('requires a revision when saving the document', async () => {
+    const cv = await create()
+    const res = await call('PATCH', `/cvs/${cv.id}`, { document: cv.document })
+    expect(res.statusCode).toBe(400)
   })
 
   it('returns 404 for unknown, malformed or deleted CVs', async () => {

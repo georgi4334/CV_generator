@@ -1,4 +1,6 @@
 import type { EditorApi } from '../../cv-renderer/editorApi'
+import { cvApi } from '../../lib/cvApi'
+import { useEditorUi } from '../../stores/editorUi'
 import { useCvEditor } from './cvEditorStore'
 
 const s = () => useCvEditor.getState()
@@ -17,4 +19,6 @@ export const cvEditorApi: EditorApi = {
   moveItem: (sectionId, itemId, direction) => s().moveItem(sectionId, itemId, direction),
   addBullet: (sectionId, itemId, afterIndex) => s().addBullet(sectionId, itemId, afterIndex),
   removeBullet: (sectionId, itemId, index) => s().removeBullet(sectionId, itemId, index),
+  uploadImage: async (image) => (await cvApi.uploadImage(image)).url,
+  notify: (message) => useEditorUi.getState().notify(message),
 }

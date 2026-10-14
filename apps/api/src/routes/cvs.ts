@@ -137,7 +137,8 @@ export async function cvRoutes(app: FastifyInstance, opts: { database: Database 
     const { id } = IdParams.parse(request.params)
     const input = UpdateCvInputSchema.parse(request.body)
     const current = await findCv(request.user.id, id)
-    if (current.revision !== input.revision) {
+    const savesDocument = input.document !== undefined
+    if (savesDocument && current.revision !== input.revision) {
       throw new HttpError(409, 'conflict', 'This CV was changed somewhere else', {
         revision: current.revision,
       })
@@ -145,7 +146,7 @@ export async function cvRoutes(app: FastifyInstance, opts: { database: Database 
 
     return db.transaction(async (tx) => {
       // Keep the previous content as an automatic snapshot, at most every few minutes.
-      if (input.document) {
+      if (savesDocument) {
         const [recent] = await tx
           .select({ id: cvVersions.id })
           .from(cvVersions)
@@ -168,11 +169,12 @@ export async function cvRoutes(app: FastifyInstance, opts: { database: Database 
           ...(input.title !== undefined && { title: input.title }),
           ...(input.professionId !== undefined && { professionId: input.professionId }),
           ...(input.jobId !== undefined && { jobId: input.jobId }),
-          ...(input.document !== undefined && { document: input.document }),
-          revision: sql`${cvs.revision} + 1`,
+          // The revision tracks the document only, so a rename in the
+          // Documents list never conflicts with an editor that is saving.
+          ...(savesDocument && { document: input.document, revision: sql`${cvs.revision} + 1` }),
           updatedAt: sql`now()`,
         })
-        .where(and(eq(cvs.id, id), eq(cvs.revision, input.revision)))
+        .where(and(eq(cvs.id, id), savesDocument ? eq(cvs.revision, input.revision!) : undefined))
         .returning()
       if (!row) throw new HttpError(409, 'conflict', 'This CV was changed somewhere else')
       await pruneVersions(id, request.user.plan)

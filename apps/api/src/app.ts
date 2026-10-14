@@ -1,7 +1,7 @@
 import cors from '@fastify/cors'
 import Fastify from 'fastify'
 import type { Database } from './db/client'
-import { HttpError, registerErrorHandler } from './lib/errors'
+import { databaseUnavailable, registerErrorHandler } from './lib/errors'
 import type { Storage } from './lib/storage'
 import { useCurrentUser } from './plugins/currentUser'
 import { cvRoutes } from './routes/cvs'
@@ -49,12 +49,7 @@ export async function buildApp(opts: AppOptions) {
               request.log.error(error, 'database not ready')
               const cause =
                 (error as Error & { cause?: Error }).cause?.message ?? (error as Error).message
-              throw new HttpError(
-                503,
-                'database_unavailable',
-                'Cannot use the database. Is it running (pnpm db:up), and does DATABASE_URL in apps/api/.env match docker-compose.yml?',
-                opts.exposeErrors ? { cause } : undefined,
-              )
+              throw databaseUnavailable(opts.exposeErrors ? cause : undefined)
             }
           })
         }

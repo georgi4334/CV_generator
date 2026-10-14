@@ -15,9 +15,10 @@ import {
 } from '@cv/shared'
 import { Building2, Star, X } from 'lucide-react'
 import { useEditor, useRender } from './context'
+import { assetUrl } from '../lib/api'
 import { itemPath } from './editorApi'
 import { ACHIEVEMENT_ICONS } from './icons'
-import { pickImage } from './image'
+import { pickAndUpload } from './image'
 import { PLACEHOLDERS as P } from './placeholders'
 import {
   Bullets,
@@ -53,7 +54,7 @@ function CompanyLogo({ item, refs }: { item: ExperienceItem; refs: ItemRef }) {
   const size = 'size-[2.6em] shrink-0 rounded-full'
 
   const image = item.logoUrl ? (
-    <img src={item.logoUrl} alt="" className={`${size} object-cover`} />
+    <img src={assetUrl(item.logoUrl)} alt="" className={`${size} object-cover`} />
   ) : mode === 'edit' ? (
     <span
       className={`${size} flex items-center justify-center`}
@@ -72,9 +73,9 @@ function CompanyLogo({ item, refs }: { item: ExperienceItem; refs: ItemRef }) {
         aria-label={item.logoUrl ? 'Change company logo' : 'Upload company logo'}
         className="block cursor-pointer rounded-full border-0 bg-transparent p-0"
         onClick={() =>
-          pickImage(160).then(
+          pickAndUpload(160, editor.uploadImage).then(
             (url) => url && update({ logoUrl: url }),
-            (e: Error) => alert(e.message),
+            (e: Error) => editor.notify(`Logo not uploaded: ${e.message}`),
           )
         }
       >

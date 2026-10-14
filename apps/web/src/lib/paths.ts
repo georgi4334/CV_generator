@@ -1,5 +1,8 @@
 import type { DocumentType } from '@cv/shared'
 
+/** The "Create new CV" wizard. */
+export const NEW_CV_PATH = '/cvs/new'
+
 export function editPath(doc: { id: string; type: DocumentType }) {
   return doc.type === 'cv' ? `/cvs/${doc.id}/edit` : `/cover-letters/${doc.id}/edit`
 }
