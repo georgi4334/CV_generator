@@ -14,6 +14,8 @@ interface EditorLayoutProps {
   cvId?: string
   /** Shown between the top bar and the page (e.g. conflict warning). */
   banner?: ReactNode
+  onDownload?: () => void
+  onShare?: () => void
   children: ReactNode
 }
 
@@ -25,6 +27,8 @@ export function EditorLayout({
   previewTo,
   cvId,
   banner,
+  onDownload,
+  onShare,
   children,
 }: EditorLayoutProps) {
   const activePanel = useEditorUi((s) => s.activePanel)
@@ -37,7 +41,7 @@ export function EditorLayout({
         <div className="flex-1 overflow-auto">
           <div className="flex min-w-max justify-center gap-4 px-6 py-8">
             {children}
-            <EditorRightRail previewTo={previewTo} />
+            <EditorRightRail previewTo={previewTo} onDownload={onDownload} onShare={onShare} />
           </div>
         </div>
       </div>

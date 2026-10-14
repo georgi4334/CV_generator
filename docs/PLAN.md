@@ -1,13 +1,13 @@
 # CV Generator — Development Plan
 
-> Status: **Step 10 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
+> Status: **Step 11 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
 >
 > **Decision log**
 >
 > - App tabs: Dashboard · Documents (All documents / Cover letters / CVs) · Saved Jobs ✅
 > - Job statuses: To apply · Applied · Interviewing · Negotiating · Accepted · Rejected · No answer ✅
 > - Backend framework: Fastify; ORM: Drizzle ✅
-> - Step 0 closed. Step 1 (project setup) ✅. Step 2 (shared domain model) ✅. Step 3 (app shell) ✅. Step 4 (CV renderer) ✅. Step 5 (inline editing) ✅. Step 6 (rearrange) ✅. Step 7 (templates & design) ✅. Step 8 (API & database) ✅. Step 9 (frontend ↔ API) ✅. Step 10 ("Create new CV" wizard) built; awaiting review before Step 11.
+> - Step 0 closed. Step 1 (project setup) ✅. Step 2 (shared domain model) ✅. Step 3 (app shell) ✅. Step 4 (CV renderer) ✅. Step 5 (inline editing) ✅. Step 6 (rearrange) ✅. Step 7 (templates & design) ✅. Step 8 (API & database) ✅. Step 9 (frontend ↔ API) ✅. Step 10 ("Create new CV" wizard) ✅. Step 11 (PDF download & share links) built; awaiting review before Step 12.
 > - Choosing a template applies its suggested font, column layout and spacing; the user can change them afterwards ✅
 > - Frontend: React + TS + Vite + Tailwind + Axios + React Router + TanStack Query + Zustand ✅
 > - Backend: Node + TypeScript + PostgreSQL (JSONB) with shared Zod types ✅
@@ -193,7 +193,7 @@ Job         { id, userId, position, company, status, type: 'remote' | 'onsite' |
               dateSaved, dateApplied?, cvId?, coverLetterId?, notes,
               url?, description?, location?, salary?, contact? }
 JobStatus   = 'to_apply' | 'applied' | 'interviewing' | 'negotiating' | 'accepted' | 'rejected' | 'no_answer'  // default: 'to_apply'
-ShareLink   { id, documentType: 'cv' | 'coverLetter', documentId, slug, isActive, createdAt }
+ShareLink   { id, cvId (coverLetterId in Step 13), slug, isActive, createdAt, updatedAt } // one per document; deleted with it
 Template    { id, name, layout, defaultDesign, supportsPhoto, tags[] } // defined in code; thumbnails are live renders
 Profession  { id, name, recommendedTemplateIds[], defaultSections[], exampleContent }
 ```
@@ -371,12 +371,16 @@ Specification: §3.2 and §3.3.
 - Fixed: the top navigation was 16 px too wide on phones.
 - (Later) import an existing CV from PDF/DOCX or from a LinkedIn export.
 
-### Step 11: Preview, PDF export & sharing
+### Step 11: Preview, PDF export & sharing ✅ built (awaiting review)
 
-- Preview mode: placeholders and empty sections hidden.
-- PDF download, phase 1 (free): browser print with dedicated print CSS (`@page` A4, no margins, colors kept). The text stays selectable, which keeps it ATS-friendly.
+- ✅ Preview mode: placeholders and empty sections hidden (built in Step 4). The preview page now has _Share_ and _Download PDF_, and scales the pages to fit narrow screens.
+- ✅ **PDF download, phase 1 (free):** _Download PDF_ opens the browser's print dialog with only the CV. It is rendered in preview mode at its page size (`@page` A4 or US Letter, no margins, colors and backgrounds kept), and the file name suggested is the CV's title. The text stays selectable, which keeps it ATS-friendly. Available in the editor (prints the latest edits, even unsaved ones), the preview page, the Documents menu (and the selection toolbar when one CV is selected) and on shared links.
 - PDF download, phase 2 (when paid hosting exists): server-side headless Chromium for a one-click download that is identical in every browser.
-- Public read-only share link (`/s/:slug`) that can be turned on and off.
+- ✅ **Share link** (`/s/:slug`), off by default, from the editor's right rail, the preview page and the Documents menu:
+  - Turning it on creates a random, unguessable address (16 characters). Turning it off makes the link stop working; turning it on again brings back the same address. _Replace link_ gives a new address and the old one stops working.
+  - The shared page is read-only, shows the latest saved version, offers _Download PDF_, fits phones, and is kept out of search engines (`noindex`). It shows no ids or owner details.
+  - Shared CVs get a _Shared_ badge in Documents. Deleting a CV deletes its link; copies are not shared.
+- API: `GET/PUT /cvs/:id/share`, `POST /cvs/:id/share/reset`, public `GET /shared/:slug`. New table `share_links` (migration `0001_share_links`, applied automatically on start).
 
 ### Step 12: Saved Jobs tracker
 

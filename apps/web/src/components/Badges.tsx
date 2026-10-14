@@ -1,3 +1,4 @@
+import { Link2 } from 'lucide-react'
 import {
   JOB_STATUS_LABELS,
   JOB_TYPE_LABELS,
@@ -61,6 +62,18 @@ export function RecommendedBadge({
       className={`${size} bg-amber-100 text-amber-800 shadow-sm dark:bg-amber-950 dark:text-amber-300 ${className}`}
     >
       Recommended
+    </span>
+  )
+}
+
+/** The document has an active public share link. */
+export function SharedBadge() {
+  return (
+    <span
+      className={`${pill} gap-1 bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-300`}
+      title="Anyone with the share link can view this"
+    >
+      <Link2 className="size-3" aria-hidden /> Shared
     </span>
   )
 }

@@ -4,6 +4,7 @@ import {
   Copy,
   Download,
   FileText,
+  Link2,
   MoreVertical,
   Pencil,
   Plus,
@@ -12,11 +13,13 @@ import {
 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link, Navigate, NavLink, useParams } from 'react-router'
-import { DocumentTypeBadge } from '../components/Badges'
+import { DocumentTypeBadge, SharedBadge } from '../components/Badges'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { card, PageHeader, primaryButton, secondaryButton } from '../components/PageHeader'
+import { printCv } from '../features/print/printCv'
+import { ShareDialog } from '../features/share/ShareDialog'
 import { toApiRequestError } from '../lib/api'
-import { useCvList, useDeleteCvs, useDuplicateCv, useRenameCv } from '../lib/cvQueries'
+import { useCvList, useDeleteCvs, useDuplicateCv, useLoadCv, useRenameCv } from '../lib/cvQueries'
 import { formatDate } from '../lib/format'
 import {
   DOCUMENT_SUBTABS,
@@ -101,6 +104,8 @@ function CreateNewButton({ subtab }: { subtab: DocumentSubtab }) {
 interface RowActions {
   onRename: () => void
   onDuplicate: () => void
+  onDownload: () => void
+  onShare: () => void
   onDelete: () => void
 }
 
@@ -130,7 +135,7 @@ function RowMenu({ doc, actions }: { doc: DocumentSummary; actions: RowActions }
       {open && (
         <div
           role="menu"
-          className={`${card} absolute right-0 z-20 mt-1 w-44 overflow-hidden py-1 text-sm`}
+          className={`${card} absolute right-0 z-20 mt-1 w-48 overflow-hidden py-1 text-sm`}
         >
           <Link role="menuitem" to={editPath(doc)} className={item}>
             <FileText className="size-4" /> Open
@@ -157,10 +162,19 @@ function RowMenu({ doc, actions }: { doc: DocumentSummary; actions: RowActions }
             type="button"
             role="menuitem"
             className={item}
-            disabled
-            title="PDF download arrives in Step 11"
+            disabled={!editable}
+            onClick={run(actions.onDownload)}
           >
-            <Download className="size-4" /> Download
+            <Download className="size-4" /> Download PDF
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            className={item}
+            disabled={!editable}
+            onClick={run(actions.onShare)}
+          >
+            <Link2 className="size-4" /> Share link
           </button>
           <button
             type="button"
@@ -208,11 +222,13 @@ export function DocumentsPage() {
   const rename = useRenameCv()
   const duplicate = useDuplicateCv()
   const remove = useDeleteCvs()
+  const loadCv = useLoadCv()
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<SortKey>('updated')
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [renaming, setRenaming] = useState<string | null>(null)
   const [toDelete, setToDelete] = useState<DocumentSummary[] | null>(null)
+  const [sharing, setSharing] = useState<DocumentSummary | null>(null)
   const [message, setMessage] = useState<string | null>(null)
 
   const documents = useMemo(() => {
@@ -242,6 +258,17 @@ export function DocumentsPage() {
     })
   const report = (prefix: string) => (e: unknown) =>
     setMessage(`${prefix}: ${toApiRequestError(e).message}`)
+
+  const download = async (doc: DocumentSummary) => {
+    setMessage(null)
+    try {
+      const record = await loadCv(doc.id)
+      setMessage('In the print dialog, choose “Save as PDF” as the destination.')
+      printCv(record.document, record.title)
+    } catch (e) {
+      report(`"${doc.title}" could not be downloaded`)(e)
+    }
+  }
 
   const duplicateMany = async (docs: DocumentSummary[]) => {
     setMessage(null)
@@ -328,9 +355,10 @@ export function DocumentsPage() {
           </button>
           <button
             type="button"
-            className={`${secondaryButton} opacity-50`}
-            disabled
-            title="PDF download arrives in Step 11"
+            className={`${secondaryButton} disabled:cursor-not-allowed disabled:opacity-50`}
+            disabled={selectedDocs.length !== 1}
+            title={selectedDocs.length === 1 ? undefined : 'Select one CV to download it as a PDF'}
+            onClick={() => void download(selectedDocs[0]!)}
           >
             <Download className="size-4" /> Download
           </button>
@@ -434,6 +462,7 @@ export function DocumentsPage() {
                     {job ? `For ${job.position} at ${job.company}` : 'Not linked to a job'}
                   </span>
                 </div>
+                {doc.shared && <SharedBadge />}
                 <DocumentTypeBadge type={doc.type} />
                 <span className="hidden w-28 text-right text-sm text-slate-500 sm:block">
                   {formatDate(doc.updatedAt)}
@@ -443,6 +472,8 @@ export function DocumentsPage() {
                   actions={{
                     onRename: () => setRenaming(doc.id),
                     onDuplicate: () => void duplicateMany([doc]),
+                    onDownload: () => void download(doc),
+                    onShare: () => setSharing(doc),
                     onDelete: () => setToDelete([doc]),
                   }}
                 />
@@ -451,6 +482,10 @@ export function DocumentsPage() {
           })}
         </ul>
       </div>
+
+      {sharing && (
+        <ShareDialog cvId={sharing.id} title={sharing.title} onClose={() => setSharing(null)} />
+      )}
 
       {toDelete && (
         <ConfirmDialog

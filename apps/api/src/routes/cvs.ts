@@ -14,7 +14,7 @@ import { and, count, desc, eq, gt, inArray, sql } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import type { Database } from '../db/client'
-import { cvs, cvVersions } from '../db/schema'
+import { cvs, cvVersions, shareLinks } from '../db/schema'
 import { HttpError, notFound } from '../lib/errors'
 
 /** While editing, keep at most one automatic snapshot per this many minutes. */
@@ -38,12 +38,13 @@ const toRecord = (row: CvRow): CvRecord => ({
 })
 
 const toSummary = (
-  row: Pick<CvRow, 'id' | 'title' | 'jobId' | 'createdAt' | 'updatedAt'>,
+  row: Pick<CvRow, 'id' | 'title' | 'jobId' | 'createdAt' | 'updatedAt'> & { shared: boolean },
 ): DocumentSummary => ({
   id: row.id,
   type: 'cv',
   title: row.title,
   jobId: row.jobId,
+  shared: row.shared,
   createdAt: row.createdAt.toISOString(),
   updatedAt: row.updatedAt.toISOString(),
 })
@@ -103,8 +104,10 @@ export async function cvRoutes(app: FastifyInstance, opts: { database: Database 
         jobId: cvs.jobId,
         createdAt: cvs.createdAt,
         updatedAt: cvs.updatedAt,
+        shared: sql<boolean>`coalesce(${shareLinks.isActive}, false)`,
       })
       .from(cvs)
+      .leftJoin(shareLinks, eq(shareLinks.cvId, cvs.id))
       .where(eq(cvs.userId, request.user.id))
       .orderBy(desc(cvs.updatedAt))
     return rows.map(toSummary)

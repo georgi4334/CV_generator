@@ -21,3 +21,49 @@
 button.cv-editable {
   cursor: pointer;
 }
+
+/*
+ * Download PDF (browser print): only the CV pages, at their exact paper size.
+ * On screen the print copy sits off-screen but is laid out, so it can be measured.
+ */
+.print-root {
+  position: fixed;
+  top: 0;
+  left: -20000px;
+}
+@media print {
+  html,
+  body {
+    margin: 0 !important;
+    background: #fff !important;
+  }
+  body > :not(.print-root) {
+    display: none !important;
+  }
+  .print-root {
+    position: static;
+  }
+  .print-root [role='document'] {
+    gap: 0 !important;
+  }
+  .print-root [data-cv-page] {
+    box-shadow: none !important;
+    break-after: page;
+  }
+  .print-root [data-cv-page]:last-child {
+    break-after: auto;
+  }
+  /* Pages are drawn in whole pixels; pin them to the paper so no blank page follows. */
+  .print-root [data-cv-page='A4'] {
+    width: 210mm !important;
+    height: 297mm !important;
+  }
+  .print-root [data-cv-page='Letter'] {
+    width: 8.5in !important;
+    height: 11in !important;
+  }
+  .print-root * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}

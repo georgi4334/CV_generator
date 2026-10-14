@@ -7,6 +7,7 @@ import {
   type CvVersionSummary,
   type DocumentSummary,
   type ProfessionId,
+  type ShareLink,
 } from '@cv/shared'
 import { ApiRequestError } from '../lib/api'
 import type { CvApi } from '../lib/cvApi'
@@ -19,6 +20,7 @@ interface Version extends CvVersionSummary {
 export function createFakeCvApi() {
   const cvs = new Map<string, CvRecord>()
   const versions = new Map<string, Version[]>()
+  const shares = new Map<string, ShareLink>()
   let clock = Date.parse('2026-10-14T09:00:00Z')
   let seq = 0
   const now = () => new Date((clock += 1000)).toISOString()
@@ -34,6 +36,7 @@ export function createFakeCvApi() {
     type: 'cv',
     title: cv.title,
     jobId: cv.jobId,
+    shared: shares.get(cv.id)?.isActive ?? false,
     createdAt: cv.createdAt,
     updatedAt: cv.updatedAt,
   })
@@ -85,6 +88,7 @@ export function createFakeCvApi() {
     async remove(cvId) {
       find(cvId)
       cvs.delete(cvId)
+      shares.delete(cvId)
     },
     async duplicate(cvId) {
       const source = find(cvId)
@@ -129,6 +133,37 @@ export function createFakeCvApi() {
       cvs.set(cvId, next)
       return structuredClone(next)
     },
+    async getShare(cvId) {
+      find(cvId)
+      return { link: structuredClone(shares.get(cvId) ?? null) }
+    },
+    async setShare(cvId, isActive) {
+      find(cvId)
+      const time = now()
+      const current = shares.get(cvId)
+      const link: ShareLink = current
+        ? { ...current, isActive, updatedAt: time }
+        : { slug: `slug${++seq}AbCdEfGh`, isActive, createdAt: time, updatedAt: time }
+      shares.set(cvId, link)
+      return { link: structuredClone(link) }
+    },
+    async resetShare(cvId) {
+      await api.setShare(cvId, true)
+      const link = { ...shares.get(cvId)!, slug: `slug${++seq}NewLink0` }
+      shares.set(cvId, link)
+      return { link: structuredClone(link) }
+    },
+    async getShared(slug) {
+      const entry = [...shares.entries()].find(([, link]) => link.slug === slug && link.isActive)
+      const cv = entry && cvs.get(entry[0])
+      if (!cv) throw new ApiRequestError(404, 'not_found', 'Shared document not found')
+      return {
+        type: 'cv' as const,
+        title: cv.title,
+        document: structuredClone(cv.document),
+        updatedAt: cv.updatedAt,
+      }
+    },
     async uploadImage() {
       return { id: id(), url: `/api/uploads/${id()}`, contentType: 'image/png', size: 100 }
     },
@@ -154,9 +189,11 @@ export function createFakeCvApi() {
       cvs.set(record.id, record)
       return record
     },
+    shares,
     reset() {
       cvs.clear()
       versions.clear()
+      shares.clear()
     },
   }
 }

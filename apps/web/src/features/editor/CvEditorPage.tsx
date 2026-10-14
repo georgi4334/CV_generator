@@ -1,9 +1,11 @@
 import type { CvRecord } from '@cv/shared'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router'
 import { toApiRequestError } from '../../lib/api'
 import { useCv, useRenameCv } from '../../lib/cvQueries'
 import { NotFoundPage } from '../../pages/NotFoundPage'
+import { printCv } from '../print/printCv'
+import { ShareDialog } from '../share/ShareDialog'
 import { useEditorUi } from '../../stores/editorUi'
 import { ConflictBanner } from './ConflictBanner'
 import { useCvEditor } from './cvEditorStore'
@@ -24,6 +26,13 @@ function CvEditor({ record }: { record: CvRecord }) {
   const previewVersionId = useEditorUi((s) => s.previewVersionId)
   const rename = useRenameCv()
   const notify = useEditorUi((s) => s.notify)
+  const [sharing, setSharing] = useState(false)
+
+  const download = () => {
+    notify('In the print dialog, choose “Save as PDF” as the destination.')
+    // The latest edits, even if they are still being saved.
+    printCv(useCvEditor.getState().cv ?? record.document, record.title)
+  }
 
   return (
     <EditorLayout
@@ -43,6 +52,8 @@ function CvEditor({ record }: { record: CvRecord }) {
       previewTo={`/cvs/${record.id}/preview`}
       cvId={record.id}
       banner={<ConflictBanner cvId={record.id} />}
+      onDownload={download}
+      onShare={() => setSharing(true)}
     >
       {previewVersionId ? (
         <VersionPreview cvId={record.id} versionId={previewVersionId} />
@@ -53,6 +64,9 @@ function CvEditor({ record }: { record: CvRecord }) {
           mode="edit"
           editor={cvEditorApi}
         />
+      )}
+      {sharing && (
+        <ShareDialog cvId={record.id} title={record.title} onClose={() => setSharing(false)} />
       )}
     </EditorLayout>
   )

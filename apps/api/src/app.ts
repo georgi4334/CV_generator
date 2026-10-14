@@ -7,6 +7,7 @@ import { useCurrentUser } from './plugins/currentUser'
 import { cvRoutes } from './routes/cvs'
 import { healthRoutes } from './routes/health'
 import { professionRoutes } from './routes/professions'
+import { publicShareRoutes, shareRoutes } from './routes/share'
 import { publicUploadRoutes, uploadRoutes } from './routes/uploads'
 
 export interface AppOptions {
@@ -27,7 +28,7 @@ export async function buildApp(opts: AppOptions) {
   await app.register(cors, {
     origin: opts.corsOrigin.split(',').map((origin) => origin.trim()),
     credentials: true,
-    methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   })
 
   const database = opts.database as Database
@@ -38,11 +39,11 @@ export async function buildApp(opts: AppOptions) {
       await api.register(professionRoutes)
       await api.register(publicUploadRoutes, { database, storage: opts.storage })
 
-      // Routes acting for the current user
-      await api.register(async (scope) => {
+      // Routes that need the tables
+      await api.register(async (data) => {
         const { ensureMigrated } = opts
         if (ensureMigrated) {
-          scope.addHook('onRequest', async (request) => {
+          data.addHook('onRequest', async (request) => {
             try {
               await ensureMigrated()
             } catch (error) {
@@ -53,9 +54,16 @@ export async function buildApp(opts: AppOptions) {
             }
           })
         }
-        useCurrentUser(scope, { database })
-        await scope.register(cvRoutes, { database })
-        await scope.register(uploadRoutes, { database, storage: opts.storage })
+        // Public: anyone with a share link
+        await data.register(publicShareRoutes, { database })
+
+        // Acting for the current user
+        await data.register(async (scope) => {
+          useCurrentUser(scope, { database })
+          await scope.register(cvRoutes, { database })
+          await scope.register(shareRoutes, { database })
+          await scope.register(uploadRoutes, { database, storage: opts.storage })
+        })
       })
     },
     { prefix: '/api' },
