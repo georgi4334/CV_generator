@@ -3,7 +3,7 @@ import { AtSign, Link2, MapPin, Phone, type LucideIcon } from 'lucide-react'
 import { assetUrl } from '../lib/api'
 import { useRender } from './context'
 import { Field } from './primitives'
-import { PLACEHOLDERS as P } from './placeholders'
+import { usePlaceholders } from './placeholders'
 
 const CONTACTS: Array<{ key: 'phone' | 'email' | 'link' | 'location'; icon: LucideIcon }> = [
   { key: 'phone', icon: Phone },
@@ -13,6 +13,7 @@ const CONTACTS: Array<{ key: 'phone' | 'email' | 'link' | 'location'; icon: Luci
 ]
 
 function Contacts({ header, layout }: { header: CvHeader; layout: 'row' | 'column' | 'centered' }) {
+  const P = usePlaceholders()
   const { mode } = useRender()
   const shown = CONTACTS.filter(({ key }) => mode === 'edit' || header[key].trim())
   const layoutClass =
@@ -43,6 +44,7 @@ function Photo({ header }: { header: CvHeader }) {
 }
 
 export function PolishedHeader({ header }: { header: CvHeader }) {
+  const P = usePlaceholders()
   return (
     <div className="flex items-center gap-[1.2em]">
       <Photo header={header} />
@@ -70,6 +72,7 @@ export function PolishedHeader({ header }: { header: CvHeader }) {
 }
 
 export function SingleColumnHeader({ header }: { header: CvHeader }) {
+  const P = usePlaceholders()
   return (
     <div className="text-center">
       <Field
@@ -94,6 +97,7 @@ export function SingleColumnHeader({ header }: { header: CvHeader }) {
 }
 
 export function CompactHeader({ header }: { header: CvHeader }) {
+  const P = usePlaceholders()
   return (
     <div
       className="flex items-end justify-between gap-[1.5em] border-b-2 pb-[0.8em]"
@@ -125,6 +129,7 @@ export function CompactHeader({ header }: { header: CvHeader }) {
 
 /** Name and contacts on a colored band across the page (Contemporary). */
 export function ContemporaryHeader({ header }: { header: CvHeader }) {
+  const P = usePlaceholders()
   return (
     <div className="flex items-center justify-between gap-[1.5em]">
       <div className="min-w-0">
@@ -153,6 +158,7 @@ export function ContemporaryHeader({ header }: { header: CvHeader }) {
 
 /** Large accent-colored name with a spaced-out headline (Creative). */
 export function CreativeHeader({ header }: { header: CvHeader }) {
+  const P = usePlaceholders()
   return (
     <div className="flex items-center gap-[1.2em]">
       <Photo header={header} />
@@ -181,6 +187,7 @@ export function CreativeHeader({ header }: { header: CvHeader }) {
 
 /** Centered, photo on top, name between thin accent rules (Stylish). */
 export function StylishHeader({ header }: { header: CvHeader }) {
+  const P = usePlaceholders()
   return (
     <div className="flex flex-col items-center text-center">
       <Photo header={header} />
