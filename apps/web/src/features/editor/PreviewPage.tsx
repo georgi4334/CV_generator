@@ -1,10 +1,15 @@
 import type { DocumentType } from '@cv/shared'
-import { ArrowLeft } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { ArrowLeft, Download, Link2 } from 'lucide-react'
+import { useState, type ReactNode } from 'react'
+import { FitToWidth } from '../../components/FitToWidth'
+import { primaryButton, secondaryButton } from '../../components/PageHeader'
+import { PAGE_SIZE_PX } from '../../cv-renderer/tokens'
 import { Link, useParams } from 'react-router'
 import { toApiRequestError } from '../../lib/api'
 import { useCv } from '../../lib/cvQueries'
 import { NotFoundPage } from '../../pages/NotFoundPage'
+import { printCv } from '../print/printCv'
+import { ShareDialog } from '../share/ShareDialog'
 import { useCvEditor } from './cvEditorStore'
 import { LoadError, PageLoading } from './LoadStates'
 import { PageCanvas } from './PageCanvas'
@@ -13,10 +18,12 @@ import { useCoverLetterStub } from './useEditorDocument'
 function PreviewFrame({
   editTo,
   title,
+  actions,
   children,
 }: {
   editTo: string
   title: string
+  actions?: ReactNode
   children: ReactNode
 }) {
   return (
@@ -28,9 +35,10 @@ function PreviewFrame({
         >
           <ArrowLeft className="size-4" /> Back to editing
         </Link>
-        <span className="text-slate-500">Preview · {title}</span>
+        <span className="min-w-0 flex-1 truncate text-slate-500">Preview · {title}</span>
+        {actions}
       </header>
-      <div className="flex justify-center overflow-auto px-6 py-8">{children}</div>
+      <div className="px-4 py-6 sm:px-6 sm:py-8">{children}</div>
     </div>
   )
 }
@@ -40,6 +48,7 @@ function CvPreview() {
   const query = useCv(id)
   // Coming straight from the editor, show its content even if the last save is still running.
   const editing = useCvEditor((s) => (s.docId === id ? s.cv : null))
+  const [sharing, setSharing] = useState(false)
 
   if (query.isPending) return <PageLoading />
   if (query.isError) {
@@ -47,9 +56,42 @@ function CvPreview() {
     if (error.status === 404 || error.status === 400) return <NotFoundPage />
     return <LoadError error={error} onRetry={() => void query.refetch()} />
   }
+  const { title } = query.data
+  const cv = editing ?? query.data.document
   return (
-    <PreviewFrame editTo={`/cvs/${query.data.id}/edit`} title={query.data.title}>
-      <PageCanvas cv={editing ?? query.data.document} title={query.data.title} mode="preview" />
+    <PreviewFrame
+      editTo={`/cvs/${query.data.id}/edit`}
+      title={title}
+      actions={
+        <>
+          <button
+            type="button"
+            onClick={() => setSharing(true)}
+            className={secondaryButton}
+            aria-label="Share"
+          >
+            <Link2 className="size-4" aria-hidden />
+            <span className="hidden sm:inline">Share</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => printCv(cv, title)}
+            className={primaryButton}
+            aria-label="Download PDF"
+            title="Opens the print dialog: choose “Save as PDF”"
+          >
+            <Download className="size-4" aria-hidden />
+            <span className="hidden sm:inline">Download PDF</span>
+          </button>
+        </>
+      }
+    >
+      <FitToWidth width={PAGE_SIZE_PX[cv.design.pageSize].width}>
+        <PageCanvas cv={cv} title={title} mode="preview" />
+      </FitToWidth>
+      {sharing && (
+        <ShareDialog cvId={query.data.id} title={title} onClose={() => setSharing(false)} />
+      )}
     </PreviewFrame>
   )
 }
@@ -60,7 +102,9 @@ function CoverLetterPreview() {
   if (!stub) return <NotFoundPage />
   return (
     <PreviewFrame editTo={`/cover-letters/${stub.id}/edit`} title={stub.title}>
-      <PageCanvas cv={null} title={stub.title} mode="preview" />
+      <FitToWidth width={PAGE_SIZE_PX.A4.width}>
+        <PageCanvas cv={null} title={stub.title} mode="preview" />
+      </FitToWidth>
     </PreviewFrame>
   )
 }

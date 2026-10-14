@@ -1,4 +1,4 @@
-import type { CreateCvInput, CvRecord, DocumentSummary } from '@cv/shared'
+import type { CreateCvInput, CvRecord, DocumentSummary, ShareState } from '@cv/shared'
 import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { cvApi } from './cvApi'
 
@@ -6,6 +6,8 @@ export const cvKeys = {
   list: ['cvs'] as const,
   detail: (id: string) => ['cvs', id] as const,
   versions: (id: string) => ['cvs', id, 'versions'] as const,
+  share: (id: string) => ['cvs', id, 'share'] as const,
+  shared: (slug: string) => ['shared', slug] as const,
   version: (id: string, versionId: string) => ['cvs', id, 'versions', versionId] as const,
 }
 
@@ -22,6 +24,17 @@ export function useCv(id: string | undefined) {
     staleTime: Infinity,
     retry: (count, error) => count < 2 && (error as { retryable?: boolean }).retryable === true,
   })
+}
+
+/** Loads a CV fresh from the server, e.g. to print it from the Documents list. */
+export function useLoadCv() {
+  const queryClient = useQueryClient()
+  return (id: string) =>
+    queryClient.fetchQuery({
+      queryKey: cvKeys.detail(id),
+      queryFn: () => cvApi.get(id),
+      staleTime: 0,
+    })
 }
 
 export function useCvVersions(id: string, enabled = true) {
@@ -47,6 +60,7 @@ export function rememberCv(queryClient: QueryClient, record: CvRecord) {
       type: 'cv',
       title: record.title,
       jobId: record.jobId,
+      shared: list.find((item) => item.id === record.id)?.shared ?? false,
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,
     }
@@ -95,5 +109,35 @@ export function useDeleteCvs() {
       for (const id of ids) queryClient.removeQueries({ queryKey: cvKeys.detail(id) })
       return queryClient.invalidateQueries({ queryKey: cvKeys.list, exact: true })
     },
+  })
+}
+
+export function useCvShare(id: string) {
+  return useQuery({ queryKey: cvKeys.share(id), queryFn: () => cvApi.getShare(id) })
+}
+
+/** Turns the share link on or off, or replaces it (`reset`). */
+export function useUpdateCvShare(id: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (change: { isActive: boolean } | 'reset') =>
+      change === 'reset' ? cvApi.resetShare(id) : cvApi.setShare(id, change.isActive),
+    onSuccess: (state: ShareState) => {
+      queryClient.setQueryData(cvKeys.share(id), state)
+      queryClient.setQueryData<DocumentSummary[]>(cvKeys.list, (list) =>
+        list?.map((item) =>
+          item.id === id ? { ...item, shared: state.link?.isActive ?? false } : item,
+        ),
+      )
+    },
+  })
+}
+
+/** Public: the CV behind a share link. */
+export function useSharedCv(slug: string) {
+  return useQuery({
+    queryKey: cvKeys.shared(slug),
+    queryFn: () => cvApi.getShared(slug),
+    retry: (count, error) => count < 2 && (error as { retryable?: boolean }).retryable === true,
   })
 }

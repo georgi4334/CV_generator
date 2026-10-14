@@ -37,5 +37,7 @@ export type CoverLetterRecord = z.infer<typeof CoverLetterRecordSchema>
 export const DocumentSummarySchema = z.object({
   ...recordBase,
   type: DocumentTypeSchema,
+  /** A share link is turned on, so anyone with the link can see it. */
+  shared: z.boolean(),
 })
 export type DocumentSummary = z.infer<typeof DocumentSummarySchema>

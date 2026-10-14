@@ -5,7 +5,14 @@ import { useEditorUi } from '../../stores/editorUi'
 const railButton =
   'flex size-9 items-center justify-center rounded-md text-slate-600 hover:bg-white hover:text-slate-900 hover:shadow-sm dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-50'
 
-export function EditorRightRail({ previewTo }: { previewTo: string }) {
+interface EditorRightRailProps {
+  previewTo: string
+  /** Not set for cover letters yet (Step 13). */
+  onDownload?: () => void
+  onShare?: () => void
+}
+
+export function EditorRightRail({ previewTo, onDownload, onShare }: EditorRightRailProps) {
   const { togglePanel, notify } = useEditorUi()
 
   return (
@@ -16,9 +23,9 @@ export function EditorRightRail({ previewTo }: { previewTo: string }) {
       <button
         type="button"
         className={railButton}
-        aria-label="Download"
-        title="Download"
-        onClick={() => notify('PDF download is coming in Step 11.')}
+        aria-label="Download PDF"
+        title="Download PDF"
+        onClick={onDownload ?? (() => notify('Cover letter downloads arrive in Step 13.'))}
       >
         <Download className="size-5" />
       </button>
@@ -27,7 +34,7 @@ export function EditorRightRail({ previewTo }: { previewTo: string }) {
         className={railButton}
         aria-label="Share link"
         title="Share link"
-        onClick={() => notify('Share links are coming in Step 11.')}
+        onClick={onShare ?? (() => notify('Cover letter links arrive in Step 13.'))}
       >
         <Link2 className="size-5" />
       </button>

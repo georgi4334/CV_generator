@@ -46,6 +46,22 @@ export const cvVersions = pgTable(
   (t) => [index('cv_versions_cv_created_idx').on(t.cvId, t.createdAt.desc())],
 )
 
+/**
+ * Public read-only links. One per CV (cover letters get their own column in
+ * Step 13), so deleting a CV deletes its link.
+ */
+export const shareLinks = pgTable('share_links', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  cvId: uuid('cv_id')
+    .notNull()
+    .unique()
+    .references(() => cvs.id, { onDelete: 'cascade' }),
+  slug: text('slug').notNull().unique(),
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: createdAt(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
 export const uploads = pgTable('uploads', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id')

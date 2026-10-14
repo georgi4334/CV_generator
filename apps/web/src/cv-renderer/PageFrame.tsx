@@ -162,6 +162,7 @@ export function PageFrame({
   return (
     <div
       className={`relative flex flex-col overflow-hidden bg-white ${className ?? ''}`}
+      data-cv-page={measuring ? undefined : design.pageSize}
       style={{
         ...pageStyle(design, tokens),
         backgroundImage: backgroundImage(design.background, design.accentColor),

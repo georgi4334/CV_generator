@@ -3,6 +3,8 @@ import {
   CvVersionSummarySchema,
   CvDocumentSchema,
   DocumentSummarySchema,
+  SharedCvSchema,
+  ShareStateSchema,
   UploadSchema,
   type CreateCvInput,
   type CvRecord,
@@ -51,6 +53,25 @@ export const cvApi = {
   async restoreVersion(id: string, versionId: string) {
     const { data } = await api.post(`/cvs/${id}/versions/${versionId}/restore`)
     return CvRecordSchema.parse(data)
+  },
+  async getShare(id: string) {
+    const { data } = await api.get(`/cvs/${id}/share`)
+    return ShareStateSchema.parse(data)
+  },
+  /** The first call creates the link; later calls turn it on or off. */
+  async setShare(id: string, isActive: boolean) {
+    const { data } = await api.put(`/cvs/${id}/share`, { isActive })
+    return ShareStateSchema.parse(data)
+  },
+  /** A new address; the old link stops working. */
+  async resetShare(id: string) {
+    const { data } = await api.post(`/cvs/${id}/share/reset`)
+    return ShareStateSchema.parse(data)
+  },
+  /** Public: what a share link shows. */
+  async getShared(slug: string) {
+    const { data } = await api.get(`/shared/${encodeURIComponent(slug)}`)
+    return SharedCvSchema.parse(data)
   },
   async uploadImage(image: Blob, filename = 'image') {
     const form = new FormData()
