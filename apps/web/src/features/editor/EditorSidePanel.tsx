@@ -1,4 +1,6 @@
+import { isProfessionId } from '@cv/shared'
 import { X } from 'lucide-react'
+import { useCv } from '../../lib/cvQueries'
 import { useEditorUi, type EditorPanel } from '../../stores/editorUi'
 import { DesignPanel } from './DesignPanel'
 import { HistoryPanel } from './HistoryPanel'
@@ -24,6 +26,8 @@ function AiPanel() {
 
 export function EditorSidePanel({ panel, cvId }: { panel: EditorPanel; cvId?: string }) {
   const closePanel = useEditorUi((s) => s.closePanel)
+  const savedProfession = useCv(cvId).data?.professionId
+  const professionId = isProfessionId(savedProfession) ? savedProfession : null
   return (
     <aside
       aria-label={TITLES[panel]}
@@ -40,7 +44,7 @@ export function EditorSidePanel({ panel, cvId }: { panel: EditorPanel; cvId?: st
           <X className="size-4" />
         </button>
       </div>
-      {panel === 'templates' && <TemplatesPanel />}
+      {panel === 'templates' && <TemplatesPanel professionId={professionId} />}
       {panel === 'design' && <DesignPanel />}
       {panel === 'ai' && <AiPanel />}
       {panel === 'rearrange' && <RearrangePanel />}

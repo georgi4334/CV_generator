@@ -18,7 +18,13 @@ import { card, PageHeader, primaryButton, secondaryButton } from '../components/
 import { toApiRequestError } from '../lib/api'
 import { useCvList, useDeleteCvs, useDuplicateCv, useRenameCv } from '../lib/cvQueries'
 import { formatDate } from '../lib/format'
-import { DOCUMENT_SUBTABS, editPath, isDocumentSubtab, type DocumentSubtab } from '../lib/paths'
+import {
+  DOCUMENT_SUBTABS,
+  editPath,
+  isDocumentSubtab,
+  NEW_CV_PATH,
+  type DocumentSubtab,
+} from '../lib/paths'
 import { MOCK_COVER_LETTERS, MOCK_JOBS } from '../mocks/data'
 
 type SortKey = 'updated' | 'created' | 'name' | 'type'
@@ -45,7 +51,7 @@ function CreateNewButton({ subtab }: { subtab: DocumentSubtab }) {
 
   if (subtab === 'cvs') {
     return (
-      <Link to="/cvs/new/edit" className={primaryButton}>
+      <Link to={NEW_CV_PATH} className={primaryButton}>
         <Plus className="size-4" /> Create new CV
       </Link>
     )
@@ -74,7 +80,7 @@ function CreateNewButton({ subtab }: { subtab: DocumentSubtab }) {
         >
           <Link
             role="menuitem"
-            to="/cvs/new/edit"
+            to={NEW_CV_PATH}
             className="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800"
           >
             CV
@@ -378,7 +384,7 @@ export function DocumentsPage() {
             {query ? 'No documents match your search.' : 'Nothing here yet.'}
             {!query && subtab !== 'cover-letters' && (
               <div className="mt-3">
-                <Link to="/cvs/new/edit" className={primaryButton}>
+                <Link to={NEW_CV_PATH} className={primaryButton}>
                   <Plus className="size-4" /> Create your first CV
                 </Link>
               </div>

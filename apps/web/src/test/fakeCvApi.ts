@@ -1,6 +1,7 @@
 import {
   createEmptyCv,
   createExampleCv,
+  PROFESSIONS,
   type CvDocument,
   type CvRecord,
   type CvVersionSummary,
@@ -49,7 +50,9 @@ export function createFakeCvApi() {
       const record: CvRecord = {
         id: id(),
         type: 'cv',
-        title: input.title ?? 'Untitled CV',
+        title:
+          input.title ??
+          (input.professionId ? `${PROFESSIONS[input.professionId].name} CV` : 'Untitled CV'),
         professionId: input.professionId ?? null,
         jobId: input.jobId ?? null,
         revision: 1,

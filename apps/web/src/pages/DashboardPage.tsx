@@ -4,12 +4,12 @@ import { Link } from 'react-router'
 import { DocumentTypeBadge } from '../components/Badges'
 import { card, PageHeader } from '../components/PageHeader'
 import { daysBetween, formatDate } from '../lib/format'
-import { editPath } from '../lib/paths'
+import { editPath, NEW_CV_PATH } from '../lib/paths'
 import { useCvList } from '../lib/cvQueries'
 import { MOCK_COVER_LETTERS, MOCK_JOBS, MOCK_TODAY } from '../mocks/data'
 
 const QUICK_ACTIONS = [
-  { to: '/cvs/new/edit', label: 'New CV', icon: FilePlus2 },
+  { to: NEW_CV_PATH, label: 'New CV', icon: FilePlus2 },
   { to: '/cover-letters/new/edit', label: 'New cover letter', icon: Mail },
   { to: '/jobs', label: 'Add job', icon: Briefcase },
 ]

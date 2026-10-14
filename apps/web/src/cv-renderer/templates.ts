@@ -1,4 +1,4 @@
-import type { CvDesign, CvHeader, TemplateId } from '@cv/shared'
+import type { CvDesign, CvDocument, CvHeader, TemplateId } from '@cv/shared'
 import type { FC } from 'react'
 import type { TitleVariant } from './context'
 import {
@@ -230,6 +230,16 @@ export const TEMPLATES: Record<TemplateId, TemplateDefinition> = {
 
 export function getTemplate(id: TemplateId): TemplateDefinition {
   return TEMPLATES[id] ?? TEMPLATES.polished
+}
+
+/** What choosing a template changes: the template itself plus its suggested look. */
+export function templateChoice(id: TemplateId): Partial<CvDesign> {
+  return { templateId: id, ...getTemplate(id).suggested }
+}
+
+/** The CV as it would look after choosing another template. */
+export function withTemplate(cv: CvDocument, id: TemplateId): CvDocument {
+  return { ...cv, design: { ...cv.design, ...templateChoice(id) } }
 }
 
 /** Sidebar width and background for the chosen Column layout option. */

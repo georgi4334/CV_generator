@@ -12,7 +12,6 @@ import { cvEditorApi } from './editorApi'
 import { useCvSession } from './editorSession'
 import { EditorLayout } from './EditorLayout'
 import { LoadError, PageLoading } from './LoadStates'
-import { NewCvPage } from './NewCvPage'
 import { PageCanvas } from './PageCanvas'
 import { SaveIndicator } from './SaveIndicator'
 import { useUndoShortcuts } from './useUndoShortcuts'
@@ -62,13 +61,12 @@ function CvEditor({ record }: { record: CvRecord }) {
 /** /cvs/:id/edit: loads the CV from the API and opens the editor. */
 export function CvEditorPage() {
   const { id } = useParams()
-  const query = useCv(id === 'new' ? undefined : id)
+  const query = useCv(id)
   const closePanel = useEditorUi((s) => s.closePanel)
 
   // Start each document with the side panel closed.
   useEffect(() => closePanel, [id, closePanel])
 
-  if (id === 'new') return <NewCvPage />
   if (query.isPending) return <PageLoading />
   if (query.isError) {
     const error = toApiRequestError(query.error)

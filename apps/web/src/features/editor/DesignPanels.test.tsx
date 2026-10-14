@@ -43,6 +43,21 @@ describe('TemplatesPanel', () => {
     expect(design()).toMatchObject({ templateId: 'creative', fontFamily: 'Inter' })
   })
 
+  it("marks the templates recommended for the CV's profession", () => {
+    render(<TemplatesPanel professionId="designer" />)
+    const list = within(screen.getByRole('list', { name: 'Templates' }))
+    expect(list.getAllByRole('button', { name: /Recommended$/ })).toEqual(
+      ['Contemporary', 'Creative', 'Stylish'].map((name) =>
+        list.getByRole('button', { name: `${name} Recommended` }),
+      ),
+    )
+  })
+
+  it('shows no recommendations without a profession', () => {
+    render(<TemplatesPanel />)
+    expect(screen.queryByText('Recommended')).toBeNull()
+  })
+
   it('switches document size and resume language', () => {
     render(<TemplatesPanel />)
     fireEvent.click(screen.getByRole('radio', { name: 'US Letter' }))

@@ -45,3 +45,22 @@ export function DocumentTypeBadge({ type }: { type: DocumentType }) {
     </span>
   )
 }
+
+/** Marks a template that suits the CV's profession. */
+export function RecommendedBadge({
+  compact = false,
+  className = '',
+}: {
+  /** Smaller, for template thumbnails in the editor panel. */
+  compact?: boolean
+  className?: string
+}) {
+  const size = compact ? 'rounded-full px-1.5 py-px text-[10px] font-medium' : pill
+  return (
+    <span
+      className={`${size} bg-amber-100 text-amber-800 shadow-sm dark:bg-amber-950 dark:text-amber-300 ${className}`}
+    >
+      Recommended
+    </span>
+  )
+}
