@@ -1,6 +1,7 @@
 import {
   createEmptyCv,
   createExampleCv,
+  CV_LANGUAGES,
   PROFESSION_IDS,
   TEMPLATE_IDS,
   type CvDocument,
@@ -9,6 +10,7 @@ import { render, screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { isItemEmpty } from './blocks'
 import { CvRenderer } from './CvRenderer'
+import { PLACEHOLDERS } from './placeholders'
 import { getTemplate } from './templates'
 
 const visiblePages = () => within(screen.getByRole('document', { name: 'CV' }))
@@ -54,6 +56,26 @@ describe('CvRenderer', () => {
     const cv = { ...createExampleCv('healthcare'), language: 'bg' as const }
     render(<CvRenderer cv={cv} mode="preview" />)
     expect(visiblePages().getByText('Професионален опит')).toBeDefined()
+  })
+})
+
+describe('placeholders', () => {
+  it('follow the CV language', () => {
+    const cv = createEmptyCv('bg')
+    render(<CvRenderer cv={cv} mode="edit" />)
+    const page = visiblePages()
+    expect(page.getByText('Вашето име')).toBeDefined()
+    expect(page.getByText('Телефон')).toBeDefined()
+    expect(page.getAllByText('Име на компанията').length).toBeGreaterThan(0)
+    expect(page.queryByText('Your Name')).toBeNull()
+  })
+
+  it('have a translation for every field in every language', () => {
+    const keys = Object.keys(PLACEHOLDERS['en-US']).sort()
+    for (const language of CV_LANGUAGES) {
+      expect(Object.keys(PLACEHOLDERS[language]).sort()).toEqual(keys)
+      expect(Object.values(PLACEHOLDERS[language]).every((text) => text.trim())).toBe(true)
+    }
   })
 })
 

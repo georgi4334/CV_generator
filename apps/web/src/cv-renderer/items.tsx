@@ -19,7 +19,7 @@ import { assetUrl } from '../lib/api'
 import { itemPath } from './editorApi'
 import { ACHIEVEMENT_ICONS } from './icons'
 import { pickAndUpload } from './image'
-import { PLACEHOLDERS as P } from './placeholders'
+import { usePlaceholders } from './placeholders'
 import {
   Bullets,
   DateRangeField,
@@ -104,6 +104,7 @@ export function ExperienceView({
   showLogo: boolean
   refs: ItemRef
 }) {
+  const P = usePlaceholders()
   const { language } = useRender()
   const update = useUpdate(refs)
   return (
@@ -153,6 +154,7 @@ export function ExperienceView({
 }
 
 export function EducationView({ item, refs }: { item: EducationItem; refs: ItemRef }) {
+  const P = usePlaceholders()
   const { language } = useRender()
   const update = useUpdate(refs)
   return (
@@ -224,6 +226,7 @@ function AchievementIcon({ item, refs }: { item: AchievementItem; refs: ItemRef 
 }
 
 export function AchievementView({ item, refs }: { item: AchievementItem; refs: ItemRef }) {
+  const P = usePlaceholders()
   return (
     <div className="flex gap-[0.6em]">
       <AchievementIcon item={item} refs={refs} />
@@ -248,6 +251,7 @@ export function AchievementView({ item, refs }: { item: AchievementItem; refs: I
 }
 
 export function CourseView({ item, refs }: { item: CourseItem; refs: ItemRef }) {
+  const P = usePlaceholders()
   const { language } = useRender()
   const update = useUpdate(refs)
   return (
@@ -283,6 +287,7 @@ export function CourseView({ item, refs }: { item: CourseItem; refs: ItemRef }) 
 }
 
 export function ProjectView({ item, refs }: { item: ProjectItem; refs: ItemRef }) {
+  const P = usePlaceholders()
   const { language } = useRender()
   const update = useUpdate(refs)
   return (
@@ -338,6 +343,7 @@ export function ProjectView({ item, refs }: { item: ProjectItem; refs: ItemRef }
 }
 
 export function CertificateView({ item, refs }: { item: CertificateItem; refs: ItemRef }) {
+  const P = usePlaceholders()
   const { language } = useRender()
   const update = useUpdate(refs)
   return (
@@ -363,6 +369,7 @@ export function CertificateView({ item, refs }: { item: CertificateItem; refs: I
 }
 
 export function CustomView({ item, refs }: { item: CustomItem; refs: ItemRef }) {
+  const P = usePlaceholders()
   return (
     <div>
       <SplitRow
@@ -412,6 +419,7 @@ export function LanguageView({
   display: LanguagesDisplay
   refs: ItemRef
 }) {
+  const P = usePlaceholders()
   const { language } = useRender()
   const update = useUpdate(refs)
   const setLevel = (level: number) => update({ level })
@@ -483,6 +491,7 @@ export function SkillsView({
   display: SkillsDisplay
   sectionId: string
 }) {
+  const P = usePlaceholders()
   const { inlineSkills, mode } = useRender()
   const editor = useEditor()
   const shown = mode === 'preview' ? items.filter((s) => s.name.trim()) : items
@@ -551,6 +560,7 @@ export function SkillsView({
 }
 
 export function SummaryView({ text, sectionId }: { text: string; sectionId: string }) {
+  const P = usePlaceholders()
   return (
     <Field
       value={text}
