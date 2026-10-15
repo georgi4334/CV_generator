@@ -3,11 +3,11 @@ import { useEffect, type ReactNode } from 'react'
 import { Link, useParams } from 'react-router'
 import { FitToWidth } from '../../components/FitToWidth'
 import { primaryButton, secondaryButton } from '../../components/PageHeader'
-import { CvRenderer } from '../../cv-renderer'
+import { CvRenderer, LetterRenderer } from '../../cv-renderer'
 import { PAGE_SIZE_PX } from '../../cv-renderer/tokens'
 import { toApiRequestError } from '../../lib/api'
-import { useSharedCv } from '../../lib/cvQueries'
-import { printCv } from '../print/printCv'
+import { useSharedDocument } from '../../lib/shareQueries'
+import { printDocument } from '../print/printCv'
 
 /** Keeps shared CVs out of search results while the page is open. */
 function useNoIndex() {
@@ -40,10 +40,10 @@ function Message({ title, children }: { title: string; children: ReactNode }) {
   )
 }
 
-/** /s/:slug: a CV someone shared, read-only, for anyone with the link. */
-export function SharedCvPage() {
+/** /s/:slug: a CV or cover letter someone shared, read-only, for anyone with the link. */
+export function SharedDocumentPage() {
   const { slug = '' } = useParams()
-  const query = useSharedCv(slug)
+  const query = useSharedDocument(slug)
   useNoIndex()
   useDocumentTitle(query.data?.title)
 
@@ -70,7 +70,7 @@ export function SharedCvPage() {
       )
     }
     return (
-      <Message title="Could not load this CV">
+      <Message title="Could not load this document">
         <p className="max-w-md text-sm text-slate-500">{error.message}</p>
         <button type="button" onClick={() => void query.refetch()} className={primaryButton}>
           Try again
@@ -79,7 +79,9 @@ export function SharedCvPage() {
     )
   }
 
-  const { title, document: cv } = query.data
+  const shared = query.data
+  const { title } = shared
+  const pageSize = shared.document.design.pageSize
   return (
     <div className="min-h-screen bg-slate-200 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <header className="sticky top-0 z-10 border-b border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900">
@@ -88,7 +90,14 @@ export function SharedCvPage() {
           <h1 className="min-w-0 flex-1 truncate font-semibold">{title}</h1>
           <button
             type="button"
-            onClick={() => printCv(cv, title)}
+            onClick={() =>
+              printDocument(
+                shared.type === 'cv'
+                  ? { kind: 'cv', cv: shared.document }
+                  : { kind: 'coverLetter', letter: shared.document },
+                title,
+              )
+            }
             className={primaryButton}
             aria-label="Download PDF"
             title="Opens the print dialog: choose “Save as PDF”"
@@ -101,8 +110,12 @@ export function SharedCvPage() {
         </div>
       </header>
       <main className="px-4 py-6 sm:px-6 sm:py-8">
-        <FitToWidth width={PAGE_SIZE_PX[cv.design.pageSize].width}>
-          <CvRenderer cv={cv} mode="preview" pageClassName="shadow-lg" />
+        <FitToWidth width={PAGE_SIZE_PX[pageSize].width}>
+          {shared.type === 'cv' ? (
+            <CvRenderer cv={shared.document} mode="preview" pageClassName="shadow-lg" />
+          ) : (
+            <LetterRenderer letter={shared.document} mode="preview" pageClassName="shadow-lg" />
+          )}
         </FitToWidth>
       </main>
       <footer className="pb-8 text-center text-xs text-slate-500">

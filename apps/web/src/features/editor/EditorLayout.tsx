@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { useEditorUi } from '../../stores/editorUi'
 import { EditorRightRail } from './EditorRightRail'
 import { EditorSidePanel } from './EditorSidePanel'
-import { EditorTopBar } from './EditorTopBar'
+import { EditorTopBar, type UndoRedo } from './EditorTopBar'
 import { Toast } from './Toast'
 
 interface EditorLayoutProps {
@@ -16,6 +16,9 @@ interface EditorLayoutProps {
   banner?: ReactNode
   onDownload?: () => void
   onShare?: () => void
+  /** For a cover letter: its undo/redo and which tools apply. */
+  undoRedo?: UndoRedo
+  kind?: 'cv' | 'coverLetter'
   children: ReactNode
 }
 
@@ -29,12 +32,21 @@ export function EditorLayout({
   banner,
   onDownload,
   onShare,
+  undoRedo,
+  kind,
   children,
 }: EditorLayoutProps) {
   const activePanel = useEditorUi((s) => s.activePanel)
   return (
     <div className="flex h-screen flex-col bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-      <EditorTopBar title={title} status={status} backTo={backTo} historyEnabled={Boolean(cvId)} />
+      <EditorTopBar
+        title={title}
+        status={status}
+        backTo={backTo}
+        historyEnabled={Boolean(cvId)}
+        undoRedo={undoRedo}
+        kind={kind}
+      />
       {banner}
       <div className="flex min-h-0 flex-1">
         {activePanel && <EditorSidePanel panel={activePanel} cvId={cvId} />}

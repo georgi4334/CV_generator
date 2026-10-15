@@ -46,14 +46,38 @@ interface EditorTopBarProps {
   backTo: string
   /** Version history is only available for saved CVs. */
   historyEnabled?: boolean
+  /** Undo/redo of the open document (default: the CV editor). */
+  undoRedo?: UndoRedo
+  /** Which tools apply: a cover letter has no sections to rearrange. */
+  kind?: 'cv' | 'coverLetter'
 }
 
-export function EditorTopBar({ title, status, backTo, historyEnabled = false }: EditorTopBarProps) {
+export interface UndoRedo {
+  canUndo: boolean
+  canRedo: boolean
+  undo: () => void
+  redo: () => void
+}
+
+export function EditorTopBar({
+  title,
+  status,
+  backTo,
+  historyEnabled = false,
+  undoRedo,
+  kind = 'cv',
+}: EditorTopBarProps) {
   const { activePanel, togglePanel, notify } = useEditorUi()
-  const canUndo = useCvEditor((s) => s.past.length > 0)
-  const canRedo = useCvEditor((s) => s.future.length > 0)
-  const undo = useCvEditor((s) => s.undo)
-  const redo = useCvEditor((s) => s.redo)
+  const cvCanUndo = useCvEditor((s) => s.past.length > 0)
+  const cvCanRedo = useCvEditor((s) => s.future.length > 0)
+  const cvUndo = useCvEditor((s) => s.undo)
+  const cvRedo = useCvEditor((s) => s.redo)
+  const { canUndo, canRedo, undo, redo } = undoRedo ?? {
+    canUndo: cvCanUndo,
+    canRedo: cvCanRedo,
+    undo: cvUndo,
+    redo: cvRedo,
+  }
   const [helpOpen, setHelpOpen] = useState(false)
 
   return (
@@ -91,7 +115,11 @@ export function EditorTopBar({ title, status, backTo, historyEnabled = false }: 
               className={`${toolButton} ${active ? activeTool : ''}`}
               aria-pressed={panel ? active : undefined}
               onClick={() =>
-                panel ? togglePanel(panel) : notify(`${label} is coming in ${comingIn}.`)
+                kind === 'coverLetter' && panel === 'rearrange'
+                  ? notify('A cover letter has no sections to rearrange.')
+                  : panel
+                    ? togglePanel(panel)
+                    : notify(`${label} is coming in ${comingIn}.`)
               }
             >
               <Icon className="size-4" /> <span className="hidden md:inline">{label}</span>

@@ -67,3 +67,18 @@ button.cv-editable {
     -webkit-print-color-adjust: exact;
   }
 }
+
+/* Cover letters grow past one page when long, so their page is a minimum height. */
+@media print {
+  .print-root [data-letter-page] {
+    box-shadow: none !important;
+  }
+  .print-root [data-letter-page='A4'] {
+    width: 210mm !important;
+    min-height: 297mm !important;
+  }
+  .print-root [data-letter-page='Letter'] {
+    width: 8.5in !important;
+    min-height: 11in !important;
+  }
+}

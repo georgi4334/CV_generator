@@ -14,6 +14,7 @@ import { CvThumbnail, getTemplate, templateChoice, withTemplate } from '../../cv
 import { CV_LANGUAGE_NAMES } from '../../lib/languages'
 import { useEditorUi } from '../../stores/editorUi'
 import { useCvEditor } from './cvEditorStore'
+import { useDesignTarget } from './designTarget'
 
 /** The user's CV in another template, the way choosing it would look. */
 const TemplateThumbnail = memo(function TemplateThumbnail({
@@ -31,11 +32,13 @@ const segment = 'flex-1 rounded-md py-1.5 text-sm font-medium'
 /** `professionId` marks the templates recommended for the CV's profession. */
 export function TemplatesPanel({ professionId = null }: { professionId?: ProfessionId | null }) {
   const cv = useCvEditor((s) => s.cv)
-  const updateDesign = useCvEditor((s) => s.updateDesign)
-  const setLanguage = useCvEditor((s) => s.setLanguage)
+  const { kind, design, language, updateDesign, setLanguage, renderThumbnail } = useDesignTarget()
   const closePanel = useEditorUi((s) => s.closePanel)
-  if (!cv) return null
-  const current = cv.design.templateId
+  if (!design) return null
+  const current = design.templateId
+  const thumbnail =
+    renderThumbnail ??
+    ((id: TemplateId) => (cv ? <TemplateThumbnail cv={cv} templateId={id} /> : null))
   const recommended: readonly TemplateId[] = professionId
     ? PROFESSIONS[professionId].recommendedTemplates
     : []
@@ -58,7 +61,7 @@ export function TemplatesPanel({ professionId = null }: { professionId?: Profess
                     : 'hover:ring-2 hover:ring-slate-300 dark:hover:ring-slate-600'
                 }`}
               >
-                <TemplateThumbnail cv={cv} templateId={id} />
+                {thumbnail(id)}
                 <span
                   className={`mt-1 block ${selected ? 'font-semibold text-teal-700 dark:text-teal-300' : ''}`}
                 >
@@ -96,10 +99,10 @@ export function TemplatesPanel({ professionId = null }: { professionId?: Profess
               key={size}
               type="button"
               role="radio"
-              aria-checked={cv.design.pageSize === size}
+              aria-checked={design.pageSize === size}
               onClick={() => updateDesign({ pageSize: size })}
               className={`${segment} ${
-                cv.design.pageSize === size
+                design.pageSize === size
                   ? 'bg-white text-teal-700 shadow-sm dark:bg-slate-700 dark:text-teal-300'
                   : 'text-slate-600 dark:text-slate-300'
               }`}
@@ -112,9 +115,13 @@ export function TemplatesPanel({ professionId = null }: { professionId?: Profess
 
       <label className="mt-4 flex items-center gap-3">
         <span className="flex w-24 items-center gap-1 text-sm">
-          Resume language
+          {kind === 'cv' ? 'Resume language' : 'Letter language'}
           <span
-            title="Sets the section titles, date formats and placeholders on your CV. It does not change the app's language."
+            title={
+              kind === 'cv'
+                ? "Sets the section titles, date formats and placeholders on your CV. It does not change the app's language."
+                : "Sets the placeholders on your letter. It does not change the app's language or your text."
+            }
             className="text-slate-400"
           >
             <Info className="size-3.5" aria-hidden />
@@ -122,7 +129,7 @@ export function TemplatesPanel({ professionId = null }: { professionId?: Profess
         </span>
         <select
           className="flex-1 rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-800"
-          value={cv.language}
+          value={language}
           onChange={(e) => setLanguage(e.target.value as CvLanguage)}
         >
           {CV_LANGUAGES.map((language) => (

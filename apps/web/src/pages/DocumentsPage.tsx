@@ -16,20 +16,21 @@ import { Link, Navigate, NavLink, useParams } from 'react-router'
 import { DocumentTypeBadge, SharedBadge } from '../components/Badges'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { card, PageHeader, primaryButton, secondaryButton } from '../components/PageHeader'
-import { printCv } from '../features/print/printCv'
 import { ShareDialog } from '../features/share/ShareDialog'
 import { toApiRequestError } from '../lib/api'
-import { useCvList, useDeleteCvs, useDuplicateCv, useLoadCv, useRenameCv } from '../lib/cvQueries'
+import { useCvList } from '../lib/cvQueries'
+import { useDocumentActions } from '../lib/documentActions'
+import { useCoverLetterList } from '../lib/letterQueries'
 import { formatDate } from '../lib/format'
 import {
   DOCUMENT_SUBTABS,
   editPath,
   isDocumentSubtab,
   NEW_CV_PATH,
+  NEW_LETTER_PATH,
   type DocumentSubtab,
 } from '../lib/paths'
 import { useJobs } from '../lib/jobQueries'
-import { MOCK_COVER_LETTERS } from '../mocks/data'
 
 type SortKey = 'updated' | 'created' | 'name' | 'type'
 
@@ -47,9 +48,6 @@ const compare: Record<SortKey, (a: DocumentSummary, b: DocumentSummary) => numbe
   type: (a, b) => a.type.localeCompare(b.type) || b.updatedAt.localeCompare(a.updatedAt),
 }
 
-/** Cover letters are sample data until Step 13, so they cannot be changed yet. */
-const isEditable = (doc: DocumentSummary) => doc.type === 'cv'
-
 function CreateNewButton({ subtab }: { subtab: DocumentSubtab }) {
   const [open, setOpen] = useState(false)
 
@@ -62,7 +60,7 @@ function CreateNewButton({ subtab }: { subtab: DocumentSubtab }) {
   }
   if (subtab === 'cover-letters') {
     return (
-      <Link to="/cover-letters/new/edit" className={primaryButton}>
+      <Link to={NEW_LETTER_PATH} className={primaryButton}>
         <Plus className="size-4" /> Create new cover letter
       </Link>
     )
@@ -91,7 +89,7 @@ function CreateNewButton({ subtab }: { subtab: DocumentSubtab }) {
           </Link>
           <Link
             role="menuitem"
-            to="/cover-letters/new/edit"
+            to={NEW_LETTER_PATH}
             className="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800"
           >
             Cover letter
@@ -112,7 +110,6 @@ interface RowActions {
 
 function RowMenu({ doc, actions }: { doc: DocumentSummary; actions: RowActions }) {
   const [open, setOpen] = useState(false)
-  const editable = isEditable(doc)
   const item =
     'flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent dark:hover:bg-slate-800'
   const run = (action: () => void) => () => {
@@ -141,47 +138,22 @@ function RowMenu({ doc, actions }: { doc: DocumentSummary; actions: RowActions }
           <Link role="menuitem" to={editPath(doc)} className={item}>
             <FileText className="size-4" /> Open
           </Link>
-          <button
-            type="button"
-            role="menuitem"
-            className={item}
-            disabled={!editable}
-            onClick={run(actions.onRename)}
-          >
+          <button type="button" role="menuitem" className={item} onClick={run(actions.onRename)}>
             <Pencil className="size-4" /> Rename
           </button>
-          <button
-            type="button"
-            role="menuitem"
-            className={item}
-            disabled={!editable}
-            onClick={run(actions.onDuplicate)}
-          >
+          <button type="button" role="menuitem" className={item} onClick={run(actions.onDuplicate)}>
             <Copy className="size-4" /> Copy
           </button>
-          <button
-            type="button"
-            role="menuitem"
-            className={item}
-            disabled={!editable}
-            onClick={run(actions.onDownload)}
-          >
+          <button type="button" role="menuitem" className={item} onClick={run(actions.onDownload)}>
             <Download className="size-4" /> Download PDF
           </button>
-          <button
-            type="button"
-            role="menuitem"
-            className={item}
-            disabled={!editable}
-            onClick={run(actions.onShare)}
-          >
+          <button type="button" role="menuitem" className={item} onClick={run(actions.onShare)}>
             <Link2 className="size-4" /> Share link
           </button>
           <button
             type="button"
             role="menuitem"
             className={`${item} text-red-600 dark:text-red-400`}
-            disabled={!editable}
             onClick={run(actions.onDelete)}
           >
             <Trash2 className="size-4" /> Delete
@@ -220,10 +192,9 @@ function RenameInput({
 export function DocumentsPage() {
   const { subtab } = useParams()
   const cvs = useCvList()
-  const rename = useRenameCv()
-  const duplicate = useDuplicateCv()
-  const remove = useDeleteCvs()
-  const loadCv = useLoadCv()
+  const letters = useCoverLetterList()
+  const actions = useDocumentActions()
+  const { remove } = actions
   const jobs = useJobs().data ?? []
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<SortKey>('updated')
@@ -235,7 +206,7 @@ export function DocumentsPage() {
 
   const documents = useMemo(() => {
     if (!isDocumentSubtab(subtab)) return []
-    const all = [...(cvs.data ?? []), ...MOCK_COVER_LETTERS]
+    const all = [...(cvs.data ?? []), ...(letters.data ?? [])]
     const needle = query.trim().toLowerCase()
     return all
       .filter(
@@ -244,11 +215,13 @@ export function DocumentsPage() {
       )
       .filter((doc) => !needle || doc.title.toLowerCase().includes(needle))
       .sort(compare[sort])
-  }, [cvs.data, subtab, query, sort])
+  }, [cvs.data, letters.data, subtab, query, sort])
 
   if (!isDocumentSubtab(subtab)) return <Navigate to="/documents/all" replace />
 
-  const selectable = documents.filter(isEditable)
+  const selectable = documents
+  const loading = cvs.isPending || letters.isPending
+  const loadError = cvs.error ?? letters.error
   const selectedDocs = selectable.filter((doc) => selected.has(doc.id))
   const allSelected = selectable.length > 0 && selectedDocs.length === selectable.length
   const toggle = (id: string) =>
@@ -264,9 +237,8 @@ export function DocumentsPage() {
   const download = async (doc: DocumentSummary) => {
     setMessage(null)
     try {
-      const record = await loadCv(doc.id)
+      await actions.download(doc)
       setMessage('In the print dialog, choose “Save as PDF” as the destination.')
-      printCv(record.document, record.title)
     } catch (e) {
       report(`"${doc.title}" could not be downloaded`)(e)
     }
@@ -276,7 +248,7 @@ export function DocumentsPage() {
     setMessage(null)
     for (const doc of docs) {
       try {
-        await duplicate.mutateAsync(doc.id)
+        await actions.duplicate(doc)
       } catch (e) {
         report(`"${doc.title}" was not copied`)(e)
         return
@@ -359,7 +331,9 @@ export function DocumentsPage() {
             type="button"
             className={`${secondaryButton} disabled:cursor-not-allowed disabled:opacity-50`}
             disabled={selectedDocs.length !== 1}
-            title={selectedDocs.length === 1 ? undefined : 'Select one CV to download it as a PDF'}
+            title={
+              selectedDocs.length === 1 ? undefined : 'Select one document to download it as a PDF'
+            }
             onClick={() => void download(selectedDocs[0]!)}
           >
             <Download className="size-4" /> Download
@@ -396,20 +370,25 @@ export function DocumentsPage() {
           <span className="w-8" />
         </div>
 
-        {cvs.isPending && (
-          <p className="px-4 py-6 text-sm text-slate-500">Loading your documents…</p>
-        )}
-        {cvs.isError && (
+        {loading && <p className="px-4 py-6 text-sm text-slate-500">Loading your documents…</p>}
+        {loadError && (
           <div className="flex items-center gap-3 px-4 py-6 text-sm">
             <span className="text-red-600">
-              Could not load your CVs: {toApiRequestError(cvs.error).message}
+              Could not load your documents: {toApiRequestError(loadError).message}
             </span>
-            <button type="button" className={secondaryButton} onClick={() => void cvs.refetch()}>
+            <button
+              type="button"
+              className={secondaryButton}
+              onClick={() => {
+                void cvs.refetch()
+                void letters.refetch()
+              }}
+            >
               Try again
             </button>
           </div>
         )}
-        {!cvs.isPending && documents.length === 0 && (
+        {!loading && documents.length === 0 && (
           <div className="px-4 py-10 text-center text-sm text-slate-500">
             {query ? 'No documents match your search.' : 'Nothing here yet.'}
             {!query && subtab !== 'cover-letters' && (
@@ -425,7 +404,6 @@ export function DocumentsPage() {
         <ul aria-label="Documents" className="divide-y divide-slate-100 dark:divide-slate-800">
           {documents.map((doc) => {
             const job = jobs.find((j) => j.id === doc.jobId)
-            const editable = isEditable(doc)
             return (
               <li
                 key={doc.id}
@@ -434,8 +412,6 @@ export function DocumentsPage() {
                 <input
                   type="checkbox"
                   aria-label={`Select ${doc.title}`}
-                  disabled={!editable}
-                  title={editable ? undefined : 'Cover letters arrive in Step 13'}
                   checked={selected.has(doc.id)}
                   onChange={() => toggle(doc.id)}
                 />
@@ -448,8 +424,7 @@ export function DocumentsPage() {
                       doc={doc}
                       onDone={(title) => {
                         setRenaming(null)
-                        if (title)
-                          rename.mutate({ id: doc.id, title }, { onError: report('Not renamed') })
+                        if (title) actions.rename(doc, title).catch(report('Not renamed'))
                       }}
                     />
                   ) : (
@@ -486,16 +461,25 @@ export function DocumentsPage() {
       </div>
 
       {sharing && (
-        <ShareDialog cvId={sharing.id} title={sharing.title} onClose={() => setSharing(null)} />
+        <ShareDialog
+          type={sharing.type}
+          id={sharing.id}
+          title={sharing.title}
+          onClose={() => setSharing(null)}
+        />
       )}
 
       {toDelete && (
         <ConfirmDialog
-          title={toDelete.length === 1 ? 'Delete this CV?' : `Delete ${toDelete.length} CVs?`}
+          title={
+            toDelete.length === 1
+              ? `Delete this ${toDelete[0]!.type === 'cv' ? 'CV' : 'cover letter'}?`
+              : `Delete ${toDelete.length} documents?`
+          }
           message={
             toDelete.length === 1
-              ? `"${toDelete[0]!.title}" and its version history will be deleted. This cannot be undone.`
-              : 'They will be deleted with their version history. This cannot be undone.'
+              ? `"${toDelete[0]!.title}"${toDelete[0]!.type === 'cv' ? ' and its version history' : ''} will be deleted. This cannot be undone.`
+              : 'They will be deleted, CVs with their version history. This cannot be undone.'
           }
           confirmLabel="Delete"
           danger
@@ -503,9 +487,9 @@ export function DocumentsPage() {
           onCancel={() => setToDelete(null)}
           onConfirm={() => {
             const ids = toDelete.map((doc) => doc.id)
-            remove.mutate(ids, {
+            remove.mutate(toDelete, {
               onSuccess: () =>
-                setMessage(ids.length === 1 ? 'CV deleted.' : `${ids.length} CVs deleted.`),
+                setMessage(ids.length === 1 ? 'Deleted.' : `${ids.length} documents deleted.`),
               onError: report('Not everything was deleted'),
               onSettled: () => {
                 setToDelete(null)

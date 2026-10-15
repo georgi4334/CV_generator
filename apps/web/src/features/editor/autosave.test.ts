@@ -23,7 +23,7 @@ const edit = (doc: CvDocument, name: string): CvDocument => ({
 describe('AutosaveController', () => {
   let states: SaveState[]
   let save: Mock<(document: CvDocument, revision: number) => Promise<CvRecord>>
-  let controller: AutosaveController
+  let controller: AutosaveController<CvDocument, CvRecord>
   const base = createEmptyCv()
   const status = () => states.at(-1)!.status
 
@@ -31,7 +31,7 @@ describe('AutosaveController', () => {
     vi.useFakeTimers()
     states = []
     save = vi.fn(async (document: CvDocument, revision: number) => record(document, revision + 1))
-    controller = new AutosaveController({
+    controller = new AutosaveController<CvDocument, CvRecord>({
       save,
       onState: (s) => states.push(s),
       delayMs: 1000,

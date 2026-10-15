@@ -74,7 +74,9 @@ describe('placeholders', () => {
     const keys = Object.keys(PLACEHOLDERS['en-US']).sort()
     for (const language of CV_LANGUAGES) {
       expect(Object.keys(PLACEHOLDERS[language]).sort()).toEqual(keys)
-      expect(Object.values(PLACEHOLDERS[language]).every((text) => text.trim())).toBe(true)
+      const texts = Object.values(PLACEHOLDERS[language]).flat()
+      expect(texts.every((text) => text.trim())).toBe(true)
+      expect(PLACEHOLDERS[language].paragraphs).toHaveLength(3)
     }
   })
 })

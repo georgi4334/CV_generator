@@ -4,6 +4,7 @@ import type { Database } from './db/client'
 import { databaseUnavailable, registerErrorHandler } from './lib/errors'
 import type { Storage } from './lib/storage'
 import { useCurrentUser } from './plugins/currentUser'
+import { coverLetterRoutes } from './routes/coverLetters'
 import { cvRoutes } from './routes/cvs'
 import { healthRoutes } from './routes/health'
 import { jobRoutes } from './routes/jobs'
@@ -64,6 +65,7 @@ export async function buildApp(opts: AppOptions) {
           await scope.register(cvRoutes, { database })
           await scope.register(shareRoutes, { database })
           await scope.register(jobRoutes, { database })
+          await scope.register(coverLetterRoutes, { database })
           await scope.register(uploadRoutes, { database, storage: opts.storage })
         })
       })

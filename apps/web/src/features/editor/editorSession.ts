@@ -1,4 +1,4 @@
-import type { CvRecord } from '@cv/shared'
+import type { CvDocument, CvRecord } from '@cv/shared'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef } from 'react'
 import { create } from 'zustand'
@@ -15,7 +15,9 @@ export const useSaveState = create<SaveState>()(() => ({
 }))
 
 /** The open CV's autosave controller (one editor at a time). */
-const session: { controller: AutosaveController | null } = { controller: null }
+const session: { controller: AutosaveController<CvDocument, CvRecord> | null } = {
+  controller: null,
+}
 
 /** Saves pending changes now; resolves false if they could not be saved. */
 export function flushSave(): Promise<boolean> {
@@ -44,7 +46,7 @@ export function useCvSession(record: CvRecord) {
 
   useEffect(() => {
     const start = initial.current
-    const controller = new AutosaveController({
+    const controller = new AutosaveController<CvDocument, CvRecord>({
       save: (document, revision) => cvApi.update(start.id, { revision, document }),
       onState: (state) => useSaveState.setState(state, true),
       onSaved: (saved) => rememberCv(queryClient, saved),

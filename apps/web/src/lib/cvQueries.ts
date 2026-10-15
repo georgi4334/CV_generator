@@ -1,4 +1,4 @@
-import type { CreateCvInput, CvRecord, DocumentSummary, ShareState } from '@cv/shared'
+import type { CreateCvInput, CvRecord, DocumentSummary } from '@cv/shared'
 import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { cvApi } from './cvApi'
 
@@ -109,35 +109,5 @@ export function useDeleteCvs() {
       for (const id of ids) queryClient.removeQueries({ queryKey: cvKeys.detail(id) })
       return queryClient.invalidateQueries({ queryKey: cvKeys.list, exact: true })
     },
-  })
-}
-
-export function useCvShare(id: string) {
-  return useQuery({ queryKey: cvKeys.share(id), queryFn: () => cvApi.getShare(id) })
-}
-
-/** Turns the share link on or off, or replaces it (`reset`). */
-export function useUpdateCvShare(id: string) {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: (change: { isActive: boolean } | 'reset') =>
-      change === 'reset' ? cvApi.resetShare(id) : cvApi.setShare(id, change.isActive),
-    onSuccess: (state: ShareState) => {
-      queryClient.setQueryData(cvKeys.share(id), state)
-      queryClient.setQueryData<DocumentSummary[]>(cvKeys.list, (list) =>
-        list?.map((item) =>
-          item.id === id ? { ...item, shared: state.link?.isActive ?? false } : item,
-        ),
-      )
-    },
-  })
-}
-
-/** Public: the CV behind a share link. */
-export function useSharedCv(slug: string) {
-  return useQuery({
-    queryKey: cvKeys.shared(slug),
-    queryFn: () => cvApi.getShared(slug),
-    retry: (count, error) => count < 2 && (error as { retryable?: boolean }).retryable === true,
   })
 }

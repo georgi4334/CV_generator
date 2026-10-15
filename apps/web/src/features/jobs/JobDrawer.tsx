@@ -1,14 +1,16 @@
 import { type Job, type UpdateJobInput } from '@cv/shared'
-import { CopyPlus, Trash2, X } from 'lucide-react'
+import { CopyPlus, FilePen, Trash2, X } from 'lucide-react'
 import { useId, useState, type FormEvent, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { Modal } from '../../components/Modal'
 import { primaryButton, secondaryButton } from '../../components/PageHeader'
 import { toApiRequestError } from '../../lib/api'
 import { useCvList } from '../../lib/cvQueries'
+import { useCoverLetterList } from '../../lib/letterQueries'
+import { NEW_LETTER_PATH } from '../../lib/paths'
 import { formatDate, localToday } from '../../lib/format'
 import { useCreateJob, useTailorCv, useUpdateJob } from '../../lib/jobQueries'
-import { CvSelect, DateInput, StatusSelect, TypeSelect } from './fields'
+import { DateInput, DocumentSelect, StatusSelect, TypeSelect } from './fields'
 import { statusChange } from './jobHelpers'
 
 type Draft = Pick<
@@ -19,6 +21,7 @@ type Draft = Pick<
   | 'type'
   | 'dateApplied'
   | 'cvId'
+  | 'coverLetterId'
   | 'notes'
   | 'location'
   | 'salary'
@@ -32,6 +35,7 @@ const EMPTY: Draft = {
   type: null,
   dateApplied: null,
   cvId: null,
+  coverLetterId: null,
   notes: '',
   location: '',
   salary: '',
@@ -74,7 +78,8 @@ export function JobDrawer({
   onDelete: (job: Job) => void
 }) {
   const headingId = useId()
-  const cvs = useCvList().data ?? []
+  const cvs = (useCvList().data ?? []).filter((doc) => doc.type === 'cv')
+  const letters = useCoverLetterList().data ?? []
   const create = useCreateJob()
   const update = useUpdateJob()
   const tailor = useTailorCv()
@@ -215,9 +220,9 @@ export function JobDrawer({
             </legend>
             <div className="flex flex-col gap-1 text-sm">
               <span className="text-slate-600 dark:text-slate-400">Resume</span>
-              <CvSelect
+              <DocumentSelect
                 value={draft.cvId}
-                cvs={cvs}
+                docs={cvs}
                 label="Resume"
                 onChange={(cvId) => set({ cvId })}
                 className={field}
@@ -253,9 +258,24 @@ export function JobDrawer({
                 After saving, you can create a tailored copy of a CV for this job.
               </p>
             )}
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Cover letter: available in Step 13.
-            </p>
+            <div className="flex flex-col gap-1 border-t border-slate-200 pt-3 text-sm dark:border-slate-700">
+              <span className="text-slate-600 dark:text-slate-400">Cover letter</span>
+              <DocumentSelect
+                value={draft.coverLetterId}
+                docs={letters}
+                label="Cover letter"
+                onChange={(coverLetterId) => set({ coverLetterId })}
+                className={field}
+              />
+              {job && (
+                <Link
+                  to={`${NEW_LETTER_PATH}?jobId=${job.id}${draft.cvId ? `&cvId=${draft.cvId}` : ''}`}
+                  className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-teal-700 hover:underline dark:text-teal-300"
+                >
+                  <FilePen className="size-4" aria-hidden /> Write a cover letter for this job
+                </Link>
+              )}
+            </div>
           </fieldset>
 
           <Field label="Notes" wide>

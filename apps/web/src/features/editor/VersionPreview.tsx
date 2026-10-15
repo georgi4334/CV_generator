@@ -68,7 +68,7 @@ export function VersionPreview({ cvId, versionId }: { cvId: string; versionId: s
       {version.isError && (
         <p className="text-sm text-red-600">{toApiRequestError(version.error).message}</p>
       )}
-      {version.data && <PageCanvas cv={version.data.document} title="" mode="preview" />}
+      {version.data && <PageCanvas cv={version.data.document} mode="preview" />}
     </div>
   )
 }

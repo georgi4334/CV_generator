@@ -2,13 +2,13 @@ import { FileText } from 'lucide-react'
 import { NavLink, Outlet, useLocation } from 'react-router'
 import { ApiStatus } from '../components/ApiStatus'
 import { ThemeToggle } from '../components/ThemeToggle'
-import { NEW_CV_PATH } from '../lib/paths'
+import { NEW_CV_PATH, NEW_LETTER_PATH } from '../lib/paths'
 import { useHealth } from '../lib/useHealth'
 
 const TABS = [
   { to: '/', label: 'Dashboard', end: true },
   // "Create new CV" (/cvs/new) belongs to Documents too.
-  { to: '/documents', label: 'Documents', end: false, also: NEW_CV_PATH },
+  { to: '/documents', label: 'Documents', end: false, also: [NEW_CV_PATH, NEW_LETTER_PATH] },
   { to: '/jobs', label: 'Saved Jobs', end: false },
 ]
 
@@ -33,7 +33,7 @@ export function AppLayout() {
                 end={tab.end}
                 className={({ isActive }) =>
                   `flex items-center border-b-2 px-3 text-sm font-medium transition-colors ${
-                    isActive || pathname === tab.also
+                    isActive || tab.also?.includes(pathname)
                       ? 'border-teal-600 text-teal-700 dark:border-teal-400 dark:text-teal-300'
                       : 'border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100'
                   }`

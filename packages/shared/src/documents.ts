@@ -28,7 +28,10 @@ export type CvRecord = z.infer<typeof CvRecordSchema>
 export const CoverLetterRecordSchema = z.object({
   ...recordBase,
   type: z.literal('coverLetter'),
+  /** The CV this letter goes with; its header and design can be copied again. */
   cvId: IdSchema.nullable(),
+  /** Increases on every save of the document, like a CV's revision. */
+  revision: z.number().int().positive(),
   document: CoverLetterDocumentSchema,
 })
 export type CoverLetterRecord = z.infer<typeof CoverLetterRecordSchema>

@@ -1,4 +1,4 @@
-import type { CvDocument, JobStatus, JobType, Plan } from '@cv/shared'
+import type { CoverLetterDocument, CvDocument, JobStatus, JobType, Plan } from '@cv/shared'
 import {
   boolean,
   date,
@@ -10,7 +10,9 @@ import {
   timestamp,
   uuid,
   type AnyPgColumn,
+  check,
 } from 'drizzle-orm/pg-core'
+import { sql } from 'drizzle-orm'
 
 const createdAt = () => timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
 
@@ -58,20 +60,28 @@ export const cvVersions = pgTable(
 )
 
 /**
- * Public read-only links. One per CV (cover letters get their own column in
- * Step 13), so deleting a CV deletes its link.
+ * Public read-only links: one per document, deleted with it. Exactly one of
+ * `cvId` and `coverLetterId` is set.
  */
-export const shareLinks = pgTable('share_links', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  cvId: uuid('cv_id')
-    .notNull()
-    .unique()
-    .references(() => cvs.id, { onDelete: 'cascade' }),
-  slug: text('slug').notNull().unique(),
-  isActive: boolean('is_active').notNull().default(true),
-  createdAt: createdAt(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-})
+export const shareLinks = pgTable(
+  'share_links',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    cvId: uuid('cv_id')
+      .unique()
+      .references(() => cvs.id, { onDelete: 'cascade' }),
+    coverLetterId: uuid('cover_letter_id')
+      .unique()
+      .references((): AnyPgColumn => coverLetters.id, { onDelete: 'cascade' }),
+    slug: text('slug').notNull().unique(),
+    isActive: boolean('is_active').notNull().default(true),
+    createdAt: createdAt(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    check('share_links_one_document', sql`(${t.cvId} is null) <> (${t.coverLetterId} is null)`),
+  ],
+)
 
 export const uploads = pgTable('uploads', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -101,8 +111,10 @@ export const jobs = pgTable(
     dateApplied: date('date_applied', { mode: 'string' }),
     /** Cleared when that CV is deleted. */
     cvId: uuid('cv_id').references((): AnyPgColumn => cvs.id, { onDelete: 'set null' }),
-    /** Cover letters arrive in Step 13 (the foreign key comes with their table). */
-    coverLetterId: uuid('cover_letter_id'),
+    /** Cleared when that cover letter is deleted. */
+    coverLetterId: uuid('cover_letter_id').references((): AnyPgColumn => coverLetters.id, {
+      onDelete: 'set null',
+    }),
     notes: text('notes').notNull().default(''),
     location: text('location').notNull().default(''),
     salary: text('salary').notNull().default(''),
@@ -111,4 +123,25 @@ export const jobs = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index('jobs_user_saved_idx').on(t.userId, t.dateSaved.desc())],
+)
+
+export const coverLetters = pgTable(
+  'cover_letters',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    /** The CV it goes with; cleared when that CV is deleted. */
+    cvId: uuid('cv_id').references((): AnyPgColumn => cvs.id, { onDelete: 'set null' }),
+    /** Saved job it was written for; cleared when the job is deleted. */
+    jobId: uuid('job_id').references((): AnyPgColumn => jobs.id, { onDelete: 'set null' }),
+    /** The whole letter (content + design), validated with CoverLetterDocumentSchema. */
+    document: jsonb('document').$type<CoverLetterDocument>().notNull(),
+    revision: integer('revision').notNull().default(1),
+    createdAt: createdAt(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('cover_letters_user_updated_idx').on(t.userId, t.updatedAt.desc())],
 )

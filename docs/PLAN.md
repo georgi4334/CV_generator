@@ -1,13 +1,13 @@
 # CV Generator — Development Plan
 
-> Status: **Step 12 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
+> Status: **Step 13 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
 >
 > **Decision log**
 >
 > - App tabs: Dashboard · Documents (All documents / Cover letters / CVs) · Saved Jobs ✅
 > - Job statuses: To apply · Applied · Interviewing · Negotiating · Accepted · Rejected · No answer ✅
 > - Backend framework: Fastify; ORM: Drizzle ✅
-> - Step 0 closed. Step 1 (project setup) ✅. Step 2 (shared domain model) ✅. Step 3 (app shell) ✅. Step 4 (CV renderer) ✅. Step 5 (inline editing) ✅. Step 6 (rearrange) ✅. Step 7 (templates & design) ✅. Step 8 (API & database) ✅. Step 9 (frontend ↔ API) ✅. Step 10 ("Create new CV" wizard) ✅. Step 11 (PDF download & share links) ✅. Step 12 (Saved Jobs) built; awaiting review before Step 13.
+> - Step 0 closed. Step 1 (project setup) ✅. Step 2 (shared domain model) ✅. Step 3 (app shell) ✅. Step 4 (CV renderer) ✅. Step 5 (inline editing) ✅. Step 6 (rearrange) ✅. Step 7 (templates & design) ✅. Step 8 (API & database) ✅. Step 9 (frontend ↔ API) ✅. Step 10 ("Create new CV" wizard) ✅. Step 11 (PDF download & share links) ✅. Step 12 (Saved Jobs) ✅. Step 13 (cover letters) built; awaiting review before Step 14.
 > - Choosing a template applies its suggested font, column layout and spacing; the user can change them afterwards ✅
 > - Frontend: React + TS + Vite + Tailwind + Axios + React Router + TanStack Query + Zustand ✅
 > - Backend: Node + TypeScript + PostgreSQL (JSONB) with shared Zod types ✅
@@ -190,12 +190,12 @@ Implementation notes:
 User        { id, email, name, passwordHash | oauthId, plan: 'free' | 'pro', createdAt }  // plan field ready for premium later
 Cv          { id, userId, title, professionId, templateId, jobId?, design (JSON), content (JSONB), updatedAt } // jobId set for tailored copies
 CvVersion   { id, cvId, snapshot (JSONB), label, createdAt }        // history / restore
-CoverLetter { id, userId, title, cvId?, jobId?, design (JSON), content (JSONB), updatedAt } // can reuse the linked CV's header & design
+CoverLetter { id, userId, title, cvId?, jobId?, revision, document (JSONB: header, recipient, date, greeting, paragraphs, closing, signature, design), updatedAt } // header & design copied from the linked CV
 Job         { id, userId, position, company, status, type: 'remote' | 'onsite' | 'hybrid',
               dateSaved, dateApplied?, cvId?, coverLetterId?, notes,
               url?, description?, location?, salary?, contact? }
 JobStatus   = 'to_apply' | 'applied' | 'interviewing' | 'negotiating' | 'accepted' | 'rejected' | 'no_answer'  // default: 'to_apply'
-ShareLink   { id, cvId (coverLetterId in Step 13), slug, isActive, createdAt, updatedAt } // one per document; deleted with it
+ShareLink   { id, cvId | coverLetterId (exactly one), slug, isActive, createdAt, updatedAt } // one per document; deleted with it
 Template    { id, name, layout, defaultDesign, supportsPhoto, tags[] } // defined in code; thumbnails are live renders
 Profession  { id, name, recommendedTemplateIds[], defaultSections[], exampleContent }
 ```
@@ -396,13 +396,17 @@ Specification: §2.3.
 - ✅ The Dashboard pipeline and reminders and the Documents "For <position> at <company>" line use the real jobs.
 - Decided: no Kanban board. Cover letter links arrive with cover letters (Step 13).
 
-### Step 13: Cover letters
+### Step 13: Cover letters ✅ built (awaiting review)
 
-- Cover letter editor that reuses the editor shell, Design & Font panel and PDF export.
-- Header (name and contacts) and design can be **inherited from a linked CV**, so letter and CV match.
-- Sections: recipient, date, greeting, body paragraphs, closing and signature.
-- **Documents → Cover letters** sub-tab; cover letters also appear in _All documents_.
-- (Step 16, AI) Generate a draft from a saved job's description plus the linked CV.
+- ✅ **Create a cover letter** (`/cover-letters/new`, from Documents, the Dashboard or a saved job): pick the CV (most recent by default) and optionally the job. The letter copies the CV's header (name, contacts, photo) and design, so letter and CV match; the job fills in the company, names the letter "Cover letter – <Company>" and becomes that job's cover letter. Greeting, closing and date follow the letter language (English US/UK, Bulgarian).
+- ✅ **Editor** reusing the CV editor shell: edit everything in place (date, recipient name, title, company, address, greeting, paragraphs, closing, signature, header). Enter starts a new paragraph; "Add paragraph"; Backspace in an empty paragraph removes it. Templates and Design & Font panels (the letter uses the template's header style; no column layout). Undo/redo, autosave with revisions and the conflict banner like CVs.
+- ✅ A bar under the top bar links the letter to a CV and a job, with **"Use CV's header & design"** to copy them again after the CV changed (copied, not live-linked, so the letter never changes by surprise).
+- ✅ Preview page, **Download PDF** (one page, grows if the text is longer) and **share links** for letters; the public `/s/:slug` page shows CVs and letters.
+- ✅ **Documents** list real cover letters on All documents and Cover letters, with open, rename, copy, download, share and delete (also in bulk). The Dashboard's recent documents include letters. The sample cover letters are gone.
+- ✅ **Saved Jobs**: the Cover letter column and the job details link a letter; the job details offer "Write a cover letter for this job".
+- API: `GET/POST /cover-letters`, `GET/PATCH/DELETE /cover-letters/:id`, `POST /cover-letters/:id/duplicate`, `GET/PUT /cover-letters/:id/share`, `POST /cover-letters/:id/share/reset`. New table `cover_letters` (migration `0003_cover_letters`); share links point at a CV or a letter; `jobs.cover_letter_id` now references letters. Deleting a CV unlinks its letters; deleting a letter unlinks jobs and removes its share link.
+- Not in this step: version history for letters (CVs only for now).
+- (Step 16, AI) Generate a draft from a saved job plus the linked CV.
 
 ### Step 14: Dashboard
 

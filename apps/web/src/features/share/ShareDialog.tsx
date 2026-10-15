@@ -1,25 +1,28 @@
+import type { DocumentType } from '@cv/shared'
 import { Check, Copy, ExternalLink, X } from 'lucide-react'
 import { useId, useRef, useState } from 'react'
 import { Modal } from '../../components/Modal'
 import { primaryButton, secondaryButton } from '../../components/PageHeader'
 import { toApiRequestError } from '../../lib/api'
-import { useCvShare, useUpdateCvShare } from '../../lib/cvQueries'
+import { useDocumentShare, useUpdateDocumentShare } from '../../lib/shareQueries'
 import { shareUrl } from './shareUrl'
 
 /** Turn a CV's public read-only link on or off, copy it, or replace it. */
 export function ShareDialog({
-  cvId,
+  type = 'cv',
+  id,
   title,
   onClose,
 }: {
-  cvId: string
+  type?: DocumentType
+  id: string
   title: string
   onClose: () => void
 }) {
   const headingId = useId()
   const switchId = useId()
-  const share = useCvShare(cvId)
-  const update = useUpdateCvShare(cvId)
+  const share = useDocumentShare(type, id)
+  const update = useUpdateDocumentShare(type, id)
   const input = useRef<HTMLInputElement>(null)
   const [copied, setCopied] = useState(false)
 
@@ -64,7 +67,7 @@ export function ShareDialog({
                 Share a read-only link
               </span>
               <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">
-                Anyone with the link can view and download this CV, without an account.
+                Anyone with the link can view and download it, without an account.
               </span>
             </span>
             <button

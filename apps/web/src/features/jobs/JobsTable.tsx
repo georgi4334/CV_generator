@@ -11,7 +11,7 @@ import {
 import { ArrowDown, ArrowUp, ChevronsUpDown, Pencil, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { formatDate } from '../../lib/format'
-import { CvSelect, DateInput, InlineText, StatusSelect, TypeSelect } from './fields'
+import { DateInput, DocumentSelect, InlineText, StatusSelect, TypeSelect } from './fields'
 import { statusChange } from './jobHelpers'
 import { useJobActions } from './jobContext'
 
@@ -75,11 +75,24 @@ function TypeCell({ job }: { job: Job }) {
 function ResumeCell({ job }: { job: Job }) {
   const { cvs, update } = useJobActions()
   return (
-    <CvSelect
+    <DocumentSelect
       value={job.cvId}
-      cvs={cvs}
+      docs={cvs}
       label={`Resume for ${job.position}`}
       onChange={(cvId) => update(job, { cvId })}
+      className="max-w-44 rounded-md border border-transparent bg-transparent px-1 py-0.5 text-sm hover:border-slate-300 dark:hover:border-slate-600"
+    />
+  )
+}
+
+function CoverLetterCell({ job }: { job: Job }) {
+  const { letters, update } = useJobActions()
+  return (
+    <DocumentSelect
+      value={job.coverLetterId}
+      docs={letters}
+      label={`Cover letter for ${job.position}`}
+      onChange={(coverLetterId) => update(job, { coverLetterId })}
       className="max-w-44 rounded-md border border-transparent bg-transparent px-1 py-0.5 text-sm hover:border-slate-300 dark:hover:border-slate-600"
     />
   )
@@ -169,11 +182,7 @@ const columns = helper.columns([
   helper.display({
     id: 'coverLetter',
     header: 'Cover letter',
-    cell: () => (
-      <span className="text-slate-400" title="Cover letters arrive in Step 13">
-        —
-      </span>
-    ),
+    cell: ({ row }) => <CoverLetterCell job={row.original} />,
   }),
   helper.display({
     id: 'notes',

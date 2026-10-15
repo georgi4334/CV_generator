@@ -4,14 +4,14 @@ import { Link } from 'react-router'
 import { DocumentTypeBadge } from '../components/Badges'
 import { card, PageHeader } from '../components/PageHeader'
 import { daysBetween, formatDate, localToday } from '../lib/format'
-import { editPath, NEW_CV_PATH } from '../lib/paths'
+import { editPath, NEW_CV_PATH, NEW_LETTER_PATH } from '../lib/paths'
 import { useCvList } from '../lib/cvQueries'
 import { useJobs } from '../lib/jobQueries'
-import { MOCK_COVER_LETTERS } from '../mocks/data'
+import { useCoverLetterList } from '../lib/letterQueries'
 
 const QUICK_ACTIONS = [
   { to: NEW_CV_PATH, label: 'New CV', icon: FilePlus2 },
-  { to: '/cover-letters/new/edit', label: 'New cover letter', icon: Mail },
+  { to: NEW_LETTER_PATH, label: 'New cover letter', icon: Mail },
   { to: '/jobs?add=1', label: 'Add job', icon: Briefcase },
 ]
 
@@ -19,7 +19,8 @@ export function DashboardPage() {
   const cvs = useCvList()
   const jobs = useJobs().data ?? []
   const today = localToday()
-  const recent = [...(cvs.data ?? []), ...MOCK_COVER_LETTERS]
+  const letters = useCoverLetterList()
+  const recent = [...(cvs.data ?? []), ...(letters.data ?? [])]
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
     .slice(0, 4)
   const counts = JOB_STATUSES.map((status) => ({
