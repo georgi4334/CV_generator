@@ -8,7 +8,7 @@ import {
   useTable,
   type SortingState,
 } from '@tanstack/react-table'
-import { ArrowDown, ArrowUp, ChevronsUpDown, Trash2 } from 'lucide-react'
+import { ArrowDown, ArrowUp, ChevronsUpDown, Pencil, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { formatDate } from '../../lib/format'
 import { CvSelect, DateInput, InlineText, StatusSelect, TypeSelect } from './fields'
@@ -98,17 +98,29 @@ function NotesCell({ job }: { job: Job }) {
 }
 
 function ActionsCell({ job }: { job: Job }) {
-  const { remove } = useJobActions()
+  const { open, remove } = useJobActions()
+  const name = `${job.position} at ${job.company}`
   return (
-    <button
-      type="button"
-      onClick={() => remove(job)}
-      aria-label={`Delete ${job.position} at ${job.company}`}
-      title="Delete"
-      className="rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950"
-    >
-      <Trash2 className="size-4" />
-    </button>
+    <span className="flex items-center gap-0.5">
+      <button
+        type="button"
+        onClick={() => open(job)}
+        aria-label={`Edit ${name}`}
+        title="Edit all details"
+        className="rounded-md p-1.5 text-slate-400 hover:bg-teal-50 hover:text-teal-700 dark:hover:bg-teal-950 dark:hover:text-teal-300"
+      >
+        <Pencil className="size-4" />
+      </button>
+      <button
+        type="button"
+        onClick={() => remove(job)}
+        aria-label={`Delete ${name}`}
+        title="Delete"
+        className="rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950"
+      >
+        <Trash2 className="size-4" />
+      </button>
+    </span>
   )
 }
 

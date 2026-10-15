@@ -811,6 +811,14 @@ describe('saved jobs', () => {
     )
   })
 
+  it('opens the details from the edit icon', async () => {
+    fake.current.seedJob({ position: 'Frontend Engineer', company: 'Acme' })
+    renderRoute('/jobs')
+    fireEvent.click(await screen.findByRole('button', { name: 'Edit Frontend Engineer at Acme' }))
+    const drawer = within(screen.getByRole('dialog', { name: 'Frontend Engineer' }))
+    expect(drawer.getByRole('textbox', { name: 'Company *' })).toHaveProperty('value', 'Acme')
+  })
+
   it('deletes a job after confirming', async () => {
     fake.current.seedJob({ position: 'Frontend Engineer', company: 'Acme' })
     renderRoute('/jobs')
