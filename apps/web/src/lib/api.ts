@@ -1,5 +1,7 @@
 import { ApiErrorSchema } from '@cv/shared'
 import axios, { AxiosError } from 'axios'
+import { authKeys } from './authKeys'
+import { queryClient } from './queryClient'
 
 const baseURL = import.meta.env.VITE_API_URL ?? '/api'
 
@@ -56,9 +58,18 @@ export function toApiRequestError(error: unknown): ApiRequestError {
   )
 }
 
-api.interceptors.response.use(undefined, (error: unknown) =>
-  Promise.reject(toApiRequestError(error)),
-)
+api.interceptors.response.use(undefined, (error: unknown) => {
+  // The session ended (expired, signed out elsewhere): the app returns to the sign-in page.
+  // Failed sign-ins (/auth/...) are answered on their own page.
+  if (
+    error instanceof AxiosError &&
+    error.response?.status === 401 &&
+    !error.config?.url?.startsWith('/auth/')
+  ) {
+    queryClient.setQueryData(authKeys.me, null)
+  }
+  return Promise.reject(toApiRequestError(error))
+})
 
 /**
  * Image URLs saved in a CV are relative to the API ("/api/uploads/…"). When

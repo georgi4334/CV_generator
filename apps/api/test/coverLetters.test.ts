@@ -17,7 +17,7 @@ describe.skipIf(!dbAvailable)('cover letters API', () => {
     method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
     url: string,
     payload?: object,
-  ) => ctx.app.inject({ method, url: `/api${url}`, payload })
+  ) => ctx.app.inject({ method, url: `/api${url}`, payload, headers: { cookie: ctx.cookie } })
   const create = async (payload: object = {}) => {
     const res = await call('POST', '/cover-letters', payload)
     expect(res.statusCode).toBe(201)

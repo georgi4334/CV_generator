@@ -33,7 +33,9 @@ pnpm dev                                     # web on :5173, api on :3001
 
 Docker's Postgres listens on port **5433** so it does not clash with a PostgreSQL installed directly on your computer (which usually uses 5432). If you created `apps/api/.env` before this change, update its `DATABASE_URL` to port 5433.
 
-Open http://localhost:5173. The page shows whether the API and database are reachable.
+Open http://localhost:5173 and create an account. In development the emails (confirm your address, reset your password) are printed in the API terminal: copy the link from there.
+
+If you used the app before accounts existed, the **first account you create takes over** those CVs, cover letters, saved jobs and images. Accounts created afterwards start empty. (This is switched off when `NODE_ENV=production`.)
 
 After a `git pull`, just run `pnpm dev` again: if dependencies changed, pnpm installs them first (`verifyDepsBeforeRun` in `pnpm-workspace.yaml`).
 
@@ -42,6 +44,16 @@ After a `git pull`, just run `pnpm dev` again: if dependencies changed, pnpm ins
 The API runs on http://localhost:3001 and applies database migrations when it starts. In development the web app proxies `/api` to it. See the endpoint table in [`docs/PLAN.md`](docs/PLAN.md) (Step 8).
 
 `pnpm test` also runs the API's database tests against a `cv_generator_test` database, created automatically on the Postgres from `pnpm db:up`. Without a running Postgres they are skipped with a warning (CI always runs them).
+
+### Account settings (`apps/api/.env`)
+
+| Variable           | Default                                       | Meaning                                                                                |
+| ------------------ | --------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `CORS_ORIGIN`      | `http://localhost:5173,http://127.0.0.1:5173` | Web addresses allowed to call the API (also used to refuse writes from other websites) |
+| `APP_URL`          | `http://localhost:5173`                       | Where the web app lives; links in emails point here                                    |
+| `COOKIE_SECURE`    | `true` in production, otherwise `false`       | Send the session cookie over HTTPS only                                                |
+| `COOKIE_SAME_SITE` | `lax`                                         | `none` when web app and API are on different sites (requires `COOKIE_SECURE=true`)     |
+| `TRUST_PROXY`      | `false`                                       | `true` behind a hosting proxy, so rate limits use the real client address              |
 
 ## Scripts
 

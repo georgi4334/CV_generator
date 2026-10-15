@@ -1,15 +1,14 @@
 import { createExampleCv, CvRecordSchema, PLAN_LIMITS, type CvRecord } from '@cv/shared'
-import { eq, sql } from 'drizzle-orm'
+import { sql } from 'drizzle-orm'
 import { describe, expect, it } from 'vitest'
 import { cvs, cvVersions, users } from '../src/db/schema'
-import { DEV_USER_EMAIL } from '../src/plugins/currentUser'
 import { dbAvailable, useTestApp } from './context'
 import { TEST_DATABASE_URL } from './env'
 
 describe.skipIf(!dbAvailable)('CV API', () => {
   const ctx = useTestApp()
   const call = (method: 'GET' | 'POST' | 'PATCH' | 'DELETE', url: string, payload?: object) =>
-    ctx.app.inject({ method, url: `/api${url}`, payload })
+    ctx.app.inject({ method, url: `/api${url}`, payload, headers: { cookie: ctx.cookie } })
   const create = async (payload: object = {}) => {
     const res = await call('POST', '/cvs', payload)
     expect(res.statusCode).toBe(201)
@@ -120,11 +119,10 @@ describe.skipIf(!dbAvailable)('CV API', () => {
 
   it('enforces the free plan CV limit', async () => {
     await create()
-    const [user] = await ctx.database.db.select().from(users).where(eq(users.email, DEV_USER_EMAIL))
     const max = PLAN_LIMITS.free.maxCvs!
     await ctx.database.db.insert(cvs).values(
       Array.from({ length: max - 1 }, (_, i) => ({
-        userId: user!.id,
+        userId: ctx.userId,
         title: `CV ${i}`,
         document: createExampleCv('designer'),
       })),
@@ -227,7 +225,8 @@ describe.skipIf(!dbAvailable)('database not ready yet', () => {
     expect(down.json().error.code).toBe('database_unavailable')
 
     reachable = true
-    expect((await app.inject({ method: 'GET', url: '/api/cvs' })).statusCode).toBe(200)
+    // The database is back; this request only lacks a session.
+    expect((await app.inject({ method: 'GET', url: '/api/cvs' })).statusCode).toBe(401)
     await app.close()
     await database.close()
   })

@@ -29,6 +29,13 @@
       "when": 1792070161736,
       "tag": "0003_cover_letters",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792098768191,
+      "tag": "0004_auth",
+      "breakpoints": true
     }
   ]
 }

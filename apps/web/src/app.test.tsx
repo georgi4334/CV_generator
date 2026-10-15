@@ -7,6 +7,7 @@ import { ApiRequestError } from './lib/api'
 import { localToday } from './lib/format'
 import { useSaveState } from './features/editor/editorSession'
 import { useEditorUi } from './stores/editorUi'
+import type { FakeAuthApi } from './test/fakeAuthApi'
 import type { FakeCvApi } from './test/fakeCvApi'
 import { renderRoute } from './test/renderRoute'
 
@@ -30,6 +31,14 @@ vi.mock('./lib/jobsApi', async () => {
   return { jobsApi: fake.current.jobsApi }
 })
 
+const auth = vi.hoisted(() => ({ current: null as unknown as FakeAuthApi }))
+
+vi.mock('./lib/authApi', async () => {
+  const { createFakeAuthApi } = await import('./test/fakeAuthApi')
+  auth.current ??= createFakeAuthApi()
+  return { authApi: auth.current.api }
+})
+
 vi.mock('./lib/useHealth', () => ({
   useHealth: () => ({
     isLoading: false,
@@ -40,6 +49,7 @@ vi.mock('./lib/useHealth', () => ({
 
 beforeEach(() => {
   fake.current.reset()
+  auth.current.reset()
   useEditorUi.setState({ activePanel: null, notice: null, previewVersionId: null })
   useCvEditor.setState({ docId: null, cv: null, past: [], future: [] })
   useSaveState.setState({ status: 'saved', lastSavedAt: null, error: null })

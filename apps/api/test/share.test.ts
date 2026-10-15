@@ -9,7 +9,7 @@ describe.skipIf(!dbAvailable)('share links API', () => {
     method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
     url: string,
     payload?: object,
-  ) => ctx.app.inject({ method, url: `/api${url}`, payload })
+  ) => ctx.app.inject({ method, url: `/api${url}`, payload, headers: { cookie: ctx.cookie } })
   const createCv = async () => CvRecordSchema.parse((await call('POST', '/cvs', {})).json())
   const share = async (id: string, isActive: boolean) => {
     const res = await call('PUT', `/cvs/${id}/share`, { isActive })
