@@ -1,4 +1,3 @@
-import type { CvDocument, CvRecord } from '@cv/shared'
 import { toApiRequestError, type ApiRequestError } from '../../lib/api'
 
 export type SaveStatus = 'saved' | 'pending' | 'saving' | 'error' | 'conflict'
@@ -9,10 +8,17 @@ export interface SaveState {
   error: ApiRequestError | null
 }
 
-interface AutosaveOptions {
-  save: (document: CvDocument, revision: number) => Promise<CvRecord>
+/** What a save returns: the stored document with its new revision (a CV or a cover letter). */
+interface SavedRecord<TDocument> {
+  revision: number
+  document: TDocument
+  updatedAt: string
+}
+
+interface AutosaveOptions<TDocument, TRecord extends SavedRecord<TDocument>> {
+  save: (document: TDocument, revision: number) => Promise<TRecord>
   onState: (state: SaveState) => void
-  onSaved?: (record: CvRecord) => void
+  onSaved?: (record: TRecord) => void
   /** Quiet time after the last change before saving. */
   delayMs?: number
   /** Waits between retries after a network or server error. */
@@ -20,25 +26,25 @@ interface AutosaveOptions {
 }
 
 /**
- * Saves the CV in the background. Changes are debounced, at most one save is
+ * Saves a document (CV or cover letter) in the background. Changes are debounced, at most one save is
  * in flight, every save carries the revision it is based on, failed saves are
  * retried with backoff, and a conflict (another tab saved first) stops saving
  * until the user decides what to do.
  */
-export class AutosaveController {
+export class AutosaveController<TDocument, TRecord extends SavedRecord<TDocument>> {
   private revision = 0
-  private savedDocument: CvDocument | null = null
-  private latestDocument: CvDocument | null = null
+  private savedDocument: TDocument | null = null
+  private latestDocument: TDocument | null = null
   private timer: ReturnType<typeof setTimeout> | null = null
   private inFlight: Promise<void> | null = null
   private attempt = 0
   private state: SaveState = { status: 'saved', lastSavedAt: null, error: null }
   private disposed = false
 
-  constructor(private readonly options: AutosaveOptions) {}
+  constructor(private readonly options: AutosaveOptions<TDocument, TRecord>) {}
 
   /** (Re)start from a record loaded from the server. */
-  start(record: CvRecord) {
+  start(record: TRecord) {
     this.clearTimer()
     this.revision = record.revision
     this.savedDocument = record.document
@@ -48,7 +54,7 @@ export class AutosaveController {
   }
 
   /** Call with the editor's document whenever it changes. */
-  change(document: CvDocument) {
+  change(document: TDocument) {
     this.latestDocument = document
     if (this.state.status === 'conflict') return
     if (document === this.savedDocument && !this.inFlight) {

@@ -3,7 +3,7 @@ import { and, desc, eq, sql } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import type { Database } from '../db/client'
-import { cvs, jobs } from '../db/schema'
+import { coverLetters, cvs, jobs } from '../db/schema'
 import { notFound } from '../lib/errors'
 
 const IdParams = z.object({ id: z.uuid() })
@@ -40,6 +40,16 @@ export async function jobRoutes(app: FastifyInstance, opts: { database: Database
     if (!row) throw notFound('CV')
   }
 
+  /** A linked cover letter must be one of the user's own. */
+  async function assertOwnLetter(userId: string, coverLetterId: string | null | undefined) {
+    if (!coverLetterId) return
+    const [row] = await db
+      .select({ id: coverLetters.id })
+      .from(coverLetters)
+      .where(and(eq(coverLetters.id, coverLetterId), eq(coverLetters.userId, userId)))
+    if (!row) throw notFound('Cover letter')
+  }
+
   app.get('/jobs', async (request) => {
     const rows = await db
       .select()
@@ -52,6 +62,7 @@ export async function jobRoutes(app: FastifyInstance, opts: { database: Database
   app.post('/jobs', async (request, reply) => {
     const { dateSaved, ...input } = CreateJobInputSchema.parse(request.body ?? {})
     await assertOwnCv(request.user.id, input.cvId)
+    await assertOwnLetter(request.user.id, input.coverLetterId)
     const [row] = await db
       .insert(jobs)
       .values({
@@ -77,6 +88,7 @@ export async function jobRoutes(app: FastifyInstance, opts: { database: Database
     const { id } = IdParams.parse(request.params)
     const input = UpdateJobInputSchema.parse(request.body ?? {})
     await assertOwnCv(request.user.id, input.cvId)
+    await assertOwnLetter(request.user.id, input.coverLetterId)
     const [row] = await db
       .update(jobs)
       .set({ ...input, updatedAt: sql`now()` })

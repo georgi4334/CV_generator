@@ -1,6 +1,7 @@
-import type { CvDocument } from '@cv/shared'
+import type { CoverLetterDocument, CvDocument } from '@cv/shared'
 import { memo } from 'react'
 import { CvRenderer } from './CvRenderer'
+import { LetterRenderer } from './LetterRenderer'
 import type { RenderMode } from './context'
 import { PAGE_SIZE_PX } from './tokens'
 
@@ -28,6 +29,33 @@ export const CvThumbnail = memo(function CvThumbnail({
     >
       <div style={{ width: page.width, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
         <CvRenderer cv={cv} mode={mode} />
+      </div>
+    </div>
+  )
+})
+
+/** The first page of a cover letter, scaled down to `width` pixels. Not interactive. */
+export const LetterThumbnail = memo(function LetterThumbnail({
+  letter,
+  width,
+  mode = 'preview',
+}: {
+  letter: CoverLetterDocument
+  width: number
+  /** "edit" shows the hints of empty fields. */
+  mode?: RenderMode
+}) {
+  const page = PAGE_SIZE_PX[letter.design.pageSize]
+  const scale = width / page.width
+  return (
+    <div
+      aria-hidden
+      inert
+      className="pointer-events-none overflow-hidden rounded border border-slate-200 bg-white dark:border-slate-700"
+      style={{ width, height: Math.round(page.height * scale) }}
+    >
+      <div style={{ width: page.width, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
+        <LetterRenderer letter={letter} mode={mode} />
       </div>
     </div>
   )

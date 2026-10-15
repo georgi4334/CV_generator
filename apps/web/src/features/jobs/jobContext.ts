@@ -3,8 +3,9 @@ import { createContext, useContext } from 'react'
 
 /** What the editable cells need; provided by the Saved Jobs page. */
 export interface JobActions {
-  /** The user's CVs, to link one to a job. */
+  /** The user's CVs and cover letters, to link them to a job. */
   cvs: DocumentSummary[]
+  letters: DocumentSummary[]
   update: (job: Job, change: UpdateJobInput) => void
   open: (job: Job) => void
   remove: (job: Job) => void

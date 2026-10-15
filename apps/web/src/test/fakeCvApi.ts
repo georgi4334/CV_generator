@@ -1,10 +1,12 @@
 import {
+  createCoverLetter,
   createEmptyCv,
   createExampleCv,
   PROFESSIONS,
   type CvDocument,
   type CvRecord,
   type CvVersionSummary,
+  type CoverLetterRecord,
   type CreateJobInput,
   CreateJobInputSchema,
   type DocumentSummary,
@@ -14,6 +16,7 @@ import {
 } from '@cv/shared'
 import { ApiRequestError } from '../lib/api'
 import type { CvApi } from '../lib/cvApi'
+import type { CoverLetterApi } from '../lib/coverLetterApi'
 import type { JobsApi } from '../lib/jobsApi'
 
 interface Version extends CvVersionSummary {
@@ -26,6 +29,7 @@ export function createFakeCvApi() {
   const versions = new Map<string, Version[]>()
   const shares = new Map<string, ShareLink>()
   const jobs = new Map<string, Job>()
+  const letters = new Map<string, CoverLetterRecord>()
   let clock = Date.parse('2026-10-14T09:00:00Z')
   let seq = 0
   const now = () => new Date((clock += 1000)).toISOString()
@@ -45,6 +49,26 @@ export function createFakeCvApi() {
     createdAt: cv.createdAt,
     updatedAt: cv.updatedAt,
   })
+
+  /** Share links of any document (CV or cover letter), by document id. */
+  const share = {
+    get: (docId: string) => ({ link: structuredClone(shares.get(docId) ?? null) }),
+    set(docId: string, isActive: boolean) {
+      const time = now()
+      const current = shares.get(docId)
+      const link: ShareLink = current
+        ? { ...current, isActive, updatedAt: time }
+        : { slug: `slug${++seq}AbCdEfGh`, isActive, createdAt: time, updatedAt: time }
+      shares.set(docId, link)
+      return { link: structuredClone(link) }
+    },
+    reset(docId: string) {
+      share.set(docId, true)
+      const link = { ...shares.get(docId)!, slug: `slug${++seq}NewLink0` }
+      shares.set(docId, link)
+      return { link: structuredClone(link) }
+    },
+  }
 
   const api: CvApi = {
     async list() {
@@ -96,6 +120,8 @@ export function createFakeCvApi() {
       shares.delete(cvId)
       for (const job of jobs.values())
         if (job.cvId === cvId) jobs.set(job.id, { ...job, cvId: null })
+      for (const letter of letters.values())
+        if (letter.cvId === cvId) letters.set(letter.id, { ...letter, cvId: null })
     },
     async duplicate(cvId, jobId) {
       const source = find(cvId)
@@ -147,34 +173,29 @@ export function createFakeCvApi() {
     },
     async getShare(cvId) {
       find(cvId)
-      return { link: structuredClone(shares.get(cvId) ?? null) }
+      return share.get(cvId)
     },
     async setShare(cvId, isActive) {
       find(cvId)
-      const time = now()
-      const current = shares.get(cvId)
-      const link: ShareLink = current
-        ? { ...current, isActive, updatedAt: time }
-        : { slug: `slug${++seq}AbCdEfGh`, isActive, createdAt: time, updatedAt: time }
-      shares.set(cvId, link)
-      return { link: structuredClone(link) }
+      return share.set(cvId, isActive)
     },
     async resetShare(cvId) {
-      await api.setShare(cvId, true)
-      const link = { ...shares.get(cvId)!, slug: `slug${++seq}NewLink0` }
-      shares.set(cvId, link)
-      return { link: structuredClone(link) }
+      find(cvId)
+      return share.reset(cvId)
     },
     async getShared(slug) {
       const entry = [...shares.entries()].find(([, link]) => link.slug === slug && link.isActive)
       const cv = entry && cvs.get(entry[0])
-      if (!cv) throw new ApiRequestError(404, 'not_found', 'Shared document not found')
-      return {
-        type: 'cv' as const,
-        title: cv.title,
-        document: structuredClone(cv.document),
-        updatedAt: cv.updatedAt,
+      if (cv) {
+        const { title, document, updatedAt } = structuredClone(cv)
+        return { type: 'cv' as const, title, document, updatedAt }
       }
+      const letter = entry && letters.get(entry[0])
+      if (letter) {
+        const { title, document, updatedAt } = structuredClone(letter)
+        return { type: 'coverLetter' as const, title, document, updatedAt }
+      }
+      throw new ApiRequestError(404, 'not_found', 'Shared document not found')
     },
     async uploadImage() {
       return { id: id(), url: `/api/uploads/${id()}`, contentType: 'image/png', size: 100 }
@@ -218,9 +239,121 @@ export function createFakeCvApi() {
     },
   }
 
+  const findLetter = (letterId: string) => {
+    const letter = letters.get(letterId)
+    if (!letter) throw new ApiRequestError(404, 'not_found', 'Cover letter not found')
+    return letter
+  }
+  const letterSummary = (letter: CoverLetterRecord): DocumentSummary => ({
+    id: letter.id,
+    type: 'coverLetter',
+    title: letter.title,
+    jobId: letter.jobId,
+    shared: shares.get(letter.id)?.isActive ?? false,
+    createdAt: letter.createdAt,
+    updatedAt: letter.updatedAt,
+  })
+
+  const coverLetterApi: CoverLetterApi = {
+    async list() {
+      return [...letters.values()]
+        .map(letterSummary)
+        .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+    },
+    async get(letterId) {
+      return structuredClone(findLetter(letterId))
+    },
+    async create(input = {}) {
+      const time = now()
+      const record: CoverLetterRecord = {
+        id: id(),
+        type: 'coverLetter',
+        title: input.title ?? 'Cover letter',
+        cvId: input.cvId ?? null,
+        jobId: input.jobId ?? null,
+        revision: 1,
+        document: input.document ?? createCoverLetter(),
+        createdAt: time,
+        updatedAt: time,
+      }
+      letters.set(record.id, record)
+      const job = record.jobId ? jobs.get(record.jobId) : undefined
+      if (job && !job.coverLetterId) jobs.set(job.id, { ...job, coverLetterId: record.id })
+      return structuredClone(record)
+    },
+    async update(letterId, input) {
+      const current = findLetter(letterId)
+      if (input.document && input.revision !== current.revision) {
+        throw new ApiRequestError(409, 'conflict', 'This cover letter was changed somewhere else', {
+          revision: current.revision,
+        })
+      }
+      const next: CoverLetterRecord = {
+        ...current,
+        ...(input.title !== undefined && { title: input.title }),
+        ...(input.cvId !== undefined && { cvId: input.cvId }),
+        ...(input.jobId !== undefined && { jobId: input.jobId }),
+        ...(input.document !== undefined && {
+          document: input.document,
+          revision: current.revision + 1,
+        }),
+        updatedAt: now(),
+      }
+      letters.set(letterId, next)
+      return structuredClone(next)
+    },
+    async remove(letterId) {
+      findLetter(letterId)
+      letters.delete(letterId)
+      shares.delete(letterId)
+      for (const job of jobs.values())
+        if (job.coverLetterId === letterId) jobs.set(job.id, { ...job, coverLetterId: null })
+    },
+    async duplicate(letterId) {
+      const source = findLetter(letterId)
+      return coverLetterApi.create({
+        title: `Copy of ${source.title}`,
+        cvId: source.cvId,
+        document: structuredClone(source.document),
+      })
+    },
+    async getShare(letterId) {
+      findLetter(letterId)
+      return share.get(letterId)
+    },
+    async setShare(letterId, isActive) {
+      findLetter(letterId)
+      return share.set(letterId, isActive)
+    },
+    async resetShare(letterId) {
+      findLetter(letterId)
+      return share.reset(letterId)
+    },
+  }
+
   return {
     api,
     jobsApi,
+    coverLetterApi,
+    letters,
+    /** Adds a cover letter directly, as if it already existed on the server. */
+    seedLetter(title: string, fields: Partial<CoverLetterRecord> = {}) {
+      const time = now()
+      const record: CoverLetterRecord = {
+        id: id(),
+        type: 'coverLetter',
+        title,
+        cvId: null,
+        jobId: null,
+        revision: 1,
+        document: createCoverLetter({ today: new Date(2026, 9, 15) }),
+        createdAt: time,
+        updatedAt: time,
+        ...fields,
+      }
+      letters.set(record.id, record)
+      return record
+    },
     jobs,
     /** Adds a job directly, as if it already existed on the server. */
     seedJob(input: CreateJobInput) {
@@ -260,6 +393,7 @@ export function createFakeCvApi() {
       versions.clear()
       shares.clear()
       jobs.clear()
+      letters.clear()
     },
   }
 }

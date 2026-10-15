@@ -3,7 +3,7 @@ import {
   CvVersionSummarySchema,
   CvDocumentSchema,
   DocumentSummarySchema,
-  SharedCvSchema,
+  SharedDocumentSchema,
   ShareStateSchema,
   UploadSchema,
   type CreateCvInput,
@@ -69,10 +69,10 @@ export const cvApi = {
     const { data } = await api.post(`/cvs/${id}/share/reset`)
     return ShareStateSchema.parse(data)
   },
-  /** Public: what a share link shows. */
+  /** Public: what a share link shows (a CV or a cover letter). */
   async getShared(slug: string) {
     const { data } = await api.get(`/shared/${encodeURIComponent(slug)}`)
-    return SharedCvSchema.parse(data)
+    return SharedDocumentSchema.parse(data)
   },
   async uploadImage(image: Blob, filename = 'image') {
     const form = new FormData()

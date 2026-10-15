@@ -7,7 +7,7 @@ import { NotFoundPage } from '../../pages/NotFoundPage'
 import { printCv } from '../print/printCv'
 import { ShareDialog } from '../share/ShareDialog'
 import { useEditorUi } from '../../stores/editorUi'
-import { ConflictBanner } from './ConflictBanner'
+import { CvConflictBanner } from './ConflictBanner'
 import { useCvEditor } from './cvEditorStore'
 import { EditableTitle } from './EditableTitle'
 import { cvEditorApi } from './editorApi'
@@ -51,22 +51,17 @@ function CvEditor({ record }: { record: CvRecord }) {
       backTo="/documents/cvs"
       previewTo={`/cvs/${record.id}/preview`}
       cvId={record.id}
-      banner={<ConflictBanner cvId={record.id} />}
+      banner={<CvConflictBanner cvId={record.id} />}
       onDownload={download}
       onShare={() => setSharing(true)}
     >
       {previewVersionId ? (
         <VersionPreview cvId={record.id} versionId={previewVersionId} />
       ) : (
-        <PageCanvas
-          cv={cv ?? record.document}
-          title={record.title}
-          mode="edit"
-          editor={cvEditorApi}
-        />
+        <PageCanvas cv={cv ?? record.document} mode="edit" editor={cvEditorApi} />
       )}
       {sharing && (
-        <ShareDialog cvId={record.id} title={record.title} onClose={() => setSharing(false)} />
+        <ShareDialog id={record.id} title={record.title} onClose={() => setSharing(false)} />
       )}
     </EditorLayout>
   )

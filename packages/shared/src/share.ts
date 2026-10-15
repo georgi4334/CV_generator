@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { CoverLetterDocumentSchema } from './coverLetter'
 import { CvDocumentSchema } from './cv/document'
 
 /** A public, read-only link to a document. Off by default. */
@@ -27,6 +28,21 @@ export const SharedCvSchema = z.object({
   updatedAt: z.iso.datetime(),
 })
 export type SharedCv = z.infer<typeof SharedCvSchema>
+
+export const SharedCoverLetterSchema = z.object({
+  type: z.literal('coverLetter'),
+  title: z.string(),
+  document: CoverLetterDocumentSchema,
+  updatedAt: z.iso.datetime(),
+})
+export type SharedCoverLetter = z.infer<typeof SharedCoverLetterSchema>
+
+/** Answer of the public share endpoint: a CV or a cover letter. */
+export const SharedDocumentSchema = z.discriminatedUnion('type', [
+  SharedCvSchema,
+  SharedCoverLetterSchema,
+])
+export type SharedDocument = z.infer<typeof SharedDocumentSchema>
 
 /** Slugs are base64url; anything else cannot be a share link. */
 export const SHARE_SLUG_PATTERN = /^[A-Za-z0-9_-]{8,64}$/

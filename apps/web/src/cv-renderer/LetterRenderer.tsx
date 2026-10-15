@@ -1,0 +1,207 @@
+import type { CoverLetterDocument } from '@cv/shared'
+import { Plus } from 'lucide-react'
+import type { ReactNode } from 'react'
+import { RenderContext, useEditor, useRender, type RenderMode } from './context'
+import { HeaderControls } from './controls'
+import type { EditorApi } from './editorApi'
+import { backgroundImage } from './backgrounds'
+import { pageStyle, SOLID_SIDEBAR_VARS } from './pageStyle'
+import { usePlaceholders, type Placeholders } from './placeholders'
+import { Field } from './primitives'
+import { getTemplate } from './templates'
+import { layoutTokens } from './tokens'
+
+/** Letter-only edits: paragraphs are added and removed like CV bullets. */
+export interface LetterActions {
+  addParagraph: (afterIndex: number) => void
+  removeParagraph: (index: number) => void
+}
+
+/** Opening first, closing last, "why you" and more in between, however many there are. */
+function paragraphHint(P: Placeholders, index: number, count: number) {
+  const [opening, whyYou, closing] = P.paragraphs
+  if (index === 0) return opening!
+  if (index === count - 1) return closing!
+  return index === 1 ? whyYou! : P.paragraph
+}
+
+function Paragraphs({ paragraphs, actions }: { paragraphs: string[]; actions?: LetterActions }) {
+  const P = usePlaceholders()
+  const editor = useEditor()
+  const { mode } = useRender()
+  return (
+    <div className="flex flex-col gap-[0.8em]">
+      {paragraphs.map((text, index) =>
+        mode === 'preview' && !text.trim() ? null : (
+          // Re-mount when paragraphs are added or removed, so the new one takes the focus.
+          <p key={`${index}/${paragraphs.length}`} className="m-0">
+            <Field
+              value={text}
+              path={`paragraphs.${index}`}
+              placeholder={paragraphHint(P, index, paragraphs.length)}
+              className="block"
+              onEnter={actions ? () => actions.addParagraph(index) : undefined}
+              onBackspaceEmpty={
+                actions && paragraphs.length > 1 ? () => actions.removeParagraph(index) : undefined
+              }
+            />
+          </p>
+        ),
+      )}
+      {editor && actions && (
+        <button
+          type="button"
+          onClick={() => actions.addParagraph(paragraphs.length - 1)}
+          className="inline-flex w-fit items-center gap-1 rounded px-1 text-[0.85em] opacity-60 hover:bg-[var(--cv-hover)] hover:opacity-100"
+          style={{ color: 'var(--cv-accent-text)' }}
+        >
+          <Plus className="size-[1em]" aria-hidden /> Add paragraph
+        </button>
+      )}
+    </div>
+  )
+}
+
+/**
+ * A cover letter as one page (it grows if the text is longer): the header of
+ * the chosen template, so letter and CV look alike, then the letter itself.
+ */
+export function LetterRenderer({
+  letter,
+  mode,
+  editor,
+  actions,
+  pageClassName,
+}: {
+  letter: CoverLetterDocument
+  mode: RenderMode
+  /** Makes the letter editable in place (edit mode only). */
+  editor?: EditorApi
+  actions?: LetterActions
+  pageClassName?: string
+}) {
+  const { design, header, recipient } = letter
+  const template = getTemplate(design.templateId)
+  const tokens = layoutTokens(design)
+  const { margin } = tokens
+  const { Header } = template
+  const banded = template.headerPlacement === 'full' && template.headerBand
+  const context = {
+    mode,
+    language: letter.language,
+    titleVariant: template.titleVariant,
+    inlineSkills: false,
+    timeline: false,
+    measuring: false,
+    editor: editor ?? null,
+  }
+
+  return (
+    <RenderContext.Provider value={context}>
+      <LetterPlaceholders>
+        {(P) => (
+          <div role="document" aria-label="Cover letter" className="flex flex-col">
+            <div
+              data-letter-page={design.pageSize}
+              className={`relative flex flex-col bg-white ${pageClassName ?? ''}`}
+              style={{
+                ...pageStyle(design, tokens),
+                backgroundImage: backgroundImage(design.background, design.accentColor),
+                minHeight: tokens.page.height,
+              }}
+            >
+              <div
+                style={{
+                  paddingTop: margin,
+                  paddingBottom: Math.round(margin * 0.7),
+                  // Banded templates color the whole top of the page; others draw a rule.
+                  ...(banded
+                    ? {
+                        ...SOLID_SIDEBAR_VARS,
+                        paddingLeft: margin,
+                        paddingRight: margin,
+                        background: design.accentColor,
+                        color: 'var(--cv-text)',
+                      }
+                    : {
+                        marginLeft: margin,
+                        marginRight: margin,
+                        borderBottom: '1px solid var(--cv-rule)',
+                      }),
+                }}
+              >
+                <HeaderControls
+                  supportsPhoto={template.supportsPhoto}
+                  hasPhoto={header.showPhoto && header.photoUrl !== null}
+                >
+                  <Header header={header} />
+                </HeaderControls>
+              </div>
+
+              <div
+                className="flex flex-1 flex-col gap-[1.4em]"
+                style={{ padding: `${Math.round(margin * 0.8)}px ${margin}px ${margin}px` }}
+              >
+                <div className="text-right" style={{ color: 'var(--cv-muted)' }}>
+                  <Field value={letter.date} path="date" placeholder={P.letterDate} />
+                </div>
+                <div className="flex flex-col">
+                  <Field
+                    value={recipient.name}
+                    path="recipient.name"
+                    placeholder={P.recipientName}
+                    className="font-semibold"
+                    style={{ color: 'var(--cv-strong)' }}
+                  />
+                  <Field
+                    value={recipient.title}
+                    path="recipient.title"
+                    placeholder={P.recipientTitle}
+                  />
+                  <Field
+                    value={recipient.company}
+                    path="recipient.company"
+                    placeholder={P.recipientCompany}
+                  />
+                  <Field
+                    value={recipient.address}
+                    path="recipient.address"
+                    placeholder={P.recipientAddress}
+                    multiline
+                    style={{ color: 'var(--cv-muted)' }}
+                  />
+                </div>
+                <Field
+                  value={letter.greeting}
+                  path="greeting"
+                  placeholder={P.greeting}
+                  className="block"
+                />
+                <Paragraphs paragraphs={letter.paragraphs} actions={actions} />
+                <div className="flex flex-col">
+                  <Field value={letter.closing} path="closing" placeholder={P.closing} />
+                  <Field
+                    value={letter.signature}
+                    path="signature"
+                    placeholder={P.signature}
+                    className="mt-[1.6em] text-[1.15em] font-semibold"
+                    style={{ color: 'var(--cv-accent-text)' }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </LetterPlaceholders>
+    </RenderContext.Provider>
+  )
+}
+
+/** Gives the body the placeholders of the letter language (they need the render context). */
+function LetterPlaceholders({
+  children,
+}: {
+  children: (P: ReturnType<typeof usePlaceholders>) => ReactNode
+}) {
+  return <>{children(usePlaceholders())}</>
+}

@@ -3,6 +3,9 @@ import type { DocumentType } from '@cv/shared'
 /** The "Create new CV" wizard. */
 export const NEW_CV_PATH = '/cvs/new'
 
+/** "Create a cover letter"; add `?cvId=` / `?jobId=` to preselect them. */
+export const NEW_LETTER_PATH = '/cover-letters/new'
+
 export function editPath(doc: { id: string; type: DocumentType }) {
   return doc.type === 'cv' ? `/cvs/${doc.id}/edit` : `/cover-letters/${doc.id}/edit`
 }

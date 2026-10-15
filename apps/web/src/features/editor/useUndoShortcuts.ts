@@ -1,8 +1,16 @@
 import { useEffect } from 'react'
 import { useCvEditor } from './cvEditorStore'
 
-/** Ctrl/Cmd+Z = undo, Ctrl/Cmd+Shift+Z or Ctrl+Y = redo, for the whole CV. */
-export function useUndoShortcuts() {
+interface UndoHistory {
+  undo: () => void
+  redo: () => void
+}
+
+/**
+ * Ctrl/Cmd+Z = undo, Ctrl/Cmd+Shift+Z or Ctrl+Y = redo, for the whole document.
+ * `history` returns the open document's store (the CV editor by default).
+ */
+export function useUndoShortcuts(history: () => UndoHistory = () => useCvEditor.getState()) {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (!(e.ctrlKey || e.metaKey) || e.altKey) return
@@ -12,14 +20,14 @@ export function useUndoShortcuts() {
       const key = e.key.toLowerCase()
       if (key === 'z') {
         e.preventDefault()
-        if (e.shiftKey) useCvEditor.getState().redo()
-        else useCvEditor.getState().undo()
+        if (e.shiftKey) history().redo()
+        else history().undo()
       } else if (key === 'y') {
         e.preventDefault()
-        useCvEditor.getState().redo()
+        history().redo()
       }
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [])
+  }, [history])
 }

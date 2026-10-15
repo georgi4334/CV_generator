@@ -11,6 +11,7 @@ import { ExternalLink } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { JOB_STATUS_STYLES } from '../../components/badgeStyles'
+import { editPath } from '../../lib/paths'
 import { inputClass } from './jobHelpers'
 
 /** Status as a colored badge that is also a dropdown. */
@@ -127,21 +128,21 @@ export function InlineText({
   )
 }
 
-/** Pick which CV was sent; a link opens it. */
-export function CvSelect({
+/** Pick which CV or cover letter was sent; a link opens it. */
+export function DocumentSelect({
   value,
-  cvs,
+  docs,
   label,
   onChange,
   className = inputClass,
 }: {
   value: string | null
-  cvs: DocumentSummary[]
+  docs: DocumentSummary[]
   label: string
-  onChange: (cvId: string | null) => void
+  onChange: (id: string | null) => void
   className?: string
 }) {
-  const linked = cvs.find((cv) => cv.id === value)
+  const linked = docs.find((doc) => doc.id === value)
   return (
     <span className="flex min-w-0 items-center gap-1">
       <select
@@ -151,15 +152,15 @@ export function CvSelect({
         className={`min-w-0 flex-1 ${className}`}
       >
         <option value="">—</option>
-        {cvs.map((cv) => (
-          <option key={cv.id} value={cv.id}>
-            {cv.title}
+        {docs.map((doc) => (
+          <option key={doc.id} value={doc.id}>
+            {doc.title}
           </option>
         ))}
       </select>
       {linked && (
         <Link
-          to={`/cvs/${linked.id}/edit`}
+          to={editPath(linked)}
           aria-label={`Open ${linked.title}`}
           title={`Open ${linked.title}`}
           className="shrink-0 rounded p-1 text-teal-700 hover:bg-slate-100 dark:text-teal-300 dark:hover:bg-slate-800"

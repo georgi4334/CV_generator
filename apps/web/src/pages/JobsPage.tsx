@@ -19,6 +19,7 @@ import { JobsTable } from '../features/jobs/JobsTable'
 import { JobActionsContext, type JobActions } from '../features/jobs/jobContext'
 import { toApiRequestError } from '../lib/api'
 import { useCvList } from '../lib/cvQueries'
+import { useCoverLetterList } from '../lib/letterQueries'
 import { useDeleteJob, useJobs, useUpdateJob } from '../lib/jobQueries'
 import { useMediaQuery } from '../lib/useMediaQuery'
 
@@ -32,6 +33,7 @@ export function JobsPage() {
   // The table needs room; phones get one card per job.
   const wide = useMediaQuery('(min-width: 768px)')
   const cvs = useCvList().data
+  const letters = useCoverLetterList().data
   const update = useUpdateJob()
   const remove = useDeleteJob()
   const [params, setParams] = useSearchParams()
@@ -66,6 +68,7 @@ export function JobsPage() {
   const actions = useMemo<JobActions>(
     () => ({
       cvs: (cvs ?? []).filter((doc) => doc.type === 'cv'),
+      letters: letters ?? [],
       update: (job: Job, change: UpdateJobInput) => {
         setMessage(null)
         update.mutate(
@@ -79,7 +82,7 @@ export function JobsPage() {
       open: (job: Job) => setDrawer({ kind: 'job', id: job.id }),
       remove: setToDelete,
     }),
-    [cvs, update],
+    [cvs, letters, update],
   )
 
   const openJob = drawer?.kind === 'job' ? all?.find((job) => job.id === drawer.id) : undefined

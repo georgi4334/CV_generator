@@ -12,7 +12,7 @@ import { BACKGROUNDS, backgroundImage } from '../../cv-renderer/backgrounds'
 import { FONT_STACKS } from '../../cv-renderer/fonts'
 import { sidebarFor, type TemplateDefinition } from '../../cv-renderer/templates'
 import { contrastWithWhite } from './contrast'
-import { useCvEditor } from './cvEditorStore'
+import { useDesignTarget } from './designTarget'
 
 type LevelKey = 'pageMargins' | 'sectionSpacing' | 'fontSize' | 'lineHeight'
 
@@ -46,8 +46,7 @@ function LevelSlider({
   minLabel: string
   maxLabel: string
 }) {
-  const updateDesign = useCvEditor((s) => s.updateDesign)
-  const endTyping = useCvEditor((s) => s.endTyping)
+  const { updateDesign, endTyping } = useDesignTarget()
   const set = (next: number) =>
     updateDesign({ [field]: Math.min(5, Math.max(1, next)) }, `design:${field}`)
 
@@ -100,8 +99,7 @@ function LevelSlider({
 }
 
 function ColorPicker({ design, template }: { design: CvDesign; template: TemplateDefinition }) {
-  const updateDesign = useCvEditor((s) => s.updateDesign)
-  const endTyping = useCvEditor((s) => s.endTyping)
+  const { updateDesign, endTyping } = useDesignTarget()
   const [hexText, setHexText] = useState(design.accentColor)
   const custom = !(ACCENT_PRESETS as readonly string[]).includes(design.accentColor.toLowerCase())
   const filled = sidebarFor(template, design.columnLayout).fill === 'solid' || template.headerBand
@@ -187,7 +185,7 @@ function ColorPicker({ design, template }: { design: CvDesign; template: Templat
 }
 
 function FontPicker({ value }: { value: FontFamily }) {
-  const updateDesign = useCvEditor((s) => s.updateDesign)
+  const { updateDesign } = useDesignTarget()
   const [open, setOpen] = useState(false)
   return (
     <Group title="Font style">
@@ -245,7 +243,7 @@ function ColumnLayoutPicker({
   design: CvDesign
   template: TemplateDefinition
 }) {
-  const updateDesign = useCvEditor((s) => s.updateDesign)
+  const { updateDesign } = useDesignTarget()
   if (template.columns === 1) {
     return (
       <Group title="Column layout">
@@ -302,7 +300,7 @@ function ColumnLayoutPicker({
 }
 
 function BackgroundPicker({ design }: { design: CvDesign }) {
-  const updateDesign = useCvEditor((s) => s.updateDesign)
+  const { updateDesign } = useDesignTarget()
   return (
     <Group title="Backgrounds">
       <div role="radiogroup" aria-label="Background" className="grid grid-cols-4 gap-2">
@@ -332,10 +330,8 @@ function BackgroundPicker({ design }: { design: CvDesign }) {
 }
 
 export function DesignPanel() {
-  const cv = useCvEditor((s) => s.cv)
-  const updateDesign = useCvEditor((s) => s.updateDesign)
-  if (!cv) return null
-  const { design } = cv
+  const { kind, design, updateDesign } = useDesignTarget()
+  if (!design) return null
   const template = getTemplate(design.templateId)
 
   const resetToTemplateDefaults = () => {
@@ -382,7 +378,8 @@ export function DesignPanel() {
         minLabel="condensed"
         maxLabel="spacious"
       />
-      <ColumnLayoutPicker design={design} template={template} />
+      {/* A letter is one column; its look comes from the template's header. */}
+      {kind === 'cv' && <ColumnLayoutPicker design={design} template={template} />}
       <BackgroundPicker design={design} />
       <button
         type="button"

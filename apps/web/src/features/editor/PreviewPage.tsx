@@ -8,12 +8,14 @@ import { Link, useParams } from 'react-router'
 import { toApiRequestError } from '../../lib/api'
 import { useCv } from '../../lib/cvQueries'
 import { NotFoundPage } from '../../pages/NotFoundPage'
-import { printCv } from '../print/printCv'
+import { printCv, printLetter } from '../print/printCv'
 import { ShareDialog } from '../share/ShareDialog'
 import { useCvEditor } from './cvEditorStore'
 import { LoadError, PageLoading } from './LoadStates'
 import { PageCanvas } from './PageCanvas'
-import { useCoverLetterStub } from './useEditorDocument'
+import { LetterRenderer } from '../../cv-renderer'
+import { useCoverLetter } from '../../lib/letterQueries'
+import { useLetterEditor } from '../letter/letterEditorStore'
 
 function PreviewFrame({
   editTo,
@@ -43,6 +45,27 @@ function PreviewFrame({
   )
 }
 
+function PreviewActions({ onShare, onDownload }: { onShare: () => void; onDownload: () => void }) {
+  return (
+    <>
+      <button type="button" onClick={onShare} className={secondaryButton} aria-label="Share">
+        <Link2 className="size-4" aria-hidden />
+        <span className="hidden sm:inline">Share</span>
+      </button>
+      <button
+        type="button"
+        onClick={onDownload}
+        className={primaryButton}
+        aria-label="Download PDF"
+        title="Opens the print dialog: choose “Save as PDF”"
+      >
+        <Download className="size-4" aria-hidden />
+        <span className="hidden sm:inline">Download PDF</span>
+      </button>
+    </>
+  )
+}
+
 function CvPreview() {
   const { id } = useParams()
   const query = useCv(id)
@@ -63,34 +86,14 @@ function CvPreview() {
       editTo={`/cvs/${query.data.id}/edit`}
       title={title}
       actions={
-        <>
-          <button
-            type="button"
-            onClick={() => setSharing(true)}
-            className={secondaryButton}
-            aria-label="Share"
-          >
-            <Link2 className="size-4" aria-hidden />
-            <span className="hidden sm:inline">Share</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => printCv(cv, title)}
-            className={primaryButton}
-            aria-label="Download PDF"
-            title="Opens the print dialog: choose “Save as PDF”"
-          >
-            <Download className="size-4" aria-hidden />
-            <span className="hidden sm:inline">Download PDF</span>
-          </button>
-        </>
+        <PreviewActions onShare={() => setSharing(true)} onDownload={() => printCv(cv, title)} />
       }
     >
       <FitToWidth width={PAGE_SIZE_PX[cv.design.pageSize].width}>
-        <PageCanvas cv={cv} title={title} mode="preview" />
+        <PageCanvas cv={cv} mode="preview" />
       </FitToWidth>
       {sharing && (
-        <ShareDialog cvId={query.data.id} title={title} onClose={() => setSharing(false)} />
+        <ShareDialog id={query.data.id} title={title} onClose={() => setSharing(false)} />
       )}
     </PreviewFrame>
   )
@@ -98,13 +101,41 @@ function CvPreview() {
 
 function CoverLetterPreview() {
   const { id } = useParams()
-  const stub = useCoverLetterStub(id)
-  if (!stub) return <NotFoundPage />
+  const query = useCoverLetter(id)
+  // Coming straight from the editor, show its content even if the last save is still running.
+  const editing = useLetterEditor((s) => (s.docId === id ? s.letter : null))
+  const [sharing, setSharing] = useState(false)
+
+  if (query.isPending) return <PageLoading />
+  if (query.isError) {
+    const error = toApiRequestError(query.error)
+    if (error.status === 404 || error.status === 400) return <NotFoundPage />
+    return <LoadError error={error} onRetry={() => void query.refetch()} />
+  }
+  const { title } = query.data
+  const letter = editing ?? query.data.document
   return (
-    <PreviewFrame editTo={`/cover-letters/${stub.id}/edit`} title={stub.title}>
-      <FitToWidth width={PAGE_SIZE_PX.A4.width}>
-        <PageCanvas cv={null} title={stub.title} mode="preview" />
+    <PreviewFrame
+      editTo={`/cover-letters/${query.data.id}/edit`}
+      title={title}
+      actions={
+        <PreviewActions
+          onShare={() => setSharing(true)}
+          onDownload={() => printLetter(letter, title)}
+        />
+      }
+    >
+      <FitToWidth width={PAGE_SIZE_PX[letter.design.pageSize].width}>
+        <LetterRenderer letter={letter} mode="preview" pageClassName="shadow-lg" />
       </FitToWidth>
+      {sharing && (
+        <ShareDialog
+          type="coverLetter"
+          id={query.data.id}
+          title={title}
+          onClose={() => setSharing(false)}
+        />
+      )}
     </PreviewFrame>
   )
 }

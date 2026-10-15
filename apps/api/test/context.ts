@@ -25,7 +25,7 @@ export function useTestApp() {
       })
     }
     await context.database.db.execute(
-      sql`truncate users, cvs, cv_versions, uploads, share_links, jobs cascade`,
+      sql`truncate users, cvs, cv_versions, uploads, share_links, jobs, cover_letters cascade`,
     )
   })
 

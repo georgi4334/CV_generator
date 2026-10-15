@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { IdSchema } from './cv/common'
+import { CoverLetterDocumentSchema } from './coverLetter'
 import { CvDocumentSchema } from './cv/document'
 import { PROFESSION_IDS } from './professions'
 
@@ -47,6 +48,30 @@ export type UpdateCvInput = z.infer<typeof UpdateCvInputSchema>
 /** Copy a CV; with `jobId`, a copy tailored for that saved job, which then points at it. */
 export const DuplicateCvInputSchema = z.object({ jobId: IdSchema.optional() })
 export type DuplicateCvInput = z.infer<typeof DuplicateCvInputSchema>
+
+export const CreateCoverLetterInputSchema = z.object({
+  title: TitleSchema.optional(),
+  cvId: IdSchema.nullable().optional(),
+  jobId: IdSchema.nullable().optional(),
+  /** Omit for an empty letter (without a CV's header and design). */
+  document: CoverLetterDocumentSchema.optional(),
+})
+export type CreateCoverLetterInput = z.infer<typeof CreateCoverLetterInputSchema>
+
+/** Same rules as a CV: a document save needs the revision it is based on. */
+export const UpdateCoverLetterInputSchema = z
+  .object({
+    revision: z.number().int().positive().optional(),
+    title: TitleSchema.optional(),
+    cvId: IdSchema.nullable().optional(),
+    jobId: IdSchema.nullable().optional(),
+    document: CoverLetterDocumentSchema.optional(),
+  })
+  .refine((input) => input.document === undefined || input.revision !== undefined, {
+    message: 'revision is required when saving the document',
+    path: ['revision'],
+  })
+export type UpdateCoverLetterInput = z.infer<typeof UpdateCoverLetterInputSchema>
 
 export const CvVersionSummarySchema = z.object({
   id: IdSchema,

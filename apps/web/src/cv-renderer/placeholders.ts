@@ -33,6 +33,21 @@ const EN = {
   customTitle: 'Title',
   customSubtitle: 'Subtitle',
   customDescription: 'Description',
+  // Cover letters
+  letterDate: 'Date',
+  recipientName: "Hiring manager's name",
+  recipientTitle: 'Their job title',
+  recipientCompany: 'Company name',
+  recipientAddress: 'Company address',
+  greeting: 'Dear Hiring Manager,',
+  paragraphs: [
+    'Opening: the role you are applying for and why it excites you.',
+    'Why you: your most relevant experience and results, with numbers if possible.',
+    'Closing: what you would bring to the team, and that you look forward to talking.',
+  ],
+  paragraph: 'Another paragraph.',
+  closing: 'Kind regards,',
+  signature: 'Your Name',
 }
 
 export type Placeholders = typeof EN
@@ -72,6 +87,20 @@ export const PLACEHOLDERS: Record<CvLanguage, Placeholders> = {
     customTitle: 'Заглавие',
     customSubtitle: 'Подзаглавие',
     customDescription: 'Описание',
+    letterDate: 'Дата',
+    recipientName: 'Име на човека, който наема',
+    recipientTitle: 'Неговата длъжност',
+    recipientCompany: 'Име на компанията',
+    recipientAddress: 'Адрес на компанията',
+    greeting: 'Уважаеми г-н/г-жо,',
+    paragraphs: [
+      'Начало: позицията, за която кандидатствате, и защо ви вълнува.',
+      'Защо вие: най-подходящият ви опит и резултати, с числа, ако е възможно.',
+      'Край: какво бихте донесли на екипа и че очаквате разговор.',
+    ],
+    paragraph: 'Още един абзац.',
+    closing: 'С уважение,',
+    signature: 'Вашето име',
   },
 }
 
