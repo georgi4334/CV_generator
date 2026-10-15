@@ -28,7 +28,8 @@ import {
   NEW_CV_PATH,
   type DocumentSubtab,
 } from '../lib/paths'
-import { MOCK_COVER_LETTERS, MOCK_JOBS } from '../mocks/data'
+import { useJobs } from '../lib/jobQueries'
+import { MOCK_COVER_LETTERS } from '../mocks/data'
 
 type SortKey = 'updated' | 'created' | 'name' | 'type'
 
@@ -223,6 +224,7 @@ export function DocumentsPage() {
   const duplicate = useDuplicateCv()
   const remove = useDeleteCvs()
   const loadCv = useLoadCv()
+  const jobs = useJobs().data ?? []
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<SortKey>('updated')
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -422,7 +424,7 @@ export function DocumentsPage() {
 
         <ul aria-label="Documents" className="divide-y divide-slate-100 dark:divide-slate-800">
           {documents.map((doc) => {
-            const job = MOCK_JOBS.find((j) => j.id === doc.jobId)
+            const job = jobs.find((j) => j.id === doc.jobId)
             const editable = isEditable(doc)
             return (
               <li

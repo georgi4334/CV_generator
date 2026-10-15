@@ -36,26 +36,48 @@ export const JOB_TYPE_LABELS: Record<JobType, string> = {
 /** Calendar date without time, e.g. "2026-10-13". */
 export const IsoDateSchema = z.iso.date()
 
-/** Editable fields of a saved job (what the "Add job" form and inline edits send). */
-export const JobInputSchema = z.object({
-  position: z.string().min(1),
-  company: z.string().min(1),
-  status: JobStatusSchema.default('to_apply'),
-  type: JobTypeSchema.nullable().default(null),
-  dateApplied: IsoDateSchema.nullable().default(null),
-  cvId: IdSchema.nullable().default(null),
-  coverLetterId: IdSchema.nullable().default(null),
-  notes: z.string().default(''),
-  url: z.string().default(''),
-  description: z.string().default(''),
-  location: z.string().default(''),
-  salary: z.string().default(''),
-  contact: z.string().default(''),
-})
-export type JobInput = z.input<typeof JobInputSchema>
+/** Fields of a saved job the user can edit (in the table, the form or the drawer). */
+const jobFields = {
+  position: z.string().trim().min(1).max(200),
+  company: z.string().trim().min(1).max(200),
+  status: JobStatusSchema,
+  type: JobTypeSchema.nullable(),
+  dateApplied: IsoDateSchema.nullable(),
+  /** The CV sent for this job. */
+  cvId: IdSchema.nullable(),
+  /** The cover letter sent (cover letters arrive in Step 13). */
+  coverLetterId: IdSchema.nullable(),
+  notes: z.string().max(5000),
+  location: z.string().trim().max(200),
+  salary: z.string().trim().max(100),
+  contact: z.string().trim().max(200),
+}
 
-export const JobSchema = JobInputSchema.extend({
+/** "+ Add job": position and company are required, everything else has a default. */
+export const CreateJobInputSchema = z.object({
+  ...jobFields,
+  status: jobFields.status.default('to_apply'),
+  type: jobFields.type.default(null),
+  dateApplied: jobFields.dateApplied.default(null),
+  cvId: jobFields.cvId.default(null),
+  coverLetterId: jobFields.coverLetterId.default(null),
+  notes: jobFields.notes.default(''),
+  location: jobFields.location.default(''),
+  salary: jobFields.salary.default(''),
+  contact: jobFields.contact.default(''),
+  /** The user's local date; the server's date (UTC) when left out. */
+  dateSaved: IsoDateSchema.optional(),
+})
+export type CreateJobInput = z.input<typeof CreateJobInputSchema>
+
+/** Inline edits and the drawer send only the fields that changed. */
+export const UpdateJobInputSchema = z.object(jobFields).partial()
+export type UpdateJobInput = z.infer<typeof UpdateJobInputSchema>
+
+export const JobSchema = z.object({
+  ...jobFields,
   id: IdSchema,
+  /** Set when the job is added. */
   dateSaved: IsoDateSchema,
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),

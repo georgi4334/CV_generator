@@ -1,17 +1,19 @@
 # CV Generator — Development Plan
 
-> Status: **Step 11 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
+> Status: **Step 12 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
 >
 > **Decision log**
 >
 > - App tabs: Dashboard · Documents (All documents / Cover letters / CVs) · Saved Jobs ✅
 > - Job statuses: To apply · Applied · Interviewing · Negotiating · Accepted · Rejected · No answer ✅
 > - Backend framework: Fastify; ORM: Drizzle ✅
-> - Step 0 closed. Step 1 (project setup) ✅. Step 2 (shared domain model) ✅. Step 3 (app shell) ✅. Step 4 (CV renderer) ✅. Step 5 (inline editing) ✅. Step 6 (rearrange) ✅. Step 7 (templates & design) ✅. Step 8 (API & database) ✅. Step 9 (frontend ↔ API) ✅. Step 10 ("Create new CV" wizard) ✅. Step 11 (PDF download & share links) built; awaiting review before Step 12.
+> - Step 0 closed. Step 1 (project setup) ✅. Step 2 (shared domain model) ✅. Step 3 (app shell) ✅. Step 4 (CV renderer) ✅. Step 5 (inline editing) ✅. Step 6 (rearrange) ✅. Step 7 (templates & design) ✅. Step 8 (API & database) ✅. Step 9 (frontend ↔ API) ✅. Step 10 ("Create new CV" wizard) ✅. Step 11 (PDF download & share links) ✅. Step 12 (Saved Jobs) built; awaiting review before Step 13.
 > - Choosing a template applies its suggested font, column layout and spacing; the user can change them afterwards ✅
 > - Frontend: React + TS + Vite + Tailwind + Axios + React Router + TanStack Query + Zustand ✅
 > - Backend: Node + TypeScript + PostgreSQL (JSONB) with shared Zod types ✅
 > - Only free plans that allow commercial use; keep everything portable so it can become paid later ✅
+> - Saved Jobs extra fields: salary, location, contact person (no job URL or description for now); no Kanban board ✅
+> - Placeholders on the CV follow the CV language (English US/UK, Bulgarian) ✅
 
 ## 1. Goal
 
@@ -78,7 +80,7 @@ Table features:
 - Sort by any column; filter by status and type; text search.
 - Inline editing of status, dates, type and notes.
 - "+ Add job" button opens a form or drawer.
-- Details drawer: all fields plus **job URL, job description, salary, location, contact person** (proposed extra fields). The job description is what **Check & Tailor** uses later.
+- Details drawer: all fields plus **salary, location, contact person** ✅. (A job description field can be added in Step 16 if Check & Tailor should compare the CV with the posting.)
 - Built with **TanStack Table** (free, MIT; it matches TanStack Query). On mobile the table becomes stacked cards.
 
 ## 3. CV editor UI (reference screenshots)
@@ -382,15 +384,17 @@ Specification: §3.2 and §3.3.
   - Shared CVs get a _Shared_ badge in Documents. Deleting a CV deletes its link; copies are not shared.
 - API: `GET/PUT /cvs/:id/share`, `POST /cvs/:id/share/reset`, public `GET /shared/:slug`. New table `share_links` (migration `0001_share_links`, applied automatically on start).
 
-### Step 12: Saved Jobs tracker
+### Step 12: Saved Jobs tracker ✅ built (awaiting review)
 
 Specification: §2.3.
 
-- Backend: `GET/POST /jobs`, `PATCH/DELETE /jobs/:id`, with filters and sorting.
-- Table with sorting, filters, search and inline editing; "+ Add job" form; details drawer.
-- Link a job to a resume or cover letter, including "Create tailored copy" (duplicates the CV with `jobId` set).
-- Status changes automatically fill in "Date applied".
-- **Discuss:** the extra fields, and whether to add a Kanban board view later.
+- ✅ Backend: `GET/POST /jobs`, `GET/PATCH/DELETE /jobs/:id` (scoped to the user; PATCH sends only changed fields). New table `jobs` (migration `0002_jobs`); deleting a CV unlinks it from jobs, deleting a job keeps its CVs. Sorting and filtering run in the browser, which is instant for a personal job list.
+- ✅ Table (TanStack Table v9): sort by position, company, status, dates and type; filter by status and type; search position, company, location and notes. Inline editing of status, date applied, type, resume and notes, saved at once (undone if the save fails). Phones get one card per job.
+- ✅ "+ Add job" and the details drawer: position, company, status, date applied, type, location, salary, contact person, resume and notes; delete with confirmation. The Dashboard's "Add job" opens the form directly.
+- ✅ "Create tailored copy" duplicates the selected CV as "<CV title> – <Company>" with `jobId` set and links the job to it (`POST /cvs/:id/duplicate { jobId }`).
+- ✅ Status changes fill in "Date applied" (today, in the user's time zone) the first time a job leaves "To apply"; it stays editable.
+- ✅ The Dashboard pipeline and reminders and the Documents "For <position> at <company>" line use the real jobs.
+- Decided: no Kanban board. Cover letter links arrive with cover letters (Step 13).
 
 ### Step 13: Cover letters
 

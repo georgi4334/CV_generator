@@ -5,12 +5,16 @@ import {
   type CvDocument,
   type CvRecord,
   type CvVersionSummary,
+  type CreateJobInput,
+  CreateJobInputSchema,
   type DocumentSummary,
+  type Job,
   type ProfessionId,
   type ShareLink,
 } from '@cv/shared'
 import { ApiRequestError } from '../lib/api'
 import type { CvApi } from '../lib/cvApi'
+import type { JobsApi } from '../lib/jobsApi'
 
 interface Version extends CvVersionSummary {
   document: CvDocument
@@ -21,6 +25,7 @@ export function createFakeCvApi() {
   const cvs = new Map<string, CvRecord>()
   const versions = new Map<string, Version[]>()
   const shares = new Map<string, ShareLink>()
+  const jobs = new Map<string, Job>()
   let clock = Date.parse('2026-10-14T09:00:00Z')
   let seq = 0
   const now = () => new Date((clock += 1000)).toISOString()
@@ -89,13 +94,20 @@ export function createFakeCvApi() {
       find(cvId)
       cvs.delete(cvId)
       shares.delete(cvId)
+      for (const job of jobs.values())
+        if (job.cvId === cvId) jobs.set(job.id, { ...job, cvId: null })
     },
-    async duplicate(cvId) {
+    async duplicate(cvId, jobId) {
       const source = find(cvId)
-      return api.create({
-        title: `Copy of ${source.title}`,
+      const job = jobId ? jobs.get(jobId) : undefined
+      if (jobId && !job) throw new ApiRequestError(404, 'not_found', 'Job not found')
+      const copy = await api.create({
+        title: job ? `${source.title} – ${job.company}` : `Copy of ${source.title}`,
+        jobId: job?.id ?? null,
         document: structuredClone(source.document),
       })
+      if (job) jobs.set(job.id, { ...job, cvId: copy.id })
+      return copy
     },
     async listVersions(cvId) {
       find(cvId)
@@ -169,8 +181,61 @@ export function createFakeCvApi() {
     },
   }
 
+  const findJob = (jobId: string) => {
+    const job = jobs.get(jobId)
+    if (!job) throw new ApiRequestError(404, 'not_found', 'Job not found')
+    return job
+  }
+  const byNewest = (a: Job, b: Job) =>
+    b.dateSaved.localeCompare(a.dateSaved) || b.createdAt.localeCompare(a.createdAt)
+
+  const jobsApi: JobsApi = {
+    async list() {
+      return structuredClone([...jobs.values()].sort(byNewest))
+    },
+    async create(input) {
+      const { dateSaved, ...fields } = CreateJobInputSchema.parse(input)
+      const time = now()
+      const job: Job = {
+        ...fields,
+        id: id(),
+        dateSaved: dateSaved ?? time.slice(0, 10),
+        createdAt: time,
+        updatedAt: time,
+      }
+      jobs.set(job.id, job)
+      return structuredClone(job)
+    },
+    async update(jobId, change) {
+      const job = { ...findJob(jobId), ...change, updatedAt: now() }
+      jobs.set(jobId, job)
+      return structuredClone(job)
+    },
+    async remove(jobId) {
+      findJob(jobId)
+      jobs.delete(jobId)
+      for (const cv of cvs.values()) if (cv.jobId === jobId) cvs.set(cv.id, { ...cv, jobId: null })
+    },
+  }
+
   return {
     api,
+    jobsApi,
+    jobs,
+    /** Adds a job directly, as if it already existed on the server. */
+    seedJob(input: CreateJobInput) {
+      const { dateSaved, ...fields } = CreateJobInputSchema.parse(input)
+      const time = now()
+      const job: Job = {
+        ...fields,
+        id: id(),
+        dateSaved: dateSaved ?? '2026-10-01',
+        createdAt: time,
+        updatedAt: time,
+      }
+      jobs.set(job.id, job)
+      return job
+    },
     cvs,
     /** Adds a CV directly, as if it already existed on the server. */
     seed(title: string, professionId: ProfessionId = 'software-developer') {
@@ -194,6 +259,7 @@ export function createFakeCvApi() {
       cvs.clear()
       versions.clear()
       shares.clear()
+      jobs.clear()
     },
   }
 }
