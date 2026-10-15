@@ -1,13 +1,13 @@
 # CV Generator — Development Plan
 
-> Status: **Step 13 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
+> Status: **Step 14 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
 >
 > **Decision log**
 >
 > - App tabs: Dashboard · Documents (All documents / Cover letters / CVs) · Saved Jobs ✅
 > - Job statuses: To apply · Applied · Interviewing · Negotiating · Accepted · Rejected · No answer ✅
 > - Backend framework: Fastify; ORM: Drizzle ✅
-> - Step 0 closed. Step 1 (project setup) ✅. Step 2 (shared domain model) ✅. Step 3 (app shell) ✅. Step 4 (CV renderer) ✅. Step 5 (inline editing) ✅. Step 6 (rearrange) ✅. Step 7 (templates & design) ✅. Step 8 (API & database) ✅. Step 9 (frontend ↔ API) ✅. Step 10 ("Create new CV" wizard) ✅. Step 11 (PDF download & share links) ✅. Step 12 (Saved Jobs) ✅. Step 13 (cover letters) built; awaiting review before Step 14.
+> - Step 0 closed. Step 1 (project setup) ✅. Step 2 (shared domain model) ✅. Step 3 (app shell) ✅. Step 4 (CV renderer) ✅. Step 5 (inline editing) ✅. Step 6 (rearrange) ✅. Step 7 (templates & design) ✅. Step 8 (API & database) ✅. Step 9 (frontend ↔ API) ✅. Step 10 ("Create new CV" wizard) ✅. Step 11 (PDF download & share links) ✅. Step 12 (Saved Jobs) ✅. Step 13 (cover letters) ✅. Step 14 (Dashboard) built; awaiting review before Step 15.
 > - Choosing a template applies its suggested font, column layout and spacing; the user can change them afterwards ✅
 > - Frontend: React + TS + Vite + Tailwind + Axios + React Router + TanStack Query + Zustand ✅
 > - Backend: Node + TypeScript + PostgreSQL (JSONB) with shared Zod types ✅
@@ -408,12 +408,19 @@ Specification: §2.3.
 - Not in this step: version history for letters (CVs only for now).
 - (Step 16, AI) Generate a draft from a saved job plus the linked CV.
 
-### Step 14: Dashboard
+### Step 14: Dashboard ✅ built (awaiting review)
 
 Specification: §2.1.
 
-- Quick actions, recent documents, job pipeline counts, reminders.
-- Built last among the pages because it summarizes data from Documents and Saved Jobs.
+- ✅ **Quick actions:** New CV, New cover letter, Add job (opens the form).
+- ✅ **Recent documents:** the 4 latest CVs and cover letters as cards with a thumbnail of the first page, type badge, "Shared" badge and date. An empty account gets a "Create your first CV" prompt.
+- ✅ **Job pipeline:** a count and a small bar per status; each row opens Saved Jobs filtered to that status (`/jobs?status=applied`).
+- ✅ **Reminders**, longest-waiting first, with a count:
+  - Applied for 14+ days: _Mark as "No answer"_ in one click.
+  - Still "To apply" after 7+ days: _I applied_ in one click (fills in "Date applied", like the table does).
+  - The job's name opens its details (`/jobs?job=<id>`). "Nothing to follow up on." when there is none.
+- Saved Jobs reads `?status=` and `?job=` once and then clears them from the address.
+- The reminder rules live in `lib/reminders.ts` (14 and 7 days) and are unit-tested.
 
 ### Step 15: Authentication & accounts
 
