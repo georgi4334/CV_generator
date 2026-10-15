@@ -38,17 +38,24 @@ export function JobsPage() {
   const remove = useDeleteJob()
   const [params, setParams] = useSearchParams()
   const [query, setQuery] = useState('')
-  const [status, setStatus] = useState<JobStatus | 'all'>('all')
+  // The Dashboard links here with ?status= (pipeline) or ?job= (reminders).
+  const [status, setStatus] = useState<JobStatus | 'all'>(() => {
+    const requested = params.get('status')
+    return JOB_STATUSES.find((s) => s === requested) ?? 'all'
+  })
   const [type, setType] = useState<JobType | 'all'>('all')
-  // Dashboard → "Add job" (/jobs?add=1) opens the form straight away.
-  const [drawer, setDrawer] = useState<Drawer>(() =>
-    params.get('add') === '1' ? { kind: 'add' } : null,
-  )
+  // /jobs?add=1 opens the form straight away, /jobs?job=<id> that job's details.
+  const [drawer, setDrawer] = useState<Drawer>(() => {
+    const jobId = params.get('job')
+    if (jobId) return { kind: 'job', id: jobId }
+    return params.get('add') === '1' ? { kind: 'add' } : null
+  })
   const [toDelete, setToDelete] = useState<Job | null>(null)
   const [message, setMessage] = useState<string | null>(null)
 
   useEffect(() => {
-    if (params.has('add')) setParams({}, { replace: true })
+    // The request is read once; keep the address clean afterwards.
+    if (['add', 'job', 'status'].some((key) => params.has(key))) setParams({}, { replace: true })
   }, [params, setParams])
 
   const all = jobsQuery.data
