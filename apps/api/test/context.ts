@@ -24,7 +24,9 @@ export function useTestApp() {
         storage: createLocalStorage(mkdtempSync(join(tmpdir(), 'cv-uploads-'))),
       })
     }
-    await context.database.db.execute(sql`truncate users, cvs, cv_versions, uploads cascade`)
+    await context.database.db.execute(
+      sql`truncate users, cvs, cv_versions, uploads, share_links, jobs cascade`,
+    )
   })
 
   afterAll(async () => {

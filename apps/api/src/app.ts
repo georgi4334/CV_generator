@@ -6,6 +6,7 @@ import type { Storage } from './lib/storage'
 import { useCurrentUser } from './plugins/currentUser'
 import { cvRoutes } from './routes/cvs'
 import { healthRoutes } from './routes/health'
+import { jobRoutes } from './routes/jobs'
 import { professionRoutes } from './routes/professions'
 import { publicShareRoutes, shareRoutes } from './routes/share'
 import { publicUploadRoutes, uploadRoutes } from './routes/uploads'
@@ -62,6 +63,7 @@ export async function buildApp(opts: AppOptions) {
           useCurrentUser(scope, { database })
           await scope.register(cvRoutes, { database })
           await scope.register(shareRoutes, { database })
+          await scope.register(jobRoutes, { database })
           await scope.register(uploadRoutes, { database, storage: opts.storage })
         })
       })

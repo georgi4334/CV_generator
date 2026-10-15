@@ -34,8 +34,9 @@ export const cvApi = {
   async remove(id: string) {
     await api.delete(`/cvs/${id}`)
   },
-  async duplicate(id: string) {
-    const { data } = await api.post(`/cvs/${id}/duplicate`)
+  /** A copy; with `jobId`, a copy tailored for that job, which then links to it. */
+  async duplicate(id: string, jobId?: string) {
+    const { data } = await api.post(`/cvs/${id}/duplicate`, jobId ? { jobId } : {})
     return CvRecordSchema.parse(data)
   },
   async listVersions(id: string) {

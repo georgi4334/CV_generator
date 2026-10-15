@@ -1,20 +1,43 @@
 import { describe, expect, it } from 'vitest'
-import { JobInputSchema, withStatus } from './jobs'
+import { CreateJobInputSchema, UpdateJobInputSchema, withStatus } from './jobs'
 
-describe('JobInputSchema', () => {
-  it('defaults new jobs to "To apply"', () => {
-    const job = JobInputSchema.parse({ position: 'Frontend Engineer', company: 'Acme' })
-    expect(job.status).toBe('to_apply')
-    expect(job.dateApplied).toBeNull()
+describe('CreateJobInputSchema', () => {
+  it('defaults new jobs to "To apply" with empty details', () => {
+    const job = CreateJobInputSchema.parse({ position: 'Frontend Engineer', company: 'Acme' })
+    expect(job).toMatchObject({
+      status: 'to_apply',
+      dateApplied: null,
+      type: null,
+      cvId: null,
+      notes: '',
+      location: '',
+      salary: '',
+      contact: '',
+    })
   })
 
   it('requires position and company', () => {
-    expect(JobInputSchema.safeParse({ position: '', company: 'Acme' }).success).toBe(false)
+    expect(CreateJobInputSchema.safeParse({ position: ' ', company: 'Acme' }).success).toBe(false)
+    expect(CreateJobInputSchema.safeParse({ position: 'Dev' }).success).toBe(false)
   })
 
   it('rejects an unknown job type', () => {
-    const result = JobInputSchema.safeParse({ position: 'Dev', company: 'Acme', type: 'office' })
+    const result = CreateJobInputSchema.safeParse({
+      position: 'Dev',
+      company: 'Acme',
+      type: 'office',
+    })
     expect(result.success).toBe(false)
+  })
+})
+
+describe('UpdateJobInputSchema', () => {
+  it('accepts a single changed field without filling in the others', () => {
+    expect(UpdateJobInputSchema.parse({ notes: 'Call back' })).toEqual({ notes: 'Call back' })
+  })
+
+  it('does not allow clearing the position', () => {
+    expect(UpdateJobInputSchema.safeParse({ position: '' }).success).toBe(false)
   })
 })
 

@@ -2,6 +2,7 @@ import {
   createEmptyCv,
   CreateCvInputSchema,
   CreateVersionInputSchema,
+  DuplicateCvInputSchema,
   PLAN_LIMITS,
   PROFESSIONS,
   UpdateCvInputSchema,
@@ -14,7 +15,7 @@ import { and, count, desc, eq, gt, inArray, sql } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import type { Database } from '../db/client'
-import { cvs, cvVersions, shareLinks } from '../db/schema'
+import { cvs, cvVersions, jobs, shareLinks } from '../db/schema'
 import { HttpError, notFound } from '../lib/errors'
 
 /** While editing, keep at most one automatic snapshot per this many minutes. */
@@ -68,6 +69,16 @@ export async function cvRoutes(app: FastifyInstance, opts: { database: Database 
     return row
   }
 
+  /** A job the CV is linked to must be one of the user's own. */
+  async function findOwnJob(userId: string, jobId: string) {
+    const [job] = await db
+      .select({ id: jobs.id, company: jobs.company })
+      .from(jobs)
+      .where(and(eq(jobs.id, jobId), eq(jobs.userId, userId)))
+    if (!job) throw notFound('Job')
+    return job
+  }
+
   async function assertCanCreate(userId: string, plan: keyof typeof PLAN_LIMITS) {
     const max = PLAN_LIMITS[plan].maxCvs
     if (max === null) return
@@ -116,6 +127,7 @@ export async function cvRoutes(app: FastifyInstance, opts: { database: Database 
   app.post('/cvs', async (request, reply) => {
     const input = CreateCvInputSchema.parse(request.body ?? {})
     await assertCanCreate(request.user.id, request.user.plan)
+    if (input.jobId) await findOwnJob(request.user.id, input.jobId)
     const professionId = (input.professionId ?? null) as ProfessionId | null
     const [row] = await db
       .insert(cvs)
@@ -140,6 +152,7 @@ export async function cvRoutes(app: FastifyInstance, opts: { database: Database 
     const { id } = IdParams.parse(request.params)
     const input = UpdateCvInputSchema.parse(request.body)
     const current = await findCv(request.user.id, id)
+    if (input.jobId) await findOwnJob(request.user.id, input.jobId)
     const savesDocument = input.document !== undefined
     if (savesDocument && current.revision !== input.revision) {
       throw new HttpError(409, 'conflict', 'This CV was changed somewhere else', {
@@ -197,19 +210,34 @@ export async function cvRoutes(app: FastifyInstance, opts: { database: Database 
 
   app.post('/cvs/:id/duplicate', async (request, reply) => {
     const { id } = IdParams.parse(request.params)
+    const { jobId } = DuplicateCvInputSchema.parse(request.body ?? {})
     const source = await findCv(request.user.id, id)
+    const job = jobId ? await findOwnJob(request.user.id, jobId) : null
     await assertCanCreate(request.user.id, request.user.plan)
-    const [row] = await db
-      .insert(cvs)
-      .values({
-        userId: request.user.id,
-        title: `Copy of ${source.title}`.slice(0, 200),
-        professionId: source.professionId,
-        jobId: source.jobId,
-        document: source.document,
-      })
-      .returning()
-    return reply.status(201).send(toRecord(row!))
+    const row = await db.transaction(async (tx) => {
+      const [copy] = await tx
+        .insert(cvs)
+        .values({
+          userId: request.user.id,
+          // A tailored copy is named after the company it is for.
+          title: (job ? `${source.title} – ${job.company}` : `Copy of ${source.title}`).slice(
+            0,
+            200,
+          ),
+          professionId: source.professionId,
+          jobId: job ? job.id : source.jobId,
+          document: source.document,
+        })
+        .returning()
+      // The job now points at its tailored CV.
+      if (job)
+        await tx
+          .update(jobs)
+          .set({ cvId: copy!.id, updatedAt: sql`now()` })
+          .where(eq(jobs.id, job.id))
+      return copy!
+    })
+    return reply.status(201).send(toRecord(row))
   })
 
   app.get('/cvs/:id/versions', async (request) => {

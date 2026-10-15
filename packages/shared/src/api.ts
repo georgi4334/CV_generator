@@ -44,6 +44,10 @@ export const UpdateCvInputSchema = z
   })
 export type UpdateCvInput = z.infer<typeof UpdateCvInputSchema>
 
+/** Copy a CV; with `jobId`, a copy tailored for that saved job, which then points at it. */
+export const DuplicateCvInputSchema = z.object({ jobId: IdSchema.optional() })
+export type DuplicateCvInput = z.infer<typeof DuplicateCvInputSchema>
+
 export const CvVersionSummarySchema = z.object({
   id: IdSchema,
   label: z.string().nullable(),

@@ -84,7 +84,7 @@ export function useCreateCv() {
 
 export function useDuplicateCv() {
   const remember = useRememberCv()
-  return useMutation({ mutationFn: cvApi.duplicate, onSuccess: remember })
+  return useMutation({ mutationFn: (id: string) => cvApi.duplicate(id), onSuccess: remember })
 }
 
 export function useRenameCv() {

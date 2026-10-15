@@ -3,42 +3,45 @@ import { Bell, Briefcase, FilePlus2, Mail } from 'lucide-react'
 import { Link } from 'react-router'
 import { DocumentTypeBadge } from '../components/Badges'
 import { card, PageHeader } from '../components/PageHeader'
-import { daysBetween, formatDate } from '../lib/format'
+import { daysBetween, formatDate, localToday } from '../lib/format'
 import { editPath, NEW_CV_PATH } from '../lib/paths'
 import { useCvList } from '../lib/cvQueries'
-import { MOCK_COVER_LETTERS, MOCK_JOBS, MOCK_TODAY } from '../mocks/data'
+import { useJobs } from '../lib/jobQueries'
+import { MOCK_COVER_LETTERS } from '../mocks/data'
 
 const QUICK_ACTIONS = [
   { to: NEW_CV_PATH, label: 'New CV', icon: FilePlus2 },
   { to: '/cover-letters/new/edit', label: 'New cover letter', icon: Mail },
-  { to: '/jobs', label: 'Add job', icon: Briefcase },
+  { to: '/jobs?add=1', label: 'Add job', icon: Briefcase },
 ]
 
 export function DashboardPage() {
   const cvs = useCvList()
+  const jobs = useJobs().data ?? []
+  const today = localToday()
   const recent = [...(cvs.data ?? []), ...MOCK_COVER_LETTERS]
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
     .slice(0, 4)
   const counts = JOB_STATUSES.map((status) => ({
     status,
-    count: MOCK_JOBS.filter((job) => job.status === status).length,
+    count: jobs.filter((job) => job.status === status).length,
   }))
   const reminders = [
-    ...MOCK_JOBS.filter(
-      (job) =>
-        job.status === 'applied' &&
-        job.dateApplied &&
-        daysBetween(job.dateApplied, MOCK_TODAY) >= 14,
-    ).map((job) => ({
-      id: job.id,
-      text: `${job.position} at ${job.company}: applied ${daysBetween(job.dateApplied!, MOCK_TODAY)} days ago. Mark as "No answer"?`,
-    })),
-    ...MOCK_JOBS.filter(
-      (job) => job.status === 'to_apply' && daysBetween(job.dateSaved, MOCK_TODAY) >= 7,
-    ).map((job) => ({
-      id: job.id,
-      text: `${job.position} at ${job.company}: saved ${daysBetween(job.dateSaved, MOCK_TODAY)} days ago and still "To apply".`,
-    })),
+    ...jobs
+      .filter(
+        (job) =>
+          job.status === 'applied' && job.dateApplied && daysBetween(job.dateApplied, today) >= 14,
+      )
+      .map((job) => ({
+        id: job.id,
+        text: `${job.position} at ${job.company}: applied ${daysBetween(job.dateApplied!, today)} days ago. Mark as "No answer"?`,
+      })),
+    ...jobs
+      .filter((job) => job.status === 'to_apply' && daysBetween(job.dateSaved, today) >= 7)
+      .map((job) => ({
+        id: job.id,
+        text: `${job.position} at ${job.company}: saved ${daysBetween(job.dateSaved, today)} days ago and still "To apply".`,
+      })),
   ]
 
   return (
