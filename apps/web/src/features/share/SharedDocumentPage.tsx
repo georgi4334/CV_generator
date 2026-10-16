@@ -1,8 +1,9 @@
-import { Download, FileText, LoaderCircle } from 'lucide-react'
+import { Download, FileText } from 'lucide-react'
 import { useEffect, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router'
 import { FitToWidth } from '@/shared/ui/FitToWidth'
+import { EditorLoading } from '@/shared/ui/LoadStates'
 import { primaryButton, secondaryButton } from '@/shared/ui/PageHeader'
 import { CvRenderer, LetterRenderer } from '@/renderer'
 import { PAGE_SIZE_PX } from '@/renderer/templates/tokens'
@@ -51,11 +52,7 @@ export function SharedDocumentPage() {
   useDocumentTitle(query.data?.title)
 
   if (query.isPending) {
-    return (
-      <div className="flex min-h-screen items-center justify-center gap-2 bg-muted text-fg-muted">
-        <LoaderCircle className="size-5 animate-spin" /> {t('common.loading')}
-      </div>
-    )
+    return <EditorLoading />
   }
   if (query.isError) {
     const error = toApiRequestError(query.error)

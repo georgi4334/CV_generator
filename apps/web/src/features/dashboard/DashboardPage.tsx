@@ -14,6 +14,7 @@ import { useJobs, useUpdateJob } from '@/features/jobs/queries'
 import { useCoverLetter, useCoverLetterList } from '@/features/cover-letters/queries'
 import { editPath, NEW_CV_PATH, NEW_LETTER_PATH } from '@/shared/lib/paths'
 import { remindersFor } from './reminders'
+import { LoadingRegion, Skeleton } from '@/shared/ui/Skeleton'
 
 const QUICK_ACTIONS = [
   { to: NEW_CV_PATH, label: 'dashboard.newCv', icon: FilePlus2 },
@@ -23,6 +24,8 @@ const QUICK_ACTIONS = [
 
 const RECENT_COUNT = 4
 const THUMBNAIL_WIDTH = 132
+/** Placeholders shown while the recent documents load. */
+const RECENT_PLACEHOLDERS = RECENT_COUNT
 
 /** The first page of a document, or an empty page while it loads. */
 function DocumentThumbnail({ doc }: { doc: DocumentSummary }) {
@@ -30,12 +33,29 @@ function DocumentThumbnail({ doc }: { doc: DocumentSummary }) {
   const letter = useCoverLetter(doc.type === 'coverLetter' ? doc.id : undefined).data
   if (cv) return <CvThumbnail cv={cv.document} width={THUMBNAIL_WIDTH} />
   if (letter) return <LetterThumbnail letter={letter.document} width={THUMBNAIL_WIDTH} />
+  return <ThumbnailSkeleton />
+}
+
+/** A page-shaped placeholder the size of a thumbnail. */
+function ThumbnailSkeleton() {
+  return <Skeleton className="aspect-paper" style={{ width: THUMBNAIL_WIDTH }} />
+}
+
+/** While the list loads: thumbnails, titles and badges in the shape of real documents. */
+function RecentDocumentsSkeleton() {
+  const { t } = useTranslation()
   return (
-    <div
-      aria-hidden
-      className="animate-pulse rounded-tight border border-line bg-muted"
-      style={{ width: THUMBNAIL_WIDTH, height: Math.round(THUMBNAIL_WIDTH * 1.414) }}
-    />
+    <LoadingRegion label={t('dashboard.recent.loading')}>
+      <ul className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        {Array.from({ length: RECENT_PLACEHOLDERS }, (_, i) => (
+          <li key={i} className="flex flex-col gap-2 p-2">
+            <ThumbnailSkeleton />
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-3 w-1/2" />
+          </li>
+        ))}
+      </ul>
+    </LoadingRegion>
   )
 }
 
@@ -52,7 +72,7 @@ function RecentDocuments({ docs, loading }: { docs: DocumentSummary[]; loading: 
         </Link>
       </div>
       {loading ? (
-        <p className="text-sm text-fg-muted">{t('dashboard.recent.loading')}</p>
+        <RecentDocumentsSkeleton />
       ) : docs.length === 0 ? (
         <div className="py-6 text-center text-sm text-fg-muted">
           <p>{t('dashboard.recent.empty')}</p>

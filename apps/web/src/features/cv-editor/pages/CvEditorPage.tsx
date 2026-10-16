@@ -17,7 +17,7 @@ import { EditableTitle } from '@/features/cv-editor/layout/EditableTitle'
 import { cvEditorApi } from '@/features/cv-editor/state/editorApi'
 import { useCvSession } from '@/features/cv-editor/state/editorSession'
 import { EditorLayout } from '@/features/cv-editor/layout/EditorLayout'
-import { LoadError, PageLoading } from '@/shared/ui/LoadStates'
+import { EditorLoading, LoadError } from '@/shared/ui/LoadStates'
 import { PageCanvas } from '@/features/cv-editor/layout/PageCanvas'
 import { SaveIndicator } from '@/features/cv-editor/layout/SaveIndicator'
 import { useUndoShortcuts } from '@/features/cv-editor/layout/useUndoShortcuts'
@@ -87,7 +87,7 @@ export function CvEditorPage() {
   // Start each document with the side panel closed.
   useEffect(() => closePanel, [id, closePanel])
 
-  if (query.isPending) return <PageLoading />
+  if (query.isPending) return <EditorLoading />
   if (query.isError) {
     const error = toApiRequestError(query.error)
     if (error.status === 404 || error.status === 400) return <NotFoundPage />

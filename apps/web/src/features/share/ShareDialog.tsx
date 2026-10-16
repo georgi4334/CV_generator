@@ -7,6 +7,7 @@ import { primaryButton, secondaryButton } from '@/shared/ui/PageHeader'
 import { errorMessage } from '@/shared/api/errorMessage'
 import { useDocumentShare, useUpdateDocumentShare } from './queries'
 import { shareUrl } from './shareUrl'
+import { LoadingRegion, Skeleton } from '@/shared/ui/Skeleton'
 
 /** Turn a CV's public read-only link on or off, copy it, or replace it. */
 export function ShareDialog({
@@ -60,7 +61,16 @@ export function ShareDialog({
       </div>
 
       {share.isPending ? (
-        <p className="mt-4 text-sm text-fg-muted">{t('common.loading')}</p>
+        <LoadingRegion className="mt-4 space-y-4">
+          <div className="flex items-center justify-between gap-4 rounded-control border border-line p-3">
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-4 w-1/2" />
+              <Skeleton className="h-3 w-3/4" />
+            </div>
+            <Skeleton className="h-6 w-11 rounded-pill" />
+          </div>
+          <Skeleton className="h-9 w-full rounded-control" />
+        </LoadingRegion>
       ) : (
         <>
           <div className="mt-4 flex items-center justify-between gap-4 rounded-control border border-line p-3 ">

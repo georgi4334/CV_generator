@@ -66,6 +66,20 @@
   @apply inline-flex items-center rounded-pill px-2.5 py-0.5 text-xs font-medium whitespace-nowrap;
 }
 
+/* ----- Loading ----- */
+/* A grey placeholder in the shape of content that is still loading (light and dark). */
+@utility skeleton {
+  @apply animate-shimmer rounded-tight motion-reduce:animate-none;
+  background-image: linear-gradient(
+    90deg,
+    var(--color-skeleton) 25%,
+    var(--color-skeleton-shine) 50%,
+    var(--color-skeleton) 75%
+  );
+  background-size: 200% 100%;
+  background-color: var(--color-skeleton);
+}
+
 /* Smaller variants for dense places (tables, toolbars, popovers). */
 @utility btn-sm {
   @apply gap-1.5 rounded-tight px-2.5 py-1 text-xs;

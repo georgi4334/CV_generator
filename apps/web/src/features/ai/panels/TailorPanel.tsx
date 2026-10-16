@@ -7,7 +7,15 @@ import { useTailor } from '@/features/ai/queries'
 import { errorMessage } from '@/shared/api/errorMessage'
 import { useJobs, useUpdateJob } from '@/features/jobs/queries'
 import { useEditorUi } from '@/features/cv-editor/state/editorUi'
-import { AiErrorMessage, AiGate, aiButton, aiField, aiSecondary, Change } from './AiGate'
+import {
+  AiErrorMessage,
+  AiGate,
+  AiResultSkeleton,
+  aiButton,
+  aiField,
+  aiSecondary,
+  Change,
+} from './AiGate'
 import { useAiTarget } from '@/features/ai/aiTarget'
 
 const PASTE = 'paste'
@@ -170,6 +178,7 @@ export function TailorPanel() {
             : t('ai.tailor.checkMatch')}
       </button>
       {tailor.isError && <AiErrorMessage error={tailor.error} />}
+      {tailor.isPending && <AiResultSkeleton />}
 
       {result && match && label && !tailor.isPending && (
         <section aria-label={t('ai.tailor.match')} className="space-y-4">

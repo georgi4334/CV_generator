@@ -21,7 +21,7 @@ import { ConflictBanner } from '@/features/cv-editor/layout/ConflictBanner'
 import { DesignTargetContext, type DesignTarget } from '@/features/cv-editor/state/designTarget'
 import { EditableTitle } from '@/features/cv-editor/layout/EditableTitle'
 import { EditorLayout } from '@/features/cv-editor/layout/EditorLayout'
-import { LoadError, PageLoading } from '@/shared/ui/LoadStates'
+import { EditorLoading, LoadError } from '@/shared/ui/LoadStates'
 import { SaveIndicator } from '@/features/cv-editor/layout/SaveIndicator'
 import { useUndoShortcuts } from '@/features/cv-editor/layout/useUndoShortcuts'
 import { AiTargetContext } from '@/features/ai/aiTarget'
@@ -229,7 +229,7 @@ export function LetterEditorPage() {
   // Start each document with the side panel closed.
   useEffect(() => closePanel, [id, closePanel])
 
-  if (query.isPending) return <PageLoading />
+  if (query.isPending) return <EditorLoading />
   if (query.isError) {
     const error = toApiRequestError(query.error)
     if (error.status === 404 || error.status === 400) return <NotFoundPage />

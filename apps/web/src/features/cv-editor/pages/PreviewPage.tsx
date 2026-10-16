@@ -12,7 +12,7 @@ import { NotFoundPage } from '@/app/pages/NotFoundPage'
 import { printCv, printLetter } from '@/features/print/printCv'
 import { ShareDialog } from '@/features/share/ShareDialog'
 import { useCvEditor } from '@/features/cv-editor/state/cvEditorStore'
-import { LoadError, PageLoading } from '@/shared/ui/LoadStates'
+import { EditorLoading, LoadError } from '@/shared/ui/LoadStates'
 import { PageCanvas } from '@/features/cv-editor/layout/PageCanvas'
 import { LetterRenderer } from '@/renderer'
 import { useCoverLetter } from '@/features/cover-letters/queries'
@@ -84,7 +84,7 @@ function CvPreview() {
   const editing = useCvEditor((s) => (s.docId === id ? s.cv : null))
   const [sharing, setSharing] = useState(false)
 
-  if (query.isPending) return <PageLoading />
+  if (query.isPending) return <EditorLoading />
   if (query.isError) {
     const error = toApiRequestError(query.error)
     if (error.status === 404 || error.status === 400) return <NotFoundPage />
@@ -117,7 +117,7 @@ function CoverLetterPreview() {
   const editing = useLetterEditor((s) => (s.docId === id ? s.letter : null))
   const [sharing, setSharing] = useState(false)
 
-  if (query.isPending) return <PageLoading />
+  if (query.isPending) return <EditorLoading />
   if (query.isError) {
     const error = toApiRequestError(query.error)
     if (error.status === 404 || error.status === 400) return <NotFoundPage />
