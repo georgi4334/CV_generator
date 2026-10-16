@@ -1,7 +1,7 @@
 import { HealthResponseSchema } from '@cv/shared'
 import { describe, expect, it } from 'vitest'
 import { buildApp } from './app'
-import { createLocalStorage } from './lib/storage'
+import { createLocalStorage } from './infra/storage/index'
 
 const appWithDb = (healthy: boolean) =>
   buildApp({

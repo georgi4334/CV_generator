@@ -1,14 +1,14 @@
 import * as Sentry from '@sentry/node'
-import { createGeminiProvider } from './ai/gemini'
-import { createMockProvider } from './ai/mock'
+import { createGeminiProvider } from './modules/ai/gemini'
+import { createMockProvider } from './modules/ai/mock'
 import { buildApp } from './app'
 import { createDb } from './db/client'
 import { createMigrator, runMigrations } from './db/migrate'
-import { productionProblems, productionWarnings } from './config'
-import { env } from './env'
-import { createBrevoMailer, createLogMailer } from './lib/mailer'
-import { createR2Storage } from './lib/r2Storage'
-import { createLocalStorage } from './lib/storage'
+import { productionProblems, productionWarnings } from './config/production'
+import { env } from './config/env'
+import { createBrevoMailer, createLogMailer } from './infra/mailer'
+import { createR2Storage } from './infra/storage/r2'
+import { createLocalStorage } from './infra/storage/index'
 
 const problems = productionProblems(env)
 if (problems.length) {

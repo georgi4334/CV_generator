@@ -1,0 +1,109 @@
+import { CvRecordSchema, SharedCvSchema, ShareStateSchema, type DocumentSummary } from '@cv/shared'
+import { describe, expect, it } from 'vitest'
+import { shareLinks } from '../../src/db/schema/index'
+import { dbAvailable, useTestApp } from '../support/context'
+
+describe.skipIf(!dbAvailable)('share links API', () => {
+  const ctx = useTestApp()
+  const call = (
+    method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
+    url: string,
+    payload?: object,
+  ) => ctx.app.inject({ method, url: `/api${url}`, payload, headers: { cookie: ctx.cookie } })
+  const createCv = async () => CvRecordSchema.parse((await call('POST', '/cvs', {})).json())
+  const share = async (id: string, isActive: boolean) => {
+    const res = await call('PUT', `/cvs/${id}/share`, { isActive })
+    expect(res.statusCode).toBe(200)
+    return ShareStateSchema.parse(res.json()).link!
+  }
+  const shared = (slug: string) => call('GET', `/shared/${slug}`)
+  const listed = async (id: string) =>
+    ((await call('GET', '/cvs')).json() as DocumentSummary[]).find((d) => d.id === id)!
+
+  it('is off until the owner turns it on', async () => {
+    const cv = await createCv()
+    expect((await call('GET', `/cvs/${cv.id}/share`)).json()).toEqual({ link: null })
+    expect((await listed(cv.id)).shared).toBe(false)
+  })
+
+  it('creates an unguessable link that shows the CV to anyone', async () => {
+    const cv = await createCv()
+    const link = await share(cv.id, true)
+    expect(link.isActive).toBe(true)
+    expect(link.slug).toMatch(/^[A-Za-z0-9_-]{16}$/)
+    expect((await listed(cv.id)).shared).toBe(true)
+
+    const res = await shared(link.slug)
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['x-robots-tag']).toBe('noindex, nofollow')
+    expect(res.headers['cache-control']).toBe('private, no-store')
+    const body = SharedCvSchema.parse(res.json())
+    expect(body).toMatchObject({ type: 'cv', title: cv.title, document: cv.document })
+    expect(res.json()).not.toHaveProperty('id')
+  })
+
+  it('shows the latest saved content', async () => {
+    const cv = await createCv()
+    const link = await share(cv.id, true)
+    const document = { ...cv.document, header: { ...cv.document.header, name: 'Maria' } }
+    await call('PATCH', `/cvs/${cv.id}`, { revision: cv.revision, document })
+    expect(SharedCvSchema.parse((await shared(link.slug)).json()).document.header.name).toBe(
+      'Maria',
+    )
+  })
+
+  it('turns off and on again with the same address', async () => {
+    const cv = await createCv()
+    const on = await share(cv.id, true)
+    const off = await share(cv.id, false)
+    expect(off).toMatchObject({ slug: on.slug, isActive: false })
+    expect((await shared(on.slug)).statusCode).toBe(404)
+    expect((await listed(cv.id)).shared).toBe(false)
+
+    expect((await share(cv.id, true)).slug).toBe(on.slug)
+    expect((await shared(on.slug)).statusCode).toBe(200)
+  })
+
+  it('replaces the address so the old link stops working', async () => {
+    const cv = await createCv()
+    const old = await share(cv.id, false)
+    const res = await call('POST', `/cvs/${cv.id}/share/reset`)
+    const next = ShareStateSchema.parse(res.json()).link!
+    expect(next.slug).not.toBe(old.slug)
+    expect(next.isActive).toBe(true)
+    expect((await shared(old.slug)).statusCode).toBe(404)
+    expect((await shared(next.slug)).statusCode).toBe(200)
+  })
+
+  it('answers unknown and malformed links with 404', async () => {
+    for (const slug of ['AAAAAAAAAAAAAAAA', 'bad', 'not%20a%20slug']) {
+      const res = await shared(slug)
+      expect(res.statusCode).toBe(404)
+      expect(res.json().error.code).toBe('not_found')
+    }
+  })
+
+  it("does not touch other users' or unknown CVs", async () => {
+    const missing = '00000000-0000-4000-8000-000000000000'
+    expect((await call('GET', `/cvs/${missing}/share`)).statusCode).toBe(404)
+    expect((await call('PUT', `/cvs/${missing}/share`, { isActive: true })).statusCode).toBe(404)
+    expect((await call('POST', `/cvs/${missing}/share/reset`)).statusCode).toBe(404)
+  })
+
+  it('validates the input', async () => {
+    const cv = await createCv()
+    const res = await call('PUT', `/cvs/${cv.id}/share`, { isActive: 'yes' })
+    expect(res.statusCode).toBe(400)
+  })
+
+  it('is removed with the CV and not copied by Duplicate', async () => {
+    const cv = await createCv()
+    const link = await share(cv.id, true)
+    const copy = CvRecordSchema.parse((await call('POST', `/cvs/${cv.id}/duplicate`)).json())
+    expect((await listed(copy.id)).shared).toBe(false)
+
+    await call('DELETE', `/cvs/${cv.id}`)
+    expect((await shared(link.slug)).statusCode).toBe(404)
+    expect(await ctx.database.db.select().from(shareLinks)).toEqual([])
+  })
+})
