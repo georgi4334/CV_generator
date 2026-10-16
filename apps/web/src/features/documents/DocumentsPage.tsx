@@ -32,6 +32,7 @@ import {
   type DocumentSubtab,
 } from '@/shared/lib/paths'
 import { useJobs } from '@/features/jobs/queries'
+import { ListSkeleton } from '@/shared/ui/Skeleton'
 
 type SortKey = 'updated' | 'created' | 'name' | 'type'
 
@@ -362,9 +363,7 @@ export function DocumentsPage() {
           <span className="w-8" />
         </div>
 
-        {loading && (
-          <p className="px-4 py-6 text-sm text-fg-muted">{t('documents.list.loading')}</p>
-        )}
+        {loading && <ListSkeleton label={t('documents.list.loading')} />}
         {loadError && (
           <div className="flex items-center gap-3 px-4 py-6 text-sm">
             <span className="text-danger-fg">

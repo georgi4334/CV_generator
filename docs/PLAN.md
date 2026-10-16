@@ -493,6 +493,7 @@ Specification: §2.1.
 - ✅ **Works on phones:** bottom tab bar, cards instead of tables, full-screen drawers, and an editor made for touch (compact top bar, bottom toolbar, tools as bottom sheets, page scaled to fit). No page scrolls sideways at 390px.
 - ✅ **One file for the look:** colours (light and dark), padding, rounding, shadows, widths, grids, z-index and breakpoints are variables in `apps/web/src/shared/styles/tokens.css`; buttons, inputs and cards are shared classes. See `docs/ARCHITECTURE.md` → "Styles: design tokens".
 - ✅ **No magic numbers:** form limits come from the shared schemas (`TITLE_MAX`, `JOB_TEXT_MAX`…), and timings and sizes are named constants.
+- ✅ **Loading skeletons** instead of spinners and "Loading…" text: page and editor outlines, document and job lists, dashboard thumbnails, history, share dialog and AI answers; themed for light and dark, still for reduced motion.
 - ✅ Browser tests on a phone (no sideways scrolling, bottom navigation, editor toolbar and sheet, accessibility).
 
 ### Step 18 (optional): Premium

@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { useAssist } from '@/features/ai/queries'
 import { useCv } from '@/features/cv-editor/queries'
 import { useJobs } from '@/features/jobs/queries'
-import { AiErrorMessage, AiGate, aiButton, aiField, aiSecondary } from './AiGate'
+import { AiErrorMessage, AiGate, AiResultSkeleton, aiButton, aiField, aiSecondary } from './AiGate'
 import { useAiTarget, type AiTarget } from '@/features/ai/aiTarget'
 
 const SUMMARY = 'summary'
@@ -168,6 +168,7 @@ function CvAssistant({ target }: { target: AiTarget }) {
         </>
       )}
       {assist.isError && <AiErrorMessage error={assist.error} />}
+      {assist.isPending && <AiResultSkeleton blocks={1} />}
       {texts && !assist.isPending && (
         <Proposal
           texts={texts}
@@ -237,6 +238,7 @@ function LetterAssistant({ target }: { target: AiTarget }) {
         {assist.isPending ? t('ai.assistant.writing') : t('ai.assistant.writeLetter')}
       </button>
       {assist.isError && <AiErrorMessage error={assist.error} />}
+      {assist.isPending && <AiResultSkeleton blocks={1} />}
       {texts && !assist.isPending && (
         <Proposal
           texts={texts}

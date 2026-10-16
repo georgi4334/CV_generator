@@ -90,6 +90,11 @@ Components use the Tailwind classes generated from those tokens, never raw value
 - **Common pieces** are classes in `shared/styles/components.css`: `page-container`, `card`,
   `btn` + `btn-primary` / `btn-secondary` / `btn-danger` / `btn-ghost` / `btn-icon` / `btn-sm`,
   `input`, `input-sm`, `link`, `pill`, the grids, and `pb-safe` / `clear-bottom-nav` for phones.
+- **Loading skeletons:** `shared/ui/Skeleton.tsx` (`Skeleton`, `SkeletonText`, `ListSkeleton`,
+  `PaperSkeleton`, `LoadingRegion`) and `PageLoading` / `EditorLoading` in `LoadStates.tsx`.
+  Their colours are `--theme-skeleton` and `--theme-skeleton-shine` (light and dark), the
+  sweep is `animate-shimmer`, and it stops for people who prefer reduced motion. Wrap
+  skeletons in `LoadingRegion` so screen readers hear one "Loading…" message.
 - **Not tokens on purpose:** the CV and letter templates (`renderer/`) keep their own sizes in
   `em` and `PAGE_SIZE_PX`, because they describe the printed page, not the app; job-status
   badge colours live in `shared/ui/badgeStyles.ts`.

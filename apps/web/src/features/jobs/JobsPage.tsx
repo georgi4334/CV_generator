@@ -21,6 +21,7 @@ import { useCvList } from '@/features/cv-editor/queries'
 import { useCoverLetterList } from '@/features/cover-letters/queries'
 import { useDeleteJob, useJobs, useUpdateJob } from './queries'
 import { useBreakpoint } from '@/shared/lib/useBreakpoint'
+import { JobsSkeleton } from './components/JobsSkeleton'
 
 const select = 'input w-auto'
 
@@ -170,7 +171,7 @@ export function JobsPage() {
       )}
 
       {jobsQuery.isPending ? (
-        <p className="py-6 text-sm text-fg-muted">{t('jobs.loading')}</p>
+        <JobsSkeleton wide={wide} />
       ) : jobsQuery.isError ? (
         <div className="flex items-center gap-3 py-6 text-sm">
           <span className="text-danger-fg">

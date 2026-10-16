@@ -8,6 +8,7 @@ import { useEditorUi } from '@/features/cv-editor/state/editorUi'
 import { flushSave, loadIntoEditor } from '@/features/cv-editor/state/editorSession'
 import { formatDateTime } from '@/features/cv-editor/lib/formatDateTime'
 import { PageCanvas } from '@/features/cv-editor/layout/PageCanvas'
+import { LoadingRegion, PaperSkeleton } from '@/shared/ui/Skeleton'
 
 /** A saved version shown read-only, with "Restore" and "Back to editing". */
 export function VersionPreview({ cvId, versionId }: { cvId: string; versionId: string }) {
@@ -69,7 +70,11 @@ export function VersionPreview({ cvId, versionId }: { cvId: string; versionId: s
           {t('editor.version.restore')}
         </button>
       </div>
-      {version.isLoading && <p className="text-sm text-fg-muted">{t('editor.version.loading')}</p>}
+      {version.isLoading && (
+        <LoadingRegion label={t('editor.version.loading')} className="flex w-full justify-center">
+          <PaperSkeleton />
+        </LoadingRegion>
+      )}
       {version.isError && <p className="text-sm text-danger-fg">{errorMessage(version.error)}</p>}
       {version.data && <PageCanvas cv={version.data.document} mode="preview" />}
     </div>

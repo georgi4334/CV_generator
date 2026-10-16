@@ -8,6 +8,7 @@ import { useEditorUi } from '@/features/cv-editor/state/editorUi'
 import { flushSave } from '@/features/cv-editor/state/editorSession'
 import { useQueryClient } from '@tanstack/react-query'
 import { formatDateTime } from '@/features/cv-editor/lib/formatDateTime'
+import { LoadingRegion, Skeleton } from '@/shared/ui/Skeleton'
 
 /** Saved versions of the CV: save a named one, preview and restore. */
 export function HistoryPanel({ cvId }: { cvId: string }) {
@@ -61,7 +62,16 @@ export function HistoryPanel({ cvId }: { cvId: string }) {
       </form>
       <p className="mb-3 text-xs text-fg-muted">{t('editor.history.hint')}</p>
 
-      {versions.isLoading && <p className="text-sm text-fg-muted">{t('common.loading')}</p>}
+      {versions.isLoading && (
+        <LoadingRegion className="space-y-1">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="space-y-2 px-2.5 py-2">
+              <Skeleton className="h-4 w-2/3" />
+              <Skeleton className="h-3 w-1/2" />
+            </div>
+          ))}
+        </LoadingRegion>
+      )}
       {versions.isError && <p className="text-sm text-danger-fg">{errorMessage(versions.error)}</p>}
       {versions.data?.length === 0 && (
         <p className="flex items-center gap-2 text-sm text-fg-muted">

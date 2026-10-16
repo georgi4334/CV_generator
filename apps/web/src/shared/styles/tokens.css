@@ -48,6 +48,8 @@
   --theme-on-inverse: var(--color-white);
   /* The dark overlay behind dialogs and sheets */
   --theme-backdrop: color-mix(in oklab, var(--color-slate-950) 50%, transparent);
+  --theme-skeleton: var(--color-slate-200); /* loading placeholders */
+  --theme-skeleton-shine: var(--color-slate-100); /* the light sweeping across them */
 }
 
 .dark {
@@ -85,6 +87,8 @@
   --theme-inverse: var(--color-slate-100);
   --theme-on-inverse: var(--color-slate-900);
   --theme-backdrop: color-mix(in oklab, var(--color-black) 60%, transparent);
+  --theme-skeleton: var(--color-slate-800);
+  --theme-skeleton-shine: var(--color-slate-700);
 }
 
 @theme inline {
@@ -122,6 +126,8 @@
   --color-inverse: var(--theme-inverse);
   --color-on-inverse: var(--theme-on-inverse);
   --color-backdrop: var(--theme-backdrop);
+  --color-skeleton: var(--theme-skeleton);
+  --color-skeleton-shine: var(--theme-skeleton-shine);
 }
 
 @theme {
@@ -170,6 +176,19 @@
   --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-overlay: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   --shadow-paper: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); /* CV pages */
+
+  --aspect-paper: 210 / 297; /* A4 page, for placeholders (aspect-paper) */
+
+  /* Loading skeletons: a light sweeping across grey shapes (animate-shimmer). */
+  --animate-shimmer: shimmer 1.6s ease-in-out infinite;
+  @keyframes shimmer {
+    from {
+      background-position: 100% 0;
+    }
+    to {
+      background-position: -100% 0;
+    }
+  }
 }
 
 /* ----- Stacking order (use as z-(--z-dropdown) …) ----- */

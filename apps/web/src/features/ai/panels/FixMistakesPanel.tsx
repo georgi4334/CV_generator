@@ -3,7 +3,7 @@ import { Check, LoaderCircle, SpellCheck, X } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useFixMistakes } from '@/features/ai/queries'
-import { AiErrorMessage, AiGate, aiButton, aiSecondary, Change } from './AiGate'
+import { AiErrorMessage, AiGate, AiResultSkeleton, aiButton, aiSecondary, Change } from './AiGate'
 import { useAiTarget } from '@/features/ai/aiTarget'
 
 type Status = 'open' | 'accepted' | 'rejected' | 'stale'
@@ -55,6 +55,7 @@ export function FixMistakesPanel() {
             : t('ai.fix.check')}
       </button>
       {check.isError && <AiErrorMessage error={check.error} />}
+      {check.isPending && <AiResultSkeleton blocks={3} />}
 
       {suggestions && !check.isPending && (
         <section aria-label={t('ai.fix.suggestions')} className="space-y-3">
