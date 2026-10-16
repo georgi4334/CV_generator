@@ -1,16 +1,17 @@
 import { History, Save } from 'lucide-react'
 import { useState } from 'react'
-import { toApiRequestError } from '../../lib/api'
+import { useTranslation } from 'react-i18next'
 import { cvApi } from '../../lib/cvApi'
 import { cvKeys, useCvVersions } from '../../lib/cvQueries'
+import { errorMessage } from '../../lib/errorMessage'
 import { useEditorUi } from '../../stores/editorUi'
 import { flushSave } from './editorSession'
 import { useQueryClient } from '@tanstack/react-query'
-
-const when = new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short' })
+import { formatDateTime } from './formatDateTime'
 
 /** Saved versions of the CV: save a named one, preview and restore. */
 export function HistoryPanel({ cvId }: { cvId: string }) {
+  const { t } = useTranslation()
   const versions = useCvVersions(cvId)
   const queryClient = useQueryClient()
   const { previewVersionId, setPreviewVersion, notify } = useEditorUi()
@@ -21,13 +22,13 @@ export function HistoryPanel({ cvId }: { cvId: string }) {
     setSaving(true)
     try {
       // Make sure the version contains the latest edits.
-      if (!(await flushSave())) throw new Error('Your latest changes are not saved yet')
+      if (!(await flushSave())) throw new Error(t('editor.history.unsavedChanges'))
       await cvApi.createVersion(cvId, label.trim() || undefined)
       setLabel('')
       await queryClient.invalidateQueries({ queryKey: cvKeys.versions(cvId) })
-      notify('Version saved.')
+      notify(t('editor.history.saved'))
     } catch (e) {
-      notify(`Version not saved: ${toApiRequestError(e).message}`)
+      notify(t('editor.history.notSaved', { reason: errorMessage(e) }))
     } finally {
       setSaving(false)
     }
@@ -43,8 +44,8 @@ export function HistoryPanel({ cvId }: { cvId: string }) {
         }}
       >
         <input
-          aria-label="Version name"
-          placeholder="Name, e.g. Sent to Acme"
+          aria-label={t('editor.history.versionName')}
+          placeholder={t('editor.history.namePlaceholder')}
           maxLength={100}
           value={label}
           onChange={(e) => setLabel(e.target.value)}
@@ -55,21 +56,16 @@ export function HistoryPanel({ cvId }: { cvId: string }) {
           disabled={saving}
           className="inline-flex items-center gap-1 rounded-md bg-teal-700 px-2.5 py-1.5 text-sm font-medium text-white hover:bg-teal-800 disabled:opacity-60"
         >
-          <Save className="size-4" /> Save
+          <Save className="size-4" /> {t('common.save')}
         </button>
       </form>
-      <p className="mb-3 text-xs text-slate-500">
-        A snapshot is also kept automatically while you edit (at most every 10 minutes). Click a
-        version to preview it.
-      </p>
+      <p className="mb-3 text-xs text-slate-500">{t('editor.history.hint')}</p>
 
-      {versions.isLoading && <p className="text-sm text-slate-500">Loading…</p>}
-      {versions.isError && (
-        <p className="text-sm text-red-600">{toApiRequestError(versions.error).message}</p>
-      )}
+      {versions.isLoading && <p className="text-sm text-slate-500">{t('common.loading')}</p>}
+      {versions.isError && <p className="text-sm text-red-600">{errorMessage(versions.error)}</p>}
       {versions.data?.length === 0 && (
         <p className="flex items-center gap-2 text-sm text-slate-500">
-          <History className="size-4" /> No versions yet.
+          <History className="size-4" /> {t('editor.history.none')}
         </p>
       )}
       <ul className="space-y-1">
@@ -88,11 +84,12 @@ export function HistoryPanel({ cvId }: { cvId: string }) {
                 }`}
               >
                 <span className="block font-medium">
-                  {version.label ?? (version.auto ? 'Automatic snapshot' : 'Saved version')}
+                  {version.label ??
+                    (version.auto
+                      ? t('editor.history.automatic')
+                      : t('editor.history.savedVersion'))}
                 </span>
-                <span className="text-xs text-slate-500">
-                  {when.format(new Date(version.createdAt))}
-                </span>
+                <span className="text-xs text-slate-500">{formatDateTime(version.createdAt)}</span>
               </button>
             </li>
           )

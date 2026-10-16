@@ -181,7 +181,7 @@ function LetterEditor({ record }: { record: CoverLetterRecord }) {
           banner={
             <>
               <ConflictBanner
-                what={t('letters.conflictWhat')}
+                kind="coverLetter"
                 reload={async () => {
                   const latest = await coverLetterApi.get(record.id)
                   remember(latest)

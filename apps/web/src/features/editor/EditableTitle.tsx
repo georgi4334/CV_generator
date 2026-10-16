@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 /** The document title in the top bar; click to rename, Enter or leaving the field saves. */
 export function EditableTitle({
@@ -8,6 +9,7 @@ export function EditableTitle({
   value: string
   onRename: (title: string) => void
 }) {
+  const { t } = useTranslation()
   const [draft, setDraft] = useState<string | null>(null)
 
   const commit = () => {
@@ -18,8 +20,8 @@ export function EditableTitle({
 
   return (
     <input
-      aria-label="Document title"
-      title="Rename"
+      aria-label={t('editor.title.label')}
+      title={t('editor.title.rename')}
       maxLength={200}
       value={draft ?? value}
       onFocus={() => setDraft(value)}
