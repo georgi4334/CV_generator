@@ -6,12 +6,15 @@ const PNG = Buffer.from(
   'base64',
 )
 
-function multipart(filename: string, contentType: string, data: Buffer) {
+function multipart(filename: string, contentType: string, data: Buffer, cookie?: string) {
   const boundary = '----cvtest'
   const head = `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${filename}"\r\nContent-Type: ${contentType}\r\n\r\n`
   return {
     payload: Buffer.concat([Buffer.from(head), data, Buffer.from(`\r\n--${boundary}--\r\n`)]),
-    headers: { 'content-type': `multipart/form-data; boundary=${boundary}` },
+    headers: {
+      'content-type': `multipart/form-data; boundary=${boundary}`,
+      ...(cookie ? { cookie } : {}),
+    },
   }
 }
 
@@ -22,7 +25,7 @@ describe.skipIf(!dbAvailable)('uploads API', () => {
     const res = await ctx.app.inject({
       method: 'POST',
       url: '/api/uploads',
-      ...multipart('a.png', 'image/png', PNG),
+      ...multipart('a.png', 'image/png', PNG, ctx.cookie),
     })
     expect(res.statusCode).toBe(201)
     const upload = res.json()
@@ -42,7 +45,7 @@ describe.skipIf(!dbAvailable)('uploads API', () => {
     const res = await ctx.app.inject({
       method: 'POST',
       url: '/api/uploads',
-      ...multipart('evil.png', 'image/png', Buffer.from('<script>alert(1)</script>')),
+      ...multipart('evil.png', 'image/png', Buffer.from('<script>alert(1)</script>'), ctx.cookie),
     })
     expect(res.statusCode).toBe(415)
     expect(res.json().error.code).toBe('unsupported_type')
@@ -53,7 +56,7 @@ describe.skipIf(!dbAvailable)('uploads API', () => {
     const res = await ctx.app.inject({
       method: 'POST',
       url: '/api/uploads',
-      ...multipart('big.png', 'image/png', big),
+      ...multipart('big.png', 'image/png', big, ctx.cookie),
     })
     expect(res.statusCode).toBe(413)
   })
@@ -63,10 +66,18 @@ describe.skipIf(!dbAvailable)('uploads API', () => {
       await ctx.app.inject({
         method: 'POST',
         url: '/api/uploads',
-        ...multipart('a.png', 'image/png', PNG),
+        ...multipart('a.png', 'image/png', PNG, ctx.cookie),
       })
     ).json()
-    expect((await ctx.app.inject({ method: 'DELETE', url: upload.url })).statusCode).toBe(204)
+    expect(
+      (
+        await ctx.app.inject({
+          method: 'DELETE',
+          url: upload.url,
+          headers: { cookie: ctx.cookie },
+        })
+      ).statusCode,
+    ).toBe(204)
     expect((await ctx.app.inject({ method: 'GET', url: upload.url })).statusCode).toBe(404)
   })
 })

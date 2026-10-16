@@ -5,7 +5,7 @@ import { dbAvailable, useTestApp } from './context'
 describe.skipIf(!dbAvailable)('jobs API', () => {
   const ctx = useTestApp()
   const call = (method: 'GET' | 'POST' | 'PATCH' | 'DELETE', url: string, payload?: object) =>
-    ctx.app.inject({ method, url: `/api${url}`, payload })
+    ctx.app.inject({ method, url: `/api${url}`, payload, headers: { cookie: ctx.cookie } })
   const addJob = async (payload: object = {}) => {
     const res = await call('POST', '/jobs', {
       position: 'Frontend Engineer',

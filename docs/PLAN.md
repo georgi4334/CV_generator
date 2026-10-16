@@ -1,19 +1,21 @@
 # CV Generator — Development Plan
 
-> Status: **Step 14 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
+> Status: **Step 15 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
 >
 > **Decision log**
 >
 > - App tabs: Dashboard · Documents (All documents / Cover letters / CVs) · Saved Jobs ✅
 > - Job statuses: To apply · Applied · Interviewing · Negotiating · Accepted · Rejected · No answer ✅
 > - Backend framework: Fastify; ORM: Drizzle ✅
-> - Step 0 closed. Step 1 (project setup) ✅. Step 2 (shared domain model) ✅. Step 3 (app shell) ✅. Step 4 (CV renderer) ✅. Step 5 (inline editing) ✅. Step 6 (rearrange) ✅. Step 7 (templates & design) ✅. Step 8 (API & database) ✅. Step 9 (frontend ↔ API) ✅. Step 10 ("Create new CV" wizard) ✅. Step 11 (PDF download & share links) ✅. Step 12 (Saved Jobs) ✅. Step 13 (cover letters) ✅. Step 14 (Dashboard) built; awaiting review before Step 15.
+> - Step 0 closed. Step 1 (project setup) ✅. Step 2 (shared domain model) ✅. Step 3 (app shell) ✅. Step 4 (CV renderer) ✅. Step 5 (inline editing) ✅. Step 6 (rearrange) ✅. Step 7 (templates & design) ✅. Step 8 (API & database) ✅. Step 9 (frontend ↔ API) ✅. Step 10 ("Create new CV" wizard) ✅. Step 11 (PDF download & share links) ✅. Step 12 (Saved Jobs) ✅. Step 13 (cover letters) ✅. Step 14 (Dashboard) ✅. Step 15 (accounts) built; awaiting review before Step 16.
 > - Choosing a template applies its suggested font, column layout and spacing; the user can change them afterwards ✅
 > - Frontend: React + TS + Vite + Tailwind + Axios + React Router + TanStack Query + Zustand ✅
 > - Backend: Node + TypeScript + PostgreSQL (JSONB) with shared Zod types ✅
 > - Only free plans that allow commercial use; keep everything portable so it can become paid later ✅
 > - Saved Jobs extra fields: salary, location, contact person (no job URL or description for now); no Kanban board ✅
 > - Placeholders on the CV follow the CV language (English US/UK, Bulgarian) ✅
+> - Accounts: email + password now, Google sign-in as a small separate step later (needs your own Google Cloud client ID and secret); open sign-up; emails go through a provider interface (printed in the API log locally, Brevo or Resend plugged in at deployment); the first account inherits the old local "dev" data ✅
+> - **Deviation from the original plan:** sessions are opaque random tokens stored (hashed) in the database and sent in an httpOnly cookie, **not JWTs**. Logging out, changing or resetting a password can then end sessions immediately, which a JWT cannot do without a blocklist. Still portable plain Postgres; no extra cost ✅
 
 ## 1. Goal
 
@@ -138,7 +140,7 @@ Implementation notes:
 
 ## 4. Tech stack
 
-**Constraint:** this is a hobby project that may become paid. Every service must have a **free plan that also allows commercial use**, so going paid later means upgrading a plan, not migrating. To avoid lock-in we stick to portable standards: plain PostgreSQL, the S3 storage API, and standard JWT auth.
+**Constraint:** this is a hobby project that may become paid. Every service must have a **free plan that also allows commercial use**, so going paid later means upgrading a plan, not migrating. To avoid lock-in we stick to portable standards: plain PostgreSQL, the S3 storage API, and standard cookie sessions.
 
 ### Frontend ✅ decided
 
@@ -162,19 +164,19 @@ Implementation notes:
 
 ### Free-tier services
 
-| Need                                 | Choice (free plan)                                                      | Why                                                       | When it becomes paid                                                                                                 |
-| ------------------------------------ | ----------------------------------------------------------------------- | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Database                             | **Neon** Postgres (free tier)                                           | Plain Postgres, scales to zero, branching per environment | Paid plan when storage or compute outgrows the free tier                                                             |
-| API hosting                          | **Render** free web service (alt: Koyeb)                                | Deploys from GitHub; Docker or Node                       | Free instances sleep after ~15 min idle (cold start ~30–60 s). Upgrade to the smallest paid instance to remove that. |
-| Frontend hosting                     | **Cloudflare Pages** (alt: Netlify)                                     | Generous free plan, commercial use allowed                | Rarely needed                                                                                                        |
-| File storage (photos, logos)         | **Cloudflare R2**                                                       | S3-compatible, free tier ~10 GB, no egress fees           | Above free storage                                                                                                   |
-| Auth                                 | **Self-built** (email/password + Google OAuth, JWT in httpOnly cookies) | Zero cost, no per-user pricing, no lock-in                | Never                                                                                                                |
-| Email (verification, password reset) | **Resend** or **Brevo** free tier                                       | Simple API                                                | Above the daily/monthly free limit                                                                                   |
-| PDF export                           | **Browser print** (`window.print()` + print CSS) first                  | Zero server cost, selectable text (ATS-friendly)          | Later: server-side headless Chromium on a paid instance for one-click download                                       |
-| AI features                          | **Google Gemini** free tier or **Groq** free tier for prototyping       | Free while low volume                                     | Switch or upgrade to a paid model when it's a premium feature                                                        |
-| CI                                   | **GitHub Actions**                                                      | Free for public repos; 2,000 min/month for private ones   | Unlikely                                                                                                             |
-| Error monitoring                     | **Sentry** free developer plan                                          | Frontend and backend errors                               | Higher event volume                                                                                                  |
-| Payments (later)                     | **Stripe**                                                              | No monthly fee, only per-transaction                      | Only when money comes in                                                                                             |
+| Need                                 | Choice (free plan)                                                                       | Why                                                       | When it becomes paid                                                                                                 |
+| ------------------------------------ | ---------------------------------------------------------------------------------------- | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Database                             | **Neon** Postgres (free tier)                                                            | Plain Postgres, scales to zero, branching per environment | Paid plan when storage or compute outgrows the free tier                                                             |
+| API hosting                          | **Render** free web service (alt: Koyeb)                                                 | Deploys from GitHub; Docker or Node                       | Free instances sleep after ~15 min idle (cold start ~30–60 s). Upgrade to the smallest paid instance to remove that. |
+| Frontend hosting                     | **Cloudflare Pages** (alt: Netlify)                                                      | Generous free plan, commercial use allowed                | Rarely needed                                                                                                        |
+| File storage (photos, logos)         | **Cloudflare R2**                                                                        | S3-compatible, free tier ~10 GB, no egress fees           | Above free storage                                                                                                   |
+| Auth                                 | **Self-built** (email/password + Google OAuth, server-side sessions in httpOnly cookies) | Zero cost, no per-user pricing, no lock-in                | Never                                                                                                                |
+| Email (verification, password reset) | **Resend** or **Brevo** free tier                                                        | Simple API                                                | Above the daily/monthly free limit                                                                                   |
+| PDF export                           | **Browser print** (`window.print()` + print CSS) first                                   | Zero server cost, selectable text (ATS-friendly)          | Later: server-side headless Chromium on a paid instance for one-click download                                       |
+| AI features                          | **Google Gemini** free tier or **Groq** free tier for prototyping                        | Free while low volume                                     | Switch or upgrade to a paid model when it's a premium feature                                                        |
+| CI                                   | **GitHub Actions**                                                                       | Free for public repos; 2,000 min/month for private ones   | Unlikely                                                                                                             |
+| Error monitoring                     | **Sentry** free developer plan                                                           | Frontend and backend errors                               | Higher event volume                                                                                                  |
+| Payments (later)                     | **Stripe**                                                                               | No monthly fee, only per-transaction                      | Only when money comes in                                                                                             |
 
 > ⚠️ **Avoid Vercel Hobby** for the frontend: its free plan forbids commercial use. Avoid Render's free Postgres too, because it expires after 30 days; that's why the database is on Neon. Free-tier limits change, so we re-check them when signing up in Step 17.
 
@@ -187,7 +189,9 @@ Implementation notes:
 > The source of truth is now the Zod schemas in `packages/shared/src` (Step 2). This section is the overview.
 
 ```
-User        { id, email, name, passwordHash | oauthId, plan: 'free' | 'pro', createdAt }  // plan field ready for premium later
+User        { id, email, name, passwordHash?, emailVerifiedAt?, oauthId? (Google, later), plan: 'free' | 'pro', createdAt }  // plan field ready for premium later
+Session     { id, userId, tokenHash, createdAt, lastUsedAt, expiresAt }   // one per signed-in browser; only a hash of the cookie token is stored
+AuthToken   { id, userId, purpose: 'password_reset' | 'email_verification', tokenHash, expiresAt, usedAt? }  // one-time email links
 Cv          { id, userId, title, professionId, templateId, jobId?, design (JSON), content (JSONB), updatedAt } // jobId set for tailored copies
 CvVersion   { id, cvId, snapshot (JSONB), label, createdAt }        // history / restore
 CoverLetter { id, userId, title, cvId?, jobId?, revision, document (JSONB: header, recipient, date, greeting, paragraphs, closing, signature, design), updatedAt } // header & design copied from the linked CV
@@ -342,7 +346,7 @@ Specification: §3.2 and §3.3.
 
 - ✅ Automatic version history: while saving, the previous content is kept as a snapshot at most every 10 minutes; versions beyond the plan limit are pruned.
 - ✅ Plan limits in one place (`PLAN_LIMITS` in `@cv/shared`): free = 20 CVs and 30 versions per CV.
-- ✅ Every query is scoped to the current user. Until login (Step 15) all requests act as one local "dev" user.
+- ✅ Every query is scoped to the current user. Since Step 15 the user comes from the session cookie; unauthenticated requests get 401.
 - ✅ File storage behind a small interface; local disk for development. The Cloudflare R2 (S3) implementation is added at deployment (Step 17).
 - ✅ API tests run against a real Postgres test database (created and migrated automatically). CI runs Postgres as a service and requires these tests; locally they are skipped with a warning when Postgres isn't running.
 - Templates stay defined in the frontend code (no `/templates` endpoint needed).
@@ -422,11 +426,21 @@ Specification: §2.1.
 - Saved Jobs reads `?status=` and `?job=` once and then clears them from the address.
 - The reminder rules live in `lib/reminders.ts` (14 and 7 days) and are unit-tested.
 
-### Step 15: Authentication & accounts
+### Step 15: Authentication & accounts ✅ built (awaiting review)
 
-- Email/password and Google OAuth; JWT in httpOnly cookies.
-- Ownership checks on every CV endpoint.
-- (Possible earlier option: anonymous CVs in local storage, then "sign up to save".)
+- ✅ **Sign up / sign in / sign out** with email and password. Sign-up is open to everyone (the free plan limits apply to each account).
+- ✅ **Passwords:** scrypt (Node built-in, OWASP cost settings, per-hash salt, parameters stored with the hash), 8–128 characters, a list of very common passwords is refused, unknown emails cost the same time as wrong passwords, login errors are generic.
+- ✅ **Sessions:** a random 256-bit token in the `cv_session` cookie (httpOnly, `SameSite=Lax`, `Secure` in production); the database keeps only its SHA-256. Idle expiry 30 days (sliding), absolute limit 90 days. Logout deletes the session on the server; changing a password signs out the other browsers; resetting signs out all.
+- ✅ **Forgot password:** the reset link (valid 1 hour, single use, a newer link replaces the older) is emailed; the answer is identical whether or not the address has an account.
+- ✅ **Email confirmation** is not blocking: a banner reminds until the link was opened, with "Send it again". Resetting a password also confirms the address.
+- ✅ **Emails** go through a `Mailer` interface. In development the email is printed in the API log (copy the link from the terminal). A real provider (Brevo or Resend) is plugged in at deployment (Step 17).
+- ✅ **Account page** (`/account`): name, change password, delete account (asks for the password; removes all CVs, letters, jobs, share links and uploaded files).
+- ✅ **Every data route requires a session** (401 `unauthorized`); public routes stay public: health, professions, uploaded images, shared documents, and the auth endpoints. Tests prove that one user cannot read, change, copy, share or delete another user's CVs, letters, jobs or uploads.
+- ✅ **Abuse protection:** in-memory rate limits (login per account and per address, sign-ups, reset emails, token attempts, resend), and writes with a foreign `Origin` header are refused (CSRF, on top of `SameSite`).
+- ✅ **Upgrade path:** in development the first account created takes over the old "dev" user's CVs, letters, jobs and uploads (done in one transaction with a row lock, so two simultaneous sign-ups cannot both inherit); later accounts start empty. This is switched off when `NODE_ENV=production`.
+- ✅ **Web:** pages `/login`, `/register`, `/forgot-password`, `/reset-password`, `/verify-email`; all app and editor pages need a session and send visitors to `/login?next=…` and back afterwards; shared links (`/s/:slug`) stay public. Signing in or out clears the cache and the open editors, so one user's data never shows for the next. A session that ends elsewhere sends the app back to the sign-in page.
+- ⏭ **Later, small separate step:** "Continue with Google" (needs a Google Cloud OAuth client ID and secret that only you can create).
+- ⚠️ **For deployment (Step 17):** the cookie is `SameSite=Lax`, which works when the web app and API share a registrable domain (use a custom domain such as `app.example.com` + `api.example.com`) or when the web host proxies `/api`. Without that, set `COOKIE_SAME_SITE=none` with `COOKIE_SECURE=true`. Behind a hosting proxy set `TRUST_PROXY=true` so rate limits see real addresses. Rate limits live in the API's memory: fine for one instance, move them to the database if the API ever runs several.
 
 ### Step 16: AI features
 
@@ -455,7 +469,7 @@ None of these block the early steps. Each one is answered in the step listed; th
 
 | Question                            | Decide in   | Default assumption                                                        |
 | ----------------------------------- | ----------- | ------------------------------------------------------------------------- |
-| Login required from day one?        | Step 15     | Single-user dev mode until Step 15; data model already has `userId`       |
+| Login required from day one?        | Step 15 ✅  | Yes: every data route needs an account                                    |
 | Which professions/templates for v1? | Steps 2 & 7 | Generic set, e.g. Software, Design, Sales/Marketing, Healthcare, Academic |
 | English only or Bulgarian too?      | Step 7      | Cyrillic-capable fonts; resume language EN-US, EN-GB, BG                  |
 | AI in v1?                           | Step 16     | Later phase                                                               |

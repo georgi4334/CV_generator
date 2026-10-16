@@ -23,6 +23,13 @@ if (ensureMigrated) {
   }
 }
 
+const cookieSecure = env.COOKIE_SECURE
+  ? env.COOKIE_SECURE === 'true'
+  : env.NODE_ENV === 'production'
+if (env.COOKIE_SAME_SITE === 'none' && !cookieSecure) {
+  throw new Error('COOKIE_SAME_SITE=none requires COOKIE_SECURE=true')
+}
+
 const app = await buildApp({
   corsOrigin: env.CORS_ORIGIN,
   database,
@@ -30,6 +37,14 @@ const app = await buildApp({
   ensureMigrated,
   exposeErrors: env.NODE_ENV !== 'production',
   logger: true,
+  appUrl: env.APP_URL,
+  cookie: {
+    secure: cookieSecure,
+    sameSite: env.COOKIE_SAME_SITE,
+  },
+  // Never hand a production database's first account someone else's data.
+  claimDevData: env.NODE_ENV !== 'production',
+  trustProxy: env.TRUST_PROXY,
 })
 
 const shutdown = async () => {
