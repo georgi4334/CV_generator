@@ -34,7 +34,7 @@ export function EditableTitle({
           requestAnimationFrame(() => (e.target as HTMLInputElement).blur())
         }
       }}
-      className="w-48 min-w-0 truncate rounded bg-transparent px-1.5 py-0.5 text-slate-700 outline-none hover:bg-slate-100 focus:bg-slate-100 focus:ring-1 focus:ring-teal-600 dark:text-slate-200 dark:hover:bg-slate-800 dark:focus:bg-slate-800"
+      className="w-48 min-w-0 truncate rounded-tight bg-transparent px-1.5 py-0.5 text-fg-soft outline-none hover:bg-muted focus:bg-muted focus:ring-1 focus:ring-brand-line"
     />
   )
 }

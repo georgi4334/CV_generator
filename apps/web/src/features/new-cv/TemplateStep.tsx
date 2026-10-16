@@ -12,6 +12,9 @@ import { RecommendedBadge } from '@/shared/ui/Badges'
 import { CvThumbnail, withTemplate } from '@/renderer'
 import { FALLBACK_EXAMPLE } from './buildNewCv'
 
+/** Width in pixels of each template thumbnail. */
+const TEMPLATE_THUMBNAIL_WIDTH = 180
+
 function TemplateGroup({
   title,
   ids,
@@ -31,19 +34,19 @@ function TemplateGroup({
     <section aria-labelledby={headingId}>
       <h2
         id={headingId}
-        className="mb-3 text-sm font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-400"
+        className="mb-3 text-sm font-semibold tracking-wide text-fg-muted uppercase"
       >
         {title}
       </h2>
-      <ul className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
+      <ul className="grid-templates">
         {ids.map((id) => (
           <li key={id}>
             <button
               type="button"
               onClick={() => onChoose(id)}
-              className="flex w-full flex-col items-center gap-2 rounded-xl p-3 hover:bg-white hover:ring-2 hover:ring-teal-500 focus-visible:outline-2 focus-visible:outline-teal-600 dark:hover:bg-slate-900"
+              className="flex w-full flex-col items-center gap-2 rounded-card p-3 hover:bg-surface hover:ring-2 hover:ring-brand-line focus-visible:outline-2 focus-visible:outline-brand-line"
             >
-              <CvThumbnail cv={withTemplate(sample, id)} width={180} />
+              <CvThumbnail cv={withTemplate(sample, id)} width={TEMPLATE_THUMBNAIL_WIDTH} />
               <span className="flex items-center gap-2 text-sm font-medium">
                 {t(`labels.template.${id}`)}
                 {recommended && (
@@ -92,7 +95,7 @@ export function TemplateStep({
         sample={sample}
         onChoose={onChoose}
       />
-      <p className="text-xs text-slate-500 dark:text-slate-400">{t('newCv.previewsNote')}</p>
+      <p className="text-xs text-fg-muted">{t('newCv.previewsNote')}</p>
     </div>
   )
 }

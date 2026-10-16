@@ -58,7 +58,7 @@ export function ConflictBanner({
   return (
     <div
       role="alert"
-      className="flex flex-wrap items-center gap-3 border-b border-red-200 bg-red-50 px-4 py-2 text-sm text-red-900 dark:border-red-900 dark:bg-red-950/60 dark:text-red-200"
+      className="flex flex-wrap items-center gap-3 border-b border-danger-line bg-danger-soft px-4 py-2 text-sm text-danger-fg"
     >
       <span className="flex-1">
         {t(kind === 'cv' ? 'editor.conflict.cv' : 'editor.conflict.coverLetter')}
@@ -67,7 +67,7 @@ export function ConflictBanner({
         type="button"
         disabled={busy}
         onClick={loadLatest}
-        className="rounded-md border border-red-300 bg-white px-3 py-1 font-medium hover:bg-red-100 dark:border-red-800 dark:bg-transparent dark:hover:bg-red-900"
+        className="rounded-tight border border-danger-line bg-surface px-3 py-1 font-medium hover:bg-danger-soft"
       >
         {t('editor.conflict.loadOther')}
       </button>
@@ -75,7 +75,7 @@ export function ConflictBanner({
         type="button"
         disabled={busy || serverRevision === undefined}
         onClick={() => overwrite(serverRevision!)}
-        className="rounded-md bg-red-600 px-3 py-1 font-medium text-white hover:bg-red-700"
+        className="rounded-tight bg-danger px-3 py-1 font-medium text-on-danger hover:bg-danger-hover"
       >
         {t('editor.conflict.keepMine')}
       </button>

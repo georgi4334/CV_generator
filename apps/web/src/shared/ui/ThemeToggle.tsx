@@ -18,7 +18,7 @@ export function ThemeToggle() {
       onClick={() => setMode(NEXT[mode])}
       title={t('common.theme.hint', { mode: label })}
       aria-label={label}
-      className="rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+      className="rounded-tight p-2 text-fg-muted hover:bg-muted hover:text-fg"
     >
       <Icon className="size-5" />
     </button>

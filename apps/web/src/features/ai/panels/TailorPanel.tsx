@@ -12,24 +12,26 @@ import { useAiTarget } from '@/features/ai/aiTarget'
 
 const PASTE = 'paste'
 
+/** Match scores (0–100) at or above which a CV counts as a good or partial match. */
+const GOOD_MATCH = 70
+const PARTIAL_MATCH = 40
+
 function scoreLabel(score: number) {
-  if (score >= 70) return { key: 'ai.tailor.goodMatch', bar: 'bg-emerald-500' } as const
-  if (score >= 40) return { key: 'ai.tailor.partialMatch', bar: 'bg-amber-500' } as const
-  return { key: 'ai.tailor.lowMatch', bar: 'bg-red-500' } as const
+  if (score >= GOOD_MATCH) return { key: 'ai.tailor.goodMatch', bar: 'bg-success' } as const
+  if (score >= PARTIAL_MATCH) return { key: 'ai.tailor.partialMatch', bar: 'bg-warning' } as const
+  return { key: 'ai.tailor.lowMatch', bar: 'bg-danger' } as const
 }
 
 function Chips({ keywords, tone }: { keywords: Keyword[]; tone: 'found' | 'missing' }) {
   const { t } = useTranslation()
   const style =
-    tone === 'found'
-      ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-      : 'bg-amber-50 text-amber-900 dark:bg-amber-950 dark:text-amber-300'
+    tone === 'found' ? 'bg-success-soft text-success-fg' : 'bg-warning-soft text-warning-fg'
   return (
     <ul className="flex flex-wrap gap-1.5">
       {keywords.map((k) => (
         <li
           key={k.term}
-          className={`rounded-full px-2 py-0.5 text-xs ${style} ${k.importance === 'high' ? 'font-semibold' : ''}`}
+          className={`rounded-pill px-2 py-0.5 text-xs ${style} ${k.importance === 'high' ? 'font-semibold' : ''}`}
           title={k.importance === 'high' ? t('ai.tailor.important') : undefined}
         >
           {k.term}
@@ -179,12 +181,12 @@ export function TailorPanel() {
               >
                 {match.score}%
               </span>
-              <span className="text-sm text-slate-600 dark:text-slate-300">{t(label.key)}</span>
+              <span className="text-sm text-fg-soft">{t(label.key)}</span>
             </div>
-            <div className="mt-1 h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+            <div className="mt-1 h-2 overflow-hidden rounded-pill bg-muted">
               <div className={`h-full ${label.bar}`} style={{ width: `${match.score}%` }} />
             </div>
-            <p className="mt-1 text-xs text-slate-500">{t('ai.tailor.scoreHint')}</p>
+            <p className="mt-1 text-xs text-fg-muted">{t('ai.tailor.scoreHint')}</p>
           </div>
 
           {match.missing.length > 0 && (
@@ -207,7 +209,7 @@ export function TailorPanel() {
           {result.advice.length > 0 && (
             <div className="space-y-1.5">
               <h3 className="text-sm font-medium">{t('ai.tailor.advice')}</h3>
-              <ul className="list-disc space-y-1 pl-4 text-sm text-slate-700 dark:text-slate-300">
+              <ul className="list-disc space-y-1 pl-4 text-sm text-fg-soft">
                 {result.advice.map((a) => (
                   <li key={a}>{a}</li>
                 ))}
@@ -218,16 +220,13 @@ export function TailorPanel() {
           <div className="space-y-2">
             <h3 className="text-sm font-medium">{t('ai.tailor.rewrites')}</h3>
             {result.rewrites.length === 0 ? (
-              <p className="text-sm text-slate-500">{t('ai.tailor.noRewrites')}</p>
+              <p className="text-sm text-fg-muted">{t('ai.tailor.noRewrites')}</p>
             ) : (
               <>
-                <p className="text-xs text-slate-500">{t('ai.tailor.rewritesHint')}</p>
+                <p className="text-xs text-fg-muted">{t('ai.tailor.rewritesHint')}</p>
                 <ul className="space-y-2">
                   {result.rewrites.map((r, i) => (
-                    <li
-                      key={r.path}
-                      className="rounded-lg border border-slate-200 p-3 dark:border-slate-700"
-                    >
+                    <li key={r.path} className="rounded-control border border-line p-3">
                       <label className="flex items-start gap-2">
                         <input
                           type="checkbox"
@@ -240,18 +239,16 @@ export function TailorPanel() {
                           aria-label={t('ai.tailor.useRewrite', { label: r.label })}
                         />
                         <span className="min-w-0 flex-1">
-                          <span className="block text-xs text-slate-500">{r.label}</span>
+                          <span className="block text-xs text-fg-muted">{r.label}</span>
                           <Change original={r.original} replacement={r.replacement} />
                           {r.reason && (
-                            <span className="mt-1 block text-xs text-slate-500">{r.reason}</span>
+                            <span className="mt-1 block text-xs text-fg-muted">{r.reason}</span>
                           )}
                         </span>
                       </label>
                       <div className="mt-2 pl-6 text-xs">
                         {applied[i] ? (
-                          <span className="text-emerald-700 dark:text-emerald-400">
-                            {t('ai.tailor.applied')}
-                          </span>
+                          <span className="text-success-fg">{t('ai.tailor.applied')}</span>
                         ) : (
                           <button
                             type="button"
@@ -288,7 +285,7 @@ export function TailorPanel() {
                   ? t('ai.tailor.saveCopy', { count: open.length })
                   : t('ai.tailor.saveCopy')}
             </button>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-fg-muted">
               {job
                 ? t('ai.tailor.linkedCopy', {
                     job: t('ai.jobOption', { position: job.position, company: job.company }),

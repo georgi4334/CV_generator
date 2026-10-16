@@ -56,16 +56,12 @@ export function TemplatesPanel({ professionId = null }: { professionId?: Profess
                 type="button"
                 aria-pressed={selected}
                 onClick={() => updateDesign(templateChoice(id))}
-                className={`group relative w-full rounded-lg p-1 text-center text-xs ${
-                  selected
-                    ? 'ring-2 ring-teal-600'
-                    : 'hover:ring-2 hover:ring-slate-300 dark:hover:ring-slate-600'
+                className={`group relative w-full rounded-control p-1 text-center text-xs ${
+                  selected ? 'ring-2 ring-brand-line' : 'hover:ring-2 hover:ring-line-strong '
                 }`}
               >
                 {thumbnail(id)}
-                <span
-                  className={`mt-1 block ${selected ? 'font-semibold text-teal-700 dark:text-teal-300' : ''}`}
-                >
+                <span className={`mt-1 block ${selected ? 'font-semibold text-brand-fg ' : ''}`}>
                   {t(`labels.template.${id}`)}
                 </span>
                 {isRecommended && (
@@ -83,7 +79,7 @@ export function TemplatesPanel({ professionId = null }: { professionId?: Profess
       <button
         type="button"
         onClick={closePanel}
-        className="mt-4 w-full rounded-lg bg-teal-700 py-2 text-sm font-medium text-white hover:bg-teal-800"
+        className="mt-4 w-full rounded-control bg-brand py-2 text-sm font-medium text-on-brand hover:bg-brand-hover"
       >
         {t('editor.templates.continueEditing')}
       </button>
@@ -93,7 +89,7 @@ export function TemplatesPanel({ professionId = null }: { professionId?: Profess
         <div
           role="radiogroup"
           aria-label={t('editor.templates.documentSize')}
-          className="flex flex-1 gap-1 rounded-lg bg-slate-100 p-1 dark:bg-slate-800"
+          className="flex flex-1 gap-1 rounded-control bg-muted p-1"
         >
           {(['A4', 'Letter'] as const).map((size) => (
             <button
@@ -103,9 +99,7 @@ export function TemplatesPanel({ professionId = null }: { professionId?: Profess
               aria-checked={design.pageSize === size}
               onClick={() => updateDesign({ pageSize: size })}
               className={`${segment} ${
-                design.pageSize === size
-                  ? 'bg-white text-teal-700 shadow-sm dark:bg-slate-700 dark:text-teal-300'
-                  : 'text-slate-600 dark:text-slate-300'
+                design.pageSize === size ? 'bg-surface text-brand-fg shadow-card ' : 'text-fg-soft '
               }`}
             >
               {size === 'A4' ? 'A4' : t('editor.templates.usLetter')}
@@ -125,13 +119,13 @@ export function TemplatesPanel({ professionId = null }: { professionId?: Profess
                 ? t('editor.templates.resumeLanguageHint')
                 : t('editor.templates.letterLanguageHint')
             }
-            className="text-slate-400"
+            className="text-fg-faint"
           >
             <Info className="size-3.5" aria-hidden />
           </span>
         </span>
         <select
-          className="flex-1 rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-800"
+          className="flex-1 rounded-control border border-line-strong bg-surface px-2 py-1.5 text-sm"
           value={language}
           onChange={(e) => setLanguage(e.target.value as CvLanguage)}
         >

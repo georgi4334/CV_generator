@@ -69,7 +69,7 @@ export function ResetPasswordPage() {
               onChange={(e) => setPassword(e.target.value)}
               className={field}
             />
-            <span className="block text-xs text-slate-500 dark:text-slate-400">
+            <span className="block text-xs text-fg-muted">
               {t('auth.reset.hint', { min: PASSWORD_MIN_LENGTH })}
             </span>
           </label>

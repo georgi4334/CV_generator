@@ -13,6 +13,11 @@ const WEB_PORT = 4173
 const DATABASE_URL =
   process.env.E2E_DATABASE_URL ?? 'postgres://cv:cv@localhost:5433/cv_generator_e2e'
 
+// Use a preinstalled Chromium when the environment provides one.
+const launchOptions = process.env.PLAYWRIGHT_CHROMIUM_PATH
+  ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH }
+  : {}
+
 export default defineConfig({
   testDir: 'tests',
   fullyParallel: false,
@@ -28,14 +33,18 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
+      testIgnore: /mobile\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1440, height: 950 },
-        // Use a preinstalled Chromium when the environment provides one.
-        launchOptions: process.env.PLAYWRIGHT_CHROMIUM_PATH
-          ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH }
-          : {},
+        launchOptions,
       },
+    },
+    {
+      // A phone: the bottom navigation, the compact editor and no sideways scrolling.
+      name: 'mobile',
+      testMatch: /mobile\.spec\.ts/,
+      use: { ...devices['Pixel 7'], launchOptions },
     },
   ],
   webServer: [

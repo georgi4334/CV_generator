@@ -16,18 +16,14 @@ export function ErrorPage() {
     error instanceof Error &&
     /dynamically imported module|Importing a module script/i.test(error.message)
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-slate-50 px-4 text-center text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-page px-4 text-center text-fg">
       <h1 className="text-2xl font-semibold">
         {outdated ? t('nav.error.outdatedTitle') : t('nav.error.title')}
       </h1>
-      <p className="max-w-md text-sm text-slate-500 dark:text-slate-400">
+      <p className="max-w-md text-sm text-fg-muted">
         {outdated ? t('nav.error.outdatedText') : t('nav.error.text')}
       </p>
-      <button
-        type="button"
-        onClick={() => window.location.reload()}
-        className="rounded-lg bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800"
-      >
+      <button type="button" onClick={() => window.location.reload()} className="btn btn-primary">
         {t('nav.error.reload')}
       </button>
     </div>

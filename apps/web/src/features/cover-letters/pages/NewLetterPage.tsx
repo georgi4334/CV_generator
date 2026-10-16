@@ -10,8 +10,7 @@ import { useCv, useCvList } from '@/features/cv-editor/queries'
 import { useJobs } from '@/features/jobs/queries'
 import { useCreateLetter } from '@/features/cover-letters/queries'
 
-const field =
-  'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800'
+const field = 'input'
 
 /**
  * /cover-letters/new: choose the CV the letter goes with (its header and design
@@ -102,9 +101,7 @@ export function NewLetterPage() {
                 </option>
               ))}
             </select>
-            <span className="block text-xs text-slate-500 dark:text-slate-400">
-              {t('letters.jobHint')}
-            </span>
+            <span className="block text-xs text-fg-muted">{t('letters.jobHint')}</span>
           </label>
           <label className="block space-y-1 text-sm">
             <span className="font-medium">{t('letters.letterLanguage')}</span>
@@ -130,7 +127,7 @@ export function NewLetterPage() {
             />
           </label>
           {create.isError && (
-            <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+            <p role="alert" className="text-sm text-danger-fg">
               {t('letters.createFailed', { message: errorMessage(create.error) })}
             </p>
           )}

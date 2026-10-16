@@ -75,20 +75,12 @@ function CreateNewButton({ subtab }: { subtab: DocumentSubtab }) {
       {open && (
         <div
           role="menu"
-          className={`${card} absolute right-0 z-10 mt-2 w-48 overflow-hidden py-1 text-sm`}
+          className={`${card} absolute right-0 z-(--z-dropdown) mt-2 w-menu overflow-hidden py-1 text-sm`}
         >
-          <Link
-            role="menuitem"
-            to={NEW_CV_PATH}
-            className="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800"
-          >
+          <Link role="menuitem" to={NEW_CV_PATH} className="block px-4 py-2 hover:bg-muted">
             {t('labels.documentType.cv')}
           </Link>
-          <Link
-            role="menuitem"
-            to={NEW_LETTER_PATH}
-            className="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800"
-          >
+          <Link role="menuitem" to={NEW_LETTER_PATH} className="block px-4 py-2 hover:bg-muted">
             {t('labels.documentType.coverLetter')}
           </Link>
         </div>
@@ -109,7 +101,7 @@ function RowMenu({ doc, actions }: { doc: DocumentSummary; actions: RowActions }
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const item =
-    'flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent dark:hover:bg-slate-800'
+    'flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent'
   const run = (action: () => void) => () => {
     setOpen(false)
     action()
@@ -124,14 +116,14 @@ function RowMenu({ doc, actions }: { doc: DocumentSummary; actions: RowActions }
         aria-label={t('documents.actionsFor', { title: doc.title })}
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+        className="rounded-tight p-1.5 text-fg-muted hover:bg-muted"
       >
         <MoreVertical className="size-4" />
       </button>
       {open && (
         <div
           role="menu"
-          className={`${card} absolute right-0 z-20 mt-1 w-48 overflow-hidden py-1 text-sm`}
+          className={`${card} absolute right-0 z-(--z-dropdown) mt-1 w-menu overflow-hidden py-1 text-sm`}
         >
           <Link role="menuitem" to={editPath(doc)} className={item}>
             <FileText className="size-4" /> {t('documents.menu.open')}
@@ -151,7 +143,7 @@ function RowMenu({ doc, actions }: { doc: DocumentSummary; actions: RowActions }
           <button
             type="button"
             role="menuitem"
-            className={`${item} text-red-600 dark:text-red-400`}
+            className={`${item} text-danger-fg`}
             onClick={run(actions.onDelete)}
           >
             <Trash2 className="size-4" /> {t('common.delete')}
@@ -183,7 +175,7 @@ function RenameInput({
         if (e.key === 'Enter') e.currentTarget.blur()
         if (e.key === 'Escape') onDone(null)
       }}
-      className="w-full rounded-md border border-teal-600 bg-white px-2 py-1 font-medium dark:bg-slate-800"
+      className="w-full rounded-tight border border-brand-line bg-surface px-2 py-1 font-medium"
     />
   )
 }
@@ -272,10 +264,10 @@ export function DocumentsPage() {
             to={`/documents/${tab.id}`}
             onClick={() => setSelected(new Set())}
             className={({ isActive }) =>
-              `rounded-full px-4 py-1.5 text-sm font-medium ${
+              `rounded-pill px-4 py-1.5 text-sm font-medium ${
                 isActive
-                  ? 'bg-teal-700 text-white'
-                  : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-800 dark:hover:bg-slate-800'
+                  ? 'bg-brand text-on-brand'
+                  : 'bg-surface text-fg-soft ring-1 ring-line hover:bg-muted '
               }`
             }
           >
@@ -286,23 +278,23 @@ export function DocumentsPage() {
 
       <div className="mb-3 flex flex-wrap items-center gap-3">
         <label className="relative min-w-56 flex-1">
-          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
+          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-fg-faint" />
           <input
             type="search"
             aria-label={t('documents.search.label')}
             placeholder={t('documents.search.placeholder')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 bg-white py-2 pr-3 pl-9 text-sm dark:border-slate-700 dark:bg-slate-900"
+            className="w-full rounded-control border border-line-strong bg-surface py-2 pr-3 pl-9 text-sm"
           />
         </label>
-        <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+        <label className="flex items-center gap-2 text-sm text-fg-soft">
           {t('documents.sortBy')}
           <select
             aria-label={t('documents.sortBy')}
             value={sort}
             onChange={(e) => setSort(e.target.value as SortKey)}
-            className="rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+            className="rounded-control border border-line-strong bg-surface px-2 py-2 text-sm"
           >
             {SORTS.map((key) => (
               <option key={key} value={key}>
@@ -317,7 +309,7 @@ export function DocumentsPage() {
         <div
           role="toolbar"
           aria-label={t('documents.selection.toolbar')}
-          className="mb-3 flex flex-wrap items-center gap-2 rounded-lg bg-teal-50 px-3 py-2 text-sm dark:bg-teal-950/50"
+          className="mb-3 flex flex-wrap items-center gap-2 rounded-control bg-brand-soft px-3 py-2 text-sm"
         >
           <span className="mr-auto font-medium">
             {t('documents.selection.count', { count: selectedDocs.length })}
@@ -340,7 +332,7 @@ export function DocumentsPage() {
           </button>
           <button
             type="button"
-            className={`${secondaryButton} text-red-600 dark:text-red-400`}
+            className={`${secondaryButton} text-danger-fg`}
             onClick={() => setToDelete(selectedDocs)}
           >
             <Trash2 className="size-4" /> {t('common.delete')}
@@ -349,13 +341,13 @@ export function DocumentsPage() {
       )}
 
       {message && (
-        <p role="status" className="mb-3 text-sm text-slate-600 dark:text-slate-300">
+        <p role="status" className="mb-3 text-sm text-fg-soft">
           {message}
         </p>
       )}
 
       <div className={card}>
-        <div className="flex items-center gap-4 border-b border-slate-100 px-4 py-2 text-xs text-slate-500 dark:border-slate-800">
+        <div className="flex items-center gap-4 border-b border-line px-4 py-2 text-xs text-fg-muted">
           <input
             type="checkbox"
             aria-label={t('documents.selection.selectAll')}
@@ -371,11 +363,11 @@ export function DocumentsPage() {
         </div>
 
         {loading && (
-          <p className="px-4 py-6 text-sm text-slate-500">{t('documents.list.loading')}</p>
+          <p className="px-4 py-6 text-sm text-fg-muted">{t('documents.list.loading')}</p>
         )}
         {loadError && (
           <div className="flex items-center gap-3 px-4 py-6 text-sm">
-            <span className="text-red-600">
+            <span className="text-danger-fg">
               {t('documents.list.loadError', { message: errorMessage(loadError) })}
             </span>
             <button
@@ -391,7 +383,7 @@ export function DocumentsPage() {
           </div>
         )}
         {!loading && documents.length === 0 && (
-          <div className="px-4 py-10 text-center text-sm text-slate-500">
+          <div className="px-4 py-10 text-center text-sm text-fg-muted">
             {query ? t('documents.list.noMatch') : t('documents.list.empty')}
             {!query && subtab !== 'cover-letters' && (
               <div className="mt-3">
@@ -403,25 +395,19 @@ export function DocumentsPage() {
           </div>
         )}
 
-        <ul
-          aria-label={t('documents.list.label')}
-          className="divide-y divide-slate-100 dark:divide-slate-800"
-        >
+        <ul aria-label={t('documents.list.label')} className="divide-y divide-line">
           {documents.map((doc) => {
             const job = jobs.find((j) => j.id === doc.jobId)
             return (
-              <li
-                key={doc.id}
-                className="flex items-center gap-4 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50"
-              >
+              <li key={doc.id} className="flex items-center gap-4 px-4 py-3 hover:bg-muted">
                 <input
                   type="checkbox"
                   aria-label={t('documents.selection.select', { title: doc.title })}
                   checked={selected.has(doc.id)}
                   onChange={() => toggle(doc.id)}
                 />
-                <span className="flex h-12 w-9 shrink-0 items-center justify-center rounded border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800">
-                  <FileText className="size-4 text-slate-400" />
+                <span className="flex h-12 w-9 shrink-0 items-center justify-center rounded-tight border border-line bg-page">
+                  <FileText className="size-4 text-fg-faint" />
                 </span>
                 <div className="min-w-0 flex-1">
                   {renaming === doc.id ? (
@@ -442,12 +428,12 @@ export function DocumentsPage() {
                   ) : (
                     <Link
                       to={editPath(doc)}
-                      className="block truncate font-medium hover:text-teal-700 dark:hover:text-teal-300"
+                      className="block truncate font-medium hover:text-brand-fg"
                     >
                       {doc.title}
                     </Link>
                   )}
-                  <span className="block truncate text-sm text-slate-500">
+                  <span className="block truncate text-sm text-fg-muted">
                     {job
                       ? t('documents.list.forJob', { position: job.position, company: job.company })
                       : t('documents.list.noJob')}
@@ -455,7 +441,7 @@ export function DocumentsPage() {
                 </div>
                 {doc.shared && <SharedBadge />}
                 <DocumentTypeBadge type={doc.type} />
-                <span className="hidden w-28 text-right text-sm text-slate-500 sm:block">
+                <span className="hidden w-28 text-right text-sm text-fg-muted sm:block">
                   {formatDate(doc.updatedAt)}
                 </span>
                 <RowMenu

@@ -41,7 +41,7 @@ export function FixMistakesPanel() {
 
   return (
     <AiGate>
-      <p className="text-sm text-slate-600 dark:text-slate-300">{t('ai.fix.intro')}</p>
+      <p className="text-sm text-fg-soft">{t('ai.fix.intro')}</p>
       <button type="button" className={aiButton} onClick={run} disabled={check.isPending}>
         {check.isPending ? (
           <LoaderCircle className="size-4 animate-spin" aria-hidden />
@@ -59,7 +59,7 @@ export function FixMistakesPanel() {
       {suggestions && !check.isPending && (
         <section aria-label={t('ai.fix.suggestions')} className="space-y-3">
           {suggestions.length === 0 ? (
-            <p role="status" className="text-sm text-emerald-700 dark:text-emerald-400">
+            <p role="status" className="text-sm text-success-fg">
               {t('ai.fix.none')}
             </p>
           ) : (
@@ -81,11 +81,11 @@ export function FixMistakesPanel() {
               <li
                 key={`${s.path}-${s.original}-${index}`}
                 aria-label={`${s.original} → ${s.replacement}`}
-                className={`rounded-lg border border-slate-200 p-3 dark:border-slate-700 ${status[index] === 'open' ? '' : 'opacity-60'}`}
+                className={`rounded-control border border-line p-3 ${status[index] === 'open' ? '' : 'opacity-60'}`}
               >
-                <p className="mb-1 text-xs text-slate-500 dark:text-slate-400">{s.label}</p>
+                <p className="mb-1 text-xs text-fg-muted">{s.label}</p>
                 <Change original={s.original} replacement={s.replacement} />
-                {s.reason && <p className="mt-1 text-xs text-slate-500">{s.reason}</p>}
+                {s.reason && <p className="mt-1 text-xs text-fg-muted">{s.reason}</p>}
                 <div className="mt-2 flex items-center gap-2 text-xs">
                   {status[index] === 'open' ? (
                     <>
@@ -97,7 +97,7 @@ export function FixMistakesPanel() {
                       </button>
                     </>
                   ) : (
-                    <span className="text-slate-500">
+                    <span className="text-fg-muted">
                       {
                         {
                           accepted: t('ai.fix.accepted'),

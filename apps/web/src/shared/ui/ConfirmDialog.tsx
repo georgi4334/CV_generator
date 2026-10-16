@@ -27,12 +27,12 @@ export function ConfirmDialog({
       <h2 id="confirm-title" className="text-lg font-semibold">
         {title}
       </h2>
-      <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{message}</p>
+      <p className="mt-2 text-sm text-fg-soft">{message}</p>
       <div className="mt-5 flex justify-end gap-2">
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-lg border border-slate-300 px-4 py-2 text-sm dark:border-slate-600"
+          className="rounded-control border border-line-strong px-4 py-2 text-sm"
         >
           {t('common.cancel')}
         </button>
@@ -41,9 +41,7 @@ export function ConfirmDialog({
           autoFocus
           disabled={busy}
           onClick={onConfirm}
-          className={`rounded-lg px-4 py-2 text-sm font-medium text-white disabled:opacity-60 ${
-            danger ? 'bg-red-600 hover:bg-red-700' : 'bg-teal-700 hover:bg-teal-800'
-          }`}
+          className={`btn ${danger ? 'btn-danger' : 'btn-primary'}`}
         >
           {confirmLabel}
         </button>

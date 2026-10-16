@@ -20,7 +20,7 @@ export function JobCards({ jobs }: { jobs: Job[] }) {
             <div className="flex items-start justify-between gap-3">
               <button type="button" onClick={() => open(job)} className="min-w-0 text-left">
                 <span className="block font-medium">{job.position}</span>
-                <span className="block text-sm text-slate-500 dark:text-slate-400">
+                <span className="block text-sm text-fg-muted">
                   {job.company}
                   {job.location && ` · ${job.location}`}
                 </span>
@@ -31,7 +31,7 @@ export function JobCards({ jobs }: { jobs: Job[] }) {
                 onChange={(status) => update(job, statusChange(job, status))}
               />
             </div>
-            <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
+            <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-fg-muted">
               <dt>{t('jobs.card.saved')}</dt>
               <dd>{formatDate(job.dateSaved)}</dd>
               <dt>{t('jobs.card.applied')}</dt>
@@ -43,11 +43,7 @@ export function JobCards({ jobs }: { jobs: Job[] }) {
               <dt>{t('jobs.card.resume')}</dt>
               <dd className="truncate">{cv?.title ?? '—'}</dd>
             </dl>
-            {job.notes && (
-              <p className="mt-2 line-clamp-2 text-sm text-slate-600 dark:text-slate-300">
-                {job.notes}
-              </p>
-            )}
+            {job.notes && <p className="mt-2 line-clamp-2 text-sm text-fg-soft">{job.notes}</p>}
           </li>
         )
       })}

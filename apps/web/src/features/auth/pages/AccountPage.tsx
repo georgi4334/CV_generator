@@ -1,4 +1,4 @@
-import { PASSWORD_MIN_LENGTH } from '@cv/shared'
+import { NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '@cv/shared'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -27,7 +27,7 @@ function ProfileForm({ name: initial, email }: { name: string; email: string }) 
       <label className="block space-y-1 text-sm">
         <span className="font-medium">{t('account.profile.name')}</span>
         <input
-          maxLength={100}
+          maxLength={NAME_MAX_LENGTH}
           value={name}
           onChange={(e) => setName(e.target.value)}
           className={field}
@@ -43,7 +43,7 @@ function ProfileForm({ name: initial, email }: { name: string; email: string }) 
           {t('common.save')}
         </button>
         {update.isSuccess && (
-          <span role="status" className="text-sm text-slate-500">
+          <span role="status" className="text-sm text-fg-muted">
             {t('common.saved')}
           </span>
         )}
@@ -94,9 +94,7 @@ function PasswordForm() {
           onChange={(e) => setNew(e.target.value)}
           className={field}
         />
-        <span className="block text-xs text-slate-500 dark:text-slate-400">
-          {t('account.password.hint')}
-        </span>
+        <span className="block text-xs text-fg-muted">{t('account.password.hint')}</span>
       </label>
       <FormError message={change.isError ? errorMessage(change.error) : null} />
       <div className="flex items-center gap-3">
@@ -104,7 +102,7 @@ function PasswordForm() {
           {t('account.password.submit')}
         </button>
         {change.isSuccess && (
-          <span role="status" className="text-sm text-slate-500">
+          <span role="status" className="text-sm text-fg-muted">
             {t('account.password.changed')}
           </span>
         )}
@@ -132,13 +130,13 @@ function DeleteAccount() {
   }
   return (
     <section
-      className={`${card} space-y-3 border-red-200 p-5 dark:border-red-900`}
+      className={`${card} space-y-3 border-danger-line p-5`}
       aria-labelledby="delete-heading"
     >
-      <h2 id="delete-heading" className="font-semibold text-red-700 dark:text-red-400">
+      <h2 id="delete-heading" className="font-semibold text-danger-fg">
         {t('account.delete.title')}
       </h2>
-      <p className="text-sm text-slate-600 dark:text-slate-300">{t('account.delete.text')}</p>
+      <p className="text-sm text-fg-soft">{t('account.delete.text')}</p>
       {open ? (
         <form onSubmit={submit} className="space-y-3">
           <label className="block space-y-1 text-sm">
@@ -155,11 +153,7 @@ function DeleteAccount() {
           </label>
           <FormError message={remove.isError ? errorMessage(remove.error) : null} />
           <div className="flex gap-2">
-            <button
-              type="submit"
-              disabled={remove.isPending}
-              className="inline-flex items-center rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60"
-            >
+            <button type="submit" disabled={remove.isPending} className="btn btn-danger">
               {t('account.delete.submit')}
             </button>
             <button type="button" className={secondaryButton} onClick={() => setOpen(false)}>

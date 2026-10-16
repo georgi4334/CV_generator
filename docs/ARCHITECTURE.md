@@ -40,7 +40,8 @@ shared/
   api/          HTTP client, query client, errorMessage(), health query, auth query keys
   ui/           Generic components: Modal, ConfirmDialog, PageHeader, Badges, LoadStates,
                 ThemeToggle, LanguageSelect, ApiStatus, FitToWidth
-  lib/          format, paths, lazyPage, monitoring, useMediaQuery
+  lib/          format, paths, lazyPage, monitoring, useMediaQuery, useBreakpoint
+  styles/       tokens.css (design tokens), components.css (btn, input, card, grids…)
   stores/       theme
 i18n/           Interface languages (see i18n/README.md)
 test/           Test setup, fake APIs, appHarness for route-level tests
@@ -61,6 +62,50 @@ Also in `apps/web`: `functions/` (Cloudflare Pages Function that proxies `/api`)
   app (`<feature>.test.tsx`) import `@/test/appHarness` first.
 - **Text** shown to users goes through i18n (`t()`), with its keys in the feature's area of
   `i18n/locales`.
+
+### Styles: design tokens
+
+Every colour, spacing, radius, shadow, z-index, breakpoint and grid size the app uses is a
+variable in **`shared/styles/tokens.css`**. Change a value there and it changes everywhere.
+Components use the Tailwind classes generated from those tokens, never raw values like
+`bg-teal-700`, `rounded-xl`, `z-50` or `max-w-[794px]`.
+
+| What               | Token (in `tokens.css`)                                                            | Use in classes                                                              |
+| ------------------ | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Colours            | `--theme-*` in `:root` (light) and `.dark`                                         | `bg-surface`, `text-fg-muted`, `border-line`, `bg-brand`, `text-danger-fg`… |
+| Page padding       | `--spacing-gutter`, `--spacing-gutter-wide`, `--spacing-section`, `--spacing-card` | `px-gutter`, `py-section`, `p-card`                                         |
+| Controls           | `--spacing-control-x/-y`, `--spacing-touch` (44px)                                 | used by `btn`, `btn-icon`                                                   |
+| Rounding           | `--radius-tight`, `-control`, `-card`, `-pill`                                     | `rounded-control`, `rounded-card`…                                          |
+| Shadows            | `--shadow-card`, `-overlay`, `-paper`                                              | `shadow-card`…                                                              |
+| Widths             | `--container-page`, `-reading`, `-form`, `-panel`, `-drawer`, `-menu`…             | `max-w-page`, `w-panel`…                                                    |
+| Grids              | `--grid-cards-min`, `-thumbs-min`, `-templates-min`                                | `grid-cards`, `grid-thumbs`, `grid-templates`                               |
+| Stacking (z-index) | `--z-raised`, `-dropdown`, `-nav`, `-overlay`, `-toast`                            | `z-(--z-dropdown)`                                                          |
+| Breakpoints        | `--breakpoint-sm/md/lg/xl/2xl`                                                     | `md:…`, `lg:…`; in code `useBreakpoint('md')`                               |
+
+- **Colours follow the theme by themselves:** `bg-surface` is white in light mode and dark
+  slate in dark mode, so components need no `dark:` classes. To change a colour, edit its
+  `--theme-*` value in `:root` and in `.dark`.
+- **Breakpoints** are also in `shared/lib/useBreakpoint.ts` (`BREAKPOINTS`), for layout
+  decisions made in code; a test fails if the two disagree.
+- **Common pieces** are classes in `shared/styles/components.css`: `page-container`, `card`,
+  `btn` + `btn-primary` / `btn-secondary` / `btn-danger` / `btn-ghost` / `btn-icon` / `btn-sm`,
+  `input`, `input-sm`, `link`, `pill`, the grids, and `pb-safe` / `clear-bottom-nav` for phones.
+- **Not tokens on purpose:** the CV and letter templates (`renderer/`) keep their own sizes in
+  `em` and `PAGE_SIZE_PX`, because they describe the printed page, not the app; job-status
+  badge colours live in `shared/ui/badgeStyles.ts`.
+
+### Phones and tablets
+
+- **Below `md` (768px):** the app's tabs move to a bottom tab bar; the header keeps the logo,
+  language, theme and account. Tables become cards; drawers open full screen.
+- **Below `lg` (1024px), the editor** shows a compact top bar (back, title, undo/redo, "More"
+  menu with preview, download, share, history, language and theme), a bottom toolbar with the
+  tools, and opens each tool as a bottom sheet. The page is scaled to the screen width.
+- One navigation is rendered at a time (chosen with `useBreakpoint`), so screen readers and
+  tests never see two. Touch targets are at least 44px on touch screens (`btn-icon`), and
+  bars respect the phone's safe areas (`viewport-fit=cover`).
+- `e2e/tests/mobile.spec.ts` runs on a phone (Pixel 7): no sideways scrolling on any page,
+  the bottom navigation, the editor toolbar and sheet, and the accessibility checks.
 
 ## API: `apps/api/src`
 

@@ -53,22 +53,22 @@ export function ShareDialog({
           type="button"
           onClick={onClose}
           aria-label={t('common.close')}
-          className="rounded p-1 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+          className="rounded-tight p-1 text-fg-muted hover:bg-muted "
         >
           <X className="size-4" />
         </button>
       </div>
 
       {share.isPending ? (
-        <p className="mt-4 text-sm text-slate-500">{t('common.loading')}</p>
+        <p className="mt-4 text-sm text-fg-muted">{t('common.loading')}</p>
       ) : (
         <>
-          <div className="mt-4 flex items-center justify-between gap-4 rounded-lg border border-slate-200 p-3 dark:border-slate-700">
+          <div className="mt-4 flex items-center justify-between gap-4 rounded-control border border-line p-3 ">
             <span>
               <span id={switchId} className="block text-sm font-medium">
                 {t('share.dialog.switchLabel')}
               </span>
-              <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">
+              <span className="mt-0.5 block text-xs text-fg-muted ">
                 {t('share.dialog.switchHint')}
               </span>
             </span>
@@ -82,12 +82,12 @@ export function ShareDialog({
                 setCopied(false)
                 update.mutate({ isActive: !active })
               }}
-              className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-60 ${
-                active ? 'bg-teal-700' : 'bg-slate-300 dark:bg-slate-600'
+              className={`relative h-6 w-11 shrink-0 rounded-pill transition-colors disabled:opacity-60 ${
+                active ? 'bg-brand' : 'bg-line-strong'
               }`}
             >
               <span
-                className={`absolute top-0.5 left-0.5 size-5 rounded-full bg-white shadow transition-transform ${
+                className={`absolute top-0.5 left-0.5 size-5 rounded-pill bg-surface shadow transition-transform ${
                   active ? 'translate-x-5' : ''
                 }`}
               />
@@ -103,7 +103,7 @@ export function ShareDialog({
                   readOnly
                   value={url}
                   onFocus={(e) => e.currentTarget.select()}
-                  className="min-w-0 flex-1 rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800"
+                  className="min-w-0 flex-1 rounded-control border border-line-strong bg-page px-3 py-2 text-sm "
                 />
                 <button type="button" onClick={() => void copy()} className={secondaryButton}>
                   {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
@@ -115,7 +115,7 @@ export function ShareDialog({
                   href={url}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1 font-medium text-teal-700 hover:underline dark:text-teal-300"
+                  className="inline-flex items-center gap-1 font-medium text-brand-fg hover:underline "
                 >
                   <ExternalLink className="size-4" /> {t('share.dialog.open')}
                 </a>
@@ -126,26 +126,22 @@ export function ShareDialog({
                     setCopied(false)
                     update.mutate('reset')
                   }}
-                  className="text-slate-600 hover:underline disabled:opacity-60 dark:text-slate-300"
+                  className="text-fg-soft hover:underline disabled:opacity-60 "
                 >
                   {t('share.dialog.replace')}
                 </button>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                {t('share.dialog.activeNote')}
-              </p>
+              <p className="text-xs text-fg-muted ">{t('share.dialog.activeNote')}</p>
             </div>
           )}
           {!active && link && (
-            <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-              {t('share.dialog.inactiveNote')}
-            </p>
+            <p className="mt-3 text-xs text-fg-muted ">{t('share.dialog.inactiveNote')}</p>
           )}
         </>
       )}
 
       {error && (
-        <p role="alert" className="mt-3 text-sm text-red-600 dark:text-red-400">
+        <p role="alert" className="mt-3 text-sm text-danger-fg ">
           {errorMessage(error)}
         </p>
       )}

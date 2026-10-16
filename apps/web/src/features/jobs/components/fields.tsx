@@ -29,7 +29,7 @@ export function StatusSelect({
       aria-label={label}
       value={value}
       onChange={(e) => onChange(e.target.value as JobStatus)}
-      className={`cursor-pointer rounded-full border-0 py-0.5 pr-7 pl-2.5 text-xs font-medium ${JOB_STATUS_STYLES[value]}`}
+      className={`cursor-pointer rounded-pill border-0 py-0.5 pr-7 pl-2.5 text-xs font-medium ${JOB_STATUS_STYLES[value]}`}
     >
       {JOB_STATUSES.map((status) => (
         <option key={status} value={status}>
@@ -124,7 +124,7 @@ export function InlineText({
         if (e.key === 'Enter') e.currentTarget.blur()
         if (e.key === 'Escape') setDraft(value)
       }}
-      className="w-full truncate rounded-md border border-transparent bg-transparent px-2 py-1 text-sm text-slate-600 hover:border-slate-300 focus:border-teal-600 focus:bg-white focus:outline-none dark:text-slate-300 dark:hover:border-slate-600 dark:focus:bg-slate-800"
+      className="w-full truncate rounded-tight border border-transparent bg-transparent px-2 py-1 text-sm text-fg-soft hover:border-line-strong focus:border-brand-line focus:bg-surface focus:outline-none"
     />
   )
 }
@@ -165,7 +165,7 @@ export function DocumentSelect({
           to={editPath(linked)}
           aria-label={t('jobs.cell.openDocument', { title: linked.title })}
           title={t('jobs.cell.openDocument', { title: linked.title })}
-          className="shrink-0 rounded p-1 text-teal-700 hover:bg-slate-100 dark:text-teal-300 dark:hover:bg-slate-800"
+          className="shrink-0 rounded-tight p-1 text-brand-fg hover:bg-muted"
         >
           <ExternalLink className="size-3.5" />
         </Link>

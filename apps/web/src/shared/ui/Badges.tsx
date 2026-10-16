@@ -3,8 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { JOB_STATUS_STYLES } from './badgeStyles'
 import { type DocumentType, type JobStatus, type JobType } from '@cv/shared'
 
-const pill =
-  'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap'
+const pill = 'pill'
 
 export function JobStatusBadge({ status }: { status: JobStatus }) {
   const { t } = useTranslation()
@@ -17,20 +16,16 @@ export function JobStatusBadge({ status }: { status: JobStatus }) {
 
 export function JobTypeBadge({ type }: { type: JobType | null }) {
   const { t } = useTranslation()
-  if (!type) return <span className="text-slate-400">—</span>
+  if (!type) return <span className="text-fg-faint">—</span>
   return (
-    <span
-      className={`${pill} border border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-300`}
-    >
-      {t(`labels.jobType.${type}`)}
-    </span>
+    <span className={`${pill} border border-line text-fg-soft`}>{t(`labels.jobType.${type}`)}</span>
   )
 }
 
 export function DocumentTypeBadge({ type }: { type: DocumentType }) {
   const { t } = useTranslation()
   return type === 'cv' ? (
-    <span className={`${pill} bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300`}>
+    <span className={`${pill} bg-brand-soft text-brand-fg-strong`}>
       {t('labels.documentType.cv')}
     </span>
   ) : (
@@ -50,11 +45,9 @@ export function RecommendedBadge({
   className?: string
 }) {
   const { t } = useTranslation()
-  const size = compact ? 'rounded-full px-1.5 py-px text-[10px] font-medium' : pill
+  const size = compact ? 'rounded-full px-1.5 py-px text-2xs font-medium' : pill
   return (
-    <span
-      className={`${size} bg-amber-100 text-amber-800 shadow-sm dark:bg-amber-950 dark:text-amber-300 ${className}`}
-    >
+    <span className={`${size} bg-warning-soft text-warning-fg shadow-card ${className}`}>
       {t('documents.badges.recommended')}
     </span>
   )

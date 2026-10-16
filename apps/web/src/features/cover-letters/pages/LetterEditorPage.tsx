@@ -39,8 +39,7 @@ import {
 
 const letterHistory = () => useLetterEditor.getState()
 
-const select =
-  'max-w-56 rounded-md border border-slate-300 bg-white px-2 py-1 text-sm dark:border-slate-600 dark:bg-slate-800'
+const select = 'input input-sm w-auto max-w-56'
 
 /** Under the top bar: which CV and job the letter belongs to, and "copy the CV's look". */
 function LinkBar({ record }: { record: CoverLetterRecord }) {
@@ -70,9 +69,9 @@ function LinkBar({ record }: { record: CoverLetterRecord }) {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-slate-200 bg-white px-4 py-2 text-sm dark:border-slate-800 dark:bg-slate-900">
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-line bg-surface px-4 py-2 text-sm">
       <label className="flex items-center gap-2">
-        <span className="text-slate-500 dark:text-slate-400">{t('letters.cv')}</span>
+        <span className="text-fg-muted">{t('letters.cv')}</span>
         <select
           aria-label={t('letters.linkedCv')}
           value={record.cvId ?? ''}
@@ -94,13 +93,13 @@ function LinkBar({ record }: { record: CoverLetterRecord }) {
         onClick={() => void copyFromCv()}
         disabled={!record.cvId || copying}
         title={t('letters.useCvDesignHint')}
-        className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 font-medium text-teal-700 hover:bg-teal-50 disabled:cursor-not-allowed disabled:opacity-40 dark:text-teal-300 dark:hover:bg-teal-950"
+        className="inline-flex items-center gap-1.5 rounded-tight px-2 py-1 font-medium text-brand-fg hover:bg-brand-soft disabled:cursor-not-allowed disabled:opacity-40"
       >
         <RefreshCw className={`size-3.5 ${copying ? 'animate-spin' : ''}`} aria-hidden />
         {t('letters.useCvDesign')}
       </button>
       <label className="flex items-center gap-2">
-        <span className="text-slate-500 dark:text-slate-400">{t('letters.job')}</span>
+        <span className="text-fg-muted">{t('letters.job')}</span>
         <select
           aria-label={t('letters.job')}
           value={record.jobId ?? ''}
@@ -164,6 +163,7 @@ function LetterEditor({ record }: { record: CoverLetterRecord }) {
       <AiTargetContext.Provider value={aiTarget}>
         <EditorLayout
           kind="coverLetter"
+          pageSize={current.design.pageSize}
           title={
             <EditableTitle
               value={record.title}
@@ -204,7 +204,7 @@ function LetterEditor({ record }: { record: CoverLetterRecord }) {
             mode="edit"
             editor={letterEditorApi}
             actions={letterActions}
-            pageClassName="shrink-0 shadow-lg"
+            pageClassName="shrink-0 shadow-paper"
           />
           {sharing && (
             <ShareDialog

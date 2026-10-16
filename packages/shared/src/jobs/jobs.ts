@@ -37,10 +37,15 @@ export const JOB_TYPE_LABELS: Record<JobType, string> = {
 /** Calendar date without time, e.g. "2026-10-13". */
 export const IsoDateSchema = z.iso.date()
 
+/** Longest position, company, location or contact a job may have. */
+export const JOB_TEXT_MAX = 200
+export const JOB_SALARY_MAX = 100
+export const JOB_NOTES_MAX = 5000
+
 /** Fields of a saved job the user can edit (in the table, the form or the drawer). */
 const jobFields = {
-  position: z.string().trim().min(1).max(200),
-  company: z.string().trim().min(1).max(200),
+  position: z.string().trim().min(1).max(JOB_TEXT_MAX),
+  company: z.string().trim().min(1).max(JOB_TEXT_MAX),
   status: JobStatusSchema,
   type: JobTypeSchema.nullable(),
   dateApplied: IsoDateSchema.nullable(),
@@ -48,10 +53,10 @@ const jobFields = {
   cvId: IdSchema.nullable(),
   /** The cover letter sent (cover letters arrive in Step 13). */
   coverLetterId: IdSchema.nullable(),
-  notes: z.string().max(5000),
-  location: z.string().trim().max(200),
-  salary: z.string().trim().max(100),
-  contact: z.string().trim().max(200),
+  notes: z.string().max(JOB_NOTES_MAX),
+  location: z.string().trim().max(JOB_TEXT_MAX),
+  salary: z.string().trim().max(JOB_SALARY_MAX),
+  contact: z.string().trim().max(JOB_TEXT_MAX),
   /** The job posting, pasted by the user; Check & Tailor and letter drafts use it. */
   description: z.string().trim().max(JOB_DESCRIPTION_MAX),
 }

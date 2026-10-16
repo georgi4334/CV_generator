@@ -1,5 +1,6 @@
 import {
   CV_LANGUAGES,
+  TITLE_MAX,
   type CvDocument,
   type CvLanguage,
   type ProfessionId,
@@ -16,8 +17,10 @@ import { errorMessage } from '@/shared/api/errorMessage'
 import { useCreateCv } from '@/features/cv-editor/queries'
 import { buildNewCv, type StartFrom } from './buildNewCv'
 
-const field =
-  'rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800'
+/** Width in pixels of the example CV preview. */
+const EXAMPLE_PREVIEW_WIDTH = 260
+
+const field = 'input w-auto'
 
 function StartOption({
   value,
@@ -40,7 +43,7 @@ function StartOption({
   return (
     <label
       className={`${card} flex cursor-pointer flex-col gap-4 p-4 ${
-        selected ? 'border-teal-600 ring-2 ring-teal-600 dark:border-teal-500' : ''
+        selected ? 'border-brand-line ring-2 ring-brand-line ' : ''
       }`}
     >
       <span className="flex items-start gap-3">
@@ -50,17 +53,15 @@ function StartOption({
           value={value}
           checked={selected}
           onChange={() => onSelect(value)}
-          className="mt-1 size-4 accent-teal-600"
+          className="mt-1 size-4 accent-brand-line"
         />
         <span>
           <span className="block font-medium">{title}</span>
-          <span className="mt-0.5 block text-sm text-slate-500 dark:text-slate-400">
-            {description}
-          </span>
+          <span className="mt-0.5 block text-sm text-fg-muted">{description}</span>
         </span>
       </span>
       <span className="flex justify-center">
-        <CvThumbnail cv={cv} width={260} mode={mode} />
+        <CvThumbnail cv={cv} width={EXAMPLE_PREVIEW_WIDTH} mode={mode} />
       </span>
     </label>
   )
@@ -136,11 +137,7 @@ export function StartStep({
             mode="edit"
           />
         </div>
-        {!profession && (
-          <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
-            {t('newCv.examplesHint')}
-          </p>
-        )}
+        {!profession && <p className="mt-3 text-sm text-fg-muted">{t('newCv.examplesHint')}</p>}
       </fieldset>
 
       <div className={`${card} flex flex-wrap items-end gap-4 p-4`}>
@@ -148,7 +145,7 @@ export function StartStep({
           <span className="font-medium">{t('newCv.cvName')}</span>
           <input
             value={title}
-            maxLength={200}
+            maxLength={TITLE_MAX}
             onChange={(e) => setTitle(e.target.value)}
             className={field}
           />
@@ -172,14 +169,14 @@ export function StartStep({
           {create.isPending ? t('newCv.creating') : t('newCv.createCv')}
         </button>
       </div>
-      <p className="-mt-3 text-xs text-slate-500 dark:text-slate-400">
+      <p className="-mt-3 text-xs text-fg-muted">
         {startFrom === 'example' ? t('newCv.languageNoteExample') : t('newCv.languageNote')}
       </p>
 
       {create.isError && (
         <p
           role="alert"
-          className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-900 dark:border-red-900 dark:bg-red-950/60 dark:text-red-200"
+          className="rounded-control border border-danger-line bg-danger-soft px-4 py-2 text-sm text-danger-fg"
         >
           {t('newCv.createFailed', { message: errorMessage(create.error) })}
         </p>

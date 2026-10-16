@@ -43,6 +43,7 @@ function CvEditor({ record }: { record: CvRecord }) {
   return (
     <AiTargetContext.Provider value={aiTarget}>
       <EditorLayout
+        pageSize={(cv ?? record.document).design.pageSize}
         title={
           <EditableTitle
             value={record.title}

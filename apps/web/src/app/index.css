@@ -1,4 +1,6 @@
 @import 'tailwindcss';
+@import '../shared/styles/tokens.css';
+@import '../shared/styles/components.css';
 
 /* Dark mode follows a `.dark` class on <html>, so the app can offer a theme toggle. */
 @custom-variant dark (&:where(.dark, .dark *));

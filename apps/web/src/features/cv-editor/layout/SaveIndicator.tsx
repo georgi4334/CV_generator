@@ -11,7 +11,7 @@ export function SaveIndicator() {
 
   if (status === 'saving' || status === 'pending') {
     return (
-      <span role="status" className={`${base} text-slate-500`}>
+      <span role="status" className={`${base} text-fg-muted`}>
         <LoaderCircle className="size-3.5 animate-spin" /> {t('common.saving')}
       </span>
     )
@@ -21,7 +21,7 @@ export function SaveIndicator() {
     return (
       <span
         role="status"
-        className={`${base} text-amber-600 dark:text-amber-400`}
+        className={`${base} text-warning-fg`}
         title={error ? errorMessage(error) : undefined}
       >
         {offline ? <CloudOff className="size-3.5" /> : <CircleAlert className="size-3.5" />}
@@ -31,13 +31,13 @@ export function SaveIndicator() {
   }
   if (status === 'conflict') {
     return (
-      <span role="status" className={`${base} text-red-600 dark:text-red-400`}>
+      <span role="status" className={`${base} text-danger-fg`}>
         <CircleAlert className="size-3.5" /> {t('editor.save.changedElsewhere')}
       </span>
     )
   }
   return (
-    <span role="status" className={`${base} text-emerald-700 dark:text-emerald-400`}>
+    <span role="status" className={`${base} text-success-fg`}>
       <CircleCheck className="size-3.5" /> {t('common.saved')}
     </span>
   )
