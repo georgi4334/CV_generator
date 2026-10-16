@@ -15,7 +15,7 @@ import { useEditor } from '@/renderer/context'
 import { pickAndUpload } from './image'
 
 const toolbar =
-  'cv-controls absolute z-10 hidden items-center gap-0.5 rounded-md border border-slate-200 bg-white p-0.5 text-slate-600 shadow-md group-hover/ctl:flex group-focus-within/ctl:flex'
+  'cv-controls absolute z-(--z-raised) hidden items-center gap-0.5 rounded-tight border border-line bg-surface p-0.5 text-fg-soft shadow-overlay group-hover/ctl:flex group-focus-within/ctl:flex'
 const outline =
   'group/ctl relative rounded-sm outline-1 outline-offset-2 outline-transparent outline-dashed hover:outline-slate-400/70 focus-within:outline-slate-400/70'
 
@@ -39,7 +39,7 @@ function ToolButton({
       // Keep focus (and the caret) in the field being edited.
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
-      className="rounded p-1 hover:bg-slate-100 hover:text-slate-900 disabled:opacity-30"
+      className="rounded-tight p-1 hover:bg-muted hover:text-fg disabled:opacity-30"
     >
       <Icon className="size-3.5" />
     </button>

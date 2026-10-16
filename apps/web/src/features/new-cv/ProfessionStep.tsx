@@ -40,16 +40,14 @@ export function ProfessionStep({ onChoose }: { onChoose: (choice: ProfessionChoi
             <button
               type="button"
               onClick={() => onChoose(id)}
-              className={`${card} flex h-full w-full items-start gap-3 p-4 text-left transition-colors hover:border-teal-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600 dark:hover:border-teal-500`}
+              className={`${card} flex h-full w-full items-start gap-3 p-4 text-left transition-colors hover:border-brand-line focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-line`}
             >
-              <span className="rounded-lg bg-teal-50 p-2 text-teal-700 dark:bg-teal-950 dark:text-teal-300">
+              <span className="rounded-control bg-brand-soft p-2 text-brand-fg">
                 <Icon className="size-5" aria-hidden />
               </span>
               <span>
                 <span className="block font-medium">{name}</span>
-                <span className="mt-0.5 block text-sm text-slate-500 dark:text-slate-400">
-                  {description}
-                </span>
+                <span className="mt-0.5 block text-sm text-fg-muted">{description}</span>
               </span>
             </button>
           </li>

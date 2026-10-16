@@ -36,6 +36,7 @@ export const editor: Messages['editor'] = {
     premiumPlanned: 'Premium функциите са планирани за Стъпка 18.',
   },
   topBar: {
+    more: 'Още',
     backToDocuments: 'Назад към документите',
     tools: 'Инструменти на редактора',
     undo: 'Отмяна',

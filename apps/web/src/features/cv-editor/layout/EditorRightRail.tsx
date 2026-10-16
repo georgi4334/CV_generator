@@ -4,7 +4,7 @@ import { Link } from 'react-router'
 import { useEditorUi } from '@/features/cv-editor/state/editorUi'
 
 const railButton =
-  'flex size-9 items-center justify-center rounded-md text-slate-600 hover:bg-white hover:text-slate-900 hover:shadow-sm dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-50'
+  'flex size-9 items-center justify-center rounded-tight text-fg-soft hover:bg-surface hover:text-fg hover:shadow-card'
 
 interface EditorRightRailProps {
   previewTo: string
@@ -56,7 +56,7 @@ export function EditorRightRail({ previewTo, onDownload, onShare }: EditorRightR
       </button>
       <button
         type="button"
-        className="flex size-9 items-center justify-center rounded-md bg-amber-400 text-amber-950 hover:bg-amber-300"
+        className="flex size-9 items-center justify-center rounded-tight bg-amber-400 text-warning-fg hover:bg-amber-300"
         aria-label={t('editor.rail.premium')}
         title={t('editor.rail.premium')}
         onClick={() => notify(t('editor.rail.premiumPlanned'))}

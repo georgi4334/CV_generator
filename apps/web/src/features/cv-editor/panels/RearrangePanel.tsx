@@ -51,19 +51,18 @@ function SectionRowContent({ section, language, handle }: RowProps & { handle?: 
   const notify = useEditorUi((s) => s.notify)
   const defaultTitle = DEFAULT_SECTION_TITLES[language][section.type]
   const VisibilityIcon = section.visible ? Eye : EyeOff
-  const iconButton =
-    'rounded p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-700 dark:hover:text-slate-100'
+  const iconButton = 'rounded-tight p-1 text-fg-muted hover:bg-muted hover:text-fg'
 
   return (
     <div
-      className={`flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-1.5 py-1 shadow-sm dark:border-slate-700 dark:bg-slate-800 ${
+      className={`flex items-center gap-1 rounded-control border border-line bg-surface px-1.5 py-1 shadow-card ${
         section.visible ? '' : 'opacity-60'
       }`}
     >
       {handle}
       <input
         aria-label={t('editor.rearrange.titleOf', { title: defaultTitle })}
-        className="min-w-0 flex-1 rounded bg-transparent px-1 py-0.5 text-sm outline-none placeholder:text-slate-800 focus:bg-slate-100 dark:placeholder:text-slate-100 dark:focus:bg-slate-700"
+        className="min-w-0 flex-1 rounded-tight bg-transparent px-1 py-0.5 text-sm outline-none placeholder:text-fg focus:bg-muted"
         placeholder={defaultTitle}
         value={section.title ?? ''}
         onChange={(e) => renameSection(section.id, e.target.value)}
@@ -117,7 +116,7 @@ function SortableSectionRow({ section, language }: RowProps) {
     <button
       type="button"
       ref={setActivatorNodeRef}
-      className="cursor-grab touch-none rounded p-1 text-slate-400 hover:text-slate-700 active:cursor-grabbing dark:hover:text-slate-200"
+      className="cursor-grab touch-none rounded-tight p-1 text-fg-faint hover:text-fg-soft active:cursor-grabbing"
       aria-label={t('editor.rearrange.drag', {
         title: DEFAULT_SECTION_TITLES[language][section.type],
       })}
@@ -157,19 +156,19 @@ function ColumnList({
   const { setNodeRef, isOver } = useDroppable({ id: `${COLUMN_PREFIX}${column}` })
   return (
     <section aria-label={label} className="mb-5">
-      <h3 className="mb-2 text-xs font-medium tracking-wide text-slate-500 uppercase">{label}</h3>
+      <h3 className="mb-2 text-xs font-medium tracking-wide text-fg-muted uppercase">{label}</h3>
       <SortableContext items={sections.map((s) => s.id)} strategy={verticalListSortingStrategy}>
         <ul
           ref={setNodeRef}
-          className={`min-h-12 space-y-1.5 rounded-lg p-1 ${
-            isOver ? 'bg-teal-50 dark:bg-teal-950/40' : 'bg-slate-50 dark:bg-slate-950/40'
+          className={`min-h-12 space-y-1.5 rounded-control p-1 ${
+            isOver ? 'bg-brand-soft ' : 'bg-page '
           }`}
         >
           {sections.map((section) => (
             <SortableSectionRow key={section.id} section={section} language={language} />
           ))}
           {sections.length === 0 && (
-            <li className="px-2 py-3 text-center text-xs text-slate-400">
+            <li className="px-2 py-3 text-center text-xs text-fg-faint">
               {t('editor.rearrange.dropHere')}
             </li>
           )}
@@ -191,7 +190,7 @@ function AddSectionMenu({ sections, language }: { sections: Section[]; language:
         type="button"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-slate-300 py-2 text-sm font-medium text-slate-600 hover:border-teal-500 hover:text-teal-700 dark:border-slate-600 dark:text-slate-300 dark:hover:text-teal-300"
+        className="flex w-full items-center justify-center gap-1.5 rounded-control border border-dashed border-line-strong py-2 text-sm font-medium text-fg-soft hover:border-brand-line hover:text-brand-fg"
       >
         <Plus className="size-4" /> {t('editor.rearrange.addSection')}
       </button>
@@ -215,7 +214,7 @@ function AddSectionMenu({ sections, language }: { sections: Section[]; language:
                     addSection(type, MAIN_TYPES.has(type) ? 'main' : 'sidebar')
                     setOpen(false)
                   }}
-                  className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-left text-xs hover:border-teal-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700"
+                  className="w-full rounded-tight border border-line px-2 py-1.5 text-left text-xs hover:border-brand-line disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {DEFAULT_SECTION_TITLES[language][type]}
                 </button>
@@ -279,9 +278,9 @@ export function RearrangePanel() {
 
   return (
     <>
-      <p className="mb-4 text-xs text-slate-500">{t('editor.rearrange.hint')}</p>
+      <p className="mb-4 text-xs text-fg-muted">{t('editor.rearrange.hint')}</p>
       {singleColumn && (
-        <p className="mb-4 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:bg-amber-950/50 dark:text-amber-300">
+        <p className="mb-4 rounded-tight bg-warning-soft px-3 py-2 text-xs text-warning-fg">
           {t('editor.rearrange.singleColumn')}
         </p>
       )}

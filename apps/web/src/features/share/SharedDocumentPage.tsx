@@ -35,7 +35,7 @@ function useDocumentTitle(title: string | undefined) {
 
 function Message({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-slate-100 px-4 text-center text-slate-800 dark:bg-slate-950 dark:text-slate-100">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-muted px-4 text-center text-fg">
       <h1 className="text-xl font-semibold">{title}</h1>
       {children}
     </div>
@@ -52,7 +52,7 @@ export function SharedDocumentPage() {
 
   if (query.isPending) {
     return (
-      <div className="flex min-h-screen items-center justify-center gap-2 bg-slate-100 text-slate-500 dark:bg-slate-950">
+      <div className="flex min-h-screen items-center justify-center gap-2 bg-muted text-fg-muted">
         <LoaderCircle className="size-5 animate-spin" /> {t('common.loading')}
       </div>
     )
@@ -62,7 +62,7 @@ export function SharedDocumentPage() {
     if (error.status === 404) {
       return (
         <Message title={t('share.page.brokenTitle')}>
-          <p className="max-w-md text-sm text-slate-500">{t('share.page.brokenText')}</p>
+          <p className="max-w-md text-sm text-fg-muted">{t('share.page.brokenText')}</p>
           <Link to="/" className={secondaryButton}>
             {t('share.page.makeOwn')}
           </Link>
@@ -71,7 +71,7 @@ export function SharedDocumentPage() {
     }
     return (
       <Message title={t('share.page.loadErrorTitle')}>
-        <p className="max-w-md text-sm text-slate-500">{errorMessage(error)}</p>
+        <p className="max-w-md text-sm text-fg-muted">{errorMessage(error)}</p>
         <button type="button" onClick={() => void query.refetch()} className={primaryButton}>
           {t('common.tryAgain')}
         </button>
@@ -83,10 +83,10 @@ export function SharedDocumentPage() {
   const { title } = shared
   const pageSize = shared.document.design.pageSize
   return (
-    <div className="min-h-screen bg-slate-200 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-      <header className="sticky top-0 z-10 border-b border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-900">
+    <div className="min-h-screen bg-muted-strong text-fg">
+      <header className="sticky top-0 z-(--z-raised) border-b border-line-strong bg-surface">
         <div className="mx-auto flex h-14 max-w-5xl items-center gap-3 px-4">
-          <FileText className="size-5 shrink-0 text-teal-600 dark:text-teal-400" aria-hidden />
+          <FileText className="size-5 shrink-0 text-brand-fg" aria-hidden />
           <h1 className="min-w-0 flex-1 truncate font-semibold">{title}</h1>
           <button
             type="button"
@@ -111,15 +111,15 @@ export function SharedDocumentPage() {
       <main className="px-4 py-6 sm:px-6 sm:py-8">
         <FitToWidth width={PAGE_SIZE_PX[pageSize].width}>
           {shared.type === 'cv' ? (
-            <CvRenderer cv={shared.document} mode="preview" pageClassName="shadow-lg" />
+            <CvRenderer cv={shared.document} mode="preview" pageClassName="shadow-paper" />
           ) : (
-            <LetterRenderer letter={shared.document} mode="preview" pageClassName="shadow-lg" />
+            <LetterRenderer letter={shared.document} mode="preview" pageClassName="shadow-paper" />
           )}
         </FitToWidth>
       </main>
-      <footer className="pb-8 text-center text-xs text-slate-500">
+      <footer className="pb-8 text-center text-xs text-fg-muted">
         {t('share.page.madeWith')}{' '}
-        <Link to="/" className="font-medium text-teal-700 hover:underline dark:text-teal-300">
+        <Link to="/" className="font-medium text-brand-fg hover:underline">
           CV Generator
         </Link>
       </footer>

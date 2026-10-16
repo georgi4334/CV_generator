@@ -37,10 +37,8 @@ function Stepper({
         const content = (
           <>
             <span
-              className={`flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
-                i <= step
-                  ? 'bg-teal-700 text-white'
-                  : 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
+              className={`flex size-6 shrink-0 items-center justify-center rounded-pill text-xs font-semibold ${
+                i <= step ? 'bg-brand text-on-brand' : 'bg-muted-strong text-fg-soft'
               }`}
             >
               {done ? <Check className="size-3.5" aria-hidden /> : i + 1}
@@ -49,7 +47,7 @@ function Stepper({
             {done && choices[i] && (
               <>
                 {' '}
-                <span className="text-slate-500 dark:text-slate-400">· {choices[i]}</span>
+                <span className="text-fg-muted">· {choices[i]}</span>
               </>
             )}
           </>
@@ -60,14 +58,12 @@ function Stepper({
               <button
                 type="button"
                 onClick={() => onSelect(i)}
-                className="flex items-center gap-2 rounded-md hover:text-teal-700 dark:hover:text-teal-300"
+                className="flex items-center gap-2 rounded-tight hover:text-brand-fg"
               >
                 {content}
               </button>
             ) : (
-              <span
-                className={`flex items-center gap-2 ${i > step ? 'text-slate-500 dark:text-slate-400' : ''}`}
-              >
+              <span className={`flex items-center gap-2 ${i > step ? 'text-fg-muted ' : ''}`}>
                 {content}
               </span>
             )}

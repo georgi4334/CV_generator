@@ -5,13 +5,16 @@ import { usePrintJob } from '@/features/print/printCv'
 import { preloadPages } from '@/shared/lib/lazyPage'
 import { PrintHost } from '@/app/lazyPages'
 
+/** How long after the first page loads to start fetching the others. */
+const PRELOAD_DELAY_MS = 1500
+
 /** Wraps every page; holds what all pages share, like printing. */
 export function RootLayout() {
   const printing = usePrintJob((s) => s.job !== null)
 
   useEffect(() => {
     // Fetch the other pages in the background, so moving around is instant.
-    const id = setTimeout(() => void preloadPages(), 1500)
+    const id = setTimeout(() => void preloadPages(), PRELOAD_DELAY_MS)
     return () => clearTimeout(id)
   }, [])
 

@@ -1,4 +1,11 @@
-import { JOB_DESCRIPTION_MAX, type Job, type UpdateJobInput } from '@cv/shared'
+import {
+  JOB_DESCRIPTION_MAX,
+  JOB_NOTES_MAX,
+  JOB_SALARY_MAX,
+  JOB_TEXT_MAX,
+  type Job,
+  type UpdateJobInput,
+} from '@cv/shared'
 import { CopyPlus, FilePen, Trash2, X } from 'lucide-react'
 import { useId, useState, type FormEvent, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -48,13 +55,12 @@ const EMPTY: Draft = {
 const toDraft = (job: Job): Draft =>
   Object.fromEntries(Object.keys(EMPTY).map((key) => [key, job[key as keyof Draft]])) as Draft
 
-const field =
-  'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800'
+const field = 'input'
 
 function Field({ label, children, wide }: { label: string; children: ReactNode; wide?: boolean }) {
   return (
     <label className={`flex flex-col gap-1 text-sm ${wide ? 'sm:col-span-2' : ''}`}>
-      <span className="font-medium text-slate-700 dark:text-slate-300">{label}</span>
+      <span className="font-medium text-fg-soft">{label}</span>
       {children}
     </label>
   )
@@ -121,13 +127,13 @@ export function JobDrawer({
   return (
     <Modal labelledBy={headingId} onClose={onClose} variant="drawer">
       <form onSubmit={submit} className="flex h-full flex-col">
-        <header className="flex items-start justify-between gap-4 border-b border-slate-200 px-5 py-4 dark:border-slate-800">
+        <header className="flex items-start justify-between gap-4 border-b border-line px-5 py-4">
           <div className="min-w-0">
             <h2 id={headingId} className="truncate text-lg font-semibold">
               {job ? job.position : t('jobs.drawer.addTitle')}
             </h2>
             {job && (
-              <p className="text-sm text-slate-500 dark:text-slate-400">
+              <p className="text-sm text-fg-muted">
                 {t('jobs.drawer.saved', { date: formatDate(job.dateSaved) })}
               </p>
             )}
@@ -136,7 +142,7 @@ export function JobDrawer({
             type="button"
             onClick={onClose}
             aria-label={t('common.close')}
-            className="rounded p-1 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="rounded-tight p-1 text-fg-muted hover:bg-muted"
           >
             <X className="size-4" />
           </button>
@@ -148,7 +154,7 @@ export function JobDrawer({
               <input
                 required
                 autoFocus={!job}
-                maxLength={200}
+                maxLength={JOB_TEXT_MAX}
                 value={draft.position}
                 onChange={(e) => set({ position: e.target.value })}
                 className={field}
@@ -157,16 +163,14 @@ export function JobDrawer({
             <Field label={t('jobs.drawer.company')}>
               <input
                 required
-                maxLength={200}
+                maxLength={JOB_TEXT_MAX}
                 value={draft.company}
                 onChange={(e) => set({ company: e.target.value })}
                 className={field}
               />
             </Field>
             <div className="flex flex-col gap-1 text-sm">
-              <span className="font-medium text-slate-700 dark:text-slate-300">
-                {t('jobs.drawer.status')}
-              </span>
+              <span className="font-medium text-fg-soft">{t('jobs.drawer.status')}</span>
               <span>
                 <StatusSelect
                   value={draft.status}
@@ -193,7 +197,7 @@ export function JobDrawer({
             </Field>
             <Field label={t('jobs.drawer.location')}>
               <input
-                maxLength={200}
+                maxLength={JOB_TEXT_MAX}
                 placeholder={t('jobs.drawer.locationPlaceholder')}
                 value={draft.location}
                 onChange={(e) => set({ location: e.target.value })}
@@ -202,7 +206,7 @@ export function JobDrawer({
             </Field>
             <Field label={t('jobs.drawer.salary')}>
               <input
-                maxLength={100}
+                maxLength={JOB_SALARY_MAX}
                 placeholder={t('jobs.drawer.salaryPlaceholder')}
                 value={draft.salary}
                 onChange={(e) => set({ salary: e.target.value })}
@@ -211,7 +215,7 @@ export function JobDrawer({
             </Field>
             <Field label={t('jobs.drawer.contact')}>
               <input
-                maxLength={200}
+                maxLength={JOB_TEXT_MAX}
                 placeholder={t('jobs.drawer.contactPlaceholder')}
                 value={draft.contact}
                 onChange={(e) => set({ contact: e.target.value })}
@@ -231,12 +235,12 @@ export function JobDrawer({
             />
           </Field>
 
-          <fieldset className="space-y-2 rounded-lg border border-slate-200 p-3 dark:border-slate-700">
-            <legend className="px-1 text-sm font-medium text-slate-700 dark:text-slate-300">
+          <fieldset className="space-y-2 rounded-control border border-line p-3">
+            <legend className="px-1 text-sm font-medium text-fg-soft">
               {t('jobs.drawer.documents')}
             </legend>
             <div className="flex flex-col gap-1 text-sm">
-              <span className="text-slate-600 dark:text-slate-400">{t('jobs.drawer.resume')}</span>
+              <span className="text-fg-soft">{t('jobs.drawer.resume')}</span>
               <DocumentSelect
                 value={draft.cvId}
                 docs={cvs}
@@ -256,13 +260,13 @@ export function JobDrawer({
                   <CopyPlus className="size-4" />
                   {tailor.isPending ? t('jobs.drawer.copying') : t('jobs.drawer.tailor')}
                 </button>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="text-xs text-fg-muted">
                   {draft.cvId
                     ? t('jobs.drawer.tailorHint', { company: job.company })
                     : t('jobs.drawer.tailorPick')}
                 </p>
                 {tailored && (
-                  <p role="status" className="text-sm text-teal-700 dark:text-teal-300">
+                  <p role="status" className="text-sm text-brand-fg">
                     {t('jobs.drawer.created', { title: tailored.title })}{' '}
                     <Link to={`/cvs/${tailored.id}/edit`} className="font-medium underline">
                       {t('jobs.drawer.openIt')}
@@ -271,14 +275,10 @@ export function JobDrawer({
                 )}
               </div>
             ) : (
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                {t('jobs.drawer.tailorAfterSave')}
-              </p>
+              <p className="text-xs text-fg-muted">{t('jobs.drawer.tailorAfterSave')}</p>
             )}
-            <div className="flex flex-col gap-1 border-t border-slate-200 pt-3 text-sm dark:border-slate-700">
-              <span className="text-slate-600 dark:text-slate-400">
-                {t('jobs.drawer.coverLetter')}
-              </span>
+            <div className="flex flex-col gap-1 border-t border-line pt-3 text-sm">
+              <span className="text-fg-soft">{t('jobs.drawer.coverLetter')}</span>
               <DocumentSelect
                 value={draft.coverLetterId}
                 docs={letters}
@@ -289,7 +289,7 @@ export function JobDrawer({
               {job && (
                 <Link
                   to={`${NEW_LETTER_PATH}?jobId=${job.id}${draft.cvId ? `&cvId=${draft.cvId}` : ''}`}
-                  className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-teal-700 hover:underline dark:text-teal-300"
+                  className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-brand-fg hover:underline"
                 >
                   <FilePen className="size-4" aria-hidden /> {t('jobs.drawer.writeLetter')}
                 </Link>
@@ -300,7 +300,7 @@ export function JobDrawer({
           <Field label={t('jobs.drawer.notes')} wide>
             <textarea
               rows={5}
-              maxLength={5000}
+              maxLength={JOB_NOTES_MAX}
               value={draft.notes}
               onChange={(e) => set({ notes: e.target.value })}
               className={field}
@@ -308,18 +308,18 @@ export function JobDrawer({
           </Field>
 
           {error && (
-            <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+            <p role="alert" className="text-sm text-danger-fg">
               {errorMessage(error)}
             </p>
           )}
         </div>
 
-        <footer className="flex items-center gap-2 border-t border-slate-200 px-5 py-3 dark:border-slate-800">
+        <footer className="flex items-center gap-2 border-t border-line px-5 py-3">
           {job && (
             <button
               type="button"
               onClick={() => onDelete(job)}
-              className="mr-auto inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
+              className="mr-auto inline-flex items-center gap-1.5 rounded-control px-3 py-2 text-sm text-danger-fg hover:bg-danger-soft"
             >
               <Trash2 className="size-4" /> {t('common.delete')}
             </button>

@@ -33,7 +33,7 @@ function DocumentThumbnail({ doc }: { doc: DocumentSummary }) {
   return (
     <div
       aria-hidden
-      className="animate-pulse rounded border border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-800"
+      className="animate-pulse rounded-tight border border-line bg-muted"
       style={{ width: THUMBNAIL_WIDTH, height: Math.round(THUMBNAIL_WIDTH * 1.414) }}
     />
   )
@@ -47,14 +47,14 @@ function RecentDocuments({ docs, loading }: { docs: DocumentSummary[]; loading: 
         <h2 id="recent-heading" className="font-semibold">
           {t('dashboard.recent.heading')}
         </h2>
-        <Link to="/documents" className="text-sm text-teal-700 hover:underline dark:text-teal-300">
+        <Link to="/documents" className="text-sm text-brand-fg hover:underline">
           {t('dashboard.recent.viewAll')}
         </Link>
       </div>
       {loading ? (
-        <p className="text-sm text-slate-500">{t('dashboard.recent.loading')}</p>
+        <p className="text-sm text-fg-muted">{t('dashboard.recent.loading')}</p>
       ) : docs.length === 0 ? (
-        <div className="py-6 text-center text-sm text-slate-500">
+        <div className="py-6 text-center text-sm text-fg-muted">
           <p>{t('dashboard.recent.empty')}</p>
           <Link to={NEW_CV_PATH} className={`${primaryButton} mt-3`}>
             <FilePlus2 className="size-4" /> {t('dashboard.recent.createFirst')}
@@ -66,13 +66,13 @@ function RecentDocuments({ docs, loading }: { docs: DocumentSummary[]; loading: 
             <li key={doc.id}>
               <Link
                 to={editPath(doc)}
-                className="group flex h-full flex-col gap-2 rounded-lg p-2 hover:bg-slate-50 dark:hover:bg-slate-800/60"
+                className="group flex h-full flex-col gap-2 rounded-control p-2 hover:bg-muted"
               >
                 <DocumentThumbnail doc={doc} />
-                <span className="line-clamp-2 text-sm font-medium group-hover:text-teal-700 dark:group-hover:text-teal-300">
+                <span className="line-clamp-2 text-sm font-medium group-hover:text-brand-fg">
                   {doc.title}
                 </span>
-                <span className="mt-auto flex flex-wrap items-center gap-1.5 text-xs text-slate-500">
+                <span className="mt-auto flex flex-wrap items-center gap-1.5 text-xs text-fg-muted">
                   <DocumentTypeBadge type={doc.type} />
                   {doc.shared && <SharedBadge />}
                   {formatDate(doc.updatedAt)}
@@ -103,19 +103,17 @@ function JobPipeline({ jobs }: { jobs: Job[] }) {
           <li key={status}>
             <Link
               to={`/jobs?status=${status}`}
-              className="block rounded-md px-2 py-1.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-800/60"
+              className="block rounded-tight px-2 py-1.5 text-sm hover:bg-muted"
             >
               <span className="flex items-center justify-between">
-                <span className="text-slate-600 dark:text-slate-300">
-                  {t(`labels.jobStatus.${status}`)}
-                </span>
+                <span className="text-fg-soft">{t(`labels.jobStatus.${status}`)}</span>
                 {/* Read as "Applied: 3"; the colon is only for screen readers. */}
                 <span className="sr-only">:</span>{' '}
                 <span className="font-semibold tabular-nums">{count}</span>
               </span>
-              <span className="mt-1 block h-1 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+              <span className="mt-1 block h-1 overflow-hidden rounded-pill bg-muted">
                 <span
-                  className={`block h-full rounded-full ${JOB_STATUS_STYLES[status].split(' ')[0]}`}
+                  className={`block h-full rounded-pill ${JOB_STATUS_STYLES[status].split(' ')[0]}`}
                   style={{ width: `${(count / most) * 100}%` }}
                 />
               </span>
@@ -123,10 +121,7 @@ function JobPipeline({ jobs }: { jobs: Job[] }) {
           </li>
         ))}
       </ul>
-      <Link
-        to="/jobs"
-        className="mt-3 inline-block text-sm text-teal-700 hover:underline dark:text-teal-300"
-      >
+      <Link to="/jobs" className="mt-3 inline-block text-sm text-brand-fg hover:underline">
         {t('dashboard.pipeline.allJobs')}
       </Link>
     </section>
@@ -146,30 +141,27 @@ function Reminders({ jobs, today }: { jobs: Job[]; today: string }) {
       <h2 id="reminders-heading" className="mb-4 flex items-center gap-2 font-semibold">
         <Bell className="size-4" aria-hidden /> {t('dashboard.reminders.heading')}
         {reminders.length > 0 && (
-          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+          <span className="rounded-pill bg-warning-soft px-2 py-0.5 text-xs font-medium text-warning-fg">
             {reminders.length}
           </span>
         )}
       </h2>
       {update.isError && (
-        <p role="alert" className="mb-3 text-sm text-red-600 dark:text-red-400">
+        <p role="alert" className="mb-3 text-sm text-danger-fg">
           {t('dashboard.reminders.updateError', { message: errorMessage(update.error) })}
         </p>
       )}
       {reminders.length === 0 ? (
-        <p className="text-sm text-slate-500">{t('dashboard.reminders.none')}</p>
+        <p className="text-sm text-fg-muted">{t('dashboard.reminders.none')}</p>
       ) : (
-        <ul className="divide-y divide-slate-100 text-sm dark:divide-slate-800">
+        <ul className="divide-y divide-line text-sm">
           {reminders.map(({ job, days, kind }) => (
             <li key={job.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3">
               <span className="min-w-0 flex-1">
-                <Link
-                  to={`/jobs?job=${job.id}`}
-                  className="font-medium hover:text-teal-700 dark:hover:text-teal-300"
-                >
+                <Link to={`/jobs?job=${job.id}`} className="font-medium hover:text-brand-fg">
                   {t('dashboard.reminders.jobAt', { position: job.position, company: job.company })}
                 </Link>
-                <span className="block text-slate-500 dark:text-slate-400">
+                <span className="block text-fg-muted">
                   {kind === 'no-answer'
                     ? t('dashboard.reminders.noAnswer', { count: days })
                     : t('dashboard.reminders.toApply', {
@@ -224,9 +216,9 @@ export function DashboardPage() {
           <Link
             key={label}
             to={to}
-            className={`${card} flex items-center gap-3 p-4 font-medium hover:border-teal-500 dark:hover:border-teal-500`}
+            className={`${card} flex items-center gap-3 p-4 font-medium hover:border-brand-line`}
           >
-            <span className="rounded-lg bg-teal-50 p-2 text-teal-700 dark:bg-teal-950 dark:text-teal-300">
+            <span className="rounded-control bg-brand-soft p-2 text-brand-fg">
               <Icon className="size-5" />
             </span>
             {t(label)}

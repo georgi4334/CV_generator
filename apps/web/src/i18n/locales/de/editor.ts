@@ -36,6 +36,7 @@ export const editor: Messages['editor'] = {
     premiumPlanned: 'Premium-Funktionen sind für Schritt 18 geplant.',
   },
   topBar: {
+    more: 'Mehr',
     backToDocuments: 'Zurück zu den Dokumenten',
     tools: 'Editor-Werkzeuge',
     undo: 'Rückgängig',

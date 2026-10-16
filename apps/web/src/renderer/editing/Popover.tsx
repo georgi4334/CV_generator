@@ -46,7 +46,7 @@ export function Popover({ anchor, onClose, label, children }: PopoverProps) {
       ref={ref}
       role="dialog"
       aria-label={label}
-      className="fixed z-50 w-72 rounded-lg border border-slate-200 bg-white p-3 text-sm text-slate-800 shadow-xl dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+      className="fixed z-(--z-dropdown) w-72 rounded-control border border-line bg-surface p-3 text-sm text-fg shadow-overlay"
       style={popoverPosition(anchor.current)}
     >
       {children}

@@ -21,15 +21,15 @@ type LevelKey = 'pageMargins' | 'sectionSpacing' | 'fontSize' | 'lineHeight'
 
 function Group({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="border-b border-slate-200 py-4 first:pt-0 dark:border-slate-800">
-      <h3 className="mb-2 text-xs font-medium tracking-wide text-slate-500 uppercase">{title}</h3>
+    <section className="border-b border-line py-4 first:pt-0">
+      <h3 className="mb-2 text-xs font-medium tracking-wide text-fg-muted uppercase">{title}</h3>
       {children}
     </section>
   )
 }
 
 const stepButton =
-  'rounded p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-900 disabled:opacity-30 dark:hover:bg-slate-800 dark:hover:text-slate-100'
+  'rounded-tight p-1 text-fg-muted hover:bg-muted hover:text-fg disabled:opacity-30'
 
 /** A 1–5 slider with −/+ buttons and labels for both ends, like the reference panel. */
 function LevelSlider({
@@ -69,7 +69,7 @@ function LevelSlider({
           step={1}
           value={value}
           aria-label={label}
-          className="flex-1 accent-teal-600"
+          className="flex-1 accent-brand-line"
           onChange={(e) => set(Number(e.target.value))}
           onPointerUp={endTyping}
           onKeyUp={endTyping}
@@ -87,7 +87,7 @@ function LevelSlider({
           <Plus className="size-4" />
         </button>
       </div>
-      <div className="mt-1 flex justify-between px-7 text-xs text-slate-500">
+      <div className="mt-1 flex justify-between px-7 text-xs text-fg-muted">
         <span>{t(`design.${field}.min`)}</span>
         <span>{t(`design.${field}.max`)}</span>
       </div>
@@ -128,7 +128,7 @@ function ColorPicker({ design, template }: { design: CvDesign; template: Templat
                 choose(color)
                 endTyping()
               }}
-              className={`flex size-8 items-center justify-center rounded-full ring-offset-2 dark:ring-offset-slate-900 ${
+              className={`flex size-8 items-center justify-center rounded-pill ring-offset-2 dark:ring-offset-slate-900 ${
                 selected ? 'ring-2 ring-slate-900 dark:ring-white' : ''
               }`}
               style={{ background: color }}
@@ -140,8 +140,8 @@ function ColorPicker({ design, template }: { design: CvDesign; template: Templat
       </div>
       <div className="mt-3 flex items-center gap-2">
         <label
-          className={`relative size-8 cursor-pointer overflow-hidden rounded-full ring-offset-2 dark:ring-offset-slate-900 ${
-            custom ? 'ring-2 ring-slate-900 dark:ring-white' : 'ring-1 ring-slate-300'
+          className={`relative size-8 cursor-pointer overflow-hidden rounded-pill ring-offset-2 dark:ring-offset-slate-900 ${
+            custom ? 'ring-2 ring-slate-900 ' : 'ring-1 ring-line-strong'
           }`}
           style={{ background: design.accentColor }}
           title={t('design.colors.useCustom')}
@@ -157,7 +157,7 @@ function ColorPicker({ design, template }: { design: CvDesign; template: Templat
         </label>
         <input
           aria-label={t('design.colors.hex')}
-          className="w-24 rounded-md border border-slate-300 bg-white px-2 py-1 font-mono text-sm uppercase dark:border-slate-600 dark:bg-slate-800"
+          className="w-24 rounded-tight border border-line-strong bg-surface px-2 py-1 font-mono text-sm uppercase"
           value={hexText}
           maxLength={7}
           onChange={(e) => {
@@ -170,13 +170,10 @@ function ColorPicker({ design, template }: { design: CvDesign; template: Templat
             endTyping()
           }}
         />
-        <span className="text-xs text-slate-500">{t('design.colors.useCustom')}</span>
+        <span className="text-xs text-fg-muted">{t('design.colors.useCustom')}</span>
       </div>
       {lowContrast && (
-        <p
-          role="note"
-          className="mt-2 flex items-start gap-1.5 text-xs text-amber-700 dark:text-amber-400"
-        >
+        <p role="note" className="mt-2 flex items-start gap-1.5 text-xs text-warning-fg">
           <TriangleAlert className="mt-0.5 size-3.5 shrink-0" />
           {filled ? t('design.colors.lowContrastFilled') : t('design.colors.lowContrastText')}
         </p>
@@ -198,17 +195,17 @@ function FontPicker({ value }: { value: FontFamily }) {
           aria-expanded={open}
           aria-label={t('design.font.current', { font: value })}
           onClick={() => setOpen((o) => !o)}
-          className="flex w-full items-center justify-between rounded-lg border border-slate-300 px-3 py-2 text-lg dark:border-slate-600"
+          className="flex w-full items-center justify-between rounded-control border border-line-strong px-3 py-2 text-lg"
           style={{ fontFamily: FONT_STACKS[value] }}
         >
           {value}
-          <ChevronDown className="size-4 text-slate-500" />
+          <ChevronDown className="size-4 text-fg-muted" />
         </button>
         {open && (
           <ul
             role="listbox"
             aria-label={t('design.font.list')}
-            className="absolute z-10 mt-1 max-h-72 w-full overflow-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-900"
+            className="absolute z-(--z-dropdown) mt-1 max-h-72 w-full overflow-auto rounded-control border border-line bg-surface py-1 shadow-overlay"
           >
             {FONT_FAMILIES.map((font) => (
               <li key={font}>
@@ -220,8 +217,8 @@ function FontPicker({ value }: { value: FontFamily }) {
                     updateDesign({ fontFamily: font })
                     setOpen(false)
                   }}
-                  className={`w-full px-3 py-1.5 text-left text-base hover:bg-slate-100 dark:hover:bg-slate-800 ${
-                    font === value ? 'text-teal-700 dark:text-teal-300' : ''
+                  className={`w-full px-3 py-1.5 text-left text-base hover:bg-muted ${
+                    font === value ? 'text-brand-fg ' : ''
                   }`}
                   style={{ fontFamily: FONT_STACKS[font] }}
                 >
@@ -232,7 +229,7 @@ function FontPicker({ value }: { value: FontFamily }) {
           </ul>
         )}
       </div>
-      <p className="mt-1.5 text-xs text-slate-500">{t('design.font.note')}</p>
+      <p className="mt-1.5 text-xs text-fg-muted">{t('design.font.note')}</p>
     </Group>
   )
 }
@@ -250,7 +247,7 @@ function ColumnLayoutPicker({
   if (template.columns === 1) {
     return (
       <Group title={t('design.columns.title')}>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-fg-muted">
           {t('design.columns.single', { template: t(`labels.template.${template.id}`) })}
         </p>
       </Group>
@@ -268,7 +265,7 @@ function ColumnLayoutPicker({
           const selected = design.columnLayout === option
           const sidebar = (
             <span
-              className="h-full rounded-[2px]"
+              className="h-full rounded-xs"
               style={{
                 width: `${width * 100}%`,
                 background:
@@ -292,11 +289,11 @@ function ColumnLayoutPicker({
               className="flex flex-col items-center gap-1 text-xs"
             >
               <span
-                className={`flex h-14 w-full gap-1 rounded border bg-white p-1 ${
+                className={`flex h-14 w-full gap-1 rounded-tight border bg-surface p-1 ${
                   template.sidebarSide === 'left' ? 'flex-row-reverse' : ''
-                } ${selected ? 'border-teal-600 ring-2 ring-teal-600' : 'border-slate-300 dark:border-slate-600'}`}
+                } ${selected ? 'border-brand-line ring-2 ring-brand-line' : 'border-line-strong '}`}
               >
-                <span className="flex-1 rounded-[2px] bg-slate-200" />
+                <span className="flex-1 rounded-xs bg-muted-strong" />
                 {sidebar}
               </span>
               {option}
@@ -330,10 +327,8 @@ function BackgroundPicker({ design }: { design: CvDesign }) {
               aria-label={label}
               title={label}
               onClick={() => updateDesign({ background: id })}
-              className={`aspect-square rounded border bg-white ${
-                selected
-                  ? 'border-teal-600 ring-2 ring-teal-600'
-                  : 'border-slate-300 dark:border-slate-600'
+              className={`aspect-square rounded-tight border bg-surface ${
+                selected ? 'border-brand-line ring-2 ring-brand-line' : 'border-line-strong '
               }`}
               style={{ backgroundImage: backgroundImage(id, design.accentColor) }}
             />
@@ -388,7 +383,7 @@ export function DesignPanel() {
       <button
         type="button"
         onClick={resetToTemplateDefaults}
-        className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-lg border border-slate-300 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
+        className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-control border border-line-strong py-2 text-sm text-fg-soft hover:bg-muted "
       >
         <RotateCcw className="size-4" />{' '}
         {t('design.reset', { template: t(`labels.template.${template.id}`) })}

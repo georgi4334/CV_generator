@@ -1,12 +1,16 @@
 import { useEffect } from 'react'
 import { useEditorUi } from '@/features/cv-editor/state/editorUi'
 
-export function Toast() {
+/** How long a notice stays on screen. */
+const NOTICE_MS = 3000
+
+/** A short notice at the bottom of the editor; `raised` keeps it above the phone toolbar. */
+export function Toast({ raised = false }: { raised?: boolean }) {
   const { notice, clearNotice } = useEditorUi()
 
   useEffect(() => {
     if (!notice) return
-    const timer = setTimeout(clearNotice, 3000)
+    const timer = setTimeout(clearNotice, NOTICE_MS)
     return () => clearTimeout(timer)
   }, [notice, clearNotice])
 
@@ -14,7 +18,11 @@ export function Toast() {
   return (
     <div
       role="status"
-      className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm text-white shadow-lg dark:bg-slate-100 dark:text-slate-900"
+      className={`fixed left-1/2 z-(--z-toast) w-max max-w-[calc(100%-2*var(--spacing-gutter))] -translate-x-1/2 rounded-control bg-inverse px-4 py-2.5 text-center text-sm text-on-inverse shadow-overlay ${
+        raised
+          ? 'bottom-[calc(var(--spacing-bottom-nav)+var(--spacing-section))]'
+          : 'bottom-section'
+      }`}
     >
       {notice}
     </div>

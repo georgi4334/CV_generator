@@ -35,6 +35,7 @@ export const editor = {
     premiumPlanned: 'Premium features are planned for Step 18.',
   },
   topBar: {
+    more: 'More',
     backToDocuments: 'Back to documents',
     tools: 'Editor tools',
     undo: 'Undo',

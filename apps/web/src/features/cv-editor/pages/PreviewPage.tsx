@@ -31,15 +31,16 @@ function PreviewFrame({
 }) {
   const { t } = useTranslation()
   return (
-    <div className="min-h-screen bg-slate-200 dark:bg-slate-950">
-      <header className="sticky top-0 z-10 flex h-12 items-center gap-3 border-b border-slate-300 bg-white px-4 text-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100">
+    <div className="min-h-screen bg-muted-strong">
+      <header className="sticky top-0 z-(--z-raised) flex h-12 items-center gap-3 border-b border-line-strong bg-surface px-4 text-sm">
         <Link
           to={editTo}
-          className="inline-flex items-center gap-1.5 font-medium text-teal-700 hover:underline dark:text-teal-300"
+          className="inline-flex items-center gap-1.5 font-medium text-brand-fg hover:underline"
         >
-          <ArrowLeft className="size-4" /> {t('editor.preview.backToEditing')}
+          <ArrowLeft className="size-4" />{' '}
+          <span className="max-sm:sr-only">{t('editor.preview.backToEditing')}</span>
         </Link>
-        <span className="min-w-0 flex-1 truncate text-slate-500">
+        <span className="min-w-0 flex-1 truncate text-fg-muted">
           {t('editor.preview.title', { title })}
         </span>
         {actions}
@@ -136,7 +137,7 @@ function CoverLetterPreview() {
       }
     >
       <FitToWidth width={PAGE_SIZE_PX[letter.design.pageSize].width}>
-        <LetterRenderer letter={letter} mode="preview" pageClassName="shadow-lg" />
+        <LetterRenderer letter={letter} mode="preview" pageClassName="shadow-paper" />
       </FitToWidth>
       {sharing && (
         <ShareDialog

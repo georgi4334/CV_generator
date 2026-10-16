@@ -16,7 +16,10 @@ export type ApiError = z.infer<typeof ApiErrorSchema>
 
 export const ProfessionIdSchema = z.enum(PROFESSION_IDS)
 
-const TitleSchema = z.string().trim().min(1).max(200)
+/** Longest title a CV or cover letter may have. */
+export const TITLE_MAX = 200
+
+const TitleSchema = z.string().trim().min(1).max(TITLE_MAX)
 
 export const CreateCvInputSchema = z.object({
   title: TitleSchema.optional(),

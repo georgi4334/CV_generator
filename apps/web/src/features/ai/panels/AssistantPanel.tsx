@@ -1,4 +1,4 @@
-import { cvFields, type AiField } from '@cv/shared'
+import { AI_INSTRUCTION_MAX, cvFields, type AiField } from '@cv/shared'
 import { LoaderCircle, Sparkles } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -36,7 +36,7 @@ function Instruction({ value, onChange }: { value: string; onChange: (v: string)
       <span className="font-medium">{t('ai.assistant.instructions')}</span>
       <input
         value={value}
-        maxLength={500}
+        maxLength={AI_INSTRUCTION_MAX}
         onChange={(e) => onChange(e.target.value)}
         placeholder={t('ai.assistant.instructionsPlaceholder')}
         className={aiField}
@@ -62,7 +62,7 @@ function Proposal({
   return (
     <section
       aria-label={t('ai.assistant.proposal')}
-      className="space-y-2 rounded-lg border border-teal-200 bg-teal-50/50 p-3 dark:border-teal-900 dark:bg-teal-950/30"
+      className="space-y-2 rounded-control border border-brand-line bg-brand-soft/50 p-3"
     >
       {list ? (
         <ul className="list-disc space-y-1 pl-4 text-sm">
@@ -148,7 +148,7 @@ function CvAssistant({ target }: { target: AiTarget }) {
         </select>
       </label>
       {missingSummary ? (
-        <p className="text-sm text-slate-600 dark:text-slate-300">{t('ai.assistant.noSummary')}</p>
+        <p className="text-sm text-fg-soft">{t('ai.assistant.noSummary')}</p>
       ) : (
         <>
           <Instruction value={instruction} onChange={setInstruction} />
@@ -215,7 +215,7 @@ function LetterAssistant({ target }: { target: AiTarget }) {
 
   return (
     <>
-      <p className="text-sm text-slate-600 dark:text-slate-300">
+      <p className="text-sm text-fg-soft ">
         {t('ai.assistant.letterIntro', {
           source: linkedCv ? `“${linkedCv.title}”` : t('ai.assistant.theLetter'),
           job: job
@@ -223,11 +223,9 @@ function LetterAssistant({ target }: { target: AiTarget }) {
             : '',
         })}
       </p>
-      {!letter.cvId && (
-        <p className="text-xs text-amber-700 dark:text-amber-400">{t('ai.assistant.linkCv')}</p>
-      )}
+      {!letter.cvId && <p className="text-xs text-warning-fg ">{t('ai.assistant.linkCv')}</p>}
       {job && !job.description.trim() && (
-        <p className="text-xs text-slate-500">{t('ai.assistant.jobTip')}</p>
+        <p className="text-xs text-fg-muted">{t('ai.assistant.jobTip')}</p>
       )}
       <Instruction value={instruction} onChange={setInstruction} />
       <button type="button" className={aiButton} onClick={run} disabled={assist.isPending}>

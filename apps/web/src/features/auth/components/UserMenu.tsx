@@ -17,7 +17,7 @@ export function UserMenu() {
         to="/account"
         aria-label={t('auth.accountLabel', { name: label })}
         title={t('auth.accountTitle')}
-        className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+        className="flex items-center gap-1.5 rounded-tight px-2 py-1.5 text-sm text-fg-soft hover:bg-muted"
       >
         <UserRound className="size-5" aria-hidden />
         <span className="hidden max-w-32 truncate lg:inline">{label}</span>
@@ -30,7 +30,7 @@ export function UserMenu() {
         }
         aria-label={t('auth.signOut')}
         title={t('auth.signOut')}
-        className="rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+        className="rounded-tight p-2 text-fg-muted hover:bg-muted hover:text-fg"
       >
         <LogOut className="size-5" aria-hidden />
       </button>

@@ -1,9 +1,10 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 
 const VARIANTS = {
-  center: 'm-auto w-full rounded-xl border p-5',
-  /** Full height, sliding in from the right edge (e.g. the job details). */
-  drawer: 'm-0 ml-auto h-dvh max-h-none w-full max-w-lg border-l p-0',
+  /** Centered; on phones it keeps the page gutter on both sides. */
+  center: 'm-auto w-[calc(100%-2*var(--spacing-gutter))] rounded-card border p-card',
+  /** Full height at the right edge (e.g. the job details); the whole screen on phones. */
+  drawer: 'm-0 ml-auto h-dvh max-h-none w-full max-w-full p-0 md:max-w-drawer md:border-l',
 }
 
 /** A modal `<dialog>`: Escape and the backdrop's Cancel call `onClose`. */
@@ -41,7 +42,7 @@ export function Modal({
         e.preventDefault()
         onClose()
       }}
-      className={`${VARIANTS[variant]} border-slate-200 bg-white text-slate-900 shadow-xl backdrop:bg-slate-950/50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 ${className}`}
+      className={`${VARIANTS[variant]} border-line bg-surface text-fg shadow-overlay backdrop:bg-backdrop ${className}`}
     >
       {children}
     </dialog>

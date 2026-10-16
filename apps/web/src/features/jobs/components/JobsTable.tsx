@@ -38,7 +38,7 @@ function PositionCell({ job }: { job: Job }) {
     <button
       type="button"
       onClick={() => open(job)}
-      className="text-left font-medium hover:text-teal-700 hover:underline dark:hover:text-teal-300"
+      className="text-left font-medium hover:text-brand-fg hover:underline"
     >
       {job.position}
     </button>
@@ -65,7 +65,7 @@ function DateAppliedCell({ job }: { job: Job }) {
       value={job.dateApplied}
       label={t('jobs.cell.dateAppliedFor', { position: job.position })}
       onChange={(dateApplied) => update(job, { dateApplied })}
-      className="w-36 rounded-md border border-transparent bg-transparent px-1 py-0.5 text-sm hover:border-slate-300 focus:border-teal-600 dark:hover:border-slate-600"
+      className="w-36 rounded-tight border border-transparent bg-transparent px-1 py-0.5 text-sm hover:border-line-strong focus:border-brand-line"
     />
   )
 }
@@ -78,7 +78,7 @@ function TypeCell({ job }: { job: Job }) {
       value={job.type}
       label={t('jobs.cell.typeFor', { position: job.position })}
       onChange={(type) => update(job, { type })}
-      className="rounded-md border border-transparent bg-transparent px-1 py-0.5 text-sm hover:border-slate-300 dark:hover:border-slate-600"
+      className="rounded-tight border border-transparent bg-transparent px-1 py-0.5 text-sm hover:border-line-strong"
     />
   )
 }
@@ -92,7 +92,7 @@ function ResumeCell({ job }: { job: Job }) {
       docs={cvs}
       label={t('jobs.cell.resumeFor', { position: job.position })}
       onChange={(cvId) => update(job, { cvId })}
-      className="max-w-44 rounded-md border border-transparent bg-transparent px-1 py-0.5 text-sm hover:border-slate-300 dark:hover:border-slate-600"
+      className="max-w-44 rounded-tight border border-transparent bg-transparent px-1 py-0.5 text-sm hover:border-line-strong"
     />
   )
 }
@@ -106,7 +106,7 @@ function CoverLetterCell({ job }: { job: Job }) {
       docs={letters}
       label={t('jobs.cell.coverLetterFor', { position: job.position })}
       onChange={(coverLetterId) => update(job, { coverLetterId })}
-      className="max-w-44 rounded-md border border-transparent bg-transparent px-1 py-0.5 text-sm hover:border-slate-300 dark:hover:border-slate-600"
+      className="max-w-44 rounded-tight border border-transparent bg-transparent px-1 py-0.5 text-sm hover:border-line-strong"
     />
   )
 }
@@ -135,7 +135,7 @@ function ActionsCell({ job }: { job: Job }) {
         onClick={() => open(job)}
         aria-label={t('jobs.cell.edit', { name })}
         title={t('jobs.cell.editTitle')}
-        className="rounded-md p-1.5 text-slate-400 hover:bg-teal-50 hover:text-teal-700 dark:hover:bg-teal-950 dark:hover:text-teal-300"
+        className="rounded-tight p-1.5 text-fg-faint hover:bg-brand-soft hover:text-brand-fg"
       >
         <Pencil className="size-4" />
       </button>
@@ -144,7 +144,7 @@ function ActionsCell({ job }: { job: Job }) {
         onClick={() => remove(job)}
         aria-label={t('jobs.cell.delete', { name })}
         title={t('common.delete')}
-        className="rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950"
+        className="rounded-tight p-1.5 text-fg-faint hover:bg-danger-soft hover:text-danger-fg"
       >
         <Trash2 className="size-4" />
       </button>
@@ -227,8 +227,8 @@ export function JobsTable({ jobs }: { jobs: Job[] }) {
   })
 
   return (
-    <table className="w-full min-w-[1100px] text-left text-sm">
-      <thead className="border-b border-slate-200 text-xs tracking-wide text-slate-500 uppercase dark:border-slate-800">
+    <table className="w-full min-w-table-wide text-left text-sm">
+      <thead className="border-b border-line text-xs tracking-wide text-fg-muted uppercase">
         {table.getHeaderGroups().map((group) => (
           <tr key={group.id}>
             {group.headers.map((header) => {
@@ -245,7 +245,7 @@ export function JobsTable({ jobs }: { jobs: Job[] }) {
                     <button
                       type="button"
                       onClick={header.column.getToggleSortingHandler()}
-                      className="inline-flex items-center gap-1 uppercase hover:text-slate-900 dark:hover:text-slate-100"
+                      className="inline-flex items-center gap-1 uppercase hover:text-fg"
                     >
                       {content}
                       {sorted === 'asc' ? (
@@ -265,9 +265,9 @@ export function JobsTable({ jobs }: { jobs: Job[] }) {
           </tr>
         ))}
       </thead>
-      <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+      <tbody className="divide-y divide-line">
         {table.getRowModel().rows.map((row) => (
-          <tr key={row.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+          <tr key={row.id} className="hover:bg-muted">
             {row.getAllCells().map((cell) => (
               <td
                 key={cell.id}

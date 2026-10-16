@@ -90,7 +90,7 @@ export function SectionTitle({ children }: { children: ReactNode }) {
     return (
       <h2 className="mb-[0.6em]">
         <span
-          className="inline-block rounded-full px-[0.8em] py-[0.15em] text-[0.85em] font-semibold tracking-wider text-white uppercase"
+          className="inline-block rounded-pill px-[0.8em] py-[0.15em] text-[0.85em] font-semibold tracking-wider text-white uppercase"
           style={{ background: 'var(--cv-accent)' }}
         >
           {children}
@@ -183,7 +183,7 @@ export function LevelIndicator({
   if (display === 'bar') {
     return (
       <span
-        className={`block h-[0.35em] w-full overflow-hidden rounded-full ${editable ? 'cursor-pointer' : ''}`}
+        className={`block h-[0.35em] w-full overflow-hidden rounded-pill ${editable ? 'cursor-pointer' : ''}`}
         style={{ background: 'var(--cv-rule)' }}
         role={editable ? 'slider' : undefined}
         aria-valuemin={editable ? 1 : undefined}
@@ -203,7 +203,7 @@ export function LevelIndicator({
         }}
       >
         <span
-          className="block h-full rounded-full"
+          className="block h-full rounded-pill"
           style={{ width: `${level * 20}%`, background: 'var(--cv-accent-text)' }}
         />
       </span>
@@ -218,12 +218,12 @@ export function LevelIndicator({
             key={n}
             type="button"
             aria-label={t('renderer.setLevel', { level: n })}
-            className="inline-block size-[0.6em] cursor-pointer rounded-full border-0 p-0 hover:scale-125"
+            className="inline-block size-[0.6em] cursor-pointer rounded-pill border-0 p-0 hover:scale-125"
             style={dot}
             onClick={() => onChange(n)}
           />
         ) : (
-          <span key={n} className="inline-block size-[0.6em] rounded-full" style={dot} />
+          <span key={n} className="inline-block size-[0.6em] rounded-pill" style={dot} />
         )
       })}
     </span>
@@ -331,7 +331,7 @@ export function TimelineEntry({ dated, children }: { dated: boolean; children: R
   return (
     <div className="relative border-l-2 pl-[1.1em]" style={{ borderColor: 'var(--cv-rule)' }}>
       <span
-        className="absolute top-[0.35em] -left-[0.4em] size-[0.7em] rounded-full border-2 bg-white"
+        className="absolute top-[0.35em] -left-[0.4em] size-[0.7em] rounded-pill border-2 bg-surface"
         style={{ borderColor: 'var(--cv-accent)' }}
       />
       {children}

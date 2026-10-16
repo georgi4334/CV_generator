@@ -1,4 +1,4 @@
-import { PASSWORD_MIN_LENGTH } from '@cv/shared'
+import { NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '@cv/shared'
 import { useState, type FormEvent } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router'
@@ -47,7 +47,7 @@ export function RegisterPage() {
           <span className="font-medium">{t('auth.register.nameOptional')}</span>
           <input
             autoComplete="name"
-            maxLength={100}
+            maxLength={NAME_MAX_LENGTH}
             value={name}
             onChange={(e) => setName(e.target.value)}
             className={field}
@@ -75,12 +75,12 @@ export function RegisterPage() {
             onChange={(e) => setPassword(e.target.value)}
             className={field}
           />
-          <span className="block text-xs text-slate-500 dark:text-slate-400">
+          <span className="block text-xs text-fg-muted">
             {t('auth.register.passwordHint', { min: PASSWORD_MIN_LENGTH })}
           </span>
         </label>
         <FormError message={register.isError ? errorMessage(register.error) : null} />
-        <p className="text-xs text-slate-500 dark:text-slate-400">
+        <p className="text-xs text-fg-muted">
           <Trans
             i18nKey="auth.register.consent"
             components={{

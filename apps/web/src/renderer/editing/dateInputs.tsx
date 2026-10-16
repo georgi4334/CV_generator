@@ -7,8 +7,7 @@ function monthNames(language: string): string[] {
   return Array.from({ length: 12 }, (_, i) => format.format(new Date(Date.UTC(2000, i, 15))))
 }
 
-const inputClass =
-  'rounded-md border border-slate-300 bg-white px-2 py-1 text-sm dark:border-slate-600 dark:bg-slate-800'
+const inputClass = 'input input-sm w-auto'
 
 /** Month (optional) + year. Emits "YYYY", "YYYY-MM" or null. */
 export function YearMonthInput({
@@ -36,7 +35,7 @@ export function YearMonthInput({
   return (
     <fieldset className="flex items-center gap-2" disabled={disabled}>
       <legend className="sr-only">{label}</legend>
-      <span className="w-12 text-xs text-slate-500">{label}</span>
+      <span className="w-12 text-xs text-fg-muted">{label}</span>
       <select
         aria-label={t('renderer.monthOf', { label })}
         className={inputClass}

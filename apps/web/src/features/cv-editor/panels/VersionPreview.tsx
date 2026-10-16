@@ -40,7 +40,7 @@ export function VersionPreview({ cvId, versionId }: { cvId: string; versionId: s
       <div
         role="region"
         aria-label={t('editor.version.region')}
-        className="sticky top-0 z-10 flex w-full max-w-[794px] flex-wrap items-center gap-3 rounded-lg bg-slate-900 px-4 py-2.5 text-sm text-white shadow-lg"
+        className="sticky top-0 z-(--z-raised) flex w-full max-w-paper flex-wrap items-center gap-3 rounded-control bg-inverse px-4 py-2.5 text-sm text-on-inverse shadow-overlay"
       >
         <span className="flex-1">
           {t('editor.version.viewing')}{' '}
@@ -56,7 +56,7 @@ export function VersionPreview({ cvId, versionId }: { cvId: string; versionId: s
         <button
           type="button"
           onClick={() => setPreviewVersion(null)}
-          className="rounded-md px-3 py-1 hover:bg-white/10"
+          className="rounded-tight px-3 py-1 hover:bg-on-inverse/10"
         >
           {t('editor.version.backToEditing')}
         </button>
@@ -64,13 +64,13 @@ export function VersionPreview({ cvId, versionId }: { cvId: string; versionId: s
           type="button"
           disabled={restoring || !version.data}
           onClick={restore}
-          className="rounded-md bg-teal-500 px-3 py-1 font-medium text-slate-950 hover:bg-teal-400 disabled:opacity-60"
+          className="rounded-tight bg-brand px-3 py-1 font-medium text-on-brand hover:bg-brand-hover disabled:opacity-60"
         >
           {t('editor.version.restore')}
         </button>
       </div>
-      {version.isLoading && <p className="text-sm text-slate-500">{t('editor.version.loading')}</p>}
-      {version.isError && <p className="text-sm text-red-600">{errorMessage(version.error)}</p>}
+      {version.isLoading && <p className="text-sm text-fg-muted">{t('editor.version.loading')}</p>}
+      {version.isError && <p className="text-sm text-danger-fg">{errorMessage(version.error)}</p>}
       {version.data && <PageCanvas cv={version.data.document} mode="preview" />}
     </div>
   )

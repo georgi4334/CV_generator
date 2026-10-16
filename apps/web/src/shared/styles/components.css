@@ -1,0 +1,86 @@
+/*
+ * Reusable component classes built only from the tokens in tokens.css.
+ * Use them instead of repeating long class lists: <button class="btn btn-primary">.
+ */
+
+/* ----- Layout ----- */
+@utility page-container {
+  @apply mx-auto w-full max-w-page px-gutter md:px-gutter-wide;
+}
+
+/* Cards that fill the row: as many columns as fit, each at least --grid-cards-min wide. */
+@utility grid-cards {
+  display: grid;
+  gap: var(--spacing-section);
+  grid-template-columns: repeat(auto-fill, minmax(min(var(--grid-cards-min), 100%), 1fr));
+}
+@utility grid-templates {
+  display: grid;
+  gap: var(--spacing-section);
+  grid-template-columns: repeat(auto-fill, minmax(min(var(--grid-templates-min), 100%), 1fr));
+}
+@utility grid-thumbs {
+  display: grid;
+  gap: var(--spacing-section);
+  grid-template-columns: repeat(auto-fill, minmax(min(var(--grid-thumbs-min), 100%), 1fr));
+}
+
+/* ----- Surfaces ----- */
+@utility card {
+  @apply rounded-card border border-line bg-surface shadow-card;
+}
+
+/* ----- Buttons ----- */
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-control px-control-x py-control-y text-sm font-medium whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-line disabled:cursor-not-allowed disabled:opacity-50;
+}
+@utility btn-primary {
+  @apply bg-brand text-on-brand hover:bg-brand-hover;
+}
+@utility btn-secondary {
+  @apply border border-line-strong text-fg-soft hover:bg-muted;
+}
+@utility btn-danger {
+  @apply bg-danger text-on-danger hover:bg-danger-hover;
+}
+@utility btn-ghost {
+  @apply text-fg-soft hover:bg-muted;
+}
+/* Square icon-only button; at least a finger's size on touch screens. */
+@utility btn-icon {
+  @apply inline-flex items-center justify-center rounded-tight p-2 text-fg-muted hover:bg-muted hover:text-fg disabled:opacity-40 disabled:hover:bg-transparent pointer-coarse:min-h-touch pointer-coarse:min-w-touch;
+}
+
+/* ----- Form fields ----- */
+@utility input {
+  @apply w-full rounded-control border border-line-strong bg-surface px-3 py-2 text-sm text-fg placeholder:text-fg-faint;
+}
+
+/* ----- Text ----- */
+@utility link {
+  @apply text-brand-fg underline underline-offset-2 hover:text-brand-fg-strong;
+}
+
+/* ----- Badges ----- */
+@utility pill {
+  @apply inline-flex items-center rounded-pill px-2.5 py-0.5 text-xs font-medium whitespace-nowrap;
+}
+
+/* Smaller variants for dense places (tables, toolbars, popovers). */
+@utility btn-sm {
+  @apply gap-1.5 rounded-tight px-2.5 py-1 text-xs;
+}
+@utility input-sm {
+  @apply rounded-tight px-2 py-1;
+}
+
+/* ----- Phones ----- */
+/* Keeps content clear of the bottom tab bar (and the iPhone home indicator). */
+@utility clear-bottom-nav {
+  padding-bottom: calc(
+    var(--spacing-bottom-nav) + var(--spacing-section) + env(safe-area-inset-bottom)
+  );
+}
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}

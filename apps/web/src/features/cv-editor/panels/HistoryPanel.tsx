@@ -49,22 +49,22 @@ export function HistoryPanel({ cvId }: { cvId: string }) {
           maxLength={100}
           value={label}
           onChange={(e) => setLabel(e.target.value)}
-          className="min-w-0 flex-1 rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-800"
+          className="min-w-0 flex-1 rounded-tight border border-line-strong bg-surface px-2 py-1.5 text-sm"
         />
         <button
           type="submit"
           disabled={saving}
-          className="inline-flex items-center gap-1 rounded-md bg-teal-700 px-2.5 py-1.5 text-sm font-medium text-white hover:bg-teal-800 disabled:opacity-60"
+          className="inline-flex items-center gap-1 rounded-tight bg-brand px-2.5 py-1.5 text-sm font-medium text-on-brand hover:bg-brand-hover disabled:opacity-60"
         >
           <Save className="size-4" /> {t('common.save')}
         </button>
       </form>
-      <p className="mb-3 text-xs text-slate-500">{t('editor.history.hint')}</p>
+      <p className="mb-3 text-xs text-fg-muted">{t('editor.history.hint')}</p>
 
-      {versions.isLoading && <p className="text-sm text-slate-500">{t('common.loading')}</p>}
-      {versions.isError && <p className="text-sm text-red-600">{errorMessage(versions.error)}</p>}
+      {versions.isLoading && <p className="text-sm text-fg-muted">{t('common.loading')}</p>}
+      {versions.isError && <p className="text-sm text-danger-fg">{errorMessage(versions.error)}</p>}
       {versions.data?.length === 0 && (
-        <p className="flex items-center gap-2 text-sm text-slate-500">
+        <p className="flex items-center gap-2 text-sm text-fg-muted">
           <History className="size-4" /> {t('editor.history.none')}
         </p>
       )}
@@ -77,10 +77,10 @@ export function HistoryPanel({ cvId }: { cvId: string }) {
                 type="button"
                 aria-pressed={selected}
                 onClick={() => setPreviewVersion(selected ? null : version.id)}
-                className={`w-full rounded-md px-2.5 py-2 text-left text-sm ${
+                className={`w-full rounded-tight px-2.5 py-2 text-left text-sm ${
                   selected
-                    ? 'bg-teal-50 text-teal-800 ring-1 ring-teal-600 dark:bg-teal-950 dark:text-teal-200'
-                    : 'hover:bg-slate-100 dark:hover:bg-slate-800'
+                    ? 'bg-brand-soft text-brand-fg-strong ring-1 ring-brand-line '
+                    : 'hover:bg-muted '
                 }`}
               >
                 <span className="block font-medium">
@@ -89,7 +89,7 @@ export function HistoryPanel({ cvId }: { cvId: string }) {
                       ? t('editor.history.automatic')
                       : t('editor.history.savedVersion'))}
                 </span>
-                <span className="text-xs text-slate-500">{formatDateTime(version.createdAt)}</span>
+                <span className="text-xs text-fg-muted">{formatDateTime(version.createdAt)}</span>
               </button>
             </li>
           )

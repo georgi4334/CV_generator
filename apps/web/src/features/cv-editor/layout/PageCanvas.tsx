@@ -13,5 +13,5 @@ export function PageCanvas({
   mode: RenderMode
   editor?: EditorApi
 }) {
-  return <CvRenderer cv={cv} mode={mode} editor={editor} pageClassName="shrink-0 shadow-lg" />
+  return <CvRenderer cv={cv} mode={mode} editor={editor} pageClassName="shrink-0 shadow-paper" />
 }

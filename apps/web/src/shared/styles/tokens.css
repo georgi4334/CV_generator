@@ -1,0 +1,182 @@
+/*
+ * Design tokens: the one place to change the app's look.
+ *
+ * Tailwind turns every token in @theme into utilities, e.g. --color-surface → bg-surface,
+ * --radius-control → rounded-control, --spacing-gutter → px-gutter, --breakpoint-md → md:.
+ * Colors are semantic (what they are for, not what they look like) and switch
+ * between light and dark mode on their own, so components need no `dark:` colors.
+ */
+
+/* ----- Colors per theme (raw values; use the semantic utilities below) ----- */
+:root {
+  /* Neutrals */
+  --theme-page: var(--color-slate-50);
+  --theme-surface: var(--color-white);
+  --theme-sunken: var(--color-slate-100);
+  --theme-muted: var(--color-slate-100);
+  --theme-muted-strong: var(--color-slate-200);
+  --theme-line: var(--color-slate-200);
+  --theme-line-strong: var(--color-slate-300);
+  --theme-fg: var(--color-slate-900);
+  --theme-fg-soft: var(--color-slate-700);
+  --theme-fg-muted: var(--color-slate-500);
+  --theme-fg-faint: var(--color-slate-400);
+  /* Brand (teal) */
+  --theme-brand: var(--color-teal-700);
+  --theme-brand-hover: var(--color-teal-800);
+  --theme-brand-fg: var(--color-teal-700);
+  --theme-brand-fg-strong: var(--color-teal-900);
+  --theme-brand-soft: var(--color-teal-50);
+  --theme-brand-line: var(--color-teal-600);
+  --theme-on-brand: var(--color-white);
+  /* Status */
+  --theme-danger: var(--color-red-600);
+  --theme-danger-hover: var(--color-red-700);
+  --theme-on-danger: var(--color-white);
+  --theme-success: var(--color-emerald-500);
+  --theme-warning: var(--color-amber-500);
+  --theme-danger-fg: var(--color-red-600);
+  --theme-danger-soft: var(--color-red-50);
+  --theme-danger-line: var(--color-red-200);
+  --theme-warning-fg: var(--color-amber-800);
+  --theme-warning-soft: var(--color-amber-50);
+  --theme-warning-line: var(--color-amber-200);
+  --theme-success-fg: var(--color-emerald-700);
+  --theme-success-soft: var(--color-emerald-50);
+  /* Inverted bubbles: toasts, version banner */
+  --theme-inverse: var(--color-slate-900);
+  --theme-on-inverse: var(--color-white);
+  /* The dark overlay behind dialogs and sheets */
+  --theme-backdrop: color-mix(in oklab, var(--color-slate-950) 50%, transparent);
+}
+
+.dark {
+  --theme-page: var(--color-slate-950);
+  --theme-surface: var(--color-slate-900);
+  --theme-sunken: var(--color-slate-950);
+  --theme-muted: var(--color-slate-800);
+  --theme-muted-strong: var(--color-slate-700);
+  --theme-line: var(--color-slate-800);
+  --theme-line-strong: var(--color-slate-600);
+  --theme-fg: var(--color-slate-100);
+  --theme-fg-soft: var(--color-slate-300);
+  --theme-fg-muted: var(--color-slate-400);
+  --theme-fg-faint: var(--color-slate-500);
+  --theme-brand: var(--color-teal-700);
+  --theme-brand-hover: var(--color-teal-600);
+  --theme-brand-fg: var(--color-teal-300);
+  --theme-brand-fg-strong: var(--color-teal-200);
+  --theme-brand-soft: var(--color-teal-950);
+  --theme-brand-line: var(--color-teal-400);
+  --theme-on-brand: var(--color-white);
+  --theme-danger: var(--color-red-600);
+  --theme-danger-hover: var(--color-red-500);
+  --theme-on-danger: var(--color-white);
+  --theme-success: var(--color-emerald-500);
+  --theme-warning: var(--color-amber-500);
+  --theme-danger-fg: var(--color-red-400);
+  --theme-danger-soft: var(--color-red-950);
+  --theme-danger-line: var(--color-red-900);
+  --theme-warning-fg: var(--color-amber-200);
+  --theme-warning-soft: var(--color-amber-950);
+  --theme-warning-line: var(--color-amber-900);
+  --theme-success-fg: var(--color-emerald-400);
+  --theme-success-soft: var(--color-emerald-950);
+  --theme-inverse: var(--color-slate-100);
+  --theme-on-inverse: var(--color-slate-900);
+  --theme-backdrop: color-mix(in oklab, var(--color-black) 60%, transparent);
+}
+
+@theme inline {
+  --color-page: var(--theme-page);
+  --color-surface: var(--theme-surface);
+  --color-sunken: var(--theme-sunken);
+  --color-muted: var(--theme-muted);
+  --color-muted-strong: var(--theme-muted-strong);
+  --color-line: var(--theme-line);
+  --color-line-strong: var(--theme-line-strong);
+  --color-fg: var(--theme-fg);
+  --color-fg-soft: var(--theme-fg-soft);
+  --color-fg-muted: var(--theme-fg-muted);
+  --color-fg-faint: var(--theme-fg-faint);
+  --color-brand: var(--theme-brand);
+  --color-brand-hover: var(--theme-brand-hover);
+  --color-brand-fg: var(--theme-brand-fg);
+  --color-brand-fg-strong: var(--theme-brand-fg-strong);
+  --color-brand-soft: var(--theme-brand-soft);
+  --color-brand-line: var(--theme-brand-line);
+  --color-on-brand: var(--theme-on-brand);
+  --color-danger: var(--theme-danger);
+  --color-danger-hover: var(--theme-danger-hover);
+  --color-on-danger: var(--theme-on-danger);
+  --color-success: var(--theme-success);
+  --color-warning: var(--theme-warning);
+  --color-danger-fg: var(--theme-danger-fg);
+  --color-danger-soft: var(--theme-danger-soft);
+  --color-danger-line: var(--theme-danger-line);
+  --color-warning-fg: var(--theme-warning-fg);
+  --color-warning-soft: var(--theme-warning-soft);
+  --color-warning-line: var(--theme-warning-line);
+  --color-success-fg: var(--theme-success-fg);
+  --color-success-soft: var(--theme-success-soft);
+  --color-inverse: var(--theme-inverse);
+  --color-on-inverse: var(--theme-on-inverse);
+  --color-backdrop: var(--theme-backdrop);
+}
+
+@theme {
+  /* ----- Screen sizes (Tailwind's sm:, md: … and useBreakpoint() in TypeScript) ----- */
+  --breakpoint-sm: 40rem; /* large phones in landscape */
+  --breakpoint-md: 48rem; /* tablets: desktop navigation from here */
+  --breakpoint-lg: 64rem; /* laptops: editor side panel next to the page */
+  --breakpoint-xl: 80rem;
+  --breakpoint-2xl: 96rem;
+
+  /* ----- Rounding ----- */
+  --radius-tight: 0.375rem; /* small icon buttons, menu items */
+  --radius-control: 0.5rem; /* buttons, inputs, selects */
+  --radius-card: 0.75rem; /* cards, dialogs, sheets */
+  --radius-pill: 9999px; /* badges, chips, toggles */
+
+  /* ----- Spacing (px-gutter, p-card, gap-section …) ----- */
+  --spacing-gutter: 1rem; /* left/right page padding on phones */
+  --spacing-gutter-wide: 1.5rem; /* … from md: up */
+  --spacing-card: 1.25rem; /* inside cards */
+  --spacing-section: 1.5rem; /* between blocks of a page */
+  --spacing-control-x: 1rem; /* inside buttons */
+  --spacing-control-y: 0.5rem;
+  --spacing-touch: 2.75rem; /* smallest comfortable tap target (44px) */
+  --spacing-bottom-nav: 4rem; /* height of the phone tab bar and the editor toolbar */
+  --spacing-sheet: 65dvh; /* tallest bottom sheet (editor panels on phones): the page stays visible above */
+  --text-2xs: 0.625rem; /* tiny labels (text-2xs) */
+
+  /* ----- Widths ----- */
+  --container-page: 80rem; /* max width of app pages */
+  --container-reading: 48rem; /* long text (legal pages) */
+  --container-form: 24rem; /* sign-in and similar forms */
+  --container-panel: 18rem; /* editor side panel */
+  --container-panel-wide: 24rem; /* editor side panel with AI results */
+  --container-drawer: 36rem; /* job details drawer */
+  --container-paper: 210mm; /* an A4 page */
+  --container-menu: 12rem; /* dropdown menus */
+  --container-table-wide: 68.75rem; /* the Saved Jobs table scrolls sideways below this */
+
+  /* ----- Grids ----- */
+  --grid-cards-min: 12rem; /* smallest card in auto-filling card grids */
+  --grid-thumbs-min: 8rem; /* document thumbnails */
+  --grid-templates-min: 12.5rem; /* template choices in the new-CV wizard */
+
+  /* ----- Shadows ----- */
+  --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-overlay: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-paper: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); /* CV pages */
+}
+
+/* ----- Stacking order (use as z-(--z-dropdown) …) ----- */
+:root {
+  --z-raised: 10; /* sticky bars, floating buttons */
+  --z-dropdown: 20; /* menus, popovers */
+  --z-nav: 30; /* phone tab bar */
+  --z-overlay: 40; /* drawers, sheets, dialogs and their backdrop */
+  --z-toast: 50; /* notifications above everything */
+}

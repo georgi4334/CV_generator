@@ -219,8 +219,8 @@ function AchievementIcon({ item, refs }: { item: AchievementItem; refs: ItemRef 
             type="button"
             aria-label={key}
             aria-pressed={key === item.icon}
-            className={`flex items-center justify-center rounded-md p-2 hover:bg-slate-100 dark:hover:bg-slate-800 ${
-              key === item.icon ? 'ring-2 ring-teal-600' : ''
+            className={`flex items-center justify-center rounded-md p-2 hover:bg-muted ${
+              key === item.icon ? 'ring-2 ring-brand-line' : ''
             }`}
             onClick={() => update({ icon: key })}
           >
