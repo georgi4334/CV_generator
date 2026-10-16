@@ -267,7 +267,7 @@ export function JobsTable({ jobs }: { jobs: Job[] }) {
       </thead>
       <tbody className="divide-y divide-line">
         {table.getRowModel().rows.map((row) => (
-          <tr key={row.id} className="hover:bg-muted">
+          <tr key={row.id} className="hover:bg-glass-hover">
             {row.getAllCells().map((cell) => (
               <td
                 key={cell.id}

@@ -50,6 +50,22 @@
   --theme-backdrop: color-mix(in oklab, var(--color-slate-950) 50%, transparent);
   --theme-skeleton: var(--color-slate-200); /* loading placeholders */
   --theme-skeleton-shine: var(--color-slate-100); /* the light sweeping across them */
+
+  /* Liquid glass: see-through panels that blur what is behind them (glass, glass-bar). */
+  --theme-glass: color-mix(in oklab, var(--color-white) 55%, transparent);
+  --theme-glass-strong: color-mix(
+    in oklab,
+    var(--color-white) 80%,
+    transparent
+  ); /* bars: readable even where blur is weak */
+  --theme-glass-hover: color-mix(in oklab, var(--color-white) 45%, transparent); /* rows */
+  --theme-glass-border: color-mix(in oklab, var(--color-white) 75%, transparent);
+  --theme-glass-edge: color-mix(in oklab, var(--color-slate-900) 8%, transparent);
+  --theme-glass-sheen: color-mix(in oklab, var(--color-white) 45%, transparent);
+  /* Soft colour behind the app, so the glass has something to blur. */
+  --theme-glow-1: color-mix(in oklab, var(--color-teal-300) 35%, transparent);
+  --theme-glow-2: color-mix(in oklab, var(--color-sky-300) 30%, transparent);
+  --theme-glow-3: color-mix(in oklab, var(--color-violet-300) 22%, transparent);
 }
 
 .dark {
@@ -89,6 +105,16 @@
   --theme-backdrop: color-mix(in oklab, var(--color-black) 60%, transparent);
   --theme-skeleton: var(--color-slate-800);
   --theme-skeleton-shine: var(--color-slate-700);
+
+  --theme-glass: color-mix(in oklab, var(--color-slate-900) 55%, transparent);
+  --theme-glass-strong: color-mix(in oklab, var(--color-slate-900) 85%, transparent);
+  --theme-glass-hover: color-mix(in oklab, var(--color-white) 6%, transparent);
+  --theme-glass-border: color-mix(in oklab, var(--color-white) 12%, transparent);
+  --theme-glass-edge: color-mix(in oklab, var(--color-black) 40%, transparent);
+  --theme-glass-sheen: color-mix(in oklab, var(--color-white) 7%, transparent);
+  --theme-glow-1: color-mix(in oklab, var(--color-teal-500) 22%, transparent);
+  --theme-glow-2: color-mix(in oklab, var(--color-sky-500) 15%, transparent);
+  --theme-glow-3: color-mix(in oklab, var(--color-violet-500) 12%, transparent);
 }
 
 @theme inline {
@@ -128,6 +154,15 @@
   --color-backdrop: var(--theme-backdrop);
   --color-skeleton: var(--theme-skeleton);
   --color-skeleton-shine: var(--theme-skeleton-shine);
+  --color-glass: var(--theme-glass);
+  --color-glass-strong: var(--theme-glass-strong);
+  --color-glass-hover: var(--theme-glass-hover);
+  --color-glass-border: var(--theme-glass-border);
+  --color-glass-edge: var(--theme-glass-edge);
+  --color-glass-sheen: var(--theme-glass-sheen);
+  --color-glow-1: var(--theme-glow-1);
+  --color-glow-2: var(--theme-glow-2);
+  --color-glow-3: var(--theme-glow-3);
 }
 
 @theme {
@@ -176,6 +211,12 @@
   --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-overlay: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   --shadow-paper: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); /* CV pages */
+  /* Glass: a bright top edge (light catching the rim) and a soft, wide shadow. */
+  --shadow-glass:
+    inset 0 1px 0 0 var(--theme-glass-border), 0 0 0 1px var(--theme-glass-edge),
+    0 8px 32px -8px rgb(15 23 42 / 0.18);
+
+  --blur-glass: 20px; /* how much glass blurs what is behind it (backdrop-blur-glass) */
 
   --aspect-paper: 210 / 297; /* A4 page, for placeholders (aspect-paper) */
 
@@ -223,4 +264,7 @@
   --z-nav: 30; /* phone tab bar */
   --z-overlay: 40; /* drawers, sheets, dialogs and their backdrop */
   --z-toast: 50; /* notifications above everything */
+
+  /* Glass makes the colours behind it richer, like real glass. */
+  --glass-saturation: 180%;
 }

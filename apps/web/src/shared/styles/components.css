@@ -66,6 +66,49 @@
   @apply inline-flex items-center rounded-pill px-2.5 py-0.5 text-xs font-medium whitespace-nowrap;
 }
 
+/* ----- Liquid glass ----- */
+/* A see-through panel that blurs the page behind it, with a sheen and a bright rim. */
+@utility glass {
+  @apply rounded-card border border-glass-border shadow-glass;
+  background-color: var(--color-glass);
+  background-image: linear-gradient(135deg, var(--color-glass-sheen), transparent 45%);
+  backdrop-filter: blur(var(--blur-glass)) saturate(var(--glass-saturation));
+
+  /* Solid where the browser cannot blur, or the person asked for less transparency. */
+  @supports not (backdrop-filter: blur(1px)) {
+    background-color: var(--color-surface);
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    background-color: var(--color-surface);
+    backdrop-filter: none;
+  }
+}
+
+/* A glass bar along an edge of the screen (the sticky header). */
+@utility glass-bar {
+  @apply border-b border-glass-border;
+  background-color: var(--color-glass-strong);
+  backdrop-filter: blur(var(--blur-glass)) saturate(var(--glass-saturation));
+
+  @supports not (backdrop-filter: blur(1px)) {
+    background-color: var(--color-surface);
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    background-color: var(--color-surface);
+    backdrop-filter: none;
+  }
+}
+
+/* The app's background: the page colour with soft glows of the brand colours. */
+@utility app-backdrop {
+  background-color: var(--color-page);
+  background-image:
+    radial-gradient(at 10% 0%, var(--color-glow-1), transparent 50%),
+    radial-gradient(at 90% 15%, var(--color-glow-2), transparent 45%),
+    radial-gradient(at 50% 100%, var(--color-glow-3), transparent 55%);
+  background-attachment: fixed;
+}
+
 /* ----- Loading ----- */
 /* A grey placeholder in the shape of content that is still loading (light and dark). */
 @utility skeleton {

@@ -1,7 +1,6 @@
 import type { Job } from '@cv/shared'
 import { useTranslation } from 'react-i18next'
 import { JobTypeBadge } from '@/shared/ui/Badges'
-import { card } from '@/shared/ui/PageHeader'
 import { formatDate } from '@/shared/lib/format'
 import { StatusSelect } from './fields'
 import { statusChange } from '@/features/jobs/jobHelpers'
@@ -16,7 +15,7 @@ export function JobCards({ jobs }: { jobs: Job[] }) {
       {jobs.map((job) => {
         const cv = cvs.find((c) => c.id === job.cvId)
         return (
-          <li key={job.id} className={`${card} p-4`}>
+          <li key={job.id} className="glass p-4">
             <div className="flex items-start justify-between gap-3">
               <button type="button" onClick={() => open(job)} className="min-w-0 text-left">
                 <span className="block font-medium">{job.position}</span>

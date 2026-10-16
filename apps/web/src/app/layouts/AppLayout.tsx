@@ -44,8 +44,9 @@ export function AppLayout() {
     isActive || Boolean(tab.also?.includes(pathname))
 
   return (
-    <div className="flex min-h-dvh flex-col bg-page text-fg">
-      <header className="border-b border-line bg-surface">
+    <div className="app-backdrop flex min-h-dvh flex-col text-fg">
+      {/* Always visible: it stays at the top while the page scrolls under its glass. */}
+      <header className="glass-bar sticky top-0 z-(--z-nav)">
         <div className="page-container flex h-14 items-center gap-3 md:gap-6">
           <NavLink to="/" className="flex items-center gap-2 font-semibold">
             <Logo nameClassName="max-sm:sr-only" />
@@ -100,7 +101,7 @@ export function AppLayout() {
       {!wide && (
         <nav
           aria-label={t('nav.main')}
-          className="pb-safe fixed inset-x-0 bottom-0 z-(--z-nav) border-t border-line bg-surface"
+          className="pb-safe glass-bar fixed inset-x-0 bottom-0 z-(--z-nav) border-t border-b-0"
         >
           <ul className="grid h-bottom-nav grid-cols-3">
             {TABS.map((tab) => (
