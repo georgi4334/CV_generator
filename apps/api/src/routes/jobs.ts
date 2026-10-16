@@ -22,6 +22,7 @@ const toJob = (row: typeof jobs.$inferSelect): Job => ({
   location: row.location,
   salary: row.salary,
   contact: row.contact,
+  description: row.description,
   createdAt: row.createdAt.toISOString(),
   updatedAt: row.updatedAt.toISOString(),
 })

@@ -4,6 +4,8 @@ import { useParams } from 'react-router'
 import { toApiRequestError } from '../../lib/api'
 import { useCv, useRenameCv } from '../../lib/cvQueries'
 import { NotFoundPage } from '../../pages/NotFoundPage'
+import { AiTargetContext } from '../ai/aiTarget'
+import { useCvAiTarget } from '../ai/useAiTargets'
 import { printCv } from '../print/printCv'
 import { ShareDialog } from '../share/ShareDialog'
 import { useEditorUi } from '../../stores/editorUi'
@@ -27,6 +29,7 @@ function CvEditor({ record }: { record: CvRecord }) {
   const rename = useRenameCv()
   const notify = useEditorUi((s) => s.notify)
   const [sharing, setSharing] = useState(false)
+  const aiTarget = useCvAiTarget(record, cv ?? record.document)
 
   const download = () => {
     notify('In the print dialog, choose “Save as PDF” as the destination.')
@@ -35,35 +38,37 @@ function CvEditor({ record }: { record: CvRecord }) {
   }
 
   return (
-    <EditorLayout
-      title={
-        <EditableTitle
-          value={record.title}
-          onRename={(title) =>
-            rename.mutate(
-              { id: record.id, title },
-              { onError: (e) => notify(`Not renamed: ${toApiRequestError(e).message}`) },
-            )
-          }
-        />
-      }
-      status={<SaveIndicator />}
-      backTo="/documents/cvs"
-      previewTo={`/cvs/${record.id}/preview`}
-      cvId={record.id}
-      banner={<CvConflictBanner cvId={record.id} />}
-      onDownload={download}
-      onShare={() => setSharing(true)}
-    >
-      {previewVersionId ? (
-        <VersionPreview cvId={record.id} versionId={previewVersionId} />
-      ) : (
-        <PageCanvas cv={cv ?? record.document} mode="edit" editor={cvEditorApi} />
-      )}
-      {sharing && (
-        <ShareDialog id={record.id} title={record.title} onClose={() => setSharing(false)} />
-      )}
-    </EditorLayout>
+    <AiTargetContext.Provider value={aiTarget}>
+      <EditorLayout
+        title={
+          <EditableTitle
+            value={record.title}
+            onRename={(title) =>
+              rename.mutate(
+                { id: record.id, title },
+                { onError: (e) => notify(`Not renamed: ${toApiRequestError(e).message}`) },
+              )
+            }
+          />
+        }
+        status={<SaveIndicator />}
+        backTo="/documents/cvs"
+        previewTo={`/cvs/${record.id}/preview`}
+        cvId={record.id}
+        banner={<CvConflictBanner cvId={record.id} />}
+        onDownload={download}
+        onShare={() => setSharing(true)}
+      >
+        {previewVersionId ? (
+          <VersionPreview cvId={record.id} versionId={previewVersionId} />
+        ) : (
+          <PageCanvas cv={cv ?? record.document} mode="edit" editor={cvEditorApi} />
+        )}
+        {sharing && (
+          <ShareDialog id={record.id} title={record.title} onClose={() => setSharing(false)} />
+        )}
+      </EditorLayout>
+    </AiTargetContext.Provider>
   )
 }
 

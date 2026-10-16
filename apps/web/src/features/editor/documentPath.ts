@@ -41,3 +41,13 @@ function step(node: unknown, segment: string): unknown {
   if (node !== null && typeof node === 'object') return (node as Record<string, unknown>)[segment]
   return undefined
 }
+
+/** The value at a path (see setAtPath), or undefined when the path does not exist. */
+export function getAtPath(root: unknown, path: string): unknown {
+  let node: unknown = root
+  for (const segment of path.split('.')) {
+    node = step(node, segment)
+    if (node === undefined) return undefined
+  }
+  return node
+}

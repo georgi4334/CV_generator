@@ -7,6 +7,8 @@ import { databaseUnavailable, HttpError, registerErrorHandler } from './lib/erro
 import { createLogMailer, type Mailer } from './lib/mailer'
 import type { Storage } from './lib/storage'
 import { decorateRequests, requireUser } from './plugins/auth'
+import type { AiProvider } from './ai/provider'
+import { aiRoutes } from './routes/ai'
 import { authRoutes } from './routes/auth'
 import { coverLetterRoutes } from './routes/coverLetters'
 import { cvRoutes } from './routes/cvs'
@@ -34,6 +36,8 @@ export interface AppOptions {
   claimDevData?: boolean
   /** Trust X-Forwarded-For (behind a hosting proxy), so rate limits see real addresses. */
   trustProxy?: boolean
+  /** The AI service; absent or null turns the AI features off. */
+  ai?: { provider: AiProvider | null; maxPerMinute?: number }
 }
 
 export async function buildApp(opts: AppOptions) {
@@ -112,6 +116,11 @@ export async function buildApp(opts: AppOptions) {
           await scope.register(jobRoutes, { database })
           await scope.register(coverLetterRoutes, { database })
           await scope.register(uploadRoutes, { database, storage: opts.storage })
+          await scope.register(aiRoutes, {
+            database,
+            provider: opts.ai?.provider ?? null,
+            maxPerMinute: opts.ai?.maxPerMinute ?? 10,
+          })
         })
       })
     },

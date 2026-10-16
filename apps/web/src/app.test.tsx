@@ -217,14 +217,6 @@ describe('editor', () => {
     expect(screen.queryByRole('complementary', { name: 'Design & Font' })).toBeNull()
   })
 
-  it('explains features that are not built yet', async () => {
-    const cv = fake.current.seed('Frontend CV')
-    renderRoute(`/cvs/${cv.id}/edit`)
-    await screen.findByDisplayValue('Frontend CV')
-    fireEvent.click(screen.getByRole('button', { name: 'Fix Mistakes' }))
-    expect(useEditorUi.getState().notice).toContain('Step 16')
-  })
-
   it('saves edits automatically and shows "Saved"', async () => {
     const cv = fake.current.seed('Frontend CV')
     renderRoute(`/cvs/${cv.id}/edit`)

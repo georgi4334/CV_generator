@@ -1,4 +1,4 @@
-import { type Job, type UpdateJobInput } from '@cv/shared'
+import { JOB_DESCRIPTION_MAX, type Job, type UpdateJobInput } from '@cv/shared'
 import { CopyPlus, FilePen, Trash2, X } from 'lucide-react'
 import { useId, useState, type FormEvent, type ReactNode } from 'react'
 import { Link } from 'react-router'
@@ -26,6 +26,7 @@ type Draft = Pick<
   | 'location'
   | 'salary'
   | 'contact'
+  | 'description'
 >
 
 const EMPTY: Draft = {
@@ -40,6 +41,7 @@ const EMPTY: Draft = {
   location: '',
   salary: '',
   contact: '',
+  description: '',
 }
 
 const toDraft = (job: Job): Draft =>
@@ -213,6 +215,17 @@ export function JobDrawer({
               />
             </Field>
           </div>
+
+          <Field label="Job description">
+            <textarea
+              rows={5}
+              maxLength={JOB_DESCRIPTION_MAX}
+              placeholder="Paste the job posting. Check & Tailor compares your CV with it."
+              value={draft.description}
+              onChange={(e) => set({ description: e.target.value })}
+              className={field}
+            />
+          </Field>
 
           <fieldset className="space-y-2 rounded-lg border border-slate-200 p-3 dark:border-slate-700">
             <legend className="px-1 text-sm font-medium text-slate-700 dark:text-slate-300">

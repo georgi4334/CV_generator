@@ -1,13 +1,13 @@
 # CV Generator — Development Plan
 
-> Status: **Step 15 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
+> Status: **Step 16 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
 >
 > **Decision log**
 >
 > - App tabs: Dashboard · Documents (All documents / Cover letters / CVs) · Saved Jobs ✅
 > - Job statuses: To apply · Applied · Interviewing · Negotiating · Accepted · Rejected · No answer ✅
 > - Backend framework: Fastify; ORM: Drizzle ✅
-> - Step 0 closed. Step 1 (project setup) ✅. Step 2 (shared domain model) ✅. Step 3 (app shell) ✅. Step 4 (CV renderer) ✅. Step 5 (inline editing) ✅. Step 6 (rearrange) ✅. Step 7 (templates & design) ✅. Step 8 (API & database) ✅. Step 9 (frontend ↔ API) ✅. Step 10 ("Create new CV" wizard) ✅. Step 11 (PDF download & share links) ✅. Step 12 (Saved Jobs) ✅. Step 13 (cover letters) ✅. Step 14 (Dashboard) ✅. Step 15 (accounts) built; awaiting review before Step 16.
+> - Step 0 closed. Step 1 (project setup) ✅. Step 2 (shared domain model) ✅. Step 3 (app shell) ✅. Step 4 (CV renderer) ✅. Step 5 (inline editing) ✅. Step 6 (rearrange) ✅. Step 7 (templates & design) ✅. Step 8 (API & database) ✅. Step 9 (frontend ↔ API) ✅. Step 10 ("Create new CV" wizard) ✅. Step 11 (PDF download & share links) ✅. Step 12 (Saved Jobs) ✅. Step 13 (cover letters) ✅. Step 14 (Dashboard) ✅. Step 15 (accounts) ✅. Step 16 (AI features) built; awaiting review before Step 17.
 > - Choosing a template applies its suggested font, column layout and spacing; the user can change them afterwards ✅
 > - Frontend: React + TS + Vite + Tailwind + Axios + React Router + TanStack Query + Zustand ✅
 > - Backend: Node + TypeScript + PostgreSQL (JSONB) with shared Zod types ✅
@@ -16,6 +16,7 @@
 > - Placeholders on the CV follow the CV language (English US/UK, Bulgarian) ✅
 > - Accounts: email + password now, Google sign-in as a small separate step later (needs your own Google Cloud client ID and secret); open sign-up; emails go through a provider interface (printed in the API log locally, Brevo or Resend plugged in at deployment); the first account inherits the old local "dev" data ✅
 > - **Deviation from the original plan:** sessions are opaque random tokens stored (hashed) in the database and sent in an httpOnly cookie, **not JWTs**. Logging out, changing or resetting a password can then end sessions immediately, which a JWT cannot do without a blocklist. Still portable plain Postgres; no extra cost ✅
+> - AI: Google Gemini free tier behind a provider interface (key only on the server); all three features in one step; Saved Jobs get a "Job description" field; free plan: 30 AI requests per user per day ✅
 
 ## 1. Goal
 
@@ -197,7 +198,8 @@ CvVersion   { id, cvId, snapshot (JSONB), label, createdAt }        // history /
 CoverLetter { id, userId, title, cvId?, jobId?, revision, document (JSONB: header, recipient, date, greeting, paragraphs, closing, signature, design), updatedAt } // header & design copied from the linked CV
 Job         { id, userId, position, company, status, type: 'remote' | 'onsite' | 'hybrid',
               dateSaved, dateApplied?, cvId?, coverLetterId?, notes,
-              url?, description?, location?, salary?, contact? }
+              description, location?, salary?, contact? }   // description = the pasted job posting (Step 16)
+AiUsage     { userId, day, count }   // AI requests per user per day (UTC), for the plan's daily limit
 JobStatus   = 'to_apply' | 'applied' | 'interviewing' | 'negotiating' | 'accepted' | 'rejected' | 'no_answer'  // default: 'to_apply'
 ShareLink   { id, cvId | coverLetterId (exactly one), slug, isActive, createdAt, updatedAt } // one per document; deleted with it
 Template    { id, name, layout, defaultDesign, supportsPhoto, tags[] } // defined in code; thumbnails are live renders
@@ -442,14 +444,23 @@ Specification: §2.1.
 - ⏭ **Later, small separate step:** "Continue with Google" (needs a Google Cloud OAuth client ID and secret that only you can create).
 - ⚠️ **For deployment (Step 17):** the cookie is `SameSite=Lax`, which works when the web app and API share a registrable domain (use a custom domain such as `app.example.com` + `api.example.com`) or when the web host proxies `/api`. Without that, set `COOKIE_SAME_SITE=none` with `COOKIE_SECURE=true`. Behind a hosting proxy set `TRUST_PROXY=true` so rate limits see real addresses. Rate limits live in the API's memory: fine for one instance, move them to the database if the API ever runs several.
 
-### Step 16: AI features
+### Step 16: AI features ✅ built (awaiting review)
 
-- **Fix Mistakes:** grammar and spelling pass with accept/reject per suggestion.
-- **Check & Tailor:** paste a job posting, or pick a **Saved Job** → ATS keyword match score, missing skills, suggested rewrites → save as a tailored copy.
-- **AI assistant:** generate or improve the summary and experience bullets.
-- Calls go through the backend so the API key never reaches the browser.
-- Provider behind a small interface, so we can start with a free tier (Gemini/Groq) and switch providers without touching the UI.
-- Per-user rate limits to stay inside free quotas. Later these become "AI credits" for premium.
+- ✅ **Fix Mistakes** (CVs and cover letters): spelling, grammar and punctuation; each suggestion shows "wrong → right" with a reason and can be accepted or rejected ("Accept all" too). Accepted fixes are normal edits (undo works). Respects US/UK spelling and Bulgarian.
+- ✅ **Check & Tailor** (CVs): pick a Saved Job (its new **Job description** field) or paste a posting →
+  - **Match score**: the share of the posting's keywords found in the CV, important ones counting double. The AI picks the keywords; the app counts them itself (`matchKeywords` in `@cv/shared`), so the score is stable and rises live as you add keywords.
+  - Missing / found keywords, short advice, and **suggested rewrites** of whole fields (summary, headline, bullets) that use the posting's vocabulary without inventing experience.
+  - Apply rewrites to this CV, or **Save as tailored copy**: copies the CV with the selected rewrites, names it "<CV> – <Company>", links the job to it and opens it. The original stays unchanged.
+  - A posting pasted for a job without a description is saved with that job.
+- ✅ **AI Assistant** panel:
+  - CV: write or improve the **summary**, or the **bullets** of any experience or project entry; optional instructions ("shorter", "mention leadership") and an optional saved job to aim at. The proposal shows first; Replace or Discard.
+  - Cover letter: **writes the paragraphs** from the linked CV and the job (company, position, description).
+- ✅ Nothing changes without the user's click; the panel says where the text is sent.
+- ✅ **Backend:** `/api/ai/status`, `/api/ai/fix-mistakes`, `/api/ai/tailor`, `/api/ai/assist`. The browser sends the document's text as fields with their editor paths; the model sees short ids (f1, f2, …); the server maps answers back, drops anything that cannot be applied (unknown field, text not found, no change), and validates every answer with Zod (one retry on malformed JSON). Prompts forbid invented facts and tell the model to ignore instructions inside the CV or posting.
+- ✅ **Provider interface** (`AiProvider`): **Google Gemini** via its REST API (JSON mode), model `gemini-flash-latest` by default (`GEMINI_MODEL` to pin one). A **mock provider** (`AI_PROVIDER=mock`) gives simple fake answers so the features can be tried and tested without a key; it refuses to run in production. Without a key, AI is off and the panels explain how to turn it on.
+- ✅ **Limits:** 30 AI requests per user per day on the free plan (`PLAN_LIMITS.aiRequestsPerDay`, ready to become "AI credits"); counted atomically in the database, refunded when the AI fails. A server-wide limit per minute (`AI_MAX_PER_MINUTE`, default 10) keeps the app inside Gemini's free quota. Input size is capped (30 000 characters of document, 20 000 of posting).
+- ⚠️ **Gemini free tier and privacy:** on the free tier Google may use prompts (here: CV text) to improve its products. Fine for development and a hobby launch; switch to the paid tier (or another provider) before real users rely on it, and mention it in the privacy policy (Step 17).
+- ⚠️ Free-tier quotas and model names change; check them in Google AI Studio when getting the key.
 
 ### Step 17: Quality & release
 
@@ -472,7 +483,7 @@ None of these block the early steps. Each one is answered in the step listed; th
 | Login required from day one?        | Step 15 ✅  | Yes: every data route needs an account                                    |
 | Which professions/templates for v1? | Steps 2 & 7 | Generic set, e.g. Software, Design, Sales/Marketing, Healthcare, Academic |
 | English only or Bulgarian too?      | Step 7      | Cyrillic-capable fonts; resume language EN-US, EN-GB, BG                  |
-| AI in v1?                           | Step 16     | Later phase                                                               |
+| AI in v1?                           | Step 16 ✅  | Yes: Fix Mistakes, Check & Tailor, AI Assistant (Gemini free tier)        |
 | Photo on CV?                        | Step 4      | Optional, only in templates that support it                               |
 | Import existing CVs?                | After v1    | Later                                                                     |
 | Repo visibility                     | Step 1      | CI runs on either                                                         |

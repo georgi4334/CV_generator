@@ -18,6 +18,13 @@ const EnvSchema = z.object({
   /** "none" is for a web app and API on different sites; it requires COOKIE_SECURE. */
   COOKIE_SAME_SITE: z.enum(['lax', 'strict', 'none']).default('lax'),
   /** Set to true behind a hosting proxy so the client address is read from X-Forwarded-For. */
+  /** gemini (needs GEMINI_API_KEY), mock (fake answers for development), off. Default: gemini when a key is set. */
+  AI_PROVIDER: z.enum(['gemini', 'mock', 'off']).optional(),
+  GEMINI_API_KEY: z.string().default(''),
+  /** "gemini-flash-latest" always points at Google's current Flash model. */
+  GEMINI_MODEL: z.string().default('gemini-flash-latest'),
+  /** AI requests per minute for the whole API (the provider's free quota is per minute too). */
+  AI_MAX_PER_MINUTE: z.coerce.number().int().positive().default(10),
   TRUST_PROXY: z
     .enum(['true', 'false'])
     .default('false')

@@ -2,6 +2,9 @@ import { isProfessionId } from '@cv/shared'
 import { X } from 'lucide-react'
 import { useCv } from '../../lib/cvQueries'
 import { useEditorUi, type EditorPanel } from '../../stores/editorUi'
+import { AssistantPanel } from '../ai/AssistantPanel'
+import { FixMistakesPanel } from '../ai/FixMistakesPanel'
+import { TailorPanel } from '../ai/TailorPanel'
 import { DesignPanel } from './DesignPanel'
 import { HistoryPanel } from './HistoryPanel'
 import { RearrangePanel } from './RearrangePanel'
@@ -9,20 +12,16 @@ import { TemplatesPanel } from './TemplatesPanel'
 
 const TITLES: Record<EditorPanel, string> = {
   ai: 'AI Assistant',
+  fix: 'Fix Mistakes',
+  tailor: 'Check & Tailor',
   templates: 'Templates',
   design: 'Design & Font',
   rearrange: 'Rearrange',
   history: 'History',
 }
 
-function AiPanel() {
-  return (
-    <p className="text-sm text-slate-500">
-      Chat with an AI assistant to write and improve your summary and bullet points. Coming in Step
-      16.
-    </p>
-  )
-}
+/** AI results need more room. */
+const WIDE = new Set<EditorPanel>(['ai', 'fix', 'tailor'])
 
 export function EditorSidePanel({ panel, cvId }: { panel: EditorPanel; cvId?: string }) {
   const closePanel = useEditorUi((s) => s.closePanel)
@@ -31,7 +30,7 @@ export function EditorSidePanel({ panel, cvId }: { panel: EditorPanel; cvId?: st
   return (
     <aside
       aria-label={TITLES[panel]}
-      className="w-72 shrink-0 overflow-y-auto border-r border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"
+      className={`${WIDE.has(panel) ? 'w-96' : 'w-72'} shrink-0 overflow-y-auto border-r border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900`}
     >
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-sm font-semibold">{TITLES[panel]}</h2>
@@ -46,7 +45,9 @@ export function EditorSidePanel({ panel, cvId }: { panel: EditorPanel; cvId?: st
       </div>
       {panel === 'templates' && <TemplatesPanel professionId={professionId} />}
       {panel === 'design' && <DesignPanel />}
-      {panel === 'ai' && <AiPanel />}
+      {panel === 'ai' && <AssistantPanel />}
+      {panel === 'fix' && <FixMistakesPanel />}
+      {panel === 'tailor' && <TailorPanel />}
       {panel === 'rearrange' && <RearrangePanel />}
       {panel === 'history' && cvId && <HistoryPanel cvId={cvId} />}
     </aside>

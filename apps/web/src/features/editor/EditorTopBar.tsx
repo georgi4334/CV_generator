@@ -26,13 +26,12 @@ const iconButton =
 interface Tool {
   label: string
   icon: ComponentType<{ className?: string }>
-  panel?: EditorPanel
-  comingIn?: string
+  panel: EditorPanel
 }
 
 const CENTER_TOOLS: Tool[] = [
-  { label: 'Fix Mistakes', icon: CircleCheck, comingIn: 'Step 16 (AI features)' },
-  { label: 'Check & Tailor', icon: ScanSearch, comingIn: 'Step 16 (AI features)' },
+  { label: 'Fix Mistakes', icon: CircleCheck, panel: 'fix' },
+  { label: 'Check & Tailor', icon: ScanSearch, panel: 'tailor' },
   { label: 'Rearrange', icon: ArrowDownUp, panel: 'rearrange' },
   { label: 'Templates', icon: LayoutTemplate, panel: 'templates' },
   { label: 'Design & Font', icon: Palette, panel: 'design' },
@@ -106,20 +105,22 @@ export function EditorTopBar({
       </div>
 
       <nav aria-label="Editor tools" className="flex items-center gap-0.5">
-        {CENTER_TOOLS.map(({ label, icon: Icon, panel, comingIn }) => {
-          const active = panel !== undefined && activePanel === panel
+        {CENTER_TOOLS.map(({ label, icon: Icon, panel }) => {
+          const active = activePanel === panel
           return (
             <button
               key={label}
               type="button"
               className={`${toolButton} ${active ? activeTool : ''}`}
-              aria-pressed={panel ? active : undefined}
+              aria-pressed={active}
               onClick={() =>
                 kind === 'coverLetter' && panel === 'rearrange'
                   ? notify('A cover letter has no sections to rearrange.')
-                  : panel
-                    ? togglePanel(panel)
-                    : notify(`${label} is coming in ${comingIn}.`)
+                  : kind === 'coverLetter' && panel === 'tailor'
+                    ? notify(
+                        'Check & Tailor works on CVs. Open the linked CV to tailor it to the job.',
+                      )
+                    : togglePanel(panel)
               }
             >
               <Icon className="size-4" /> <span className="hidden md:inline">{label}</span>

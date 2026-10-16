@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { JOB_DESCRIPTION_MAX } from './ai'
 import { IdSchema } from './cv/common'
 
 export const JOB_STATUSES = [
@@ -51,6 +52,8 @@ const jobFields = {
   location: z.string().trim().max(200),
   salary: z.string().trim().max(100),
   contact: z.string().trim().max(200),
+  /** The job posting, pasted by the user; Check & Tailor and letter drafts use it. */
+  description: z.string().trim().max(JOB_DESCRIPTION_MAX),
 }
 
 /** "+ Add job": position and company are required, everything else has a default. */
@@ -65,6 +68,7 @@ export const CreateJobInputSchema = z.object({
   location: jobFields.location.default(''),
   salary: jobFields.salary.default(''),
   contact: jobFields.contact.default(''),
+  description: jobFields.description.default(''),
   /** The user's local date; the server's date (UTC) when left out. */
   dateSaved: IsoDateSchema.optional(),
 })

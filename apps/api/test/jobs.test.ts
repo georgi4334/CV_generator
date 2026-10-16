@@ -33,6 +33,7 @@ describe.skipIf(!dbAvailable)('jobs API', () => {
       location: '',
       salary: '',
       contact: '',
+      description: '',
     })
     expect((await call('GET', '/jobs')).json()).toEqual([job])
     expect((await call('GET', `/jobs/${job.id}`)).json()).toEqual(job)

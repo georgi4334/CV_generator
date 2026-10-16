@@ -55,6 +55,19 @@ The API runs on http://localhost:3001 and applies database migrations when it st
 | `COOKIE_SAME_SITE` | `lax`                                         | `none` when web app and API are on different sites (requires `COOKIE_SECURE=true`)     |
 | `TRUST_PROXY`      | `false`                                       | `true` behind a hosting proxy, so rate limits use the real client address              |
 
+### AI features (`apps/api/.env`)
+
+Fix Mistakes, Check & Tailor and the AI Assistant use Google Gemini. Get a free API key at [Google AI Studio](https://aistudio.google.com/apikey) and add it:
+
+| Variable            | Default                         | Meaning                                                                        |
+| ------------------- | ------------------------------- | ------------------------------------------------------------------------------ |
+| `GEMINI_API_KEY`    | (empty: AI off)                 | Your Gemini API key. Stays on the server; the browser never sees it            |
+| `GEMINI_MODEL`      | `gemini-flash-latest`           | The Gemini model; the default always points at Google's current Flash model    |
+| `AI_PROVIDER`       | `gemini` with a key, else `off` | `mock` gives fake answers to try the features without a key (development only) |
+| `AI_MAX_PER_MINUTE` | `10`                            | AI requests per minute for the whole API, to stay inside the free quota        |
+
+Each account can make 30 AI requests per day on the free plan.
+
 ## Scripts
 
 | Command                             | What it does                                    |

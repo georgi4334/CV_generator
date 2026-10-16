@@ -10,6 +10,7 @@ const job = (fields: Partial<Job> & Pick<Job, 'id' | 'status'>): Job => ({
   dateApplied: null,
   cvId: null,
   coverLetterId: null,
+  description: '',
   notes: '',
   location: '',
   salary: '',
