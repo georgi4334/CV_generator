@@ -1,4 +1,4 @@
-import type { Messages } from '../../types'
+import type { Messages } from '@/i18n/types'
 
 export const auth: Messages['auth'] = {
   email: 'Имейл',

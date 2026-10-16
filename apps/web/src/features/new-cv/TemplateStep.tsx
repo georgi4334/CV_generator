@@ -8,8 +8,8 @@ import {
 } from '@cv/shared'
 import { useId, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { RecommendedBadge } from '../../components/Badges'
-import { CvThumbnail, withTemplate } from '../../cv-renderer'
+import { RecommendedBadge } from '@/shared/ui/Badges'
+import { CvThumbnail, withTemplate } from '@/renderer'
 import { FALLBACK_EXAMPLE } from './buildNewCv'
 
 function TemplateGroup({

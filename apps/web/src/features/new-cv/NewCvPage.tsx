@@ -1,7 +1,7 @@
 import { ArrowLeft, Check } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router'
-import { PageHeader, secondaryButton } from '../../components/PageHeader'
+import { PageHeader, secondaryButton } from '@/shared/ui/PageHeader'
 import { ProfessionStep } from './ProfessionStep'
 import { StartStep } from './StartStep'
 import { TemplateStep } from './TemplateStep'

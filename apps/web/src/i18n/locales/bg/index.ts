@@ -1,4 +1,4 @@
-import type { Messages } from '../../types'
+import type { Messages } from '@/i18n/types'
 import { account } from './account'
 import { ai } from './ai'
 import { auth } from './auth'

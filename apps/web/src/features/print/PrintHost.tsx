@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { CvRenderer, LetterRenderer } from '../../cv-renderer'
+import { CvRenderer, LetterRenderer } from '@/renderer'
 import { usePrintJob, type PrintJob } from './printCv'
 
 const nextFrame = () =>

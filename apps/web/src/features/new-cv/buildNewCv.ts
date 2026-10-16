@@ -8,7 +8,7 @@ import {
   type ProfessionId,
   type TemplateId,
 } from '@cv/shared'
-import { withTemplate } from '../../cv-renderer'
+import { withTemplate } from '@/renderer'
 
 export type StartFrom = 'example' | 'blank'
 

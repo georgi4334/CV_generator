@@ -1,4 +1,4 @@
-import type { Messages } from '../../types'
+import type { Messages } from '@/i18n/types'
 
 export const errors: Messages['errors'] = {
   network_error: 'Der Server ist nicht erreichbar. Prüfen Sie Ihre Verbindung.',

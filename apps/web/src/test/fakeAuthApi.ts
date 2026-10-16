@@ -1,6 +1,6 @@
 import type { LoginInput, RegisterInput, ResetPasswordInput, User } from '@cv/shared'
-import { ApiRequestError } from '../lib/api'
-import type { AuthApi } from '../lib/authApi'
+import { ApiRequestError } from '@/shared/api/client'
+import type { AuthApi } from '@/features/auth/api'
 
 export const TEST_USER: User = {
   id: '00000000-0000-4000-8000-0000000000aa',

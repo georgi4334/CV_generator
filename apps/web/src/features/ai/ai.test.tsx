@@ -1,34 +1,34 @@
 import type { CvDocument, FixMistakesInput, TailorInput } from '@cv/shared'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { ApiRequestError } from '../../lib/api'
-import type { FakeAiApi } from '../../test/fakeAiApi'
-import type { FakeCvApi } from '../../test/fakeCvApi'
-import { renderRoute } from '../../test/renderRoute'
-import { useEditorUi } from '../../stores/editorUi'
-import { useCvEditor } from '../editor/cvEditorStore'
-import { useLetterEditor } from '../letter/letterEditorStore'
+import { ApiRequestError } from '@/shared/api/client'
+import type { FakeAiApi } from '@/test/fakeAiApi'
+import type { FakeCvApi } from '@/test/fakeCvApi'
+import { renderRoute } from '@/test/renderRoute'
+import { useEditorUi } from '@/features/cv-editor/state/editorUi'
+import { useCvEditor } from '@/features/cv-editor/state/cvEditorStore'
+import { useLetterEditor } from '@/features/cover-letters/state/letterEditorStore'
 
 const fake = vi.hoisted(() => ({ current: null as unknown as FakeCvApi }))
 const ai = vi.hoisted(() => ({ current: null as unknown as FakeAiApi }))
 
-vi.mock('../../lib/cvApi', async () => {
-  const { createFakeCvApi } = await import('../../test/fakeCvApi')
+vi.mock('@/features/cv-editor/api', async () => {
+  const { createFakeCvApi } = await import('@/test/fakeCvApi')
   fake.current ??= createFakeCvApi()
   return { cvApi: fake.current.api }
 })
-vi.mock('../../lib/coverLetterApi', async () => {
-  const { createFakeCvApi } = await import('../../test/fakeCvApi')
+vi.mock('@/features/cover-letters/api', async () => {
+  const { createFakeCvApi } = await import('@/test/fakeCvApi')
   fake.current ??= createFakeCvApi()
   return { coverLetterApi: fake.current.coverLetterApi }
 })
-vi.mock('../../lib/jobsApi', async () => {
-  const { createFakeCvApi } = await import('../../test/fakeCvApi')
+vi.mock('@/features/jobs/api', async () => {
+  const { createFakeCvApi } = await import('@/test/fakeCvApi')
   fake.current ??= createFakeCvApi()
   return { jobsApi: fake.current.jobsApi }
 })
-vi.mock('../../lib/aiApi', async () => {
-  const { createFakeAiApi } = await import('../../test/fakeAiApi')
+vi.mock('./api', async () => {
+  const { createFakeAiApi } = await import('@/test/fakeAiApi')
   ai.current ??= createFakeAiApi()
   return { aiApi: ai.current.api }
 })

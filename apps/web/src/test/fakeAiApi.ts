@@ -7,7 +7,7 @@ import type {
   TailorInput,
   TailorResult,
 } from '@cv/shared'
-import type { AiApi } from '../lib/aiApi'
+import type { AiApi } from '@/features/ai/api'
 
 type Answer<I, R> = (input: I) => Omit<R, 'usage'> | Error
 

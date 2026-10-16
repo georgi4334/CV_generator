@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
@@ -5,6 +6,10 @@ import { previewHeaders, securityHeaders } from './build/securityHeaders.ts'
 
 export default defineConfig({
   plugins: [react(), tailwindcss(), securityHeaders(), previewHeaders()],
+  resolve: {
+    // `@/features/jobs/api` instead of long `../../..` paths.
+    alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
+  },
   server: {
     port: 5173,
     // In development the API runs separately; proxy /api so the browser sees one origin.

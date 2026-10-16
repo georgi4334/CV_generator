@@ -1,7 +1,7 @@
 import { cleanup } from '@testing-library/react'
 import { afterEach, beforeAll } from 'vitest'
-import { initI18n } from '../i18n'
-import { preloadPages } from '../lib/lazyPage'
+import { initI18n } from '@/i18n'
+import { preloadPages } from '@/shared/lib/lazyPage'
 
 afterEach(() => cleanup())
 

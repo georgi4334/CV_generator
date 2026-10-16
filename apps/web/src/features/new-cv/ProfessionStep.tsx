@@ -9,7 +9,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { card } from '../../components/PageHeader'
+import { card } from '@/shared/ui/PageHeader'
 import { OTHER_PROFESSION, type ProfessionChoice } from './wizardParams'
 
 const ICONS: Record<ProfessionChoice, LucideIcon> = {

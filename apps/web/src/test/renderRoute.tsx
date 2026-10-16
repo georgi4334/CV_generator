@@ -2,8 +2,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import type { User } from '@cv/shared'
-import { authKeys } from '../lib/authKeys'
-import { routes } from '../router'
+import { authKeys } from '@/shared/api/authKeys'
+import { routes } from '@/app/router'
 import { TEST_USER } from './fakeAuthApi'
 
 /**
