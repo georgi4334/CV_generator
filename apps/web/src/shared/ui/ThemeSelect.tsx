@@ -1,13 +1,8 @@
-import { Check, ChevronDown, Monitor, Moon, Sun } from 'lucide-react'
+import { Check, ChevronDown } from 'lucide-react'
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useThemeStore, type ThemeMode } from '@/shared/stores/theme'
-
-const MODES: { mode: ThemeMode; icon: typeof Sun }[] = [
-  { mode: 'system', icon: Monitor },
-  { mode: 'light', icon: Sun },
-  { mode: 'dark', icon: Moon },
-]
+import { useThemeStore } from '@/shared/stores/theme'
+import { THEME_MODES } from './themeModes'
 
 /**
  * Theme picker for headers: a dropdown with System, Light and Dark, each with
@@ -20,7 +15,7 @@ export function ThemeSelect({ compact = false }: { compact?: boolean }) {
   const [open, setOpen] = useState(false)
   const root = useRef<HTMLDivElement>(null)
   const menu = useRef<HTMLDivElement>(null)
-  const current = MODES.find((m) => m.mode === mode) ?? MODES[0]!
+  const current = THEME_MODES.find((m) => m.mode === mode) ?? THEME_MODES[0]!
   const label = `${t('common.theme.label')}: ${t(`common.theme.${mode}`)}`
 
   useEffect(() => {
@@ -71,7 +66,7 @@ export function ThemeSelect({ compact = false }: { compact?: boolean }) {
           aria-label={t('common.theme.label')}
           className="absolute right-0 z-(--z-dropdown) mt-1 w-menu rounded-control border border-line bg-surface py-1 text-sm shadow-overlay"
         >
-          {MODES.map(({ mode: option, icon: Icon }) => (
+          {THEME_MODES.map(({ mode: option, icon: Icon }) => (
             <button
               key={option}
               type="button"

@@ -20,8 +20,8 @@ Organised **by feature**: everything a feature needs lives in its folder.
 ```
 app/            Wiring: main.tsx, router.tsx, lazyPages.ts, layouts/, pages/ (error, not found)
 features/
-  auth/         pages/ (sign in, sign up, reset, verify, account), components/ (AuthShell,
-                RequireAuth, UserMenu, VerifyBanner), api.ts, queries.ts, sessionState.ts, localeSync.ts
+  auth/         pages/ (sign in, sign up, reset, verify), components/ (AuthShell, AccountSettings,
+                RequireAuth, UserMenu = account drawer, VerifyBanner), api.ts, queries.ts, sessionState.ts, localeSync.ts
   dashboard/    DashboardPage, reminders
   documents/    DocumentsPage, documentActions
   jobs/         JobsPage, components/ (table, cards, drawer, fields), api.ts, queries.ts
@@ -95,6 +95,9 @@ Components use the Tailwind classes generated from those tokens, never raw value
   Their colours are `--theme-skeleton` and `--theme-skeleton-shine` (light and dark), the
   sweep is `animate-shimmer`, and it stops for people who prefer reduced motion. Wrap
   skeletons in `LoadingRegion` so screen readers hear one "Loading…" message.
+- **Name and logo:** the product name is `APP_NAME` (`packages/shared/src/common/brand.ts`);
+  translations write it as `{{app}}`. The logo is `shared/ui/Logo.tsx` (`Logo`, `LogoMark`),
+  drawn with the brand tokens; `public/favicon.svg` is the same drawing.
 - **Not tokens on purpose:** the CV and letter templates (`renderer/`) keep their own sizes in
   `em` and `PAGE_SIZE_PX`, because they describe the printed page, not the app; job-status
   badge colours live in `shared/ui/badgeStyles.ts`.

@@ -1,4 +1,3 @@
-import { FileText } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
@@ -6,6 +5,7 @@ import { LanguageSelect } from '@/shared/ui/LanguageSelect'
 import { ThemeSelect } from '@/shared/ui/ThemeSelect'
 import { card } from '@/shared/ui/PageHeader'
 import { LegalFooter } from '@/features/legal/LegalLayout'
+import { Logo } from '@/shared/ui/Logo'
 
 /** The centered card around sign-in, sign-up and password pages. */
 export function AuthShell({
@@ -26,8 +26,9 @@ export function AuthShell({
         <LanguageSelect />
         <ThemeSelect />
       </div>
-      <Link to="/" className="flex items-center gap-2 text-lg font-semibold">
-        <FileText className="size-6 text-brand-fg" /> {t('common.appName')}
+      <Link to="/" className="flex flex-col items-center gap-1 text-center">
+        <Logo />
+        <span className="text-sm text-fg-muted">{t('common.tagline')}</span>
       </Link>
       <main className={`${card} w-full max-w-sm p-6`}>
         <h1 className="text-xl font-semibold">{title}</h1>

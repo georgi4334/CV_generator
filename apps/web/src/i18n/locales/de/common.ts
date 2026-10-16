@@ -1,7 +1,8 @@
 import type { Messages } from '@/i18n/types'
 
 export const common: Messages['common'] = {
-  appName: 'CV Generator',
+  appName: '{{app}}',
+  tagline: 'Lebensläufe, Anschreiben und Bewerbungen',
   save: 'Speichern',
   saved: 'Gespeichert',
   saving: 'Wird gespeichert…',

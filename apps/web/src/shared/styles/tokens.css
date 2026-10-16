@@ -191,6 +191,19 @@
     }
   }
 
+  /* A view inside a drawer (e.g. account settings) slides in from the side. */
+  --animate-view-in: view-in 0.15s ease-out;
+  @keyframes view-in {
+    from {
+      transform: translateX(1.5rem);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
   /* Loading skeletons: a light sweeping across grey shapes (animate-shimmer). */
   --animate-shimmer: shimmer 1.6s ease-in-out infinite;
   @keyframes shimmer {

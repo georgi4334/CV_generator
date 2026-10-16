@@ -1,9 +1,9 @@
-import { FileText } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { LanguageSelect } from '@/shared/ui/LanguageSelect'
 import { ThemeSelect } from '@/shared/ui/ThemeSelect'
+import { Logo } from '@/shared/ui/Logo'
 
 /** A readable page for the privacy policy and the terms. */
 export function LegalLayout({
@@ -20,8 +20,8 @@ export function LegalLayout({
     <div className="min-h-screen bg-page text-fg">
       <header className="border-b border-line bg-surface">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-4">
-          <Link to="/" className="flex items-center gap-2 font-semibold">
-            <FileText className="size-5 text-brand-fg" aria-hidden /> CV Generator
+          <Link to="/">
+            <Logo />
           </Link>
           <div className="flex items-center gap-1">
             <LanguageSelect />

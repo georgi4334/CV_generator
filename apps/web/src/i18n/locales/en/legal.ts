@@ -3,7 +3,7 @@ export const legal = {
     title: 'Privacy policy',
     updated: '16 October 2026',
     intro:
-      'CV Generator helps you write CVs and cover letters and keep track of job applications. This page explains which personal data we keep, why, who helps us process it, and your rights under the EU General Data Protection Regulation (GDPR).',
+      '{{app}} helps you write CVs and cover letters and keep track of job applications. This page explains which personal data we keep, why, who helps us process it, and your rights under the EU General Data Protection Regulation (GDPR).',
     who: {
       title: 'Who is responsible',
       body: 'The controller is {{operator}}. Contact: <mail>{{contact}}</mail>.',
@@ -74,7 +74,7 @@ export const legal = {
     title: 'Terms of use',
     updated: '16 October 2026',
     intro:
-      'These terms apply to CV Generator, run by {{operator}}. By creating an account you accept them. Questions: <mail>{{contact}}</mail>.',
+      'These terms apply to {{app}}, run by {{operator}}. By creating an account you accept them. Questions: <mail>{{contact}}</mail>.',
     service: {
       title: 'The service',
       body: 'You can create CVs and cover letters, download them as PDF, share them by link, track job applications and use AI features. The free plan includes up to {{maxCvs}} CVs, {{maxVersions}} saved versions per CV and {{aiRequests}} AI requests per day. Limits may change; we will tell you before reducing them.',

@@ -8,7 +8,6 @@ import { VerifyEmailPage } from '@/features/auth/pages/VerifyEmailPage'
 import { AppLayout } from './layouts/AppLayout'
 import { RootLayout } from './layouts/RootLayout'
 import {
-  AccountPage,
   DashboardPage,
   DocumentsPage,
   EditorPage,
@@ -41,7 +40,8 @@ export const routes: RouteObject[] = [
               { path: 'jobs', element: <JobsPage /> },
               { path: 'cvs/new', element: <NewCvPage /> },
               { path: 'cover-letters/new', element: <NewLetterPage /> },
-              { path: 'account', element: <AccountPage /> },
+              // Account settings live in the account drawer; old links open it there.
+              { path: 'account', element: <Navigate to="/?menu=account" replace /> },
             ],
           },
           // Old address of "Create new CV".

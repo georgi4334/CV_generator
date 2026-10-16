@@ -1,4 +1,4 @@
-# Deploying CV Generator (free plans)
+# Deploying Vitae (free plans)
 
 ```
 Browser ──► Cloudflare Pages (web app + /api proxy function) ──► Render (API) ──► Neon (Postgres)

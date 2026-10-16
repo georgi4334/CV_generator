@@ -1,9 +1,9 @@
-import { Briefcase, FileText, Files, LayoutDashboard, type LucideIcon } from 'lucide-react'
+import { Briefcase, Files, LayoutDashboard, type LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { NavLink, Outlet, useLocation } from 'react-router'
 import { ApiStatus } from '@/shared/ui/ApiStatus'
+import { Logo } from '@/shared/ui/Logo'
 import { LanguageSelect } from '@/shared/ui/LanguageSelect'
-import { ThemeSelect } from '@/shared/ui/ThemeSelect'
 import { UserMenu } from '@/features/auth/components/UserMenu'
 import { LegalFooter } from '@/features/legal/LegalLayout'
 import { VerifyBanner } from '@/features/auth/components/VerifyBanner'
@@ -48,8 +48,7 @@ export function AppLayout() {
       <header className="border-b border-line bg-surface">
         <div className="page-container flex h-14 items-center gap-3 md:gap-6">
           <NavLink to="/" className="flex items-center gap-2 font-semibold">
-            <FileText className="size-5 text-brand-fg" aria-hidden />
-            <span className="max-sm:sr-only">{t('common.appName')}</span>
+            <Logo nameClassName="max-sm:sr-only" />
           </NavLink>
 
           {wide && (
@@ -80,7 +79,6 @@ export function AppLayout() {
             <span className="hidden md:inline">
               <LanguageSelect />
             </span>
-            <ThemeSelect compact={!wide} />
             <UserMenu />
           </div>
         </div>

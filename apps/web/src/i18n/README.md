@@ -33,4 +33,4 @@ export function Thing({ count }: { count: number }) {
 - Code outside components (stores, helpers): `i18n.t(...)` from `i18n/index.ts`.
 - Bulgarian: formal "Вие" form, sentence case. German: formal "Sie", sentence case,
   natural UI German (e.g. "Speichern", "Lebenslauf", "Anschreiben").
-- Keep product names as they are: CV Generator, Gemini, PDF, ATS, Google.
+- Write the product's own name as `{{app}}` (it comes from `APP_NAME` in the shared package). Keep other product names as they are: Gemini, PDF, ATS, Google.

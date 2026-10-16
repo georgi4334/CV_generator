@@ -5,7 +5,7 @@ export const legal: Messages['legal'] = {
     title: 'Datenschutzerklärung',
     updated: '16. Oktober 2026',
     intro:
-      'CV Generator hilft Ihnen, Lebensläufe und Anschreiben zu verfassen und Ihre Bewerbungen im Blick zu behalten. Diese Seite erklärt, welche personenbezogenen Daten wir speichern, warum, wer uns bei der Verarbeitung unterstützt und welche Rechte Sie nach der EU-Datenschutz-Grundverordnung (DSGVO) haben.',
+      '{{app}} hilft Ihnen, Lebensläufe und Anschreiben zu verfassen und Ihre Bewerbungen im Blick zu behalten. Diese Seite erklärt, welche personenbezogenen Daten wir speichern, warum, wer uns bei der Verarbeitung unterstützt und welche Rechte Sie nach der EU-Datenschutz-Grundverordnung (DSGVO) haben.',
     who: {
       title: 'Wer verantwortlich ist',
       body: 'Verantwortlicher ist {{operator}}. Kontakt: <mail>{{contact}}</mail>.',
@@ -77,7 +77,7 @@ export const legal: Messages['legal'] = {
     title: 'Nutzungsbedingungen',
     updated: '16. Oktober 2026',
     intro:
-      'Diese Bedingungen gelten für CV Generator, betrieben von {{operator}}. Mit der Erstellung eines Kontos akzeptieren Sie sie. Fragen: <mail>{{contact}}</mail>.',
+      'Diese Bedingungen gelten für {{app}}, betrieben von {{operator}}. Mit der Erstellung eines Kontos akzeptieren Sie sie. Fragen: <mail>{{contact}}</mail>.',
     service: {
       title: 'Der Dienst',
       body: 'Sie können Lebensläufe und Anschreiben erstellen, als PDF herunterladen, per Link teilen, Bewerbungen verfolgen und KI-Funktionen nutzen. Der kostenlose Tarif umfasst bis zu {{maxCvs}} Lebensläufe, {{maxVersions}} gespeicherte Versionen pro Lebenslauf und {{aiRequests}} KI-Anfragen pro Tag. Die Limits können sich ändern; wir informieren Sie, bevor wir sie senken.',

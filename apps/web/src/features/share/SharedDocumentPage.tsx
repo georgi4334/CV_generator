@@ -1,8 +1,10 @@
-import { Download, FileText } from 'lucide-react'
+import { APP_NAME } from '@cv/shared'
+import { Download } from 'lucide-react'
 import { useEffect, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router'
 import { FitToWidth } from '@/shared/ui/FitToWidth'
+import { LogoMark } from '@/shared/ui/Logo'
 import { EditorLoading } from '@/shared/ui/LoadStates'
 import { primaryButton, secondaryButton } from '@/shared/ui/PageHeader'
 import { CvRenderer, LetterRenderer } from '@/renderer'
@@ -83,7 +85,7 @@ export function SharedDocumentPage() {
     <div className="min-h-screen bg-muted-strong text-fg">
       <header className="sticky top-0 z-(--z-raised) border-b border-line-strong bg-surface">
         <div className="mx-auto flex h-14 max-w-5xl items-center gap-3 px-4">
-          <FileText className="size-5 shrink-0 text-brand-fg" aria-hidden />
+          <LogoMark className="size-6" />
           <h1 className="min-w-0 flex-1 truncate font-semibold">{title}</h1>
           <button
             type="button"
@@ -117,7 +119,7 @@ export function SharedDocumentPage() {
       <footer className="pb-8 text-center text-xs text-fg-muted">
         {t('share.page.madeWith')}{' '}
         <Link to="/" className="font-medium text-brand-fg hover:underline">
-          CV Generator
+          {APP_NAME}
         </Link>
       </footer>
     </div>
