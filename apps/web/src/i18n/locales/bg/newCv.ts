@@ -1,4 +1,4 @@
-import type { Messages } from '../../types'
+import type { Messages } from '@/i18n/types'
 
 export const newCv: Messages['newCv'] = {
   title: 'Създаване на ново CV',

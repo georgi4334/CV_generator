@@ -12,8 +12,12 @@ apps/
   api/        Fastify + TypeScript + Drizzle ORM (PostgreSQL)
 packages/
   shared/     Zod schemas and TypeScript types shared by web and api
-docs/         Plan and UI reference screenshots
+e2e/          Browser tests (Playwright)
+docs/         Plan, deployment guide, architecture
 ```
+
+Inside the apps, code is organised by feature; see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+for the folder map and the import rules.
 
 ## Requirements
 

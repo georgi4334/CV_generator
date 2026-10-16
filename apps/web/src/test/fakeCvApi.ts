@@ -14,10 +14,10 @@ import {
   type ProfessionId,
   type ShareLink,
 } from '@cv/shared'
-import { ApiRequestError } from '../lib/api'
-import type { CvApi } from '../lib/cvApi'
-import type { CoverLetterApi } from '../lib/coverLetterApi'
-import type { JobsApi } from '../lib/jobsApi'
+import { ApiRequestError } from '@/shared/api/client'
+import type { CvApi } from '@/features/cv-editor/api'
+import type { CoverLetterApi } from '@/features/cover-letters/api'
+import type { JobsApi } from '@/features/jobs/api'
 
 interface Version extends CvVersionSummary {
   document: CvDocument

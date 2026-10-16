@@ -2,7 +2,7 @@
 
 The interface language is separate from a CV's own language: a German user can
 write an English CV. CV content, CV section titles and CV placeholders follow
-the **CV language** (`cv-renderer/placeholders.ts`, `getSectionTitle`), not this.
+the **CV language** (`renderer/placeholders.ts`, `getSectionTitle`), not this.
 
 ## How to translate a component
 
@@ -26,7 +26,7 @@ export function Thing({ count }: { count: number }) {
   with `'Read the <link>terms</link>'`.
 - Fixed values: `t(\`labels.jobStatus.${status}\`)`, `labels.jobType`, `labels.cvLanguage`,
 `labels.profession.<id>.name|description`, `labels.template.<id>`, `labels.documentType`.
-- API errors: `errorMessage(error)` from `lib/errorMessage.ts` (translated by error code) instead
+- API errors: `errorMessage(error)` from `shared/api/errorMessage.ts` (translated by error code) instead
   of `toApiRequestError(error).message`.
 - Dates: `formatDate()` follows the interface language; the component must call
   `useTranslation()` so it re-renders when the language changes.

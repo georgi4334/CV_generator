@@ -284,7 +284,7 @@ All in `packages/shared/src`, as Zod schemas with inferred TypeScript types:
 
 ### Step 4: CV renderer & template system ✅ built (awaiting review)
 
-Code in `apps/web/src/cv-renderer/`.
+Code in `apps/web/src/renderer/`.
 
 - ✅ Real-size pages: A4 (794×1123 px) and US Letter, at 96 dpi.
 - ✅ Three templates: **Polished** (two columns, sidebar on the right, as in the reference), **Single column** (centered header; sidebar sections follow the main ones), **Compact** (full-width header, narrow sidebar on the left).
