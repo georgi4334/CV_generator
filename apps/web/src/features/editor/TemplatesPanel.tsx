@@ -82,7 +82,7 @@ export function TemplatesPanel({ professionId = null }: { professionId?: Profess
       <button
         type="button"
         onClick={closePanel}
-        className="mt-4 w-full rounded-lg bg-teal-600 py-2 text-sm font-medium text-white hover:bg-teal-700"
+        className="mt-4 w-full rounded-lg bg-teal-700 py-2 text-sm font-medium text-white hover:bg-teal-800"
       >
         Continue Editing
       </button>

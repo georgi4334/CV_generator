@@ -1,13 +1,13 @@
 # CV Generator — Development Plan
 
-> Status: **Step 16 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
+> Status: **Step 17 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
 >
 > **Decision log**
 >
 > - App tabs: Dashboard · Documents (All documents / Cover letters / CVs) · Saved Jobs ✅
 > - Job statuses: To apply · Applied · Interviewing · Negotiating · Accepted · Rejected · No answer ✅
 > - Backend framework: Fastify; ORM: Drizzle ✅
-> - Step 0 closed. Step 1 (project setup) ✅. Step 2 (shared domain model) ✅. Step 3 (app shell) ✅. Step 4 (CV renderer) ✅. Step 5 (inline editing) ✅. Step 6 (rearrange) ✅. Step 7 (templates & design) ✅. Step 8 (API & database) ✅. Step 9 (frontend ↔ API) ✅. Step 10 ("Create new CV" wizard) ✅. Step 11 (PDF download & share links) ✅. Step 12 (Saved Jobs) ✅. Step 13 (cover letters) ✅. Step 14 (Dashboard) ✅. Step 15 (accounts) ✅. Step 16 (AI features) built; awaiting review before Step 17.
+> - Step 0 closed. Step 1 (project setup) ✅. Step 2 (shared domain model) ✅. Step 3 (app shell) ✅. Step 4 (CV renderer) ✅. Step 5 (inline editing) ✅. Step 6 (rearrange) ✅. Step 7 (templates & design) ✅. Step 8 (API & database) ✅. Step 9 (frontend ↔ API) ✅. Step 10 ("Create new CV" wizard) ✅. Step 11 (PDF download & share links) ✅. Step 12 (Saved Jobs) ✅. Step 13 (cover letters) ✅. Step 14 (Dashboard) ✅. Step 15 (accounts) ✅. Step 16 (AI features) ✅. Step 17 (quality & release) built; awaiting review.
 > - Choosing a template applies its suggested font, column layout and spacing; the user can change them afterwards ✅
 > - Frontend: React + TS + Vite + Tailwind + Axios + React Router + TanStack Query + Zustand ✅
 > - Backend: Node + TypeScript + PostgreSQL (JSONB) with shared Zod types ✅
@@ -17,6 +17,7 @@
 > - Accounts: email + password now, Google sign-in as a small separate step later (needs your own Google Cloud client ID and secret); open sign-up; emails go through a provider interface (printed in the API log locally, Brevo or Resend plugged in at deployment); the first account inherits the old local "dev" data ✅
 > - **Deviation from the original plan:** sessions are opaque random tokens stored (hashed) in the database and sent in an httpOnly cookie, **not JWTs**. Logging out, changing or resetting a password can then end sessions immediately, which a JWT cannot do without a blocklist. Still portable plain Postgres; no extra cost ✅
 > - AI: Google Gemini free tier behind a provider interface (key only on the server); all three features in one step; Saved Jobs get a "Job description" field; free plan: 30 AI requests per user per day ✅
+> - Release: Cloudflare Pages proxies `/api` to Render (no domain needed, first-party cookie); emails via Brevo; Bulgarian interface later as its own step; draft privacy policy and terms ✅
 
 ## 1. Goal
 
@@ -462,12 +463,18 @@ Specification: §2.1.
 - ⚠️ **Gemini free tier and privacy:** on the free tier Google may use prompts (here: CV text) to improve its products. Fine for development and a hobby launch; switch to the paid tier (or another provider) before real users rely on it, and mention it in the privacy policy (Step 17).
 - ⚠️ Free-tier quotas and model names change; check them in Google AI Studio when getting the key.
 
-### Step 17: Quality & release
+### Step 17: Quality & release ✅ built (awaiting review)
 
-- Unit tests (Vitest), component tests, E2E (Playwright).
-- Accessibility, performance, i18n (EN/BG?).
-- Deployment on free plans: frontend on Cloudflare Pages, API on Render, DB on Neon, files on Cloudflare R2.
-- Sentry for errors; a keep-warm ping is optional, because Render's free plan sleeps when idle.
+- ✅ **Deployment setup** for the free plans, step by step in [`docs/DEPLOY.md`](DEPLOY.md): Neon (database), Cloudflare R2 (images), Brevo (emails), Gemini (AI), Sentry (errors), Render (API, [`render.yaml`](../render.yaml) blueprint), Cloudflare Pages (web).
+- ✅ **One site for the browser:** a Cloudflare Pages Function forwards `/api/*` to Render with a shared secret (`PROXY_SECRET`) and the real client address. The cookie stays first-party (`SameSite=Lax`, `Secure`) without buying a domain; the API refuses requests that skip the proxy (except `/api/health` and `/api/ping`).
+- ✅ **Production pieces in the API:** R2 storage (S3 API, signed with `aws4fetch`, private bucket), Brevo mailer, Sentry (errors with route and user id only, never document contents), hardening headers, `/api/ping` for keep-warm pings that do not wake the database. The API **refuses to start** in production when storage, email or the public addresses are not configured, and warns about optional ones.
+- ✅ **Web:** security headers generated at build time (`_headers`: a Content-Security-Policy that allows exactly the page's inline theme script by hash, HSTS, nosniff, `frame-ancestors 'none'`), long caching for assets, a friendly error page (also for "a new version is available"), optional Sentry (downloaded only when configured).
+- ✅ **Performance:** pages are split into chunks; the first download shrank from 838 KB to 258 KB (80 KB gzipped). The other pages load in the background after the first screen, so moving around stays instant.
+- ✅ **Accessibility:** automatic WCAG 2.1 AA checks (axe) on the public and app pages. Fixed: button contrast (teal-600 → teal-700), links in text are underlined, "Saved" contrast, the job pipeline's and the date fields' accessible names.
+- ✅ **Browser tests (Playwright)** in `e2e/`: sign-up/sign-out/sign-in, legal pages, CV create → edit → autosave → reload → share link, saved job description, all AI features with the mock provider, accessibility, security headers, not-found page. They run against the production builds and a fresh database; CI runs them on pull requests.
+- ✅ **Privacy policy** (`/privacy`) and **terms** (`/terms`), linked from every page and the sign-up form. Drafts based on what the app really stores and which services process it; **review them (not legal advice)** and set `VITE_OPERATOR_NAME` / `VITE_CONTACT_EMAIL`.
+- ⚠️ **Gemini in the EU:** Google's Gemini API terms allow only _paid_ services for apps used by people in the EEA, UK or Switzerland. Turn on billing for the key's Google Cloud project before launch (cheap with the daily limit; set a budget alert).
+- ⏭ Later: Bulgarian interface (separate step), Google sign-in (separate step), own domain with SPF/DKIM for email deliverability.
 
 ### Step 18 (optional): Premium
 

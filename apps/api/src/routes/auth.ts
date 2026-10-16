@@ -158,7 +158,7 @@ export async function authRoutes(app: FastifyInstance, opts: AuthRouteOptions) {
   }
 
   app.post('/auth/register', async (request, reply) => {
-    allow(limits.register, request.ip)
+    allow(limits.register, request.clientIp)
     const input = RegisterInputSchema.parse(request.body)
     if (input.email === DEV_USER_EMAIL) {
       throw new HttpError(409, 'email_taken', 'An account with this email already exists')
@@ -210,9 +210,9 @@ export async function authRoutes(app: FastifyInstance, opts: AuthRouteOptions) {
   })
 
   app.post('/auth/login', async (request, reply) => {
-    allow(limits.loginIp, request.ip)
+    allow(limits.loginIp, request.clientIp)
     const input = LoginInputSchema.parse(request.body)
-    const accountKey = `${request.ip}:${input.email}`
+    const accountKey = `${request.clientIp}:${input.email}`
     allow(limits.loginAccount, accountKey)
 
     const [user] = await db.select().from(users).where(eq(users.email, input.email))
@@ -235,7 +235,7 @@ export async function authRoutes(app: FastifyInstance, opts: AuthRouteOptions) {
   })
 
   app.post('/auth/forgot-password', async (request, reply) => {
-    allow(limits.forgotIp, request.ip)
+    allow(limits.forgotIp, request.clientIp)
     const { email } = ForgotPasswordInputSchema.parse(request.body)
     // Same answer whether or not the account exists.
     if (limits.forgotEmail.hit(email)) {
@@ -260,7 +260,7 @@ export async function authRoutes(app: FastifyInstance, opts: AuthRouteOptions) {
   })
 
   app.post('/auth/reset-password', async (request, reply) => {
-    allow(limits.token, request.ip)
+    allow(limits.token, request.clientIp)
     const input = ResetPasswordInputSchema.parse(request.body)
     const userId = await useToken('password_reset', input.token)
     const passwordHash = await hashPassword(input.password)
@@ -278,7 +278,7 @@ export async function authRoutes(app: FastifyInstance, opts: AuthRouteOptions) {
   })
 
   app.post('/auth/verify-email', async (request, reply) => {
-    allow(limits.token, request.ip)
+    allow(limits.token, request.clientIp)
     const input = VerifyEmailInputSchema.parse(request.body)
     const userId = await useToken('email_verification', input.token)
     await db.update(users).set({ emailVerifiedAt: new Date() }).where(eq(users.id, userId))

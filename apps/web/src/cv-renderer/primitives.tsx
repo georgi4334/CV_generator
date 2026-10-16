@@ -232,11 +232,14 @@ export function LevelIndicator({
 function PopoverTrigger({
   label,
   display,
+  visibleText,
   className,
   children,
 }: {
   label: string
   display: ReactNode
+  /** The text shown on the page; screen readers hear it first, then what the button does. */
+  visibleText?: string
   className?: string
   children: ReactNode
 }) {
@@ -247,7 +250,7 @@ function PopoverTrigger({
       <button
         ref={ref}
         type="button"
-        aria-label={label}
+        aria-label={visibleText ? `${visibleText}, ${label.toLowerCase()}` : label}
         aria-expanded={open}
         className={`cv-editable cursor-pointer border-0 bg-transparent p-0 text-inherit ${className ?? ''}`}
         style={{ font: 'inherit', textAlign: 'inherit' }}
@@ -280,7 +283,7 @@ export function DateRangeField({
   const display = <Field value={text} placeholder={placeholder} />
   if (!editor) return display
   return (
-    <PopoverTrigger label="Edit dates" display={display}>
+    <PopoverTrigger label="Edit dates" display={display} visibleText={text || placeholder}>
       <DateRangeForm value={value} onChange={onChange} />
     </PopoverTrigger>
   )
@@ -301,7 +304,7 @@ export function SingleDateField({
   const display = <Field value={text} placeholder={placeholder} />
   if (!editor) return display
   return (
-    <PopoverTrigger label="Edit date" display={display}>
+    <PopoverTrigger label="Edit date" display={display} visibleText={text || placeholder}>
       <YearMonthInput label="Date" value={value} onChange={onChange} />
     </PopoverTrigger>
   )

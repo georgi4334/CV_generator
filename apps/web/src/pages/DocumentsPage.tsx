@@ -274,7 +274,7 @@ export function DocumentsPage() {
             className={({ isActive }) =>
               `rounded-full px-4 py-1.5 text-sm font-medium ${
                 isActive
-                  ? 'bg-teal-600 text-white'
+                  ? 'bg-teal-700 text-white'
                   : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-800 dark:hover:bg-slate-800'
               }`
             }

@@ -53,7 +53,7 @@ export function HistoryPanel({ cvId }: { cvId: string }) {
         <button
           type="submit"
           disabled={saving}
-          className="inline-flex items-center gap-1 rounded-md bg-teal-600 px-2.5 py-1.5 text-sm font-medium text-white hover:bg-teal-700 disabled:opacity-60"
+          className="inline-flex items-center gap-1 rounded-md bg-teal-700 px-2.5 py-1.5 text-sm font-medium text-white hover:bg-teal-800 disabled:opacity-60"
         >
           <Save className="size-4" /> Save
         </button>

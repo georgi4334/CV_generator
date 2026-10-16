@@ -78,6 +78,17 @@ export function RegisterPage() {
           </span>
         </label>
         <FormError message={register.isError ? toApiRequestError(register.error).message : null} />
+        <p className="text-xs text-slate-500 dark:text-slate-400">
+          By creating an account you accept the{' '}
+          <Link to="/terms" className={linkClass}>
+            Terms
+          </Link>{' '}
+          and the{' '}
+          <Link to="/privacy" className={linkClass}>
+            Privacy policy
+          </Link>
+          .
+        </p>
         <button
           type="submit"
           disabled={register.isPending}

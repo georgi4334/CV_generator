@@ -34,7 +34,7 @@ export function SaveIndicator() {
     )
   }
   return (
-    <span role="status" className={`${base} text-emerald-600 dark:text-emerald-400`}>
+    <span role="status" className={`${base} text-emerald-700 dark:text-emerald-400`}>
       <CircleCheck className="size-3.5" /> Saved
     </span>
   )

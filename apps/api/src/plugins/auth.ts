@@ -7,6 +7,8 @@ declare module 'fastify' {
   interface FastifyRequest {
     user: SessionUser
     sessionId: string
+    /** The client's address (from the proxy when the API is behind one). */
+    clientIp: string
   }
 }
 

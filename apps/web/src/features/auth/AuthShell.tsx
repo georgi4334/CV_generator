@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { ThemeToggle } from '../../components/ThemeToggle'
 import { card } from '../../components/PageHeader'
+import { LegalFooter } from '../../pages/legal/LegalLayout'
 
 /** The centered card around sign-in, sign-up and password pages. */
 export function AuthShell({
@@ -32,6 +33,7 @@ export function AuthShell({
         <div className="mt-5">{children}</div>
       </main>
       {footer && <p className="text-sm text-slate-600 dark:text-slate-300">{footer}</p>}
+      <LegalFooter />
     </div>
   )
 }
