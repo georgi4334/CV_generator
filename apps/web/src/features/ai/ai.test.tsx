@@ -115,7 +115,7 @@ describe('Fix Mistakes', () => {
       new ApiRequestError(429, 'ai_limit', 'You have used all 30 AI requests for today.')
     const { aside } = await openCv('Fix Mistakes')
     fireEvent.click(await aside.findByRole('button', { name: 'Check spelling & grammar' }))
-    expect((await aside.findByRole('alert')).textContent).toContain('all 30 AI requests')
+    expect((await aside.findByRole('alert')).textContent).toContain('all your AI requests')
   })
 
   it('explains when AI is not set up', async () => {

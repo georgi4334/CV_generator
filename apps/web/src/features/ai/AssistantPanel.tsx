@@ -1,6 +1,7 @@
 import { cvFields, type AiField } from '@cv/shared'
 import { LoaderCircle, Sparkles } from 'lucide-react'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAssist } from '../../lib/aiQueries'
 import { useCv } from '../../lib/cvQueries'
 import { useJobs } from '../../lib/jobQueries'
@@ -10,16 +11,17 @@ import { useAiTarget, type AiTarget } from './aiTarget'
 const SUMMARY = 'summary'
 
 function JobSelect({ value, onChange }: { value: string; onChange: (id: string) => void }) {
+  const { t } = useTranslation()
   const jobs = (useJobs().data ?? []).filter((j) => j.description.trim())
   if (jobs.length === 0) return null
   return (
     <label className="block space-y-1 text-sm">
-      <span className="font-medium">Aim at a saved job (optional)</span>
+      <span className="font-medium">{t('ai.assistant.aimAtJob')}</span>
       <select value={value} onChange={(e) => onChange(e.target.value)} className={aiField}>
-        <option value="">— None —</option>
+        <option value="">{t('ai.assistant.none')}</option>
         {jobs.map((j) => (
           <option key={j.id} value={j.id}>
-            {j.position} at {j.company}
+            {t('ai.jobOption', { position: j.position, company: j.company })}
           </option>
         ))}
       </select>
@@ -28,14 +30,15 @@ function JobSelect({ value, onChange }: { value: string; onChange: (id: string) 
 }
 
 function Instruction({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const { t } = useTranslation()
   return (
     <label className="block space-y-1 text-sm">
-      <span className="font-medium">Instructions (optional)</span>
+      <span className="font-medium">{t('ai.assistant.instructions')}</span>
       <input
         value={value}
         maxLength={500}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="e.g. shorter, more confident, mention leadership"
+        placeholder={t('ai.assistant.instructionsPlaceholder')}
         className={aiField}
       />
     </label>
@@ -55,21 +58,22 @@ function Proposal({
   onDiscard: () => void
   useLabel: string
 }) {
+  const { t } = useTranslation()
   return (
     <section
-      aria-label="Proposal"
+      aria-label={t('ai.assistant.proposal')}
       className="space-y-2 rounded-lg border border-teal-200 bg-teal-50/50 p-3 dark:border-teal-900 dark:bg-teal-950/30"
     >
       {list ? (
         <ul className="list-disc space-y-1 pl-4 text-sm">
-          {texts.map((t) => (
-            <li key={t}>{t}</li>
+          {texts.map((text) => (
+            <li key={text}>{text}</li>
           ))}
         </ul>
       ) : (
-        texts.map((t) => (
-          <p key={t} className="text-sm whitespace-pre-line">
-            {t}
+        texts.map((text) => (
+          <p key={text} className="text-sm whitespace-pre-line">
+            {text}
           </p>
         ))
       )}
@@ -78,7 +82,7 @@ function Proposal({
           {useLabel}
         </button>
         <button type="button" className={aiSecondary} onClick={onDiscard}>
-          Discard
+          {t('ai.assistant.discard')}
         </button>
       </div>
     </section>
@@ -86,6 +90,7 @@ function Proposal({
 }
 
 function CvAssistant({ target }: { target: AiTarget }) {
+  const { t } = useTranslation()
   const cv = target.cv!
   const assist = useAssist()
   const jobs = useJobs().data ?? []
@@ -125,7 +130,7 @@ function CvAssistant({ target }: { target: AiTarget }) {
   return (
     <>
       <label className="block space-y-1 text-sm">
-        <span className="font-medium">Write</span>
+        <span className="font-medium">{t('ai.assistant.write')}</span>
         <select
           value={what}
           onChange={(e) => {
@@ -134,19 +139,16 @@ function CvAssistant({ target }: { target: AiTarget }) {
           }}
           className={aiField}
         >
-          <option value={SUMMARY}>Summary</option>
+          <option value={SUMMARY}>{t('ai.assistant.summary')}</option>
           {cv.entries.map((e) => (
             <option key={e.path} value={e.path}>
-              Bullets – {e.label}
+              {t('ai.assistant.bulletsFor', { label: e.label })}
             </option>
           ))}
         </select>
       </label>
       {missingSummary ? (
-        <p className="text-sm text-slate-600 dark:text-slate-300">
-          This CV has no visible Summary section. Add one with Rearrange → Add section, then come
-          back.
-        </p>
+        <p className="text-sm text-slate-600 dark:text-slate-300">{t('ai.assistant.noSummary')}</p>
       ) : (
         <>
           <Instruction value={instruction} onChange={setInstruction} />
@@ -157,7 +159,11 @@ function CvAssistant({ target }: { target: AiTarget }) {
             ) : (
               <Sparkles className="size-4" aria-hidden />
             )}
-            {assist.isPending ? 'Writing…' : hasText ? 'Improve' : 'Write'}
+            {assist.isPending
+              ? t('ai.assistant.writing')
+              : hasText
+                ? t('ai.assistant.improve')
+                : t('ai.assistant.write')}
           </button>
         </>
       )}
@@ -168,7 +174,7 @@ function CvAssistant({ target }: { target: AiTarget }) {
           list={!isSummary}
           onUse={use}
           onDiscard={() => setTexts(null)}
-          useLabel={hasText ? 'Replace' : 'Insert'}
+          useLabel={hasText ? t('ai.assistant.replace') : t('ai.assistant.insert')}
         />
       )}
     </>
@@ -176,6 +182,7 @@ function CvAssistant({ target }: { target: AiTarget }) {
 }
 
 function LetterAssistant({ target }: { target: AiTarget }) {
+  const { t } = useTranslation()
   const letter = target.letter!
   const assist = useAssist()
   const linkedCv = useCv(letter.cvId ?? undefined).data
@@ -209,18 +216,18 @@ function LetterAssistant({ target }: { target: AiTarget }) {
   return (
     <>
       <p className="text-sm text-slate-600 dark:text-slate-300">
-        Writes the letter’s paragraphs from {linkedCv ? `“${linkedCv.title}”` : 'the letter'}
-        {job ? ` for ${job.position} at ${job.company}` : ''}.
+        {t('ai.assistant.letterIntro', {
+          source: linkedCv ? `“${linkedCv.title}”` : t('ai.assistant.theLetter'),
+          job: job
+            ? t('ai.assistant.forJob', { position: job.position, company: job.company })
+            : '',
+        })}
       </p>
       {!letter.cvId && (
-        <p className="text-xs text-amber-700 dark:text-amber-400">
-          Link a CV above for a letter based on your experience.
-        </p>
+        <p className="text-xs text-amber-700 dark:text-amber-400">{t('ai.assistant.linkCv')}</p>
       )}
       {job && !job.description.trim() && (
-        <p className="text-xs text-slate-500">
-          Tip: add the job description in Saved Jobs for a more specific letter.
-        </p>
+        <p className="text-xs text-slate-500">{t('ai.assistant.jobTip')}</p>
       )}
       <Instruction value={instruction} onChange={setInstruction} />
       <button type="button" className={aiButton} onClick={run} disabled={assist.isPending}>
@@ -229,7 +236,7 @@ function LetterAssistant({ target }: { target: AiTarget }) {
         ) : (
           <Sparkles className="size-4" aria-hidden />
         )}
-        {assist.isPending ? 'Writing…' : 'Write the letter'}
+        {assist.isPending ? t('ai.assistant.writing') : t('ai.assistant.writeLetter')}
       </button>
       {assist.isError && <AiErrorMessage error={assist.error} />}
       {texts && !assist.isPending && (
@@ -241,7 +248,7 @@ function LetterAssistant({ target }: { target: AiTarget }) {
             setTexts(null)
           }}
           onDiscard={() => setTexts(null)}
-          useLabel="Replace paragraphs"
+          useLabel={t('ai.assistant.replaceParagraphs')}
         />
       )}
     </>

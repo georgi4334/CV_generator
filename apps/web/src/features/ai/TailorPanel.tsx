@@ -1,9 +1,10 @@
 import { matchKeywords, type AiSuggestion, type Keyword, type TailorResult } from '@cv/shared'
 import { CopyPlus, LoaderCircle, ScanSearch } from 'lucide-react'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 import { useTailor } from '../../lib/aiQueries'
-import { toApiRequestError } from '../../lib/api'
+import { errorMessage } from '../../lib/errorMessage'
 import { useJobs, useUpdateJob } from '../../lib/jobQueries'
 import { useEditorUi } from '../../stores/editorUi'
 import { AiErrorMessage, AiGate, aiButton, aiField, aiSecondary, Change } from './AiGate'
@@ -12,12 +13,13 @@ import { useAiTarget } from './aiTarget'
 const PASTE = 'paste'
 
 function scoreLabel(score: number) {
-  if (score >= 70) return { text: 'Good match', bar: 'bg-emerald-500' }
-  if (score >= 40) return { text: 'Partial match', bar: 'bg-amber-500' }
-  return { text: 'Low match', bar: 'bg-red-500' }
+  if (score >= 70) return { key: 'ai.tailor.goodMatch', bar: 'bg-emerald-500' } as const
+  if (score >= 40) return { key: 'ai.tailor.partialMatch', bar: 'bg-amber-500' } as const
+  return { key: 'ai.tailor.lowMatch', bar: 'bg-red-500' } as const
 }
 
 function Chips({ keywords, tone }: { keywords: Keyword[]; tone: 'found' | 'missing' }) {
+  const { t } = useTranslation()
   const style =
     tone === 'found'
       ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
@@ -28,7 +30,7 @@ function Chips({ keywords, tone }: { keywords: Keyword[]; tone: 'found' | 'missi
         <li
           key={k.term}
           className={`rounded-full px-2 py-0.5 text-xs ${style} ${k.importance === 'high' ? 'font-semibold' : ''}`}
-          title={k.importance === 'high' ? 'Important in the posting' : undefined}
+          title={k.importance === 'high' ? t('ai.tailor.important') : undefined}
         >
           {k.term}
         </li>
@@ -39,6 +41,7 @@ function Chips({ keywords, tone }: { keywords: Keyword[]; tone: 'found' | 'missi
 
 /** Check & Tailor: how well this CV matches a posting, and rewrites to close the gaps. */
 export function TailorPanel() {
+  const { t } = useTranslation()
   const target = useAiTarget()
   const cv = target.cv!
   const navigate = useNavigate()
@@ -86,7 +89,7 @@ export function TailorPanel() {
       } else skipped++
     }
     setApplied(done)
-    if (skipped) notify(`${skipped} suggestion(s) skipped: the text changed since the check.`)
+    if (skipped) notify(t('ai.tailor.skipped', { count: skipped }))
   }
 
   const saveCopy = async () => {
@@ -94,10 +97,10 @@ export function TailorPanel() {
     setCopying(true)
     try {
       const id = await cv.createTailoredCopy(rewrites, job?.id ?? null)
-      notify('Tailored copy created. You are now editing the copy.')
+      notify(t('ai.tailor.copyCreated'))
       navigate(`/cvs/${id}/edit`)
     } catch (error) {
-      notify(`Could not create the copy: ${toApiRequestError(error).message}`)
+      notify(t('ai.tailor.copyFailed', { message: errorMessage(error) }))
     } finally {
       setCopying(false)
     }
@@ -113,7 +116,7 @@ export function TailorPanel() {
   return (
     <AiGate>
       <label className="block space-y-1 text-sm">
-        <span className="font-medium">Job posting</span>
+        <span className="font-medium">{t('ai.tailor.jobPosting')}</span>
         <select
           value={source}
           onChange={(e) => {
@@ -122,11 +125,13 @@ export function TailorPanel() {
           }}
           className={aiField}
         >
-          <option value={PASTE}>Paste a job posting…</option>
+          <option value={PASTE}>{t('ai.tailor.pasteOption')}</option>
           {jobs.map((j) => (
             <option key={j.id} value={j.id}>
-              {j.position} at {j.company}
-              {j.description.trim() ? '' : ' (no description yet)'}
+              {t(j.description.trim() ? 'ai.jobOption' : 'ai.jobOptionNoDescription', {
+                position: j.position,
+                company: j.company,
+              })}
             </option>
           ))}
         </select>
@@ -134,13 +139,13 @@ export function TailorPanel() {
       {needsText && (
         <label className="block space-y-1 text-sm">
           <span className="font-medium">
-            {job ? 'Paste the posting (it is saved with the job)' : 'Posting text'}
+            {job ? t('ai.tailor.pasteForJob') : t('ai.tailor.postingText')}
           </span>
           <textarea
             rows={6}
             value={pasted}
             onChange={(e) => setPasted(e.target.value)}
-            placeholder="Paste the full job description…"
+            placeholder={t('ai.tailor.pastePlaceholder')}
             className={aiField}
           />
         </label>
@@ -156,46 +161,52 @@ export function TailorPanel() {
         ) : (
           <ScanSearch className="size-4" aria-hidden />
         )}
-        {tailor.isPending ? 'Checking…' : result ? 'Check again' : 'Check match'}
+        {tailor.isPending
+          ? t('ai.tailor.checking')
+          : result
+            ? t('ai.tailor.checkAgain')
+            : t('ai.tailor.checkMatch')}
       </button>
       {tailor.isError && <AiErrorMessage error={tailor.error} />}
 
       {result && match && label && !tailor.isPending && (
-        <section aria-label="Match" className="space-y-4">
+        <section aria-label={t('ai.tailor.match')} className="space-y-4">
           <div>
             <div className="flex items-baseline justify-between">
               <span
                 className="text-3xl font-semibold tabular-nums"
-                aria-label={`Match score ${match.score}%`}
+                aria-label={t('ai.tailor.score', { score: match.score })}
               >
                 {match.score}%
               </span>
-              <span className="text-sm text-slate-600 dark:text-slate-300">{label.text}</span>
+              <span className="text-sm text-slate-600 dark:text-slate-300">{t(label.key)}</span>
             </div>
             <div className="mt-1 h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
               <div className={`h-full ${label.bar}`} style={{ width: `${match.score}%` }} />
             </div>
-            <p className="mt-1 text-xs text-slate-500">
-              Share of the posting’s keywords found in your CV (important ones count double).
-            </p>
+            <p className="mt-1 text-xs text-slate-500">{t('ai.tailor.scoreHint')}</p>
           </div>
 
           {match.missing.length > 0 && (
             <div className="space-y-1.5">
-              <h3 className="text-sm font-medium">Missing ({match.missing.length})</h3>
+              <h3 className="text-sm font-medium">
+                {t('ai.tailor.missing', { count: match.missing.length })}
+              </h3>
               <Chips keywords={match.missing} tone="missing" />
             </div>
           )}
           {match.matched.length > 0 && (
             <div className="space-y-1.5">
-              <h3 className="text-sm font-medium">Found in your CV ({match.matched.length})</h3>
+              <h3 className="text-sm font-medium">
+                {t('ai.tailor.found', { count: match.matched.length })}
+              </h3>
               <Chips keywords={match.matched} tone="found" />
             </div>
           )}
 
           {result.advice.length > 0 && (
             <div className="space-y-1.5">
-              <h3 className="text-sm font-medium">Advice</h3>
+              <h3 className="text-sm font-medium">{t('ai.tailor.advice')}</h3>
               <ul className="list-disc space-y-1 pl-4 text-sm text-slate-700 dark:text-slate-300">
                 {result.advice.map((a) => (
                   <li key={a}>{a}</li>
@@ -205,14 +216,12 @@ export function TailorPanel() {
           )}
 
           <div className="space-y-2">
-            <h3 className="text-sm font-medium">Suggested rewrites</h3>
+            <h3 className="text-sm font-medium">{t('ai.tailor.rewrites')}</h3>
             {result.rewrites.length === 0 ? (
-              <p className="text-sm text-slate-500">No rewrites suggested.</p>
+              <p className="text-sm text-slate-500">{t('ai.tailor.noRewrites')}</p>
             ) : (
               <>
-                <p className="text-xs text-slate-500">
-                  Only keep what is true for you. Every change can be undone.
-                </p>
+                <p className="text-xs text-slate-500">{t('ai.tailor.rewritesHint')}</p>
                 <ul className="space-y-2">
                   {result.rewrites.map((r, i) => (
                     <li
@@ -228,7 +237,7 @@ export function TailorPanel() {
                           onChange={(e) =>
                             setSelected((s) => s.map((v, j) => (j === i ? e.target.checked : v)))
                           }
-                          aria-label={`Use rewrite of ${r.label}`}
+                          aria-label={t('ai.tailor.useRewrite', { label: r.label })}
                         />
                         <span className="min-w-0 flex-1">
                           <span className="block text-xs text-slate-500">{r.label}</span>
@@ -240,14 +249,16 @@ export function TailorPanel() {
                       </label>
                       <div className="mt-2 pl-6 text-xs">
                         {applied[i] ? (
-                          <span className="text-emerald-700 dark:text-emerald-400">Applied</span>
+                          <span className="text-emerald-700 dark:text-emerald-400">
+                            {t('ai.tailor.applied')}
+                          </span>
                         ) : (
                           <button
                             type="button"
                             className={aiSecondary}
                             onClick={() => applyHere([i])}
                           >
-                            Apply
+                            {t('ai.tailor.apply')}
                           </button>
                         )}
                       </div>
@@ -261,7 +272,7 @@ export function TailorPanel() {
           <div className="flex flex-col gap-2">
             {open.length > 0 && (
               <button type="button" className={aiSecondary} onClick={() => applyHere(open)}>
-                Apply {open.length} selected to this CV
+                {t('ai.tailor.applySelected', { count: open.length })}
               </button>
             )}
             <button
@@ -272,15 +283,17 @@ export function TailorPanel() {
             >
               <CopyPlus className="size-4" aria-hidden />
               {copying
-                ? 'Creating copy…'
+                ? t('ai.tailor.creatingCopy')
                 : open.length
-                  ? `Save as tailored copy (${open.length} rewrites)`
-                  : 'Save as tailored copy'}
+                  ? t('ai.tailor.saveCopy', { count: open.length })
+                  : t('ai.tailor.saveCopy')}
             </button>
             <p className="text-xs text-slate-500">
               {job
-                ? `The copy is linked to “${job.position} at ${job.company}”; this CV stays as it is.`
-                : 'This CV stays as it is.'}
+                ? t('ai.tailor.linkedCopy', {
+                    job: t('ai.jobOption', { position: job.position, company: job.company }),
+                  })
+                : t('ai.tailor.stays')}
             </p>
           </div>
         </section>
