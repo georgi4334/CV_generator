@@ -1,16 +1,18 @@
 import { PASSWORD_MIN_LENGTH } from '@cv/shared'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 import { card, PageHeader, primaryButton, secondaryButton } from '../../components/PageHeader'
-import { toApiRequestError } from '../../lib/api'
 import { authApi } from '../../lib/authApi'
 import { useCurrentUser, useUpdateProfile } from '../../lib/authQueries'
+import { errorMessage } from '../../lib/errorMessage'
 import { resetClientState } from '../../lib/sessionState'
 import { FormError } from './AuthShell'
 import { field } from './authStyles'
 
 function ProfileForm({ name: initial, email }: { name: string; email: string }) {
+  const { t } = useTranslation()
   const [name, setName] = useState(initial)
   const update = useUpdateProfile()
   const submit = (event: FormEvent) => {
@@ -20,10 +22,10 @@ function ProfileForm({ name: initial, email }: { name: string; email: string }) 
   return (
     <form onSubmit={submit} className={`${card} space-y-4 p-5`} aria-labelledby="profile-heading">
       <h2 id="profile-heading" className="font-semibold">
-        Profile
+        {t('account.profile.title')}
       </h2>
       <label className="block space-y-1 text-sm">
-        <span className="font-medium">Name</span>
+        <span className="font-medium">{t('account.profile.name')}</span>
         <input
           maxLength={100}
           value={name}
@@ -32,17 +34,17 @@ function ProfileForm({ name: initial, email }: { name: string; email: string }) 
         />
       </label>
       <label className="block space-y-1 text-sm">
-        <span className="font-medium">Email</span>
+        <span className="font-medium">{t('account.profile.email')}</span>
         <input value={email} readOnly disabled className={`${field} opacity-70`} />
       </label>
-      <FormError message={update.isError ? toApiRequestError(update.error).message : null} />
+      <FormError message={update.isError ? errorMessage(update.error) : null} />
       <div className="flex items-center gap-3">
         <button type="submit" disabled={update.isPending} className={primaryButton}>
-          Save
+          {t('common.save')}
         </button>
         {update.isSuccess && (
           <span role="status" className="text-sm text-slate-500">
-            Saved
+            {t('common.saved')}
           </span>
         )}
       </div>
@@ -51,6 +53,7 @@ function ProfileForm({ name: initial, email }: { name: string; email: string }) 
 }
 
 function PasswordForm() {
+  const { t } = useTranslation()
   const [currentPassword, setCurrent] = useState('')
   const [newPassword, setNew] = useState('')
   const change = useMutation({
@@ -67,10 +70,10 @@ function PasswordForm() {
   return (
     <form onSubmit={submit} className={`${card} space-y-4 p-5`} aria-labelledby="password-heading">
       <h2 id="password-heading" className="font-semibold">
-        Change password
+        {t('account.password.title')}
       </h2>
       <label className="block space-y-1 text-sm">
-        <span className="font-medium">Current password</span>
+        <span className="font-medium">{t('account.password.current')}</span>
         <input
           type="password"
           autoComplete="current-password"
@@ -81,7 +84,7 @@ function PasswordForm() {
         />
       </label>
       <label className="block space-y-1 text-sm">
-        <span className="font-medium">New password</span>
+        <span className="font-medium">{t('account.password.new')}</span>
         <input
           type="password"
           autoComplete="new-password"
@@ -92,17 +95,17 @@ function PasswordForm() {
           className={field}
         />
         <span className="block text-xs text-slate-500 dark:text-slate-400">
-          Other browsers where you are signed in will be signed out.
+          {t('account.password.hint')}
         </span>
       </label>
-      <FormError message={change.isError ? toApiRequestError(change.error).message : null} />
+      <FormError message={change.isError ? errorMessage(change.error) : null} />
       <div className="flex items-center gap-3">
         <button type="submit" disabled={change.isPending} className={primaryButton}>
-          Change password
+          {t('account.password.submit')}
         </button>
         {change.isSuccess && (
           <span role="status" className="text-sm text-slate-500">
-            Password changed
+            {t('account.password.changed')}
           </span>
         )}
       </div>
@@ -111,6 +114,7 @@ function PasswordForm() {
 }
 
 function DeleteAccount() {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
@@ -132,16 +136,13 @@ function DeleteAccount() {
       aria-labelledby="delete-heading"
     >
       <h2 id="delete-heading" className="font-semibold text-red-700 dark:text-red-400">
-        Delete account
+        {t('account.delete.title')}
       </h2>
-      <p className="text-sm text-slate-600 dark:text-slate-300">
-        Deletes your account with all CVs, cover letters, saved jobs, uploaded images and share
-        links. This cannot be undone.
-      </p>
+      <p className="text-sm text-slate-600 dark:text-slate-300">{t('account.delete.text')}</p>
       {open ? (
         <form onSubmit={submit} className="space-y-3">
           <label className="block space-y-1 text-sm">
-            <span className="font-medium">Enter your password to confirm</span>
+            <span className="font-medium">{t('account.delete.confirmPassword')}</span>
             <input
               type="password"
               autoComplete="current-password"
@@ -152,23 +153,23 @@ function DeleteAccount() {
               className={field}
             />
           </label>
-          <FormError message={remove.isError ? toApiRequestError(remove.error).message : null} />
+          <FormError message={remove.isError ? errorMessage(remove.error) : null} />
           <div className="flex gap-2">
             <button
               type="submit"
               disabled={remove.isPending}
               className="inline-flex items-center rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60"
             >
-              Delete my account
+              {t('account.delete.submit')}
             </button>
             <button type="button" className={secondaryButton} onClick={() => setOpen(false)}>
-              Cancel
+              {t('common.cancel')}
             </button>
           </div>
         </form>
       ) : (
         <button type="button" className={secondaryButton} onClick={() => setOpen(true)}>
-          Delete account…
+          {t('account.delete.open')}
         </button>
       )}
     </section>
@@ -177,11 +178,15 @@ function DeleteAccount() {
 
 /** /account: profile, password and deleting the account. */
 export function AccountPage() {
+  const { t } = useTranslation()
   const user = useCurrentUser().data
   if (!user) return null
   return (
     <>
-      <PageHeader title="Account" description={`Signed in as ${user.email}.`} />
+      <PageHeader
+        title={t('account.title')}
+        description={t('account.signedInAs', { email: user.email })}
+      />
       <div className="grid max-w-xl gap-6">
         {/* key: a different user (after signing in elsewhere) starts with fresh fields. */}
         <ProfileForm key={user.id} name={user.name} email={user.email} />

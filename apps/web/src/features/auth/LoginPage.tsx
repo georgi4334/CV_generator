@@ -1,12 +1,14 @@
 import { useState, type FormEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router'
 import { primaryButton } from '../../components/PageHeader'
-import { toApiRequestError } from '../../lib/api'
 import { useCurrentUser, useLogin } from '../../lib/authQueries'
+import { errorMessage } from '../../lib/errorMessage'
 import { AuthShell, FormError } from './AuthShell'
 import { field, linkClass, safeNext } from './authStyles'
 
 export function LoginPage() {
+  const { t } = useTranslation()
   const [params] = useSearchParams()
   const next = safeNext(params.get('next'))
   const navigate = useNavigate()
@@ -24,22 +26,22 @@ export function LoginPage() {
 
   return (
     <AuthShell
-      title="Sign in"
+      title={t('auth.signIn')}
       footer={
         <>
-          No account yet?{' '}
+          {t('auth.login.noAccount')}{' '}
           <Link
             to={`/register${params.has('next') ? `?next=${encodeURIComponent(next)}` : ''}`}
             className={linkClass}
           >
-            Create one
+            {t('auth.login.createOne')}
           </Link>
         </>
       }
     >
       <form onSubmit={submit} className="space-y-4">
         <label className="block space-y-1 text-sm">
-          <span className="font-medium">Email</span>
+          <span className="font-medium">{t('auth.email')}</span>
           <input
             type="email"
             autoComplete="email"
@@ -52,9 +54,9 @@ export function LoginPage() {
         </label>
         <label className="block space-y-1 text-sm">
           <span className="flex justify-between font-medium">
-            Password
+            {t('auth.password')}
             <Link to="/forgot-password" className={`${linkClass} font-normal`}>
-              Forgot password?
+              {t('auth.login.forgot')}
             </Link>
           </span>
           <input
@@ -66,13 +68,13 @@ export function LoginPage() {
             className={field}
           />
         </label>
-        <FormError message={login.isError ? toApiRequestError(login.error).message : null} />
+        <FormError message={login.isError ? errorMessage(login.error) : null} />
         <button
           type="submit"
           disabled={login.isPending}
           className={`${primaryButton} w-full justify-center`}
         >
-          {login.isPending ? 'Signing in…' : 'Sign in'}
+          {login.isPending ? t('auth.signingIn') : t('auth.signIn')}
         </button>
       </form>
     </AuthShell>
