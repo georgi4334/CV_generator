@@ -1,9 +1,11 @@
 import type { CoverLetterRecord, TemplateId } from '@cv/shared'
 import { RefreshCw } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router'
 import { LetterRenderer, LetterThumbnail, templateChoice } from '../../cv-renderer'
 import { toApiRequestError } from '../../lib/api'
+import { errorMessage } from '../../lib/errorMessage'
 import { coverLetterApi } from '../../lib/coverLetterApi'
 import { useCvList, useLoadCv } from '../../lib/cvQueries'
 import { useJobs, useUpdateJob } from '../../lib/jobQueries'
@@ -42,6 +44,7 @@ const select =
 
 /** Under the top bar: which CV and job the letter belongs to, and "copy the CV's look". */
 function LinkBar({ record }: { record: CoverLetterRecord }) {
+  const { t } = useTranslation()
   const cvs = useCvList().data?.filter((doc) => doc.type === 'cv') ?? []
   const jobs = useJobs().data ?? []
   const link = useLinkLetter()
@@ -50,7 +53,7 @@ function LinkBar({ record }: { record: CoverLetterRecord }) {
   const notify = useEditorUi((s) => s.notify)
   const applyFromCv = useLetterEditor((s) => s.applyFromCv)
   const [copying, setCopying] = useState(false)
-  const failed = (e: unknown) => notify(`Not saved: ${toApiRequestError(e).message}`)
+  const failed = (e: unknown) => notify(t('letters.notSaved', { message: errorMessage(e) }))
 
   const copyFromCv = async () => {
     if (!record.cvId) return
@@ -58,7 +61,7 @@ function LinkBar({ record }: { record: CoverLetterRecord }) {
     try {
       const cv = await loadCv(record.cvId)
       applyFromCv(cv.document.header, cv.document.design)
-      notify(`Header and design copied from “${cv.title}”.`)
+      notify(t('letters.copied', { title: cv.title }))
     } catch (e) {
       failed(e)
     } finally {
@@ -69,16 +72,16 @@ function LinkBar({ record }: { record: CoverLetterRecord }) {
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-slate-200 bg-white px-4 py-2 text-sm dark:border-slate-800 dark:bg-slate-900">
       <label className="flex items-center gap-2">
-        <span className="text-slate-500 dark:text-slate-400">CV</span>
+        <span className="text-slate-500 dark:text-slate-400">{t('letters.cv')}</span>
         <select
-          aria-label="Linked CV"
+          aria-label={t('letters.linkedCv')}
           value={record.cvId ?? ''}
           onChange={(e) =>
             link.mutate({ id: record.id, cvId: e.target.value || null }, { onError: failed })
           }
           className={select}
         >
-          <option value="">— None —</option>
+          <option value="">{t('common.none')}</option>
           {cvs.map((cv) => (
             <option key={cv.id} value={cv.id}>
               {cv.title}
@@ -90,16 +93,16 @@ function LinkBar({ record }: { record: CoverLetterRecord }) {
         type="button"
         onClick={() => void copyFromCv()}
         disabled={!record.cvId || copying}
-        title="Copies your name, contacts, photo, template and design from the linked CV"
+        title={t('letters.useCvDesignHint')}
         className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 font-medium text-teal-700 hover:bg-teal-50 disabled:cursor-not-allowed disabled:opacity-40 dark:text-teal-300 dark:hover:bg-teal-950"
       >
         <RefreshCw className={`size-3.5 ${copying ? 'animate-spin' : ''}`} aria-hidden />
-        Use CV's header & design
+        {t('letters.useCvDesign')}
       </button>
       <label className="flex items-center gap-2">
-        <span className="text-slate-500 dark:text-slate-400">Job</span>
+        <span className="text-slate-500 dark:text-slate-400">{t('letters.job')}</span>
         <select
-          aria-label="Job"
+          aria-label={t('letters.job')}
           value={record.jobId ?? ''}
           onChange={(e) => {
             const jobId = e.target.value || null
@@ -111,10 +114,10 @@ function LinkBar({ record }: { record: CoverLetterRecord }) {
           }}
           className={select}
         >
-          <option value="">— None —</option>
+          <option value="">{t('common.none')}</option>
           {jobs.map((job) => (
             <option key={job.id} value={job.id}>
-              {job.position} at {job.company}
+              {t('letters.jobOption', { position: job.position, company: job.company })}
             </option>
           ))}
         </select>
@@ -133,6 +136,7 @@ function LetterEditor({ record }: { record: CoverLetterRecord }) {
   const rename = useRenameLetter()
   const remember = useRememberLetter()
   const notify = useEditorUi((s) => s.notify)
+  const { t } = useTranslation()
   const [sharing, setSharing] = useState(false)
   const current = letter ?? record.document
   const aiTarget = useLetterAiTarget(record, current)
@@ -166,7 +170,7 @@ function LetterEditor({ record }: { record: CoverLetterRecord }) {
               onRename={(title) =>
                 rename.mutate(
                   { id: record.id, title },
-                  { onError: (e) => notify(`Not renamed: ${toApiRequestError(e).message}`) },
+                  { onError: (e) => notify(t('letters.notRenamed', { message: errorMessage(e) })) },
                 )
               }
             />
@@ -177,7 +181,7 @@ function LetterEditor({ record }: { record: CoverLetterRecord }) {
           banner={
             <>
               <ConflictBanner
-                what="cover letter"
+                what={t('letters.conflictWhat')}
                 reload={async () => {
                   const latest = await coverLetterApi.get(record.id)
                   remember(latest)
@@ -190,7 +194,7 @@ function LetterEditor({ record }: { record: CoverLetterRecord }) {
           }
           undoRedo={{ canUndo, canRedo, undo: store.undo, redo: store.redo }}
           onDownload={() => {
-            notify('In the print dialog, choose “Save as PDF” as the destination.')
+            notify(t('letters.printHint'))
             printLetter(useLetterEditor.getState().letter ?? record.document, record.title)
           }}
           onShare={() => setSharing(true)}

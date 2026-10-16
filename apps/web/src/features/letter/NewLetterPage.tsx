@@ -1,13 +1,13 @@
 import { createCoverLetter, CV_LANGUAGES, type CvLanguage } from '@cv/shared'
 import { LoaderCircle } from 'lucide-react'
 import { useMemo, useState, type FormEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useSearchParams } from 'react-router'
 import { card, PageHeader, primaryButton, secondaryButton } from '../../components/PageHeader'
 import { LetterThumbnail } from '../../cv-renderer'
-import { toApiRequestError } from '../../lib/api'
+import { errorMessage } from '../../lib/errorMessage'
 import { useCv, useCvList } from '../../lib/cvQueries'
 import { useJobs } from '../../lib/jobQueries'
-import { CV_LANGUAGE_NAMES } from '../../lib/languages'
 import { useCreateLetter } from '../../lib/letterQueries'
 
 const field =
@@ -19,6 +19,7 @@ const field =
  * `?cvId=` and `?jobId=` preselect them (e.g. from a saved job).
  */
 export function NewLetterPage() {
+  const { t } = useTranslation()
   const [params] = useSearchParams()
   const navigate = useNavigate()
   const cvs = useCvList()
@@ -35,7 +36,9 @@ export function NewLetterPage() {
   const [chosenLanguage, setLanguage] = useState<CvLanguage | null>(null)
   const language = chosenLanguage ?? cv?.document.language ?? 'en-US'
   const [chosenTitle, setTitle] = useState<string | null>(null)
-  const title = chosenTitle ?? (job ? `Cover letter – ${job.company}` : 'Cover letter')
+  const title =
+    chosenTitle ??
+    (job ? t('letters.defaultTitleCompany', { company: job.company }) : t('letters.defaultTitle'))
 
   const cvDocument = cvId ? (cv?.document ?? null) : null
   const company = job?.company ?? ''
@@ -61,18 +64,18 @@ export function NewLetterPage() {
   return (
     <>
       <PageHeader
-        title="Create a cover letter"
-        description="It takes your name, contacts and design from the CV, so letter and CV match."
+        title={t('letters.newTitle')}
+        description={t('letters.newDescription')}
         actions={
           <Link to="/documents/cover-letters" className={secondaryButton}>
-            Cancel
+            {t('common.cancel')}
           </Link>
         }
       />
       <form onSubmit={submit} className="grid gap-6 lg:grid-cols-[1fr_auto]">
         <div className={`${card} space-y-4 p-5`}>
           <label className="block space-y-1 text-sm">
-            <span className="font-medium">CV</span>
+            <span className="font-medium">{t('letters.cv')}</span>
             <select
               value={cvId}
               onChange={(e) => {
@@ -81,7 +84,7 @@ export function NewLetterPage() {
               }}
               className={field}
             >
-              <option value="">No CV (empty header)</option>
+              <option value="">{t('letters.noCv')}</option>
               {cvOptions.map((option) => (
                 <option key={option.id} value={option.id}>
                   {option.title}
@@ -90,21 +93,21 @@ export function NewLetterPage() {
             </select>
           </label>
           <label className="block space-y-1 text-sm">
-            <span className="font-medium">Job (optional)</span>
+            <span className="font-medium">{t('letters.jobOptional')}</span>
             <select value={jobId} onChange={(e) => setJobId(e.target.value)} className={field}>
-              <option value="">— None —</option>
+              <option value="">{t('common.none')}</option>
               {jobs.map((option) => (
                 <option key={option.id} value={option.id}>
-                  {option.position} at {option.company}
+                  {t('letters.jobOption', { position: option.position, company: option.company })}
                 </option>
               ))}
             </select>
             <span className="block text-xs text-slate-500 dark:text-slate-400">
-              Fills in the company, and the job's “Cover letter” column links to this letter.
+              {t('letters.jobHint')}
             </span>
           </label>
           <label className="block space-y-1 text-sm">
-            <span className="font-medium">Letter language</span>
+            <span className="font-medium">{t('letters.letterLanguage')}</span>
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value as CvLanguage)}
@@ -112,13 +115,13 @@ export function NewLetterPage() {
             >
               {CV_LANGUAGES.map((code) => (
                 <option key={code} value={code}>
-                  {CV_LANGUAGE_NAMES[code]}
+                  {t(`labels.cvLanguage.${code}`)}
                 </option>
               ))}
             </select>
           </label>
           <label className="block space-y-1 text-sm">
-            <span className="font-medium">Name</span>
+            <span className="font-medium">{t('letters.name')}</span>
             <input
               value={title}
               maxLength={200}
@@ -128,7 +131,7 @@ export function NewLetterPage() {
           </label>
           {create.isError && (
             <p role="alert" className="text-sm text-red-600 dark:text-red-400">
-              Could not create the cover letter: {toApiRequestError(create.error).message}
+              {t('letters.createFailed', { message: errorMessage(create.error) })}
             </p>
           )}
           <button
@@ -137,7 +140,7 @@ export function NewLetterPage() {
             className={primaryButton}
           >
             {create.isPending && <LoaderCircle className="size-4 animate-spin" aria-hidden />}
-            {create.isPending ? 'Creating…' : 'Create cover letter'}
+            {create.isPending ? t('letters.creating') : t('letters.create')}
           </button>
         </div>
         <div className="flex justify-center lg:block">

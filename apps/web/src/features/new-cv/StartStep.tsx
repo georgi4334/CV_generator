@@ -1,6 +1,5 @@
 import {
   CV_LANGUAGES,
-  PROFESSIONS,
   type CvDocument,
   type CvLanguage,
   type ProfessionId,
@@ -8,13 +7,13 @@ import {
 } from '@cv/shared'
 import { LoaderCircle } from 'lucide-react'
 import { useMemo, useState, type FormEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 import { card, primaryButton } from '../../components/PageHeader'
 import { CvThumbnail } from '../../cv-renderer'
 import type { RenderMode } from '../../cv-renderer/context'
-import { toApiRequestError } from '../../lib/api'
+import { errorMessage } from '../../lib/errorMessage'
 import { useCreateCv } from '../../lib/cvQueries'
-import { CV_LANGUAGE_NAMES } from '../../lib/languages'
 import { buildNewCv, type StartFrom } from './buildNewCv'
 
 const field =
@@ -74,11 +73,14 @@ export function StartStep({
   professionId: ProfessionId | null
   templateId: TemplateId
 }) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const create = useCreateCv()
-  const profession = professionId ? PROFESSIONS[professionId] : null
+  const profession = professionId ? t(`labels.profession.${professionId}.name`) : null
   const [startFrom, setStartFrom] = useState<StartFrom>(profession ? 'example' : 'blank')
-  const [title, setTitle] = useState(profession ? `${profession.name} CV` : 'Untitled CV')
+  const [title, setTitle] = useState(
+    profession ? t('newCv.defaultTitle', { profession }) : t('newCv.untitled'),
+  )
   const [language, setLanguage] = useState<CvLanguage>('en-US')
 
   // Built once per choice, so the CV that is created is exactly the one previewed.
@@ -107,15 +109,15 @@ export function StartStep({
   return (
     <form onSubmit={submit} className="space-y-6">
       <fieldset>
-        <legend className="sr-only">How do you want to start?</legend>
+        <legend className="sr-only">{t('newCv.startLegend')}</legend>
         <div className="grid gap-4 md:grid-cols-2">
           {profession && documents.example && (
             <StartOption
               value="example"
               selected={startFrom === 'example'}
               onSelect={setStartFrom}
-              title="Start from an example"
-              description={`A complete ${profession.name} CV with sample text. Replace it with your own.`}
+              title={t('newCv.startExample')}
+              description={t('newCv.startExampleDescription', { profession })}
               cv={documents.example}
               mode="preview"
             />
@@ -124,11 +126,11 @@ export function StartStep({
             value="blank"
             selected={startFrom === 'blank'}
             onSelect={setStartFrom}
-            title="Start blank"
+            title={t('newCv.startBlank')}
             description={
               profession
-                ? `The sections a ${profession.name} CV usually has, ready to fill in.`
-                : 'A general layout with the most common sections, ready to fill in.'
+                ? t('newCv.startBlankProfession', { profession })
+                : t('newCv.startBlankGeneral')
             }
             cv={documents.blank}
             mode="edit"
@@ -136,14 +138,14 @@ export function StartStep({
         </div>
         {!profession && (
           <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
-            Examples are available when you choose a profession.
+            {t('newCv.examplesHint')}
           </p>
         )}
       </fieldset>
 
       <div className={`${card} flex flex-wrap items-end gap-4 p-4`}>
         <label className="flex min-w-56 flex-1 flex-col gap-1 text-sm">
-          <span className="font-medium">CV name</span>
+          <span className="font-medium">{t('newCv.cvName')}</span>
           <input
             value={title}
             maxLength={200}
@@ -152,7 +154,7 @@ export function StartStep({
           />
         </label>
         <label className="flex min-w-48 flex-col gap-1 text-sm">
-          <span className="font-medium">CV language</span>
+          <span className="font-medium">{t('newCv.cvLanguage')}</span>
           <select
             value={language}
             onChange={(e) => setLanguage(e.target.value as CvLanguage)}
@@ -160,20 +162,18 @@ export function StartStep({
           >
             {CV_LANGUAGES.map((code) => (
               <option key={code} value={code}>
-                {CV_LANGUAGE_NAMES[code]}
+                {t(`labels.cvLanguage.${code}`)}
               </option>
             ))}
           </select>
         </label>
         <button type="submit" disabled={create.isPending} className={primaryButton}>
           {create.isPending && <LoaderCircle className="size-4 animate-spin" aria-hidden />}
-          {create.isPending ? 'Creating…' : 'Create CV'}
+          {create.isPending ? t('newCv.creating') : t('newCv.createCv')}
         </button>
       </div>
       <p className="-mt-3 text-xs text-slate-500 dark:text-slate-400">
-        The CV language sets section titles and date formats
-        {startFrom === 'example' ? '; the example text itself is in English.' : '.'} You can change
-        it later in Templates.
+        {startFrom === 'example' ? t('newCv.languageNoteExample') : t('newCv.languageNote')}
       </p>
 
       {create.isError && (
@@ -181,7 +181,7 @@ export function StartStep({
           role="alert"
           className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-900 dark:border-red-900 dark:bg-red-950/60 dark:text-red-200"
         >
-          Could not create the CV: {toApiRequestError(create.error).message}
+          {t('newCv.createFailed', { message: errorMessage(create.error) })}
         </p>
       )}
     </form>

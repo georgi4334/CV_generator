@@ -7,8 +7,9 @@ import {
   type TemplateId,
 } from '@cv/shared'
 import { useId, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { RecommendedBadge } from '../../components/Badges'
-import { CvThumbnail, getTemplate, withTemplate } from '../../cv-renderer'
+import { CvThumbnail, withTemplate } from '../../cv-renderer'
 import { FALLBACK_EXAMPLE } from './buildNewCv'
 
 function TemplateGroup({
@@ -24,6 +25,7 @@ function TemplateGroup({
   sample: CvDocument
   onChoose: (id: TemplateId) => void
 }) {
+  const { t } = useTranslation()
   const headingId = useId()
   return (
     <section aria-labelledby={headingId}>
@@ -43,7 +45,7 @@ function TemplateGroup({
             >
               <CvThumbnail cv={withTemplate(sample, id)} width={180} />
               <span className="flex items-center gap-2 text-sm font-medium">
-                {getTemplate(id).name}
+                {t(`labels.template.${id}`)}
                 {recommended && (
                   <>
                     {' '}
@@ -66,6 +68,7 @@ export function TemplateStep({
   professionId: ProfessionId | null
   onChoose: (id: TemplateId) => void
 }) {
+  const { t } = useTranslation()
   const sample = useMemo(() => createExampleCv(professionId ?? FALLBACK_EXAMPLE), [professionId])
   const recommended = professionId ? PROFESSIONS[professionId].recommendedTemplates : []
   const others = TEMPLATE_IDS.filter((id) => !recommended.includes(id))
@@ -74,7 +77,9 @@ export function TemplateStep({
     <div className="space-y-8">
       {professionId && (
         <TemplateGroup
-          title={`Recommended for ${PROFESSIONS[professionId].name}`}
+          title={t('newCv.recommendedFor', {
+            profession: t(`labels.profession.${professionId}.name`),
+          })}
           ids={recommended}
           recommended
           sample={sample}
@@ -82,12 +87,12 @@ export function TemplateStep({
         />
       )}
       <TemplateGroup
-        title={professionId ? 'More templates' : 'All templates'}
+        title={professionId ? t('newCv.moreTemplates') : t('newCv.allTemplates')}
         ids={others}
         sample={sample}
         onChoose={onChoose}
       />
-      <p className="text-xs text-slate-500 dark:text-slate-400">Previews show sample content.</p>
+      <p className="text-xs text-slate-500 dark:text-slate-400">{t('newCv.previewsNote')}</p>
     </div>
   )
 }
