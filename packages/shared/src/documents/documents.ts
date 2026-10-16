@@ -1,7 +1,7 @@
 import { z } from 'zod'
-import { CoverLetterDocumentSchema } from './coverLetter'
-import { IdSchema } from './cv/common'
-import { CvDocumentSchema } from './cv/document'
+import { CoverLetterDocumentSchema } from '../cover-letter/coverLetter'
+import { IdSchema } from '../cv/common'
+import { CvDocumentSchema } from '../cv/document'
 
 export const DocumentTypeSchema = z.enum(['cv', 'coverLetter'])
 export type DocumentType = z.infer<typeof DocumentTypeSchema>

@@ -1,5 +1,5 @@
-import type { Column, SectionType } from './cv/sections'
-import type { TemplateId } from './cv/design'
+import type { Column, SectionType } from './sections'
+import type { TemplateId } from './design'
 
 export const PROFESSION_IDS = [
   'software-developer',

@@ -1,8 +1,8 @@
 import { z } from 'zod'
-import { IdSchema } from './cv/common'
-import { CoverLetterDocumentSchema } from './coverLetter'
-import { CvDocumentSchema } from './cv/document'
-import { PROFESSION_IDS } from './professions'
+import { IdSchema } from '../cv/common'
+import { CoverLetterDocumentSchema } from '../cover-letter/coverLetter'
+import { CvDocumentSchema } from '../cv/document'
+import { PROFESSION_IDS } from '../cv/professions'
 
 /** Shape of every error response from the API. */
 export const ApiErrorSchema = z.object({

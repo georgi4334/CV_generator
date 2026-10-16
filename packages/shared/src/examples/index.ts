@@ -1,5 +1,5 @@
 import type { CvDocument } from '../cv/document'
-import type { ProfessionId } from '../professions'
+import type { ProfessionId } from '../cv/professions'
 import { buildExample, range } from './build'
 
 const examples: Record<ProfessionId, () => CvDocument> = {

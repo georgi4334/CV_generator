@@ -1,8 +1,8 @@
 import { z } from 'zod'
-import { CvLanguageSchema, type CvLanguage } from './cv/common'
-import { CvDesignSchema, DEFAULT_DESIGN } from './cv/design'
-import type { CvDocument } from './cv/document'
-import { CvHeaderSchema, type CvHeader } from './cv/header'
+import { CvLanguageSchema, type CvLanguage } from '../cv/common'
+import { CvDesignSchema, DEFAULT_DESIGN } from '../cv/design'
+import type { CvDocument } from '../cv/document'
+import { CvHeaderSchema, type CvHeader } from '../cv/header'
 
 export const COVER_LETTER_SCHEMA_VERSION = 1
 

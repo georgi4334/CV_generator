@@ -31,6 +31,34 @@ export default tseslint.config(
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     },
   },
+  // Folder rules (docs/ARCHITECTURE.md): use '@/…' instead of long relative paths.
+  {
+    files: ['apps/web/src/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        { patterns: [{ group: ['../../*'], message: "Use the '@/…' alias." }] },
+      ],
+    },
+  },
+  // shared/ and renderer/ are used by features, so they must not depend on them.
+  {
+    files: ['apps/web/src/shared/**/*.{ts,tsx}', 'apps/web/src/renderer/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            { group: ['../../*'], message: "Use the '@/…' alias." },
+            {
+              group: ['@/features/*', '@/app/*'],
+              message: 'shared/ and renderer/ must not import features or app.',
+            },
+          ],
+        },
+      ],
+    },
+  },
   {
     rules: {
       '@typescript-eslint/no-unused-vars': [

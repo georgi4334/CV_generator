@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import { CoverLetterDocumentSchema } from './coverLetter'
-import { CvDocumentSchema } from './cv/document'
+import { CoverLetterDocumentSchema } from '../cover-letter/coverLetter'
+import { CvDocumentSchema } from '../cv/document'
 
 /** A public, read-only link to a document. Off by default. */
 export const ShareLinkSchema = z.object({

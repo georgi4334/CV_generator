@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { CvDocumentSchema } from '../cv/document'
-import { PROFESSION_IDS, PROFESSIONS } from '../professions'
+import { PROFESSION_IDS, PROFESSIONS } from '../cv/professions'
 import { createExampleCv } from './index'
 
 describe.each(PROFESSION_IDS)('example CV: %s', (professionId) => {

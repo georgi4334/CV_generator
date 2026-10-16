@@ -8,8 +8,8 @@ import {
   matchKeywords,
   TailorInputSchema,
 } from './ai'
-import { createCoverLetter } from './coverLetter'
-import { createExampleCv } from './examples'
+import { createCoverLetter } from '../cover-letter/coverLetter'
+import { createExampleCv } from '../examples'
 
 describe('cvFields', () => {
   it('lists the visible text with editor paths and readable labels', () => {

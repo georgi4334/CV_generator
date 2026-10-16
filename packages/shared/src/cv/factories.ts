@@ -1,4 +1,4 @@
-import { createId } from '../id'
+import { createId } from '../common/id'
 import type { CvLanguage } from './common'
 import { DEFAULT_DESIGN } from './design'
 import { CV_SCHEMA_VERSION, type CvDocument } from './document'

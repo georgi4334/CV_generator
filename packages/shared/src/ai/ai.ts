@@ -1,8 +1,8 @@
 import { z } from 'zod'
-import type { CoverLetterDocument } from './coverLetter'
-import { CvLanguageSchema, type CvLanguage } from './cv/common'
-import type { CvDocument } from './cv/document'
-import type { Section } from './cv/sections'
+import type { CoverLetterDocument } from '../cover-letter/coverLetter'
+import { CvLanguageSchema, type CvLanguage } from '../cv/common'
+import type { CvDocument } from '../cv/document'
+import type { Section } from '../cv/sections'
 
 /*
  * AI features (Step 16): Fix Mistakes, Check & Tailor and the AI Assistant.

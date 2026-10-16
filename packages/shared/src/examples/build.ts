@@ -2,7 +2,7 @@ import { DEFAULT_DESIGN, type CvDesign } from '../cv/design'
 import { CV_SCHEMA_VERSION, type CvDocument } from '../cv/document'
 import type { CvHeader } from '../cv/header'
 import type { Section } from '../cv/sections'
-import { createId } from '../id'
+import { createId } from '../common/id'
 
 type WithoutId<T> = T extends unknown ? Omit<T, 'id'> : never
 type ItemInput<S> = S extends { items: Array<infer I> } ? Omit<I, 'id'> : never

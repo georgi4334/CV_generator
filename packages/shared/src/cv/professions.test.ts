@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { TEMPLATE_IDS } from './cv/design'
+import { TEMPLATE_IDS } from './design'
 import { isProfessionId, PROFESSION_IDS, PROFESSIONS } from './professions'
 
 describe('professions', () => {

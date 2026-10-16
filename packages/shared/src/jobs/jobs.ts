@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import { JOB_DESCRIPTION_MAX } from './ai'
-import { IdSchema } from './cv/common'
+import { JOB_DESCRIPTION_MAX } from '../ai/ai'
+import { IdSchema } from '../cv/common'
 
 export const JOB_STATUSES = [
   'to_apply',

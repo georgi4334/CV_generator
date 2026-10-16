@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { createCoverLetter, CoverLetterDocumentSchema } from './coverLetter'
-import { createExampleCv } from './examples'
+import { createExampleCv } from '../examples'
 
 const today = new Date(2026, 9, 15)
 
