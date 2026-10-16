@@ -11,6 +11,7 @@ import {
   uuid,
   type AnyPgColumn,
   check,
+  primaryKey,
 } from 'drizzle-orm/pg-core'
 import { sql } from 'drizzle-orm'
 
@@ -158,6 +159,8 @@ export const jobs = pgTable(
     location: text('location').notNull().default(''),
     salary: text('salary').notNull().default(''),
     contact: text('contact').notNull().default(''),
+    /** The job posting text (Check & Tailor, letter drafts). */
+    description: text('description').notNull().default(''),
     createdAt: createdAt(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
@@ -183,4 +186,17 @@ export const coverLetters = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index('cover_letters_user_updated_idx').on(t.userId, t.updatedAt.desc())],
+)
+
+/** AI requests per user and day (UTC), for the plan's daily limit. */
+export const aiUsage = pgTable(
+  'ai_usage',
+  {
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    day: date('day').notNull(),
+    count: integer('count').notNull().default(0),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.day] })],
 )

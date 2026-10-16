@@ -22,6 +22,8 @@ import { EditorLayout } from '../editor/EditorLayout'
 import { LoadError, PageLoading } from '../editor/LoadStates'
 import { SaveIndicator } from '../editor/SaveIndicator'
 import { useUndoShortcuts } from '../editor/useUndoShortcuts'
+import { AiTargetContext } from '../ai/aiTarget'
+import { useLetterAiTarget } from '../ai/useAiTargets'
 import { printLetter } from '../print/printCv'
 import { ShareDialog } from '../share/ShareDialog'
 import { useLetterEditor } from './letterEditorStore'
@@ -133,6 +135,7 @@ function LetterEditor({ record }: { record: CoverLetterRecord }) {
   const notify = useEditorUi((s) => s.notify)
   const [sharing, setSharing] = useState(false)
   const current = letter ?? record.document
+  const aiTarget = useLetterAiTarget(record, current)
 
   const designTarget = useMemo<DesignTarget>(
     () => ({
@@ -154,59 +157,61 @@ function LetterEditor({ record }: { record: CoverLetterRecord }) {
 
   return (
     <DesignTargetContext.Provider value={designTarget}>
-      <EditorLayout
-        kind="coverLetter"
-        title={
-          <EditableTitle
-            value={record.title}
-            onRename={(title) =>
-              rename.mutate(
-                { id: record.id, title },
-                { onError: (e) => notify(`Not renamed: ${toApiRequestError(e).message}`) },
-              )
-            }
-          />
-        }
-        status={<SaveIndicator />}
-        backTo="/documents/cover-letters"
-        previewTo={`/cover-letters/${record.id}/preview`}
-        banner={
-          <>
-            <ConflictBanner
-              what="cover letter"
-              reload={async () => {
-                const latest = await coverLetterApi.get(record.id)
-                remember(latest)
-                loadLetterIntoEditor(latest)
-              }}
-              overwrite={overwriteLetterServerCopy}
+      <AiTargetContext.Provider value={aiTarget}>
+        <EditorLayout
+          kind="coverLetter"
+          title={
+            <EditableTitle
+              value={record.title}
+              onRename={(title) =>
+                rename.mutate(
+                  { id: record.id, title },
+                  { onError: (e) => notify(`Not renamed: ${toApiRequestError(e).message}`) },
+                )
+              }
             />
-            <LinkBar record={record} />
-          </>
-        }
-        undoRedo={{ canUndo, canRedo, undo: store.undo, redo: store.redo }}
-        onDownload={() => {
-          notify('In the print dialog, choose “Save as PDF” as the destination.')
-          printLetter(useLetterEditor.getState().letter ?? record.document, record.title)
-        }}
-        onShare={() => setSharing(true)}
-      >
-        <LetterRenderer
-          letter={current}
-          mode="edit"
-          editor={letterEditorApi}
-          actions={letterActions}
-          pageClassName="shrink-0 shadow-lg"
-        />
-        {sharing && (
-          <ShareDialog
-            type="coverLetter"
-            id={record.id}
-            title={record.title}
-            onClose={() => setSharing(false)}
+          }
+          status={<SaveIndicator />}
+          backTo="/documents/cover-letters"
+          previewTo={`/cover-letters/${record.id}/preview`}
+          banner={
+            <>
+              <ConflictBanner
+                what="cover letter"
+                reload={async () => {
+                  const latest = await coverLetterApi.get(record.id)
+                  remember(latest)
+                  loadLetterIntoEditor(latest)
+                }}
+                overwrite={overwriteLetterServerCopy}
+              />
+              <LinkBar record={record} />
+            </>
+          }
+          undoRedo={{ canUndo, canRedo, undo: store.undo, redo: store.redo }}
+          onDownload={() => {
+            notify('In the print dialog, choose “Save as PDF” as the destination.')
+            printLetter(useLetterEditor.getState().letter ?? record.document, record.title)
+          }}
+          onShare={() => setSharing(true)}
+        >
+          <LetterRenderer
+            letter={current}
+            mode="edit"
+            editor={letterEditorApi}
+            actions={letterActions}
+            pageClassName="shrink-0 shadow-lg"
           />
-        )}
-      </EditorLayout>
+          {sharing && (
+            <ShareDialog
+              type="coverLetter"
+              id={record.id}
+              title={record.title}
+              onClose={() => setSharing(false)}
+            />
+          )}
+        </EditorLayout>
+      </AiTargetContext.Provider>
     </DesignTargetContext.Provider>
   )
 }

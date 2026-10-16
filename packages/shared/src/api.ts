@@ -99,9 +99,12 @@ export const PLANS = ['free', 'pro'] as const
 export type Plan = (typeof PLANS)[number]
 
 /** Per-plan limits, enforced by the API. `null` means unlimited. */
-export const PLAN_LIMITS: Record<Plan, { maxCvs: number | null; maxVersionsPerCv: number }> = {
-  free: { maxCvs: 20, maxVersionsPerCv: 30 },
-  pro: { maxCvs: null, maxVersionsPerCv: 200 },
+export const PLAN_LIMITS: Record<
+  Plan,
+  { maxCvs: number | null; maxVersionsPerCv: number; aiRequestsPerDay: number }
+> = {
+  free: { maxCvs: 20, maxVersionsPerCv: 30, aiRequestsPerDay: 30 },
+  pro: { maxCvs: null, maxVersionsPerCv: 200, aiRequestsPerDay: 300 },
 }
 
 export const UPLOAD_MAX_BYTES = 5 * 1024 * 1024

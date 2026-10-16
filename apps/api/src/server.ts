@@ -1,3 +1,5 @@
+import { createGeminiProvider } from './ai/gemini'
+import { createMockProvider } from './ai/mock'
 import { buildApp } from './app'
 import { createDb } from './db/client'
 import { createMigrator, runMigrations } from './db/migrate'
@@ -30,6 +32,14 @@ if (env.COOKIE_SAME_SITE === 'none' && !cookieSecure) {
   throw new Error('COOKIE_SAME_SITE=none requires COOKIE_SECURE=true')
 }
 
+const aiProvider = env.AI_PROVIDER ?? (env.GEMINI_API_KEY ? 'gemini' : 'off')
+if (aiProvider === 'gemini' && !env.GEMINI_API_KEY) {
+  throw new Error('AI_PROVIDER=gemini requires GEMINI_API_KEY')
+}
+if (aiProvider === 'mock' && env.NODE_ENV === 'production') {
+  throw new Error('AI_PROVIDER=mock is for development only')
+}
+
 const app = await buildApp({
   corsOrigin: env.CORS_ORIGIN,
   database,
@@ -45,6 +55,15 @@ const app = await buildApp({
   // Never hand a production database's first account someone else's data.
   claimDevData: env.NODE_ENV !== 'production',
   trustProxy: env.TRUST_PROXY,
+  ai: {
+    provider:
+      aiProvider === 'gemini'
+        ? createGeminiProvider({ apiKey: env.GEMINI_API_KEY, model: env.GEMINI_MODEL })
+        : aiProvider === 'mock'
+          ? createMockProvider()
+          : null,
+    maxPerMinute: env.AI_MAX_PER_MINUTE,
+  },
 })
 
 const shutdown = async () => {
