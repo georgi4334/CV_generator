@@ -1,5 +1,5 @@
 import type { ApiError } from '@cv/shared'
-import type { FastifyError, FastifyInstance } from 'fastify'
+import type { FastifyError, FastifyInstance, FastifyRequest } from 'fastify'
 import { ZodError } from 'zod'
 
 /** An error with an HTTP status and a stable code the frontend can check. */
@@ -55,7 +55,14 @@ const body = (code: string, message: string, details?: unknown): ApiError => ({
   error: { code, message, ...(details === undefined ? {} : { details }) },
 })
 
-export function registerErrorHandler(app: FastifyInstance, opts: { exposeErrors: boolean }) {
+export function registerErrorHandler(
+  app: FastifyInstance,
+  opts: {
+    exposeErrors: boolean
+    /** Reports unexpected server errors (e.g. to Sentry). */
+    onServerError?: (error: Error, request: FastifyRequest) => void
+  },
+) {
   app.setErrorHandler((error: FastifyError | Error, request, reply) => {
     if (error instanceof HttpError) {
       return reply.status(error.status).send(body(error.code, error.message, error.details))
@@ -78,6 +85,7 @@ export function registerErrorHandler(app: FastifyInstance, opts: { exposeErrors:
       return reply.status(status).send(body('bad_request', error.message))
     }
     request.log.error(error)
+    opts.onServerError?.(error, request)
     // In development show the cause, so problems can be diagnosed from the browser too.
     const details = opts.exposeErrors ? { cause: error.message } : undefined
     return reply

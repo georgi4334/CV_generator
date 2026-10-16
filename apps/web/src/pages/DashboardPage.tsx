@@ -106,13 +106,14 @@ function JobPipeline({ jobs }: { jobs: Job[] }) {
           <li key={status}>
             <Link
               to={`/jobs?status=${status}`}
-              aria-label={`${JOB_STATUS_LABELS[status]}: ${count}`}
               className="block rounded-md px-2 py-1.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-800/60"
             >
               <span className="flex items-center justify-between">
                 <span className="text-slate-600 dark:text-slate-300">
                   {JOB_STATUS_LABELS[status]}
                 </span>
+                {/* Read as "Applied: 3"; the colon is only for screen readers. */}
+                <span className="sr-only">:</span>{' '}
                 <span className="font-semibold tabular-nums">{count}</span>
               </span>
               <span className="mt-1 block h-1 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">

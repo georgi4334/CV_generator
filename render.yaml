@@ -1,0 +1,50 @@
+# Render Blueprint for the API (https://render.com/docs/blueprint-spec).
+# In Render: New → Blueprint → pick this repository. Secrets marked `sync: false`
+# are asked for once; see docs/DEPLOY.md for where each value comes from.
+services:
+  - type: web
+    name: cv-api
+    runtime: node
+    plan: free
+    region: frankfurt
+    branch: main
+    # pnpm through npx, so no global install is needed on the build machine.
+    buildCommand: npx --yes pnpm@10.28.0 install --frozen-lockfile && npx --yes pnpm@10.28.0 --filter @cv/api build
+    startCommand: node apps/api/dist/server.js
+    # A check that does not wake the database.
+    healthCheckPath: /api/ping
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: '22'
+      - key: STORAGE
+        value: r2
+      - key: MIGRATE_ON_START
+        value: 'true'
+      - key: TRUST_PROXY
+        value: 'true'
+      - key: DATABASE_URL
+        sync: false
+      - key: APP_URL
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+      - key: PROXY_SECRET
+        sync: false
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_BUCKET
+        sync: false
+      - key: BREVO_API_KEY
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: SENTRY_DSN
+        sync: false

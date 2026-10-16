@@ -25,6 +25,21 @@ const EnvSchema = z.object({
   GEMINI_MODEL: z.string().default('gemini-flash-latest'),
   /** AI requests per minute for the whole API (the provider's free quota is per minute too). */
   AI_MAX_PER_MINUTE: z.coerce.number().int().positive().default(10),
+  /** Where uploaded images go: local disk (development) or Cloudflare R2. */
+  STORAGE: z.enum(['local', 'r2']).default('local'),
+  R2_ACCOUNT_ID: z.string().default(''),
+  R2_ACCESS_KEY_ID: z.string().default(''),
+  R2_SECRET_ACCESS_KEY: z.string().default(''),
+  R2_BUCKET: z.string().default(''),
+  /** Brevo API key; without it emails are printed in the log. */
+  BREVO_API_KEY: z.string().default(''),
+  /** Sender of account emails; must be verified in Brevo. */
+  MAIL_FROM: z.string().default(''),
+  MAIL_FROM_NAME: z.string().default('CV Generator'),
+  /** Error reporting (sentry.io); off when empty. */
+  SENTRY_DSN: z.string().default(''),
+  /** Shared with the web app's proxy; when set, requests must come through it. */
+  PROXY_SECRET: z.string().default(''),
   TRUST_PROXY: z
     .enum(['true', 'false'])
     .default('false')

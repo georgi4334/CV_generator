@@ -6,4 +6,5 @@ export function safeNext(next: string | null): string {
   return next && next.startsWith('/') && !next.startsWith('//') ? next : '/'
 }
 
-export const linkClass = 'text-teal-700 hover:underline dark:text-teal-300'
+export const linkClass =
+  'text-teal-700 underline underline-offset-2 hover:text-teal-900 dark:text-teal-300 dark:hover:text-teal-200'

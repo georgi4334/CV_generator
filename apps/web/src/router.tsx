@@ -1,26 +1,32 @@
 import { createBrowserRouter, Navigate, type RouteObject } from 'react-router'
-import { AccountPage } from './features/auth/AccountPage'
 import { ForgotPasswordPage } from './features/auth/ForgotPasswordPage'
 import { LoginPage } from './features/auth/LoginPage'
 import { RegisterPage } from './features/auth/RegisterPage'
 import { RequireAuth } from './features/auth/RequireAuth'
 import { ResetPasswordPage } from './features/auth/ResetPasswordPage'
 import { VerifyEmailPage } from './features/auth/VerifyEmailPage'
-import { EditorPage } from './features/editor/EditorPage'
-import { PreviewPage } from './features/editor/PreviewPage'
-import { NewLetterPage } from './features/letter/NewLetterPage'
-import { NewCvPage } from './features/new-cv/NewCvPage'
-import { SharedDocumentPage } from './features/share/SharedDocumentPage'
 import { AppLayout } from './layouts/AppLayout'
 import { RootLayout } from './layouts/RootLayout'
-import { DashboardPage } from './pages/DashboardPage'
-import { DocumentsPage } from './pages/DocumentsPage'
-import { JobsPage } from './pages/JobsPage'
+import {
+  AccountPage,
+  DashboardPage,
+  DocumentsPage,
+  EditorPage,
+  JobsPage,
+  NewCvPage,
+  NewLetterPage,
+  PreviewPage,
+  PrivacyPage,
+  SharedDocumentPage,
+  TermsPage,
+} from './pages/lazyPages'
+import { ErrorPage } from './pages/ErrorPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 
 export const routes: RouteObject[] = [
   {
     element: <RootLayout />,
+    errorElement: <ErrorPage />,
     children: [
       // Everything that needs an account.
       {
@@ -53,6 +59,8 @@ export const routes: RouteObject[] = [
       { path: 'forgot-password', element: <ForgotPasswordPage /> },
       { path: 'reset-password', element: <ResetPasswordPage /> },
       { path: 'verify-email', element: <VerifyEmailPage /> },
+      { path: 'privacy', element: <PrivacyPage /> },
+      { path: 'terms', element: <TermsPage /> },
       // Public, read-only: a CV or cover letter someone shared.
       { path: 's/:slug', element: <SharedDocumentPage /> },
       { path: '*', element: <NotFoundPage /> },

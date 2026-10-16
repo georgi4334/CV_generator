@@ -45,7 +45,7 @@ function Stepper({
             <span
               className={`flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
                 i <= step
-                  ? 'bg-teal-600 text-white'
+                  ? 'bg-teal-700 text-white'
                   : 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
               }`}
             >

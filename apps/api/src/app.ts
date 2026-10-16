@@ -1,6 +1,7 @@
 import cookie from '@fastify/cookie'
 import cors from '@fastify/cors'
-import Fastify from 'fastify'
+import Fastify, { type FastifyRequest } from 'fastify'
+import { timingSafeEqual } from 'node:crypto'
 import type { CookieSettings } from './auth/sessions'
 import type { Database } from './db/client'
 import { databaseUnavailable, HttpError, registerErrorHandler } from './lib/errors'
@@ -38,6 +39,13 @@ export interface AppOptions {
   trustProxy?: boolean
   /** The AI service; absent or null turns the AI features off. */
   ai?: { provider: AiProvider | null; maxPerMinute?: number }
+  /**
+   * Set when the API sits behind the web app's proxy (Cloudflare Pages Function):
+   * requests must carry it, and the client address comes from the proxy.
+   */
+  proxySecret?: string
+  /** Reports unexpected server errors (e.g. to Sentry). */
+  onServerError?: (error: Error, request: FastifyRequest) => void
 }
 
 export async function buildApp(opts: AppOptions) {
@@ -46,7 +54,38 @@ export async function buildApp(opts: AppOptions) {
     bodyLimit: 2 * 1024 * 1024,
     trustProxy: opts.trustProxy ?? false,
   })
-  registerErrorHandler(app, { exposeErrors: opts.exposeErrors ?? false })
+  registerErrorHandler(app, {
+    exposeErrors: opts.exposeErrors ?? false,
+    onServerError: opts.onServerError,
+  })
+
+  // Requests that skip the web app's proxy are refused; health checks and the
+  // keep-warm ping stay open so the host can reach them directly.
+  const secret = opts.proxySecret ? Buffer.from(opts.proxySecret) : null
+  const OPEN_PATHS = new Set(['/api/health', '/api/ping'])
+  app.decorateRequest('clientIp', '')
+  app.addHook('onRequest', async (request) => {
+    request.clientIp = request.ip
+    if (!secret) return
+    const path = request.url.split('?')[0]!
+    if (OPEN_PATHS.has(path)) return
+    const given = Buffer.from(String(request.headers['x-proxy-secret'] ?? ''))
+    if (given.length !== secret.length || !timingSafeEqual(given, secret)) {
+      throw new HttpError(403, 'forbidden', 'Use the web app to reach this API')
+    }
+    const forwarded = request.headers['x-client-ip']
+    if (typeof forwarded === 'string' && forwarded.length > 0 && forwarded.length <= 100) {
+      request.clientIp = forwarded
+    }
+  })
+
+  // Basic hardening headers; the API only serves JSON and uploaded images.
+  app.addHook('onSend', async (_request, reply) => {
+    reply.header('X-Content-Type-Options', 'nosniff')
+    reply.header('Referrer-Policy', 'no-referrer')
+    reply.header('X-Frame-Options', 'DENY')
+    reply.header('Cross-Origin-Resource-Policy', 'same-site')
+  })
 
   const allowedOrigins = opts.corsOrigin.split(',').map((origin) => origin.trim())
   await app.register(cookie)
@@ -76,6 +115,9 @@ export async function buildApp(opts: AppOptions) {
     async (api) => {
       // Public routes
       await api.register(healthRoutes, { isDbHealthy: opts.database.isHealthy })
+      // For keep-warm services: answers without touching the database, so the
+      // database can still sleep when nobody uses the app.
+      api.get('/ping', async () => ({ ok: true }))
       await api.register(professionRoutes)
       await api.register(publicUploadRoutes, { database, storage: opts.storage })
 

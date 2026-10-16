@@ -81,7 +81,7 @@ export function ShareDialog({
                 update.mutate({ isActive: !active })
               }}
               className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-60 ${
-                active ? 'bg-teal-600' : 'bg-slate-300 dark:bg-slate-600'
+                active ? 'bg-teal-700' : 'bg-slate-300 dark:bg-slate-600'
               }`}
             >
               <span

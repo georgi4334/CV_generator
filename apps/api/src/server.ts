@@ -1,10 +1,27 @@
+import * as Sentry from '@sentry/node'
 import { createGeminiProvider } from './ai/gemini'
 import { createMockProvider } from './ai/mock'
 import { buildApp } from './app'
 import { createDb } from './db/client'
 import { createMigrator, runMigrations } from './db/migrate'
+import { productionProblems, productionWarnings } from './config'
 import { env } from './env'
+import { createBrevoMailer, createLogMailer } from './lib/mailer'
+import { createR2Storage } from './lib/r2Storage'
 import { createLocalStorage } from './lib/storage'
+
+const problems = productionProblems(env)
+if (problems.length) {
+  console.error(
+    `The API is not configured for production:\n- ${problems.join('\n- ')}\nSee docs/DEPLOY.md.`,
+  )
+  process.exit(1)
+}
+for (const warning of productionWarnings(env)) console.warn(`Warning: ${warning}`)
+
+if (env.SENTRY_DSN) {
+  Sentry.init({ dsn: env.SENTRY_DSN, environment: env.NODE_ENV, tracesSampleRate: 0 })
+}
 
 const database = createDb(env.DATABASE_URL)
 
@@ -43,7 +60,31 @@ if (aiProvider === 'mock' && env.NODE_ENV === 'production') {
 const app = await buildApp({
   corsOrigin: env.CORS_ORIGIN,
   database,
-  storage: createLocalStorage(env.UPLOAD_DIR),
+  storage:
+    env.STORAGE === 'r2'
+      ? createR2Storage({
+          accountId: env.R2_ACCOUNT_ID,
+          accessKeyId: env.R2_ACCESS_KEY_ID,
+          secretAccessKey: env.R2_SECRET_ACCESS_KEY,
+          bucket: env.R2_BUCKET,
+        })
+      : createLocalStorage(env.UPLOAD_DIR),
+  mailer: env.BREVO_API_KEY
+    ? createBrevoMailer({
+        apiKey: env.BREVO_API_KEY,
+        from: { email: env.MAIL_FROM, name: env.MAIL_FROM_NAME },
+      })
+    : createLogMailer(),
+  proxySecret: env.PROXY_SECRET || undefined,
+  onServerError: env.SENTRY_DSN
+    ? (error, request) =>
+        Sentry.withScope((scope) => {
+          // Only the route and the user id; never request bodies (CVs are personal data).
+          scope.setTag('route', request.routeOptions.url ?? 'unknown')
+          if (request.user) scope.setUser({ id: request.user.id })
+          Sentry.captureException(error)
+        })
+    : undefined,
   ensureMigrated,
   exposeErrors: env.NODE_ENV !== 'production',
   logger: true,
@@ -68,6 +109,7 @@ const app = await buildApp({
 
 const shutdown = async () => {
   await app.close()
+  await Sentry.close(2000)
   await database.close()
   process.exit(0)
 }

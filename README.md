@@ -68,11 +68,24 @@ Fix Mistakes, Check & Tailor and the AI Assistant use Google Gemini. Get a free 
 
 Each account can make 30 AI requests per day on the free plan.
 
+## Tests
+
+- `pnpm test`: unit and API tests (the API tests use the Postgres from `pnpm db:up`).
+- `pnpm e2e`: browser tests with Playwright against the production builds, a fresh
+  `cv_generator_e2e` database and the mock AI, including automatic accessibility checks (axe).
+  The first time, install the browser: `pnpm --filter @cv/e2e exec playwright install chromium`.
+
+## Deployment
+
+Free plans: Cloudflare Pages (web), Render (API), Neon (database), Cloudflare R2 (images),
+Brevo (emails), Gemini (AI), Sentry (errors). Step-by-step guide: [`docs/DEPLOY.md`](docs/DEPLOY.md).
+
 ## Scripts
 
 | Command                             | What it does                                    |
 | ----------------------------------- | ----------------------------------------------- |
 | `pnpm dev`                          | Run web and api in watch mode                   |
+| `pnpm e2e`                          | Browser tests (Playwright)                      |
 | `pnpm build`                        | Build all packages                              |
 | `pnpm lint`                         | ESLint across the repo                          |
 | `pnpm typecheck`                    | TypeScript check in every package               |

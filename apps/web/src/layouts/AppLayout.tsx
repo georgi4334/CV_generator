@@ -3,6 +3,7 @@ import { NavLink, Outlet, useLocation } from 'react-router'
 import { ApiStatus } from '../components/ApiStatus'
 import { ThemeToggle } from '../components/ThemeToggle'
 import { UserMenu } from '../features/auth/UserMenu'
+import { LegalFooter } from '../pages/legal/LegalLayout'
 import { VerifyBanner } from '../features/auth/VerifyBanner'
 import { NEW_CV_PATH, NEW_LETTER_PATH } from '../lib/paths'
 import { useHealth } from '../lib/useHealth'
@@ -60,6 +61,7 @@ export function AppLayout() {
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8">
         <Outlet />
       </main>
+      <LegalFooter />
     </div>
   )
 }

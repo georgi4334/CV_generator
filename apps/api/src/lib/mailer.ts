@@ -31,3 +31,33 @@ export function createMemoryMailer(): Mailer & { outbox: Email[] } {
     },
   }
 }
+
+interface BrevoOptions {
+  apiKey: string
+  /** A sender address verified in Brevo. */
+  from: { email: string; name: string }
+  fetch?: typeof fetch
+}
+
+/** Sends through Brevo's transactional email API (free: 300 emails a day). */
+export function createBrevoMailer({ apiKey, from, fetch: doFetch = fetch }: BrevoOptions): Mailer {
+  return {
+    async send({ to, subject, text }) {
+      const response = await doFetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'api-key': apiKey,
+          'content-type': 'application/json',
+          accept: 'application/json',
+        },
+        body: JSON.stringify({ sender: from, to: [{ email: to }], subject, textContent: text }),
+        signal: AbortSignal.timeout(15_000),
+      })
+      if (!response.ok) {
+        throw new Error(
+          `Brevo answered ${response.status}: ${(await response.text()).slice(0, 300)}`,
+        )
+      }
+    },
+  }
+}

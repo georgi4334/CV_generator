@@ -4,7 +4,7 @@ import type { ApiRequestError } from '../../lib/api'
 
 export function PageLoading({ label = 'Loading…' }: { label?: string }) {
   return (
-    <div className="flex min-h-screen items-center justify-center gap-2 bg-slate-100 text-slate-500 dark:bg-slate-950">
+    <div className="flex min-h-screen items-center justify-center gap-2 bg-slate-100 text-slate-600 dark:bg-slate-950 dark:text-slate-400">
       <LoaderCircle className="size-5 animate-spin" /> {label}
     </div>
   )
@@ -19,7 +19,7 @@ export function LoadError({ error, onRetry }: { error: ApiRequestError; onRetry:
         <button
           type="button"
           onClick={onRetry}
-          className="rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white"
+          className="rounded-lg bg-teal-700 px-4 py-2 text-sm font-medium text-white"
         >
           Try again
         </button>
