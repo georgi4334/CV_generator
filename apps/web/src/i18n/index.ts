@@ -28,6 +28,9 @@ function storedLanguage(): UiLanguage | null {
   }
 }
 
+/** True when this browser has an explicit language choice. */
+export const hasStoredLanguage = () => storedLanguage() !== null
+
 /** The saved choice, else the browser's preferred languages, else English. */
 export function detectLanguage(): UiLanguage {
   const stored = storedLanguage()

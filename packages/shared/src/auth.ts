@@ -68,6 +68,11 @@ const ExistingPasswordSchema = z.string().min(1, 'Enter your password').max(PASS
 
 const NameSchema = z.string().trim().max(NAME_MAX_LENGTH)
 
+/** Languages of the interface and of account emails. */
+export const LOCALES = ['en', 'bg', 'de'] as const
+export const LocaleSchema = z.enum(LOCALES)
+export type Locale = z.infer<typeof LocaleSchema>
+
 /** What the browser may know about the signed-in user. */
 export const UserSchema = z.object({
   id: z.string(),
@@ -76,6 +81,8 @@ export const UserSchema = z.object({
   plan: z.enum(PLANS),
   /** The user opened the link in the verification email (or reset their password with one). */
   emailVerified: z.boolean(),
+  /** Interface language; account emails are written in it. */
+  locale: LocaleSchema,
   createdAt: z.iso.datetime(),
 })
 export type User = z.infer<typeof UserSchema>
@@ -84,6 +91,8 @@ export const RegisterInputSchema = z.object({
   email: EmailSchema,
   password: NewPasswordSchema,
   name: NameSchema.default(''),
+  /** The interface language when signing up; the confirmation email uses it. */
+  locale: LocaleSchema.default('en'),
 })
 export type RegisterInput = z.input<typeof RegisterInputSchema>
 
@@ -93,7 +102,11 @@ export const LoginInputSchema = z.object({
 })
 export type LoginInput = z.input<typeof LoginInputSchema>
 
-export const ForgotPasswordInputSchema = z.object({ email: EmailSchema })
+export const ForgotPasswordInputSchema = z.object({
+  email: EmailSchema,
+  /** Language of the reset email (the interface language at the time). */
+  locale: LocaleSchema.optional(),
+})
 export type ForgotPasswordInput = z.input<typeof ForgotPasswordInputSchema>
 
 /** Links in emails carry a 43-character token; anything else cannot be one. */
@@ -113,7 +126,9 @@ export const ChangePasswordInputSchema = z.object({
 })
 export type ChangePasswordInput = z.input<typeof ChangePasswordInputSchema>
 
-export const UpdateProfileInputSchema = z.object({ name: NameSchema })
+export const UpdateProfileInputSchema = z
+  .object({ name: NameSchema.optional(), locale: LocaleSchema.optional() })
+  .refine((input) => input.name !== undefined || input.locale !== undefined, 'Nothing to update')
 export type UpdateProfileInput = z.input<typeof UpdateProfileInputSchema>
 
 export const DeleteAccountInputSchema = z.object({ password: ExistingPasswordSchema })

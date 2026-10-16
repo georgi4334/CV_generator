@@ -264,6 +264,54 @@ describe.skipIf(!dbAvailable)('auth API', () => {
     })
   })
 
+  describe('language of account emails', () => {
+    it('writes the confirmation in the language chosen at sign-up and remembers it', async () => {
+      const app = await freshApp()
+      const res = await post(app, '/register', {
+        email: 'bg@example.com',
+        password: PASSWORD,
+        locale: 'bg',
+      })
+      expect(res.json().user.locale).toBe('bg')
+      expect(ctx.mailer.outbox[0]!.subject).toBe('Потвърдете имейл адреса си')
+      expect(ctx.mailer.outbox[0]!.text).toContain('/verify-email?token=')
+    })
+
+    it('writes the reset email in the language of the page, else the saved one', async () => {
+      const app = await freshApp()
+      const { cookie } = await register(app)
+      const patch = await app.inject({
+        method: 'PATCH',
+        url: '/api/auth/me',
+        payload: { locale: 'de' },
+        headers: { cookie },
+      })
+      expect(patch.json().user).toMatchObject({ locale: 'de', name: 'Ann' })
+      ctx.mailer.outbox.length = 0
+      await post(app, '/forgot-password', { email: 'ann@example.com' })
+      await post(app, '/forgot-password', { email: 'ann@example.com', locale: 'bg' })
+      await new Promise((r) => setTimeout(r, 10))
+      expect(ctx.mailer.outbox.map((m) => m.subject)).toEqual([
+        'Passwort zurücksetzen',
+        'Смяна на паролата',
+      ])
+    })
+
+    it('refuses unknown languages and empty updates', async () => {
+      const app = await freshApp()
+      const { cookie } = await register(app)
+      for (const payload of [{ locale: 'fr' }, {}]) {
+        const res = await app.inject({
+          method: 'PATCH',
+          url: '/api/auth/me',
+          payload,
+          headers: { cookie },
+        })
+        expect(res.statusCode).toBe(400)
+      }
+    })
+  })
+
   describe('email confirmation', () => {
     it('confirms with the link, once', async () => {
       const app = await freshApp()

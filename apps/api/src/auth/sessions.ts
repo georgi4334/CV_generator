@@ -1,4 +1,4 @@
-import type { Plan } from '@cv/shared'
+import type { Locale, Plan } from '@cv/shared'
 import { eq } from 'drizzle-orm'
 import type { Database } from '../db/client'
 import { sessions, users } from '../db/schema'
@@ -32,6 +32,7 @@ export interface SessionUser {
   email: string
   name: string
   emailVerified: boolean
+  locale: Locale
 }
 
 export async function createSession(
@@ -65,6 +66,7 @@ export async function findSession(
       email: users.email,
       name: users.name,
       emailVerifiedAt: users.emailVerifiedAt,
+      locale: users.locale,
     })
     .from(sessions)
     .innerJoin(users, eq(users.id, sessions.userId))
@@ -89,6 +91,7 @@ export async function findSession(
       email: row.email,
       name: row.name,
       emailVerified: row.emailVerifiedAt !== null,
+      locale: row.locale,
     },
   }
 }

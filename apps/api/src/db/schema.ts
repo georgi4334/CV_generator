@@ -1,4 +1,4 @@
-import type { CoverLetterDocument, CvDocument, JobStatus, JobType, Plan } from '@cv/shared'
+import type { CoverLetterDocument, CvDocument, JobStatus, JobType, Locale, Plan } from '@cv/shared'
 import {
   boolean,
   date,
@@ -26,6 +26,8 @@ export const users = pgTable('users', {
   /** scrypt hash; null for accounts that cannot log in with a password. */
   passwordHash: text('password_hash'),
   emailVerifiedAt: timestamp('email_verified_at', { withTimezone: true }),
+  /** Interface language; account emails are written in it. */
+  locale: text('locale').$type<Locale>().notNull().default('en'),
   createdAt: createdAt(),
 })
 

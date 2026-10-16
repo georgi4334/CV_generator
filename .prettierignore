@@ -3,3 +3,4 @@ dist/
 coverage/
 docs/ui-reference/
 apps/api/drizzle/
+.claude/

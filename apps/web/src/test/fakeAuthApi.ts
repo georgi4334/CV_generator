@@ -8,6 +8,7 @@ export const TEST_USER: User = {
   name: 'Ann',
   plan: 'free',
   emailVerified: true,
+  locale: 'en',
   createdAt: '2026-10-14T09:00:00.000Z',
 }
 
@@ -62,6 +63,11 @@ export function createFakeAuthApi() {
     async resendVerification() {
       calls.push('resend')
       signedIn()
+    },
+    async setLocale(locale) {
+      calls.push(`locale:${locale}`)
+      user = { ...signedIn(), locale }
+      return user
     },
     async updateProfile(name: string) {
       calls.push('profile')

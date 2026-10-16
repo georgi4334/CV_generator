@@ -1,6 +1,8 @@
+import { LOCALES, type Locale } from '@cv/shared'
+
 /** Languages of the app's interface (independent of each CV's own language). */
-export const UI_LANGUAGES = ['en', 'bg', 'de'] as const
-export type UiLanguage = (typeof UI_LANGUAGES)[number]
+export const UI_LANGUAGES = LOCALES
+export type UiLanguage = Locale
 
 /** Each language in its own name, as people look for it in a menu. */
 export const UI_LANGUAGE_NAMES: Record<UiLanguage, string> = {
