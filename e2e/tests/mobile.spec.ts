@@ -12,12 +12,21 @@ async function expectNoSideScroll(page: Page) {
 
 test('app pages fit a phone screen and use the bottom navigation', async ({ page }) => {
   await signUp(page)
-  for (const path of ['/', '/documents/all', '/jobs', '/cvs/new', '/account']) {
+  for (const path of ['/', '/documents/all', '/jobs', '/cvs/new']) {
     await page.goto(path)
     await page.getByRole('heading', { level: 1 }).first().waitFor()
     await expectNoSideScroll(page)
     await expectAccessible(page)
   }
+
+  // The account drawer fits the phone, opens its views and closes again.
+  await page.getByRole('button', { name: /^Account:/ }).click()
+  await page.getByRole('button', { name: /^Account settings/ }).click()
+  await expect(page.getByRole('dialog', { name: 'Account settings' })).toBeVisible()
+  await expectNoSideScroll(page)
+  await expectAccessible(page)
+  await page.getByRole('button', { name: 'Close' }).click()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
 
   // One main navigation, at the bottom of the screen.
   const nav = page.getByRole('navigation', { name: 'Main' })

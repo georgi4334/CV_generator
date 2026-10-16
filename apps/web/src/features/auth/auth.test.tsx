@@ -1,6 +1,7 @@
-import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react'
+import { cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useCvEditor } from '@/features/cv-editor/state/cvEditorStore'
+import { useThemeStore } from '@/shared/stores/theme'
 import type { FakeAuthApi } from '@/test/fakeAuthApi'
 import { TEST_USER } from '@/test/fakeAuthApi'
 import type { FakeCvApi } from '@/test/fakeCvApi'
@@ -177,9 +178,29 @@ describe('signed in', () => {
     cleanup()
   })
 
-  it('changes the name and the password on the account page', async () => {
-    renderRoute('/account')
-    await screen.findByRole('heading', { name: 'Account' })
+  it('opens account settings and the theme inside the drawer, with a back button', async () => {
+    renderRoute('/')
+    await screen.findByRole('heading', { name: 'Dashboard' })
+    click(/^Account:/)
+    const drawer = screen.getByRole('dialog', { name: TEST_USER.name })
+    fireEvent.click(within(drawer).getByRole('button', { name: /^Account settings/ }))
+    expect(screen.getByRole('dialog', { name: 'Account settings' })).toBeDefined()
+    expect(screen.getByRole('textbox', { name: 'Name' })).toBeDefined()
+
+    click('Back')
+    fireEvent.click(screen.getByRole('button', { name: /^Theme/ }))
+    fireEvent.click(screen.getByRole('radio', { name: 'Dark' }))
+    expect(useThemeStore.getState().mode).toBe('dark')
+    click('Back')
+    expect(screen.getByRole('button', { name: /^Theme.*Dark/ })).toBeDefined()
+    useThemeStore.setState({ mode: 'system' })
+  })
+
+  it('changes the name and the password in the account drawer', async () => {
+    // Old /account links open the drawer on account settings.
+    const router = renderRoute('/account')
+    await screen.findByRole('dialog', { name: 'Account settings' })
+    expect(router.state.location.search).toBe('')
     type('Name', 'Anna')
     click('Save')
     await screen.findByText('Saved')
@@ -196,8 +217,8 @@ describe('signed in', () => {
   })
 
   it('deletes the account after asking for the password', async () => {
-    const router = renderRoute('/account')
-    await screen.findByRole('heading', { name: 'Account' })
+    const router = renderRoute('/?menu=account')
+    await screen.findByRole('dialog', { name: 'Account settings' })
     click('Delete account…')
     type('Enter your password to confirm', 'wrong')
     click('Delete my account')

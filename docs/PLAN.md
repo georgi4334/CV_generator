@@ -1,4 +1,4 @@
-# CV Generator — Development Plan
+# Vitae (CV generator) — Development Plan
 
 > Status: **Step 17 done, awaiting review.** Stack and free-tier hosting decided (see §4). Each step ends with a review where we discuss ideas before moving on.
 >
@@ -494,7 +494,9 @@ Specification: §2.1.
 - ✅ **One file for the look:** colours (light and dark), padding, rounding, shadows, widths, grids, z-index and breakpoints are variables in `apps/web/src/shared/styles/tokens.css`; buttons, inputs and cards are shared classes. See `docs/ARCHITECTURE.md` → "Styles: design tokens".
 - ✅ **No magic numbers:** form limits come from the shared schemas (`TITLE_MAX`, `JOB_TEXT_MAX`…), and timings and sizes are named constants.
 - ✅ **Loading skeletons** instead of spinners and "Loading…" text: page and editor outlines, document and job lists, dashboard thumbnails, history, share dialog and AI answers; themed for light and dark, still for reduced motion.
-- ✅ **Cleaner header:** logo and tabs on the left; language, a theme dropdown (System / Light / Dark with icons) and the account avatar on the right. The avatar opens a drawer from the right with the name, email, account settings and sign out. The API and database status moved to the footer, next to Privacy and Terms.
+- ✅ **Cleaner header:** the logo and tabs on the left, the language and the account avatar on the right. The API and database status is in the footer, next to Privacy and Terms.
+- ✅ **Account drawer:** the avatar opens a drawer from the right with the name and email, **Account settings** (profile, password, delete account) and **Theme** (System / Light / Dark), each opened inside the drawer with a back button, and "Sign out" at the bottom. Old `/account` links open it on account settings.
+- ✅ **Name and logo:** the product is called **Vitae** (from _curriculum vitae_), with the tagline "CVs, cover letters and job tracking". The logo is a page with a folded corner and a check: a CV that is ready to send. The name lives in one constant (`APP_NAME` in the shared package), used by the web app (`{{app}}` in translations) and the API (emails, sender name).
 - ✅ Browser tests on a phone (no sideways scrolling, bottom navigation, editor toolbar and sheet, accessibility).
 
 ### Step 18 (optional): Premium

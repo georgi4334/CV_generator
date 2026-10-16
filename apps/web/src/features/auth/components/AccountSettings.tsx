@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
-import { card, PageHeader, primaryButton, secondaryButton } from '@/shared/ui/PageHeader'
+import { primaryButton, secondaryButton } from '@/shared/ui/PageHeader'
 import { authApi } from '@/features/auth/api'
 import { useCurrentUser, useUpdateProfile } from '@/features/auth/queries'
 import { errorMessage } from '@/shared/api/errorMessage'
@@ -20,10 +20,10 @@ function ProfileForm({ name: initial, email }: { name: string; email: string }) 
     update.mutate(name)
   }
   return (
-    <form onSubmit={submit} className={`${card} space-y-4 p-5`} aria-labelledby="profile-heading">
-      <h2 id="profile-heading" className="font-semibold">
+    <form onSubmit={submit} className="space-y-4" aria-labelledby="profile-heading">
+      <h3 id="profile-heading" className="font-semibold">
         {t('account.profile.title')}
-      </h2>
+      </h3>
       <label className="block space-y-1 text-sm">
         <span className="font-medium">{t('account.profile.name')}</span>
         <input
@@ -68,10 +68,10 @@ function PasswordForm() {
     change.mutate()
   }
   return (
-    <form onSubmit={submit} className={`${card} space-y-4 p-5`} aria-labelledby="password-heading">
-      <h2 id="password-heading" className="font-semibold">
+    <form onSubmit={submit} className="space-y-4" aria-labelledby="password-heading">
+      <h3 id="password-heading" className="font-semibold">
         {t('account.password.title')}
-      </h2>
+      </h3>
       <label className="block space-y-1 text-sm">
         <span className="font-medium">{t('account.password.current')}</span>
         <input
@@ -130,12 +130,12 @@ function DeleteAccount() {
   }
   return (
     <section
-      className={`${card} space-y-3 border-danger-line p-5`}
+      className="space-y-3 rounded-card border border-danger-line p-4"
       aria-labelledby="delete-heading"
     >
-      <h2 id="delete-heading" className="font-semibold text-danger-fg">
+      <h3 id="delete-heading" className="font-semibold text-danger-fg">
         {t('account.delete.title')}
-      </h2>
+      </h3>
       <p className="text-sm text-fg-soft">{t('account.delete.text')}</p>
       {open ? (
         <form onSubmit={submit} className="space-y-3">
@@ -170,23 +170,16 @@ function DeleteAccount() {
   )
 }
 
-/** /account: profile, password and deleting the account. */
-export function AccountPage() {
-  const { t } = useTranslation()
+/** Profile, password and deleting the account, shown in the account drawer. */
+export function AccountSettings() {
   const user = useCurrentUser().data
   if (!user) return null
   return (
-    <>
-      <PageHeader
-        title={t('account.title')}
-        description={t('account.signedInAs', { email: user.email })}
-      />
-      <div className="grid max-w-xl gap-6">
-        {/* key: a different user (after signing in elsewhere) starts with fresh fields. */}
-        <ProfileForm key={user.id} name={user.name} email={user.email} />
-        <PasswordForm />
-        <DeleteAccount />
-      </div>
-    </>
+    <div className="space-y-8">
+      {/* key: a different user (after signing in elsewhere) starts with fresh fields. */}
+      <ProfileForm key={user.id} name={user.name} email={user.email} />
+      <PasswordForm />
+      <DeleteAccount />
+    </div>
   )
 }

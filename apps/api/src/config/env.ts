@@ -1,4 +1,5 @@
 import { existsSync } from 'node:fs'
+import { APP_NAME } from '@cv/shared'
 import { z } from 'zod'
 
 if (existsSync('.env')) {
@@ -35,7 +36,7 @@ const EnvSchema = z.object({
   BREVO_API_KEY: z.string().default(''),
   /** Sender of account emails; must be verified in Brevo. */
   MAIL_FROM: z.string().default(''),
-  MAIL_FROM_NAME: z.string().default('CV Generator'),
+  MAIL_FROM_NAME: z.string().default(APP_NAME),
   /** Error reporting (sentry.io); off when empty. */
   SENTRY_DSN: z.string().default(''),
   /** Shared with the web app's proxy; when set, requests must come through it. */

@@ -1,3 +1,4 @@
+import { APP_NAME } from '@cv/shared'
 import { describe, expect, it } from 'vitest'
 import { buildApp } from '../../src/app'
 import { productionProblems, productionWarnings } from '../../src/config/production'
@@ -76,7 +77,7 @@ describe('Brevo mailer', () => {
     const f = recordingFetch(() => new Response('{"messageId":"1"}', { status: 201 }))
     const mailer = createBrevoMailer({
       apiKey: 'KEY',
-      from: { email: 'me@example.com', name: 'CV Generator' },
+      from: { email: 'me@example.com', name: APP_NAME },
       fetch: f.fn,
     })
     await mailer.send({ to: 'ann@example.com', subject: 'Hi', text: 'Body' })
@@ -84,7 +85,7 @@ describe('Brevo mailer', () => {
     expect(request.url).toBe('https://api.brevo.com/v3/smtp/email')
     expect(request.headers.get('api-key')).toBe('KEY')
     expect(await request.json()).toEqual({
-      sender: { email: 'me@example.com', name: 'CV Generator' },
+      sender: { email: 'me@example.com', name: APP_NAME },
       to: [{ email: 'ann@example.com' }],
       subject: 'Hi',
       textContent: 'Body',

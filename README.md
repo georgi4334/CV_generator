@@ -1,6 +1,6 @@
-# CV Generator
+# Vitae
 
-Build, style and update CVs and cover letters, and track job applications.
+CVs, cover letters and job tracking. Build, style and update CVs and cover letters, and track job applications.
 
 See [`docs/PLAN.md`](docs/PLAN.md) for the full development plan and decisions.
 

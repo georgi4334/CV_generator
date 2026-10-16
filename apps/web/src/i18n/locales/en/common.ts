@@ -1,6 +1,7 @@
 /** Words used all over the app. */
 export const common = {
-  appName: 'CV Generator',
+  appName: '{{app}}',
+  tagline: 'CVs, cover letters and job tracking',
   save: 'Save',
   saved: 'Saved',
   saving: 'Saving…',

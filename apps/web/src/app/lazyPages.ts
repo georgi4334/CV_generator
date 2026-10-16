@@ -14,9 +14,6 @@ export const NewCvPage = lazyPage(() =>
 export const NewLetterPage = lazyPage(() =>
   import('@/features/cover-letters/pages/NewLetterPage').then((m) => m.NewLetterPage),
 )
-export const AccountPage = lazyPage(() =>
-  import('@/features/auth/pages/AccountPage').then((m) => m.AccountPage),
-)
 export const EditorPage = lazyPage(() =>
   import('@/features/cv-editor/pages/EditorPage').then((m) => m.EditorPage),
 )

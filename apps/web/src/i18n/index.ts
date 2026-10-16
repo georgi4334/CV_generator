@@ -1,3 +1,4 @@
+import { APP_NAME } from '@cv/shared'
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 import { isUiLanguage, UI_LANGUAGES, type UiLanguage } from './languages'
@@ -68,7 +69,8 @@ export async function initI18n(language: UiLanguage = detectLanguage()) {
       lng: 'en',
       fallbackLng: 'en',
       supportedLngs: [...UI_LANGUAGES],
-      interpolation: { escapeValue: false },
+      // {{app}} in any text is the product name (APP_NAME in the shared package).
+      interpolation: { escapeValue: false, defaultVariables: { app: APP_NAME } },
       initAsync: false,
       returnNull: false,
       // Keep showing the current language while another one downloads.

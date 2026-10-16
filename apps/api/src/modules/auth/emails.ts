@@ -1,4 +1,4 @@
-import type { Locale } from '@cv/shared'
+import { APP_NAME, type Locale } from '@cv/shared'
 import type { Email } from '../../infra/mailer'
 
 /** Account emails in the user's interface language. */
@@ -13,7 +13,7 @@ const TEXTS: Record<
     verify: {
       subject: 'Confirm your email address',
       lines: (link) => [
-        'Welcome to CV Generator!',
+        `Welcome to ${APP_NAME}!`,
         '',
         'Confirm your email address by opening this link:',
         link,
@@ -24,7 +24,7 @@ const TEXTS: Record<
     reset: {
       subject: 'Reset your password',
       lines: (link) => [
-        'Someone asked to reset the password of your CV Generator account.',
+        `Someone asked to reset the password of your ${APP_NAME} account.`,
         '',
         'Choose a new password by opening this link (valid for 1 hour):',
         link,
@@ -37,7 +37,7 @@ const TEXTS: Record<
     verify: {
       subject: 'Потвърдете имейл адреса си',
       lines: (link) => [
-        'Добре дошли в CV Generator!',
+        `Добре дошли в ${APP_NAME}!`,
         '',
         'Потвърдете имейл адреса си, като отворите тази връзка:',
         link,
@@ -48,7 +48,7 @@ const TEXTS: Record<
     reset: {
       subject: 'Смяна на паролата',
       lines: (link) => [
-        'Получихме заявка за смяна на паролата на вашия профил в CV Generator.',
+        `Получихме заявка за смяна на паролата на вашия профил в ${APP_NAME}.`,
         '',
         'Изберете нова парола чрез тази връзка (валидна 1 час):',
         link,
@@ -61,7 +61,7 @@ const TEXTS: Record<
     verify: {
       subject: 'Bestätigen Sie Ihre E-Mail-Adresse',
       lines: (link) => [
-        'Willkommen bei CV Generator!',
+        `Willkommen bei ${APP_NAME}!`,
         '',
         'Bestätigen Sie Ihre E-Mail-Adresse, indem Sie diesen Link öffnen:',
         link,
