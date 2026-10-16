@@ -23,8 +23,8 @@ export function ApiStatus({ isLoading, isError, data }: ApiStatusProps) {
   }
 
   return (
-    <span className="inline-flex items-center gap-2 text-sm text-fg-soft">
-      <span className={`size-2.5 rounded-pill ${color}`} aria-hidden />
+    <span className="inline-flex items-center gap-1.5">
+      <span className={`size-2 rounded-pill ${color}`} aria-hidden />
       {label}
     </span>
   )

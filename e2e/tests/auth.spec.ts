@@ -15,6 +15,8 @@ test('sign up, sign out and sign in again', async ({ page }) => {
   const cookie = (await page.context().cookies()).find((c) => c.name === 'cv_session')
   expect(cookie).toMatchObject({ httpOnly: true, sameSite: 'Lax' })
 
+  await page.getByRole('button', { name: /^Account: / }).click()
+  await expect(page.getByRole('dialog')).toContainText(email)
   await page.getByRole('button', { name: 'Sign out' }).click()
   await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible()
   expect((await page.request.get('/api/cvs')).status()).toBe(401)

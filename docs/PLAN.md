@@ -494,6 +494,7 @@ Specification: §2.1.
 - ✅ **One file for the look:** colours (light and dark), padding, rounding, shadows, widths, grids, z-index and breakpoints are variables in `apps/web/src/shared/styles/tokens.css`; buttons, inputs and cards are shared classes. See `docs/ARCHITECTURE.md` → "Styles: design tokens".
 - ✅ **No magic numbers:** form limits come from the shared schemas (`TITLE_MAX`, `JOB_TEXT_MAX`…), and timings and sizes are named constants.
 - ✅ **Loading skeletons** instead of spinners and "Loading…" text: page and editor outlines, document and job lists, dashboard thumbnails, history, share dialog and AI answers; themed for light and dark, still for reduced motion.
+- ✅ **Cleaner header:** logo and tabs on the left; language, a theme dropdown (System / Light / Dark with icons) and the account avatar on the right. The avatar opens a drawer from the right with the name, email, account settings and sign out. The API and database status moved to the footer, next to Privacy and Terms.
 - ✅ Browser tests on a phone (no sideways scrolling, bottom navigation, editor toolbar and sheet, accessibility).
 
 ### Step 18 (optional): Premium

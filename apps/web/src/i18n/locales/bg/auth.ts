@@ -7,8 +7,9 @@ export const auth: Messages['auth'] = {
   signIn: 'Вход',
   signingIn: 'Влизане…',
   signOut: 'Изход',
-  accountLabel: 'Профил: {{name}}',
   accountTitle: 'Профил',
+  menu: 'Меню на профила',
+  accountSettings: 'Настройки на профила',
   login: {
     noAccount: 'Нямате профил?',
     createOne: 'Създайте си',

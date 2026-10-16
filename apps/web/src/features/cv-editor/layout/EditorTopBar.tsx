@@ -3,7 +3,7 @@ import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { LanguageSelect } from '@/shared/ui/LanguageSelect'
-import { ThemeToggle } from '@/shared/ui/ThemeToggle'
+import { ThemeSelect } from '@/shared/ui/ThemeSelect'
 import { useEditorUi } from '@/features/cv-editor/state/editorUi'
 import { useCvEditor } from '@/features/cv-editor/state/cvEditorStore'
 import { EditorMoreMenu } from './EditorMoreMenu'
@@ -218,7 +218,7 @@ export function EditorTopBar({
           )}
         </div>
         <LanguageSelect compact />
-        <ThemeToggle />
+        <ThemeSelect compact />
       </div>
     </header>
   )
