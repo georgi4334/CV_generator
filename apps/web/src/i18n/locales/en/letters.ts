@@ -21,6 +21,5 @@ export const letters = {
   copied: 'Header and design copied from “{{title}}”.',
   notSaved: 'Not saved: {{message}}',
   notRenamed: 'Not renamed: {{message}}',
-  conflictWhat: 'cover letter',
   printHint: 'In the print dialog, choose “Save as PDF” as the destination.',
 }

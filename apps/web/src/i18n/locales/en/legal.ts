@@ -1,5 +1,4 @@
 export const legal = {
-  lastUpdated: 'Last updated: {{date}}',
   privacy: {
     title: 'Privacy policy',
     updated: '16 October 2026',

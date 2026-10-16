@@ -25,6 +25,5 @@ export const letters: Messages['letters'] = {
   copied: 'Kopfbereich und Design aus „{{title}}“ übernommen.',
   notSaved: 'Nicht gespeichert: {{message}}',
   notRenamed: 'Nicht umbenannt: {{message}}',
-  conflictWhat: 'Anschreiben',
   printHint: 'Wählen Sie im Druckdialog „Als PDF speichern“ als Ziel.',
 }

@@ -22,6 +22,5 @@ export const letters: Messages['letters'] = {
   copied: 'Заглавната част и дизайнът са копирани от „{{title}}“.',
   notSaved: 'Не е запазено: {{message}}',
   notRenamed: 'Не е преименувано: {{message}}',
-  conflictWhat: 'мотивационно писмо',
   printHint: 'В прозореца за печат изберете „Запазване като PDF“ за местоназначение.',
 }

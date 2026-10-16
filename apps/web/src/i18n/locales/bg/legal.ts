@@ -1,7 +1,6 @@
 import type { Messages } from '../../types'
 
 export const legal: Messages['legal'] = {
-  lastUpdated: 'Последна актуализация: {{date}}',
   privacy: {
     title: 'Политика за поверителност',
     updated: '16 октомври 2026 г.',
