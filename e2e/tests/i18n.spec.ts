@@ -12,14 +12,14 @@ test('switching the language changes the page in place and is remembered', async
 
   await languageSelect(page).selectOption('bg')
   await expect(page.getByRole('heading', { level: 1 })).not.toHaveText('Sign in')
-  expect(await page.evaluate(() => document.documentElement.lang)).toBe('bg')
+  await expect(page.locator('html')).toHaveAttribute('lang', 'bg')
   expect(await page.evaluate(() => (window as unknown as { marker?: number }).marker)).toBe(42)
   await expectAccessible(page)
 
   await languageSelect(page).selectOption('de')
-  expect(await page.evaluate(() => document.documentElement.lang)).toBe('de')
+  await expect(page.locator('html')).toHaveAttribute('lang', 'de')
   await page.reload()
-  expect(await page.evaluate(() => document.documentElement.lang)).toBe('de')
+  await expect(page.locator('html')).toHaveAttribute('lang', 'de')
   await expect(languageSelect(page)).toHaveValue('de')
 })
 
@@ -32,7 +32,7 @@ test('the editor keeps unsaved work when the language changes', async ({ page })
   await page.keyboard.type('Grace Hopper')
 
   await languageSelect(page).selectOption('de')
-  expect(await page.evaluate(() => document.documentElement.lang)).toBe('de')
+  await expect(page.locator('html')).toHaveAttribute('lang', 'de')
   await expect(page.getByRole('document', { name: /CV|Lebenslauf/ })).toContainText('Grace Hopper')
   // The CV itself keeps its own language (English placeholders and section titles).
   await expect(page.getByRole('document', { name: /CV|Lebenslauf/ })).toContainText('Experience')

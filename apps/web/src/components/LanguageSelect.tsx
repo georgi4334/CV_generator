@@ -4,8 +4,11 @@ import { setLanguage } from '../i18n'
 import { UI_LANGUAGE_NAMES, UI_LANGUAGES, type UiLanguage } from '../i18n/languages'
 import { useUiLanguage } from '../i18n/useUiLanguage'
 
-/** Interface language picker for headers. Switching keeps the page and any open document. */
-export function LanguageSelect() {
+/**
+ * Interface language picker for headers. Switching keeps the page and any
+ * open document. `compact` shows language codes (EN, BG, DE) where space is short.
+ */
+export function LanguageSelect({ compact = false }: { compact?: boolean }) {
   const { t } = useTranslation()
   const language = useUiLanguage()
   return (
@@ -20,7 +23,7 @@ export function LanguageSelect() {
       >
         {UI_LANGUAGES.map((code) => (
           <option key={code} value={code} lang={code}>
-            {UI_LANGUAGE_NAMES[code]}
+            {compact ? code.toUpperCase() : UI_LANGUAGE_NAMES[code]}
           </option>
         ))}
       </select>

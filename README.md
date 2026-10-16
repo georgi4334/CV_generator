@@ -68,6 +68,11 @@ Fix Mistakes, Check & Tailor and the AI Assistant use Google Gemini. Get a free 
 
 Each account can make 30 AI requests per day on the free plan.
 
+## Languages
+
+The interface is available in English, Bulgarian and German (dropdown in the header). Texts live in
+`apps/web/src/i18n/locales/{en,bg,de}`; see `apps/web/src/i18n/README.md` for how to add or change them.
+
 ## Tests
 
 - `pnpm test`: unit and API tests (the API tests use the Postgres from `pnpm db:up`).

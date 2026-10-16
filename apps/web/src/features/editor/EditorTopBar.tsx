@@ -96,12 +96,15 @@ export function EditorTopBar({
           type="button"
           className={`${toolButton} ${activePanel === 'ai' ? activeTool : ''}`}
           aria-pressed={activePanel === 'ai'}
+          aria-label={t('editor.panels.ai')}
+          title={t('editor.panels.ai')}
           onClick={() => togglePanel('ai')}
         >
           <PanelLeft className="size-4" />{' '}
-          <span className="hidden lg:inline">{t('editor.panels.ai')}</span>
+          <span className="hidden 2xl:inline">{t('editor.panels.ai')}</span>
         </button>
-        <span className="ml-2 hidden min-w-0 items-center gap-2 text-sm text-slate-500 xl:flex">
+        {/* Keeps room for the title when the tool names are long (e.g. in Bulgarian). */}
+        <span className="ml-2 hidden min-w-40 items-center gap-2 text-sm text-slate-500 lg:flex">
           {title}
           {status}
         </span>
@@ -117,6 +120,8 @@ export function EditorTopBar({
               type="button"
               className={`${toolButton} ${active ? activeTool : ''}`}
               aria-pressed={active}
+              aria-label={label}
+              title={label}
               onClick={() =>
                 kind === 'coverLetter' && panel === 'rearrange'
                   ? notify(t('editor.topBar.noSectionsToRearrange'))
@@ -125,7 +130,7 @@ export function EditorTopBar({
                     : togglePanel(panel)
               }
             >
-              <Icon className="size-4" /> <span className="hidden md:inline">{label}</span>
+              <Icon className="size-4" /> <span className="hidden xl:inline">{label}</span>
             </button>
           )
         })}
@@ -156,12 +161,14 @@ export function EditorTopBar({
           type="button"
           className={`${toolButton} ${activePanel === 'history' ? activeTool : ''}`}
           aria-pressed={activePanel === 'history'}
+          aria-label={t('editor.panels.history')}
+          title={t('editor.panels.history')}
           onClick={() =>
             historyEnabled ? togglePanel('history') : notify(t('editor.topBar.historyOnCvs'))
           }
         >
           <History className="size-4" />{' '}
-          <span className="hidden lg:inline">{t('editor.panels.history')}</span>
+          <span className="hidden 2xl:inline">{t('editor.panels.history')}</span>
         </button>
         <div className="relative">
           <button
@@ -195,7 +202,7 @@ export function EditorTopBar({
             </div>
           )}
         </div>
-        <LanguageSelect />
+        <LanguageSelect compact />
         <ThemeToggle />
       </div>
     </header>
