@@ -1,6 +1,8 @@
 import { FileText } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { NavLink, Outlet, useLocation } from 'react-router'
 import { ApiStatus } from '../components/ApiStatus'
+import { LanguageSelect } from '../components/LanguageSelect'
 import { ThemeToggle } from '../components/ThemeToggle'
 import { UserMenu } from '../features/auth/UserMenu'
 import { LegalFooter } from '../pages/legal/LegalLayout'
@@ -8,14 +10,20 @@ import { VerifyBanner } from '../features/auth/VerifyBanner'
 import { NEW_CV_PATH, NEW_LETTER_PATH } from '../lib/paths'
 import { useHealth } from '../lib/useHealth'
 
-const TABS = [
-  { to: '/', label: 'Dashboard', end: true },
+const TABS: {
+  to: string
+  label: 'nav.dashboard' | 'nav.documents' | 'nav.savedJobs'
+  end: boolean
+  also?: string[]
+}[] = [
+  { to: '/', label: 'nav.dashboard', end: true },
   // "Create new CV" (/cvs/new) belongs to Documents too.
-  { to: '/documents', label: 'Documents', end: false, also: [NEW_CV_PATH, NEW_LETTER_PATH] },
-  { to: '/jobs', label: 'Saved Jobs', end: false },
+  { to: '/documents', label: 'nav.documents', end: false, also: [NEW_CV_PATH, NEW_LETTER_PATH] },
+  { to: '/jobs', label: 'nav.savedJobs', end: false },
 ]
 
 export function AppLayout() {
+  const { t } = useTranslation()
   const health = useHealth()
   const { pathname } = useLocation()
 
@@ -25,10 +33,10 @@ export function AppLayout() {
         <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-4 sm:gap-6">
           <NavLink to="/" className="flex items-center gap-2 font-semibold">
             <FileText className="size-5 text-teal-600 dark:text-teal-400" />
-            <span className="hidden sm:inline">CV Generator</span>
+            <span className="hidden sm:inline">{t('common.appName')}</span>
           </NavLink>
 
-          <nav aria-label="Main" className="flex h-full items-stretch gap-1">
+          <nav aria-label={t('nav.main')} className="flex h-full items-stretch gap-1">
             {TABS.map((tab) => (
               <NavLink
                 key={tab.to}
@@ -42,7 +50,7 @@ export function AppLayout() {
                   }`
                 }
               >
-                {tab.label}
+                {t(tab.label)}
               </NavLink>
             ))}
           </nav>
@@ -51,6 +59,7 @@ export function AppLayout() {
             <span className="hidden md:inline">
               <ApiStatus isLoading={health.isLoading} isError={health.isError} data={health.data} />
             </span>
+            <LanguageSelect />
             <ThemeToggle />
             <UserMenu />
           </div>

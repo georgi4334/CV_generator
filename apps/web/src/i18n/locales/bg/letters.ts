@@ -1,0 +1,26 @@
+import type { Messages } from '../../types'
+
+export const letters: Messages['letters'] = {
+  newTitle: 'Създаване на мотивационно писмо',
+  newDescription: 'Взема името, контактите и дизайна от CV, така че писмото и CV да си съвпадат.',
+  cv: 'CV',
+  noCv: 'Без CV (празна заглавна част)',
+  jobOptional: 'Обява (по избор)',
+  jobHint: 'Попълва компанията, а колоната „Мотивационно писмо“ на обявата сочи към това писмо.',
+  letterLanguage: 'Език на писмото',
+  name: 'Име',
+  defaultTitle: 'Мотивационно писмо',
+  defaultTitleCompany: 'Мотивационно писмо – {{company}}',
+  creating: 'Създаване…',
+  create: 'Създай мотивационно писмо',
+  createFailed: 'Мотивационното писмо не можа да бъде създадено: {{message}}',
+  linkedCv: 'Свързано CV',
+  job: 'Обява',
+  jobOption: '{{position}} в {{company}}',
+  useCvDesign: 'Използвай заглавната част и дизайна на CV',
+  useCvDesignHint: 'Копира името, контактите, снимката, шаблона и дизайна от свързаното CV',
+  copied: 'Заглавната част и дизайнът са копирани от „{{title}}“.',
+  notSaved: 'Не е запазено: {{message}}',
+  notRenamed: 'Не е преименувано: {{message}}',
+  printHint: 'В прозореца за печат изберете „Запазване като PDF“ за местоназначение.',
+}

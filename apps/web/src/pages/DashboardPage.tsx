@@ -1,18 +1,13 @@
-import {
-  JOB_STATUS_LABELS,
-  JOB_STATUSES,
-  type DocumentSummary,
-  type Job,
-  type JobStatus,
-} from '@cv/shared'
+import { JOB_STATUSES, type DocumentSummary, type Job, type JobStatus } from '@cv/shared'
 import { Bell, Briefcase, FilePlus2, Mail } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { DocumentTypeBadge, SharedBadge } from '../components/Badges'
 import { JOB_STATUS_STYLES } from '../components/badgeStyles'
 import { card, PageHeader, primaryButton, secondaryButton } from '../components/PageHeader'
 import { CvThumbnail, LetterThumbnail } from '../cv-renderer'
 import { statusChange } from '../features/jobs/jobHelpers'
-import { toApiRequestError } from '../lib/api'
+import { errorMessage } from '../lib/errorMessage'
 import { useCv, useCvList } from '../lib/cvQueries'
 import { formatDate, localToday } from '../lib/format'
 import { useJobs, useUpdateJob } from '../lib/jobQueries'
@@ -21,10 +16,10 @@ import { editPath, NEW_CV_PATH, NEW_LETTER_PATH } from '../lib/paths'
 import { remindersFor } from '../lib/reminders'
 
 const QUICK_ACTIONS = [
-  { to: NEW_CV_PATH, label: 'New CV', icon: FilePlus2 },
-  { to: NEW_LETTER_PATH, label: 'New cover letter', icon: Mail },
-  { to: '/jobs?add=1', label: 'Add job', icon: Briefcase },
-]
+  { to: NEW_CV_PATH, label: 'dashboard.newCv', icon: FilePlus2 },
+  { to: NEW_LETTER_PATH, label: 'dashboard.newLetter', icon: Mail },
+  { to: '/jobs?add=1', label: 'dashboard.addJob', icon: Briefcase },
+] as const
 
 const RECENT_COUNT = 4
 const THUMBNAIL_WIDTH = 132
@@ -45,23 +40,24 @@ function DocumentThumbnail({ doc }: { doc: DocumentSummary }) {
 }
 
 function RecentDocuments({ docs, loading }: { docs: DocumentSummary[]; loading: boolean }) {
+  const { t } = useTranslation()
   return (
     <section className={`${card} p-5 lg:col-span-2`} aria-labelledby="recent-heading">
       <div className="mb-4 flex items-center justify-between">
         <h2 id="recent-heading" className="font-semibold">
-          Recent documents
+          {t('dashboard.recent.heading')}
         </h2>
         <Link to="/documents" className="text-sm text-teal-700 hover:underline dark:text-teal-300">
-          View all
+          {t('dashboard.recent.viewAll')}
         </Link>
       </div>
       {loading ? (
-        <p className="text-sm text-slate-500">Loading your documents…</p>
+        <p className="text-sm text-slate-500">{t('dashboard.recent.loading')}</p>
       ) : docs.length === 0 ? (
         <div className="py-6 text-center text-sm text-slate-500">
-          <p>No documents yet. Your latest CVs and cover letters will show up here.</p>
+          <p>{t('dashboard.recent.empty')}</p>
           <Link to={NEW_CV_PATH} className={`${primaryButton} mt-3`}>
-            <FilePlus2 className="size-4" /> Create your first CV
+            <FilePlus2 className="size-4" /> {t('dashboard.recent.createFirst')}
           </Link>
         </div>
       ) : (
@@ -91,6 +87,7 @@ function RecentDocuments({ docs, loading }: { docs: DocumentSummary[]; loading: 
 }
 
 function JobPipeline({ jobs }: { jobs: Job[] }) {
+  const { t } = useTranslation()
   const counts = JOB_STATUSES.map((status) => ({
     status,
     count: jobs.filter((job) => job.status === status).length,
@@ -99,7 +96,7 @@ function JobPipeline({ jobs }: { jobs: Job[] }) {
   return (
     <section className={`${card} p-5`} aria-labelledby="pipeline-heading">
       <h2 id="pipeline-heading" className="mb-4 font-semibold">
-        Job pipeline
+        {t('dashboard.pipeline.heading')}
       </h2>
       <ul className="space-y-1">
         {counts.map(({ status, count }) => (
@@ -110,7 +107,7 @@ function JobPipeline({ jobs }: { jobs: Job[] }) {
             >
               <span className="flex items-center justify-between">
                 <span className="text-slate-600 dark:text-slate-300">
-                  {JOB_STATUS_LABELS[status]}
+                  {t(`labels.jobStatus.${status}`)}
                 </span>
                 {/* Read as "Applied: 3"; the colon is only for screen readers. */}
                 <span className="sr-only">:</span>{' '}
@@ -130,13 +127,14 @@ function JobPipeline({ jobs }: { jobs: Job[] }) {
         to="/jobs"
         className="mt-3 inline-block text-sm text-teal-700 hover:underline dark:text-teal-300"
       >
-        All saved jobs
+        {t('dashboard.pipeline.allJobs')}
       </Link>
     </section>
   )
 }
 
 function Reminders({ jobs, today }: { jobs: Job[]; today: string }) {
+  const { t } = useTranslation()
   const update = useUpdateJob()
   const reminders = remindersFor(jobs, today)
   const setStatus = (job: Job, status: JobStatus) =>
@@ -146,7 +144,7 @@ function Reminders({ jobs, today }: { jobs: Job[]; today: string }) {
   return (
     <section className={`${card} p-5 lg:col-span-3`} aria-labelledby="reminders-heading">
       <h2 id="reminders-heading" className="mb-4 flex items-center gap-2 font-semibold">
-        <Bell className="size-4" aria-hidden /> Reminders
+        <Bell className="size-4" aria-hidden /> {t('dashboard.reminders.heading')}
         {reminders.length > 0 && (
           <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-950 dark:text-amber-300">
             {reminders.length}
@@ -155,11 +153,11 @@ function Reminders({ jobs, today }: { jobs: Job[]; today: string }) {
       </h2>
       {update.isError && (
         <p role="alert" className="mb-3 text-sm text-red-600 dark:text-red-400">
-          Could not update the job: {toApiRequestError(update.error).message}
+          {t('dashboard.reminders.updateError', { message: errorMessage(update.error) })}
         </p>
       )}
       {reminders.length === 0 ? (
-        <p className="text-sm text-slate-500">Nothing to follow up on.</p>
+        <p className="text-sm text-slate-500">{t('dashboard.reminders.none')}</p>
       ) : (
         <ul className="divide-y divide-slate-100 text-sm dark:divide-slate-800">
           {reminders.map(({ job, days, kind }) => (
@@ -169,12 +167,15 @@ function Reminders({ jobs, today }: { jobs: Job[]; today: string }) {
                   to={`/jobs?job=${job.id}`}
                   className="font-medium hover:text-teal-700 dark:hover:text-teal-300"
                 >
-                  {job.position} at {job.company}
+                  {t('dashboard.reminders.jobAt', { position: job.position, company: job.company })}
                 </Link>
                 <span className="block text-slate-500 dark:text-slate-400">
                   {kind === 'no-answer'
-                    ? `Applied ${days} days ago and no answer yet.`
-                    : `Saved ${days} days ago and still “To apply”.`}
+                    ? t('dashboard.reminders.noAnswer', { count: days })
+                    : t('dashboard.reminders.toApply', {
+                        count: days,
+                        status: t('labels.jobStatus.to_apply'),
+                      })}
                 </span>
               </span>
               {kind === 'no-answer' ? (
@@ -183,7 +184,9 @@ function Reminders({ jobs, today }: { jobs: Job[]; today: string }) {
                   className={secondaryButton}
                   onClick={() => setStatus(job, 'no_answer')}
                 >
-                  Mark as “No answer”
+                  {t('dashboard.reminders.markNoAnswer', {
+                    status: t('labels.jobStatus.no_answer'),
+                  })}
                 </button>
               ) : (
                 <button
@@ -191,7 +194,7 @@ function Reminders({ jobs, today }: { jobs: Job[]; today: string }) {
                   className={secondaryButton}
                   onClick={() => setStatus(job, 'applied')}
                 >
-                  I applied
+                  {t('dashboard.reminders.applied')}
                 </button>
               )}
             </li>
@@ -203,6 +206,7 @@ function Reminders({ jobs, today }: { jobs: Job[]; today: string }) {
 }
 
 export function DashboardPage() {
+  const { t } = useTranslation()
   const cvs = useCvList()
   const letters = useCoverLetterList()
   const jobs = useJobs().data ?? []
@@ -213,12 +217,9 @@ export function DashboardPage() {
 
   return (
     <>
-      <PageHeader
-        title="Dashboard"
-        description="Your documents and job applications at a glance."
-      />
+      <PageHeader title={t('dashboard.title')} description={t('dashboard.description')} />
 
-      <section aria-label="Quick actions" className="mb-8 grid gap-4 sm:grid-cols-3">
+      <section aria-label={t('dashboard.quickActions')} className="mb-8 grid gap-4 sm:grid-cols-3">
         {QUICK_ACTIONS.map(({ to, label, icon: Icon }) => (
           <Link
             key={label}
@@ -228,7 +229,7 @@ export function DashboardPage() {
             <span className="rounded-lg bg-teal-50 p-2 text-teal-700 dark:bg-teal-950 dark:text-teal-300">
               <Icon className="size-5" />
             </span>
-            {label}
+            {t(label)}
           </Link>
         ))}
       </section>

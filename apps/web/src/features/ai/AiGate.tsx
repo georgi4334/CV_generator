@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
+import { Trans, useTranslation } from 'react-i18next'
 import { useAiStatus } from '../../lib/aiQueries'
-import { toApiRequestError } from '../../lib/api'
+import { errorMessage } from '../../lib/errorMessage'
 
 export const aiButton =
   'inline-flex items-center justify-center gap-2 rounded-lg bg-teal-700 px-3 py-2 text-sm font-medium text-white hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50'
@@ -11,18 +12,18 @@ export const aiField =
 
 /** Shows the panel only when AI is set up, with today's remaining requests below it. */
 export function AiGate({ children }: { children: ReactNode }) {
+  const { t } = useTranslation()
   const status = useAiStatus()
-  if (status.isPending) return <p className="text-sm text-slate-500">Checking AI…</p>
+  if (status.isPending) return <p className="text-sm text-slate-500">{t('ai.gate.checking')}</p>
   if (status.isError) {
     return <AiErrorMessage error={status.error} />
   }
   if (!status.data.enabled) {
     return (
       <div className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
-        <p className="font-medium">AI is not set up on this server.</p>
+        <p className="font-medium">{t('ai.gate.notSetUp')}</p>
         <p>
-          Add a free Google Gemini API key as <code>GEMINI_API_KEY</code> in{' '}
-          <code>apps/api/.env</code> and restart the API.
+          <Trans i18nKey="ai.gate.setupHint" components={{ key: <code />, env: <code /> }} />
         </p>
       </div>
     )
@@ -33,8 +34,7 @@ export function AiGate({ children }: { children: ReactNode }) {
     <div className="flex flex-col gap-4">
       {children}
       <p className="border-t border-slate-200 pt-3 text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">
-        {left} of {limit} AI requests left today. Your text is sent to {status.data.provider} to
-        create suggestions; nothing changes until you accept it.
+        {t('ai.gate.usage', { left, limit, provider: status.data.provider })}
       </p>
     </div>
   )
@@ -43,7 +43,7 @@ export function AiGate({ children }: { children: ReactNode }) {
 export function AiErrorMessage({ error }: { error: unknown }) {
   return (
     <p role="alert" className="text-sm text-red-600 dark:text-red-400">
-      {toApiRequestError(error).message}
+      {errorMessage(error)}
     </p>
   )
 }

@@ -1,8 +1,7 @@
-import { PROFESSIONS } from '@cv/shared'
 import { ArrowLeft, Check } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router'
 import { PageHeader, secondaryButton } from '../../components/PageHeader'
-import { getTemplate } from '../../cv-renderer'
 import { ProfessionStep } from './ProfessionStep'
 import { StartStep } from './StartStep'
 import { TemplateStep } from './TemplateStep'
@@ -11,20 +10,11 @@ import {
   readWizard,
   toProfessionId,
   wizardParams,
-  type ProfessionChoice,
   type WizardState,
 } from './wizardParams'
 
-const STEPS = ['Profession', 'Template', 'Start'] as const
-
-const DESCRIPTIONS = [
-  'What kind of job is this CV for? We will suggest templates and sections that fit.',
-  'Pick a template. You can switch to another one at any time in the editor.',
-  'Start from an example you can edit, or from an empty CV.',
-]
-
-const professionName = (choice: ProfessionChoice) =>
-  choice === OTHER_PROFESSION ? 'Other' : PROFESSIONS[choice].name
+const STEPS = ['stepProfession', 'stepTemplate', 'stepStart'] as const
+const DESCRIPTIONS = ['descriptionProfession', 'descriptionTemplate', 'descriptionStart'] as const
 
 function Stepper({
   step,
@@ -36,9 +26,13 @@ function Stepper({
   choices: Array<string | null>
   onSelect: (step: number) => void
 }) {
+  const { t } = useTranslation()
   return (
-    <ol aria-label="Steps" className="mb-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-      {STEPS.map((label, i) => {
+    <ol
+      aria-label={t('newCv.steps')}
+      className="mb-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm"
+    >
+      {STEPS.map((stepKey, i) => {
         const done = i < step
         const content = (
           <>
@@ -51,7 +45,7 @@ function Stepper({
             >
               {done ? <Check className="size-3.5" aria-hidden /> : i + 1}
             </span>
-            <span className={i === step ? 'font-semibold' : ''}>{label}</span>
+            <span className={i === step ? 'font-semibold' : ''}>{t(`newCv.${stepKey}`)}</span>
             {done && choices[i] && (
               <>
                 {' '}
@@ -61,7 +55,7 @@ function Stepper({
           </>
         )
         return (
-          <li key={label} aria-current={i === step ? 'step' : undefined}>
+          <li key={stepKey} aria-current={i === step ? 'step' : undefined}>
             {done ? (
               <button
                 type="button"
@@ -86,6 +80,7 @@ function Stepper({
 
 /** /cvs/new: choose a profession, then a template, then an example or a blank CV. */
 export function NewCvPage() {
+  const { t } = useTranslation()
   const [params, setParams] = useSearchParams()
   const { profession, template } = readWizard(params)
   const step = !profession ? 0 : !template ? 1 : 2
@@ -95,24 +90,30 @@ export function NewCvPage() {
   return (
     <>
       <PageHeader
-        title="Create a new CV"
-        description={DESCRIPTIONS[step]}
+        title={t('newCv.title')}
+        description={t(`newCv.${DESCRIPTIONS[step]!}`)}
         actions={
           <div className="flex gap-2">
             {step > 0 && (
               <button type="button" onClick={() => backTo(step - 1)} className={secondaryButton}>
-                <ArrowLeft className="size-4" /> Back
+                <ArrowLeft className="size-4" /> {t('common.back')}
               </button>
             )}
             <Link to="/documents/cvs" className={secondaryButton}>
-              Cancel
+              {t('common.cancel')}
             </Link>
           </div>
         }
       />
       <Stepper
         step={step}
-        choices={[profession && professionName(profession), template && getTemplate(template).name]}
+        choices={[
+          profession &&
+            (profession === OTHER_PROFESSION
+              ? t('newCv.otherName')
+              : t(`labels.profession.${profession}.name`)),
+          template && t(`labels.template.${template}`),
+        ]}
         onSelect={backTo}
       />
 

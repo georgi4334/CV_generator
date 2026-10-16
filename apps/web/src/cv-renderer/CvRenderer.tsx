@@ -1,5 +1,6 @@
 import type { CvDocument } from '@cv/shared'
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { buildBlocks, type Block } from './blocks'
 import { RenderContext, type RenderMode } from './context'
 import type { EditorApi } from './editorApi'
@@ -39,6 +40,7 @@ interface CvRendererProps {
  * then filled block by block, so content flows onto as many pages as needed.
  */
 export function CvRenderer({ cv, mode, editor, pageClassName }: CvRendererProps) {
+  const { t } = useTranslation()
   const template = getTemplate(cv.design.templateId)
   const tokens = layoutTokens(cv.design)
   const measureRef = useRef<HTMLDivElement>(null)
@@ -133,7 +135,7 @@ export function CvRenderer({ cv, mode, editor, pageClassName }: CvRendererProps)
     <RenderContext.Provider value={context}>
       <div
         role="document"
-        aria-label="CV"
+        aria-label={t('labels.documentType.cv')}
         className="flex flex-col gap-6"
         data-page-count={pages.length}
       >

@@ -1,4 +1,4 @@
-import { PROFESSION_IDS, PROFESSIONS } from '@cv/shared'
+import { PROFESSION_IDS } from '@cv/shared'
 import {
   Briefcase,
   CodeXml,
@@ -8,6 +8,7 @@ import {
   Stethoscope,
   type LucideIcon,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { card } from '../../components/PageHeader'
 import { OTHER_PROFESSION, type ProfessionChoice } from './wizardParams'
 
@@ -20,19 +21,19 @@ const ICONS: Record<ProfessionChoice, LucideIcon> = {
   [OTHER_PROFESSION]: Briefcase,
 }
 
-const CHOICES: Array<{ id: ProfessionChoice; name: string; description: string }> = [
-  ...PROFESSION_IDS.map((id) => PROFESSIONS[id]),
-  {
-    id: OTHER_PROFESSION,
-    name: 'Other',
-    description: 'Any other job. Start from a general layout.',
-  },
-]
+const CHOICES: ProfessionChoice[] = [...PROFESSION_IDS, OTHER_PROFESSION]
 
 export function ProfessionStep({ onChoose }: { onChoose: (choice: ProfessionChoice) => void }) {
+  const { t } = useTranslation()
   return (
-    <ul aria-label="Professions" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {CHOICES.map(({ id, name, description }) => {
+    <ul aria-label={t('newCv.professions')} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {CHOICES.map((id) => {
+        const name =
+          id === OTHER_PROFESSION ? t('newCv.otherName') : t(`labels.profession.${id}.name`)
+        const description =
+          id === OTHER_PROFESSION
+            ? t('newCv.otherDescription')
+            : t(`labels.profession.${id}.description`)
         const Icon = ICONS[id]
         return (
           <li key={id}>

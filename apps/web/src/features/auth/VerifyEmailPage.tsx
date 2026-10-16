@@ -1,13 +1,15 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router'
-import { toApiRequestError } from '../../lib/api'
 import { authApi } from '../../lib/authApi'
 import { authKeys } from '../../lib/authKeys'
+import { errorMessage } from '../../lib/errorMessage'
 import { AuthShell } from './AuthShell'
 import { linkClass } from './authStyles'
 
 /** /verify-email?token=: the link in the confirmation email. */
 export function VerifyEmailPage() {
+  const { t } = useTranslation()
   const token = useSearchParams()[0].get('token') ?? ''
   const queryClient = useQueryClient()
   // A query (not an effect): the link is single-use, and React runs effects twice in development.
@@ -25,21 +27,21 @@ export function VerifyEmailPage() {
 
   return (
     <AuthShell
-      title="Confirm your email"
+      title={t('auth.verify.title')}
       footer={
         <Link to="/" className={linkClass}>
-          Go to the app
+          {t('auth.verify.goToApp')}
         </Link>
       }
     >
       <p role="status" className="text-sm">
         {!token
-          ? 'This link is incomplete. Open the link from the email again.'
+          ? t('auth.verify.incomplete')
           : verify.isPending
-            ? 'Confirming…'
+            ? t('auth.verify.confirming')
             : verify.isError
-              ? `${toApiRequestError(verify.error).message}. Sign in and request a new link from the banner at the top.`
-              : 'Your email address is confirmed. Thank you!'}
+              ? t('auth.verify.failed', { message: errorMessage(verify.error) })
+              : t('auth.verify.done')}
       </p>
     </AuthShell>
   )

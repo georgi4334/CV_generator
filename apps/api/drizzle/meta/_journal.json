@@ -43,6 +43,13 @@
       "when": 1792137203832,
       "tag": "0005_ai",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792162895312,
+      "tag": "0006_user_locale",
+      "breakpoints": true
     }
   ]
 }

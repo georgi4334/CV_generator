@@ -12,7 +12,9 @@ import {
   Undo2,
 } from 'lucide-react'
 import { useState, type ComponentType, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
+import { LanguageSelect } from '../../components/LanguageSelect'
 import { ThemeToggle } from '../../components/ThemeToggle'
 import { useEditorUi, type EditorPanel } from '../../stores/editorUi'
 import { useCvEditor } from './cvEditorStore'
@@ -24,17 +26,16 @@ const iconButton =
   'rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900 disabled:opacity-40 disabled:hover:bg-transparent dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100'
 
 interface Tool {
-  label: string
   icon: ComponentType<{ className?: string }>
   panel: EditorPanel
 }
 
 const CENTER_TOOLS: Tool[] = [
-  { label: 'Fix Mistakes', icon: CircleCheck, panel: 'fix' },
-  { label: 'Check & Tailor', icon: ScanSearch, panel: 'tailor' },
-  { label: 'Rearrange', icon: ArrowDownUp, panel: 'rearrange' },
-  { label: 'Templates', icon: LayoutTemplate, panel: 'templates' },
-  { label: 'Design & Font', icon: Palette, panel: 'design' },
+  { icon: CircleCheck, panel: 'fix' },
+  { icon: ScanSearch, panel: 'tailor' },
+  { icon: ArrowDownUp, panel: 'rearrange' },
+  { icon: LayoutTemplate, panel: 'templates' },
+  { icon: Palette, panel: 'design' },
 ]
 
 interface EditorTopBarProps {
@@ -66,6 +67,7 @@ export function EditorTopBar({
   undoRedo,
   kind = 'cv',
 }: EditorTopBarProps) {
+  const { t } = useTranslation()
   const { activePanel, togglePanel, notify } = useEditorUi()
   const cvCanUndo = useCvEditor((s) => s.past.length > 0)
   const cvCanRedo = useCvEditor((s) => s.future.length > 0)
@@ -85,8 +87,8 @@ export function EditorTopBar({
         <Link
           to={backTo}
           className={iconButton}
-          aria-label="Back to documents"
-          title="Back to documents"
+          aria-label={t('editor.topBar.backToDocuments')}
+          title={t('editor.topBar.backToDocuments')}
         >
           <ArrowLeft className="size-4" />
         </Link>
@@ -94,36 +96,41 @@ export function EditorTopBar({
           type="button"
           className={`${toolButton} ${activePanel === 'ai' ? activeTool : ''}`}
           aria-pressed={activePanel === 'ai'}
+          aria-label={t('editor.panels.ai')}
+          title={t('editor.panels.ai')}
           onClick={() => togglePanel('ai')}
         >
-          <PanelLeft className="size-4" /> <span className="hidden lg:inline">AI Assistant</span>
+          <PanelLeft className="size-4" />{' '}
+          <span className="hidden 2xl:inline">{t('editor.panels.ai')}</span>
         </button>
-        <span className="ml-2 hidden min-w-0 items-center gap-2 text-sm text-slate-500 xl:flex">
+        {/* Keeps room for the title when the tool names are long (e.g. in Bulgarian). */}
+        <span className="ml-2 hidden min-w-40 items-center gap-2 text-sm text-slate-500 lg:flex">
           {title}
           {status}
         </span>
       </div>
 
-      <nav aria-label="Editor tools" className="flex items-center gap-0.5">
-        {CENTER_TOOLS.map(({ label, icon: Icon, panel }) => {
+      <nav aria-label={t('editor.topBar.tools')} className="flex items-center gap-0.5">
+        {CENTER_TOOLS.map(({ icon: Icon, panel }) => {
+          const label = t(`editor.panels.${panel}`)
           const active = activePanel === panel
           return (
             <button
-              key={label}
+              key={panel}
               type="button"
               className={`${toolButton} ${active ? activeTool : ''}`}
               aria-pressed={active}
+              aria-label={label}
+              title={label}
               onClick={() =>
                 kind === 'coverLetter' && panel === 'rearrange'
-                  ? notify('A cover letter has no sections to rearrange.')
+                  ? notify(t('editor.topBar.noSectionsToRearrange'))
                   : kind === 'coverLetter' && panel === 'tailor'
-                    ? notify(
-                        'Check & Tailor works on CVs. Open the linked CV to tailor it to the job.',
-                      )
+                    ? notify(t('editor.topBar.tailorOnCvs'))
                     : togglePanel(panel)
               }
             >
-              <Icon className="size-4" /> <span className="hidden md:inline">{label}</span>
+              <Icon className="size-4" /> <span className="hidden xl:inline">{label}</span>
             </button>
           )
         })}
@@ -135,8 +142,8 @@ export function EditorTopBar({
           className={iconButton}
           disabled={!canUndo}
           onClick={undo}
-          aria-label="Undo"
-          title="Undo (Ctrl+Z)"
+          aria-label={t('editor.topBar.undo')}
+          title={t('editor.topBar.undoTitle')}
         >
           <Undo2 className="size-4" />
         </button>
@@ -145,8 +152,8 @@ export function EditorTopBar({
           className={iconButton}
           disabled={!canRedo}
           onClick={redo}
-          aria-label="Redo"
-          title="Redo (Ctrl+Shift+Z)"
+          aria-label={t('editor.topBar.redo')}
+          title={t('editor.topBar.redoTitle')}
         >
           <Redo2 className="size-4" />
         </button>
@@ -154,19 +161,20 @@ export function EditorTopBar({
           type="button"
           className={`${toolButton} ${activePanel === 'history' ? activeTool : ''}`}
           aria-pressed={activePanel === 'history'}
+          aria-label={t('editor.panels.history')}
+          title={t('editor.panels.history')}
           onClick={() =>
-            historyEnabled
-              ? togglePanel('history')
-              : notify('Version history is available for CVs.')
+            historyEnabled ? togglePanel('history') : notify(t('editor.topBar.historyOnCvs'))
           }
         >
-          <History className="size-4" /> <span className="hidden lg:inline">History</span>
+          <History className="size-4" />{' '}
+          <span className="hidden 2xl:inline">{t('editor.panels.history')}</span>
         </button>
         <div className="relative">
           <button
             type="button"
             className={iconButton}
-            aria-label="Help"
+            aria-label={t('editor.topBar.help')}
             aria-expanded={helpOpen}
             onClick={() => setHelpOpen((o) => !o)}
           >
@@ -177,23 +185,24 @@ export function EditorTopBar({
               role="menu"
               className="absolute right-0 z-20 mt-2 w-44 rounded-lg border border-slate-200 bg-white py-1 text-sm shadow-lg dark:border-slate-700 dark:bg-slate-900"
             >
-              {['Help Center', 'Contact Us'].map((item) => (
+              {(['helpCenter', 'contactUs'] as const).map((key) => (
                 <button
-                  key={item}
+                  key={key}
                   type="button"
                   role="menuitem"
                   className="block w-full px-4 py-2 text-left hover:bg-slate-100 dark:hover:bg-slate-800"
                   onClick={() => {
                     setHelpOpen(false)
-                    notify(`${item} is not available yet.`)
+                    notify(t('editor.topBar.notAvailable', { item: t(`editor.topBar.${key}`) }))
                   }}
                 >
-                  {item}
+                  {t(`editor.topBar.${key}`)}
                 </button>
               ))}
             </div>
           )}
         </div>
+        <LanguageSelect compact />
         <ThemeToggle />
       </div>
     </header>

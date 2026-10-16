@@ -3,13 +3,18 @@ import {
   type ChangePasswordInput,
   type LoginInput,
   type RegisterInput,
+  type Locale,
   type ResetPasswordInput,
   type User,
 } from '@cv/shared'
 import { z } from 'zod'
+import { i18n } from '../i18n'
+import { isUiLanguage } from '../i18n/languages'
 import { api, ApiRequestError } from './api'
 
 const UserResponse = z.object({ user: UserSchema })
+
+const currentLocale = (): Locale => (isUiLanguage(i18n.language) ? i18n.language : 'en')
 
 /** Typed calls to the account endpoints. */
 export const authApi = {
@@ -23,8 +28,9 @@ export const authApi = {
       throw error
     }
   },
+  /** The interface language goes along, so the confirmation email is written in it. */
   async register(input: RegisterInput) {
-    const { data } = await api.post('/auth/register', input)
+    const { data } = await api.post('/auth/register', { locale: currentLocale(), ...input })
     return UserResponse.parse(data).user
   },
   async login(input: LoginInput) {
@@ -35,7 +41,7 @@ export const authApi = {
     await api.post('/auth/logout')
   },
   async forgotPassword(email: string) {
-    await api.post('/auth/forgot-password', { email })
+    await api.post('/auth/forgot-password', { email, locale: currentLocale() })
   },
   async resetPassword(input: ResetPasswordInput) {
     await api.post('/auth/reset-password', input)
@@ -48,6 +54,11 @@ export const authApi = {
   },
   async updateProfile(name: string) {
     const { data } = await api.patch('/auth/me', { name })
+    return UserResponse.parse(data).user
+  },
+  /** Remembers the interface language on the account (for emails and other devices). */
+  async setLocale(locale: Locale) {
+    const { data } = await api.patch('/auth/me', { locale })
     return UserResponse.parse(data).user
   },
   async changePassword(input: ChangePasswordInput) {

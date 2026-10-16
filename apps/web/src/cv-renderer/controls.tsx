@@ -10,6 +10,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useEditor } from './context'
 import { pickAndUpload } from './image'
 
@@ -66,46 +67,47 @@ export function ItemControls({
   children,
 }: ItemControlsProps) {
   const editor = useEditor()
+  const { t } = useTranslation()
   if (!editor) return <>{children}</>
   return (
     <div className={outline} data-item-id={itemId}>
       <div
         className={`${toolbar} -top-1 right-0 -translate-y-full`}
         role="toolbar"
-        aria-label="Entry actions"
+        aria-label={t('renderer.entryActions')}
       >
         <ToolButton
           icon={ArrowUp}
-          label="Move up"
+          label={t('renderer.moveUp')}
           disabled={index === 0}
           onClick={() => editor.moveItem(sectionId, itemId, -1)}
         />
         <ToolButton
           icon={ArrowDown}
-          label="Move down"
+          label={t('renderer.moveDown')}
           disabled={index === count - 1}
           onClick={() => editor.moveItem(sectionId, itemId, 1)}
         />
         {hasBullets && (
           <ToolButton
             icon={ListPlus}
-            label="Add bullet point"
+            label={t('renderer.addBullet')}
             onClick={() => editor.addBullet(sectionId, itemId, bulletCount - 1)}
           />
         )}
         <ToolButton
           icon={Plus}
-          label="Add entry below"
+          label={t('renderer.addEntryBelow')}
           onClick={() => editor.addItem(sectionId, itemId)}
         />
         <ToolButton
           icon={Copy}
-          label="Duplicate entry"
+          label={t('renderer.duplicateEntry')}
           onClick={() => editor.duplicateItem(sectionId, itemId)}
         />
         <ToolButton
           icon={Trash2}
-          label="Delete entry"
+          label={t('renderer.deleteEntry')}
           onClick={() => editor.removeItem(sectionId, itemId)}
         />
       </div>
@@ -125,11 +127,20 @@ export function SectionControls({
   children: ReactNode
 }) {
   const editor = useEditor()
+  const { t } = useTranslation()
   if (!editor || !canAdd) return <>{children}</>
   return (
     <div className="group/ctl relative">
-      <div className={`${toolbar} top-0 right-0`} role="toolbar" aria-label="Section actions">
-        <ToolButton icon={Plus} label="Add entry" onClick={() => editor.addItem(sectionId)} />
+      <div
+        className={`${toolbar} top-0 right-0`}
+        role="toolbar"
+        aria-label={t('renderer.sectionActions')}
+      >
+        <ToolButton
+          icon={Plus}
+          label={t('renderer.addEntry')}
+          onClick={() => editor.addItem(sectionId)}
+        />
       </div>
       {children}
     </div>
@@ -147,28 +158,29 @@ export function HeaderControls({
   children: ReactNode
 }) {
   const editor = useEditor()
+  const { t } = useTranslation()
   if (!editor || !supportsPhoto) return <>{children}</>
   const upload = () =>
     pickAndUpload(320, editor.uploadImage).then(
       (url) => url && editor.updateHeader({ photoUrl: url, showPhoto: true }),
-      (e: Error) => editor.notify(`Photo not uploaded: ${e.message}`),
+      (e: Error) => editor.notify(t('renderer.photoFailed', { message: e.message })),
     )
   return (
     <div className={outline}>
       <div
         className={`${toolbar} -top-1 right-0 -translate-y-full`}
         role="toolbar"
-        aria-label="Header actions"
+        aria-label={t('renderer.headerActions')}
       >
         <ToolButton
           icon={ImagePlus}
-          label={hasPhoto ? 'Change photo' : 'Add photo'}
+          label={hasPhoto ? t('renderer.changePhoto') : t('renderer.addPhoto')}
           onClick={upload}
         />
         {hasPhoto && (
           <ToolButton
             icon={ImageMinus}
-            label="Remove photo"
+            label={t('renderer.removePhoto')}
             onClick={() => editor.updateHeader({ photoUrl: null, showPhoto: false })}
           />
         )}

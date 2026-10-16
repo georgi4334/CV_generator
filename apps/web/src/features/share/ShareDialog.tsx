@@ -1,9 +1,10 @@
 import type { DocumentType } from '@cv/shared'
 import { Check, Copy, ExternalLink, X } from 'lucide-react'
 import { useId, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Modal } from '../../components/Modal'
 import { primaryButton, secondaryButton } from '../../components/PageHeader'
-import { toApiRequestError } from '../../lib/api'
+import { errorMessage } from '../../lib/errorMessage'
 import { useDocumentShare, useUpdateDocumentShare } from '../../lib/shareQueries'
 import { shareUrl } from './shareUrl'
 
@@ -19,6 +20,7 @@ export function ShareDialog({
   title: string
   onClose: () => void
 }) {
+  const { t } = useTranslation()
   const headingId = useId()
   const switchId = useId()
   const share = useDocumentShare(type, id)
@@ -45,12 +47,12 @@ export function ShareDialog({
     <Modal labelledBy={headingId} onClose={onClose} className="max-w-md">
       <div className="flex items-start justify-between gap-4">
         <h2 id={headingId} className="text-lg font-semibold break-words">
-          Share “{title}”
+          {t('share.dialog.heading', { title })}
         </h2>
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close"
+          aria-label={t('common.close')}
           className="rounded p-1 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
         >
           <X className="size-4" />
@@ -58,16 +60,16 @@ export function ShareDialog({
       </div>
 
       {share.isPending ? (
-        <p className="mt-4 text-sm text-slate-500">Loading…</p>
+        <p className="mt-4 text-sm text-slate-500">{t('common.loading')}</p>
       ) : (
         <>
           <div className="mt-4 flex items-center justify-between gap-4 rounded-lg border border-slate-200 p-3 dark:border-slate-700">
             <span>
               <span id={switchId} className="block text-sm font-medium">
-                Share a read-only link
+                {t('share.dialog.switchLabel')}
               </span>
               <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">
-                Anyone with the link can view and download it, without an account.
+                {t('share.dialog.switchHint')}
               </span>
             </span>
             <button
@@ -97,7 +99,7 @@ export function ShareDialog({
               <div className="flex gap-2">
                 <input
                   ref={input}
-                  aria-label="Share link"
+                  aria-label={t('share.dialog.linkLabel')}
                   readOnly
                   value={url}
                   onFocus={(e) => e.currentTarget.select()}
@@ -105,7 +107,7 @@ export function ShareDialog({
                 />
                 <button type="button" onClick={() => void copy()} className={secondaryButton}>
                   {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
-                  {copied ? 'Copied' : 'Copy'}
+                  {copied ? t('share.dialog.copied') : t('share.dialog.copy')}
                 </button>
               </div>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
@@ -115,7 +117,7 @@ export function ShareDialog({
                   rel="noreferrer"
                   className="inline-flex items-center gap-1 font-medium text-teal-700 hover:underline dark:text-teal-300"
                 >
-                  <ExternalLink className="size-4" /> Open link
+                  <ExternalLink className="size-4" /> {t('share.dialog.open')}
                 </a>
                 <button
                   type="button"
@@ -126,19 +128,17 @@ export function ShareDialog({
                   }}
                   className="text-slate-600 hover:underline disabled:opacity-60 dark:text-slate-300"
                 >
-                  Replace link
+                  {t('share.dialog.replace')}
                 </button>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                The link always shows your latest saved changes, including your contact details.
-                Replace link gives it a new address; the old one stops working.
+                {t('share.dialog.activeNote')}
               </p>
             </div>
           )}
           {!active && link && (
             <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-              The link is turned off and shows nothing. Turning it on again brings back the same
-              address.
+              {t('share.dialog.inactiveNote')}
             </p>
           )}
         </>
@@ -146,13 +146,13 @@ export function ShareDialog({
 
       {error && (
         <p role="alert" className="mt-3 text-sm text-red-600 dark:text-red-400">
-          {toApiRequestError(error).message}
+          {errorMessage(error)}
         </p>
       )}
 
       <div className="mt-5 flex justify-end">
         <button type="button" onClick={onClose} className={primaryButton}>
-          Done
+          {t('share.dialog.done')}
         </button>
       </div>
     </Modal>

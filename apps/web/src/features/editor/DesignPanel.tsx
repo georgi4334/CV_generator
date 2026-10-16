@@ -7,6 +7,7 @@ import {
 } from '@cv/shared'
 import { Check, ChevronDown, Minus, Plus, RotateCcw, TriangleAlert } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { getTemplate } from '../../cv-renderer'
 import { BACKGROUNDS, backgroundImage } from '../../cv-renderer/backgrounds'
 import { FONT_STACKS } from '../../cv-renderer/fonts'
@@ -14,9 +15,9 @@ import { sidebarFor, type TemplateDefinition } from '../../cv-renderer/templates
 import { contrastWithWhite } from './contrast'
 import { useDesignTarget } from './designTarget'
 
-type LevelKey = 'pageMargins' | 'sectionSpacing' | 'fontSize' | 'lineHeight'
+const FONT_SIZE_KEYS = ['xs', 's', 'm', 'l', 'xl'] as const
 
-const FONT_SIZE_NAMES = ['Extra small', 'Small', 'Medium', 'Large', 'Extra large']
+type LevelKey = 'pageMargins' | 'sectionSpacing' | 'fontSize' | 'lineHeight'
 
 function Group({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -32,20 +33,16 @@ const stepButton =
 
 /** A 1–5 slider with −/+ buttons and labels for both ends, like the reference panel. */
 function LevelSlider({
-  label,
   valueLabel,
   field,
   value,
-  minLabel,
-  maxLabel,
 }: {
-  label: string
   valueLabel: string
   field: LevelKey
   value: number
-  minLabel: string
-  maxLabel: string
 }) {
+  const { t } = useTranslation()
+  const label = t(`design.${field}.label`)
   const { updateDesign, endTyping } = useDesignTarget()
   const set = (next: number) =>
     updateDesign({ [field]: Math.min(5, Math.max(1, next)) }, `design:${field}`)
@@ -56,7 +53,7 @@ function LevelSlider({
         <button
           type="button"
           className={stepButton}
-          aria-label={`Decrease ${label.toLowerCase()}`}
+          aria-label={t(`design.${field}.decrease`)}
           disabled={value <= 1}
           onClick={() => {
             set(value - 1)
@@ -80,7 +77,7 @@ function LevelSlider({
         <button
           type="button"
           className={stepButton}
-          aria-label={`Increase ${label.toLowerCase()}`}
+          aria-label={t(`design.${field}.increase`)}
           disabled={value >= 5}
           onClick={() => {
             set(value + 1)
@@ -91,14 +88,15 @@ function LevelSlider({
         </button>
       </div>
       <div className="mt-1 flex justify-between px-7 text-xs text-slate-500">
-        <span>{minLabel}</span>
-        <span>{maxLabel}</span>
+        <span>{t(`design.${field}.min`)}</span>
+        <span>{t(`design.${field}.max`)}</span>
       </div>
     </Group>
   )
 }
 
 function ColorPicker({ design, template }: { design: CvDesign; template: TemplateDefinition }) {
+  const { t } = useTranslation()
   const { updateDesign, endTyping } = useDesignTarget()
   const [hexText, setHexText] = useState(design.accentColor)
   const custom = !(ACCENT_PRESETS as readonly string[]).includes(design.accentColor.toLowerCase())
@@ -111,8 +109,12 @@ function ColorPicker({ design, template }: { design: CvDesign; template: Templat
   }
 
   return (
-    <Group title="Colors">
-      <div role="radiogroup" aria-label="Accent color" className="flex flex-wrap gap-2">
+    <Group title={t('design.colors.title')}>
+      <div
+        role="radiogroup"
+        aria-label={t('design.colors.accent')}
+        className="flex flex-wrap gap-2"
+      >
         {ACCENT_PRESETS.map((color) => {
           const selected = design.accentColor.toLowerCase() === color
           return (
@@ -121,7 +123,7 @@ function ColorPicker({ design, template }: { design: CvDesign; template: Templat
               type="button"
               role="radio"
               aria-checked={selected}
-              aria-label={`Color ${color}`}
+              aria-label={t('design.colors.preset', { color })}
               onClick={() => {
                 choose(color)
                 endTyping()
@@ -142,11 +144,11 @@ function ColorPicker({ design, template }: { design: CvDesign; template: Templat
             custom ? 'ring-2 ring-slate-900 dark:ring-white' : 'ring-1 ring-slate-300'
           }`}
           style={{ background: design.accentColor }}
-          title="Use custom color"
+          title={t('design.colors.useCustom')}
         >
           <input
             type="color"
-            aria-label="Custom color"
+            aria-label={t('design.colors.custom')}
             className="absolute inset-0 cursor-pointer opacity-0"
             value={design.accentColor}
             onChange={(e) => choose(e.target.value)}
@@ -154,7 +156,7 @@ function ColorPicker({ design, template }: { design: CvDesign; template: Templat
           />
         </label>
         <input
-          aria-label="Custom color hex code"
+          aria-label={t('design.colors.hex')}
           className="w-24 rounded-md border border-slate-300 bg-white px-2 py-1 font-mono text-sm uppercase dark:border-slate-600 dark:bg-slate-800"
           value={hexText}
           maxLength={7}
@@ -168,7 +170,7 @@ function ColorPicker({ design, template }: { design: CvDesign; template: Templat
             endTyping()
           }}
         />
-        <span className="text-xs text-slate-500">Use custom color</span>
+        <span className="text-xs text-slate-500">{t('design.colors.useCustom')}</span>
       </div>
       {lowContrast && (
         <p
@@ -176,8 +178,7 @@ function ColorPicker({ design, template }: { design: CvDesign; template: Templat
           className="mt-2 flex items-start gap-1.5 text-xs text-amber-700 dark:text-amber-400"
         >
           <TriangleAlert className="mt-0.5 size-3.5 shrink-0" />
-          This color is light: {filled ? 'white text on it' : 'colored text'} may be hard to read. A
-          darker shade works better.
+          {filled ? t('design.colors.lowContrastFilled') : t('design.colors.lowContrastText')}
         </p>
       )}
     </Group>
@@ -185,16 +186,17 @@ function ColorPicker({ design, template }: { design: CvDesign; template: Templat
 }
 
 function FontPicker({ value }: { value: FontFamily }) {
+  const { t } = useTranslation()
   const { updateDesign } = useDesignTarget()
   const [open, setOpen] = useState(false)
   return (
-    <Group title="Font style">
+    <Group title={t('design.font.title')}>
       <div className="relative">
         <button
           type="button"
           aria-haspopup="listbox"
           aria-expanded={open}
-          aria-label={`Font: ${value}`}
+          aria-label={t('design.font.current', { font: value })}
           onClick={() => setOpen((o) => !o)}
           className="flex w-full items-center justify-between rounded-lg border border-slate-300 px-3 py-2 text-lg dark:border-slate-600"
           style={{ fontFamily: FONT_STACKS[value] }}
@@ -205,7 +207,7 @@ function FontPicker({ value }: { value: FontFamily }) {
         {open && (
           <ul
             role="listbox"
-            aria-label="Fonts"
+            aria-label={t('design.font.list')}
             className="absolute z-10 mt-1 max-h-72 w-full overflow-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-900"
           >
             {FONT_FAMILIES.map((font) => (
@@ -230,7 +232,7 @@ function FontPicker({ value }: { value: FontFamily }) {
           </ul>
         )}
       </div>
-      <p className="mt-1.5 text-xs text-slate-500">All fonts support Latin and Cyrillic.</p>
+      <p className="mt-1.5 text-xs text-slate-500">{t('design.font.note')}</p>
     </Group>
   )
 }
@@ -243,17 +245,24 @@ function ColumnLayoutPicker({
   design: CvDesign
   template: TemplateDefinition
 }) {
+  const { t } = useTranslation()
   const { updateDesign } = useDesignTarget()
   if (template.columns === 1) {
     return (
-      <Group title="Column layout">
-        <p className="text-xs text-slate-500">{template.name} uses a single column.</p>
+      <Group title={t('design.columns.title')}>
+        <p className="text-xs text-slate-500">
+          {t('design.columns.single', { template: t(`labels.template.${template.id}`) })}
+        </p>
       </Group>
     )
   }
   return (
-    <Group title="Column layout">
-      <div role="radiogroup" aria-label="Column layout" className="grid grid-cols-4 gap-2">
+    <Group title={t('design.columns.title')}>
+      <div
+        role="radiogroup"
+        aria-label={t('design.columns.title')}
+        className="grid grid-cols-4 gap-2"
+      >
         {[1, 2, 3, 4].map((option) => {
           const { width, fill } = sidebarFor(template, option)
           const selected = design.columnLayout === option
@@ -278,7 +287,7 @@ function ColumnLayoutPicker({
               type="button"
               role="radio"
               aria-checked={selected}
-              aria-label={`Column layout ${option}`}
+              aria-label={t('design.columns.option', { n: option })}
               onClick={() => updateDesign({ columnLayout: option })}
               className="flex flex-col items-center gap-1 text-xs"
             >
@@ -300,12 +309,18 @@ function ColumnLayoutPicker({
 }
 
 function BackgroundPicker({ design }: { design: CvDesign }) {
+  const { t } = useTranslation()
   const { updateDesign } = useDesignTarget()
   return (
-    <Group title="Backgrounds">
-      <div role="radiogroup" aria-label="Background" className="grid grid-cols-4 gap-2">
-        {BACKGROUNDS.map(({ id, label }) => {
+    <Group title={t('design.backgrounds.title')}>
+      <div
+        role="radiogroup"
+        aria-label={t('design.backgrounds.label')}
+        className="grid grid-cols-4 gap-2"
+      >
+        {BACKGROUNDS.map(({ id }) => {
           const selected = design.background === id
+          const label = t(`design.backgrounds.names.${id}`)
           return (
             <button
               key={id}
@@ -330,6 +345,7 @@ function BackgroundPicker({ design }: { design: CvDesign }) {
 }
 
 export function DesignPanel() {
+  const { t } = useTranslation()
   const { kind, design, updateDesign } = useDesignTarget()
   if (!design) return null
   const template = getTemplate(design.templateId)
@@ -345,38 +361,26 @@ export function DesignPanel() {
   return (
     <>
       <LevelSlider
-        label="Page margins"
         valueLabel={String(design.pageMargins)}
         field="pageMargins"
         value={design.pageMargins}
-        minLabel="narrow"
-        maxLabel="wide"
       />
       <LevelSlider
-        label="Section spacing"
         valueLabel={String(design.sectionSpacing)}
         field="sectionSpacing"
         value={design.sectionSpacing}
-        minLabel="compact"
-        maxLabel="more space"
       />
       <ColorPicker key={design.accentColor} design={design} template={template} />
       <FontPicker value={design.fontFamily} />
       <LevelSlider
-        label="Font size"
-        valueLabel={FONT_SIZE_NAMES[design.fontSize - 1]!}
+        valueLabel={t(`design.fontSize.names.${FONT_SIZE_KEYS[design.fontSize - 1]!}`)}
         field="fontSize"
         value={design.fontSize}
-        minLabel="−A"
-        maxLabel="+A"
       />
       <LevelSlider
-        label="Line height"
         valueLabel={String(design.lineHeight)}
         field="lineHeight"
         value={design.lineHeight}
-        minLabel="condensed"
-        maxLabel="spacious"
       />
       {/* A letter is one column; its look comes from the template's header. */}
       {kind === 'cv' && <ColumnLayoutPicker design={design} template={template} />}
@@ -386,7 +390,8 @@ export function DesignPanel() {
         onClick={resetToTemplateDefaults}
         className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-lg border border-slate-300 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
       >
-        <RotateCcw className="size-4" /> Reset to {template.name} defaults
+        <RotateCcw className="size-4" />{' '}
+        {t('design.reset', { template: t(`labels.template.${template.id}`) })}
       </button>
     </>
   )

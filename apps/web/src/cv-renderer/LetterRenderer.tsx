@@ -1,6 +1,7 @@
 import type { CoverLetterDocument } from '@cv/shared'
 import { Plus } from 'lucide-react'
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { RenderContext, useEditor, useRender, type RenderMode } from './context'
 import { HeaderControls } from './controls'
 import type { EditorApi } from './editorApi'
@@ -28,6 +29,7 @@ function paragraphHint(P: Placeholders, index: number, count: number) {
 function Paragraphs({ paragraphs, actions }: { paragraphs: string[]; actions?: LetterActions }) {
   const P = usePlaceholders()
   const editor = useEditor()
+  const { t } = useTranslation()
   const { mode } = useRender()
   return (
     <div className="flex flex-col gap-[0.8em]">
@@ -55,7 +57,7 @@ function Paragraphs({ paragraphs, actions }: { paragraphs: string[]; actions?: L
           className="inline-flex w-fit items-center gap-1 rounded px-1 text-[0.85em] opacity-60 hover:bg-[var(--cv-hover)] hover:opacity-100"
           style={{ color: 'var(--cv-accent-text)' }}
         >
-          <Plus className="size-[1em]" aria-hidden /> Add paragraph
+          <Plus className="size-[1em]" aria-hidden /> {t('renderer.addParagraph')}
         </button>
       )}
     </div>
@@ -80,6 +82,7 @@ export function LetterRenderer({
   actions?: LetterActions
   pageClassName?: string
 }) {
+  const { t } = useTranslation()
   const { design, header, recipient } = letter
   const template = getTemplate(design.templateId)
   const tokens = layoutTokens(design)
@@ -100,7 +103,11 @@ export function LetterRenderer({
     <RenderContext.Provider value={context}>
       <LetterPlaceholders>
         {(P) => (
-          <div role="document" aria-label="Cover letter" className="flex flex-col">
+          <div
+            role="document"
+            aria-label={t('labels.documentType.coverLetter')}
+            className="flex flex-col"
+          >
             <div
               data-letter-page={design.pageSize}
               className={`relative flex flex-col bg-white ${pageClassName ?? ''}`}

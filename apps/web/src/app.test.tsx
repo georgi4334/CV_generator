@@ -447,7 +447,7 @@ describe('create new CV', () => {
     const router = renderRoute('/cvs/new?profession=designer&template=stylish')
     fireEvent.click(screen.getByRole('button', { name: 'Create CV' }))
     expect((await screen.findByRole('alert')).textContent).toContain(
-      'The free plan allows up to 20 CVs',
+      'You have reached the limit of your plan.',
     )
     expect(router.state.location.pathname).toBe('/cvs/new')
     expect(fake.current.cvs.size).toBe(0)

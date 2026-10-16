@@ -18,6 +18,7 @@
 > - **Deviation from the original plan:** sessions are opaque random tokens stored (hashed) in the database and sent in an httpOnly cookie, **not JWTs**. Logging out, changing or resetting a password can then end sessions immediately, which a JWT cannot do without a blocklist. Still portable plain Postgres; no extra cost ✅
 > - AI: Google Gemini free tier behind a provider interface (key only on the server); all three features in one step; Saved Jobs get a "Job description" field; free plan: 30 AI requests per user per day ✅
 > - Release: Cloudflare Pages proxies `/api` to Render (no domain needed, first-party cookie); emails via Brevo; Bulgarian interface later as its own step; draft privacy policy and terms ✅
+> - Interface languages: English, Bulgarian, German, switched from a header dropdown without reloading (the CV keeps its own language) ✅
 
 ## 1. Goal
 
@@ -474,7 +475,18 @@ Specification: §2.1.
 - ✅ **Browser tests (Playwright)** in `e2e/`: sign-up/sign-out/sign-in, legal pages, CV create → edit → autosave → reload → share link, saved job description, all AI features with the mock provider, accessibility, security headers, not-found page. They run against the production builds and a fresh database; CI runs them on pull requests.
 - ✅ **Privacy policy** (`/privacy`) and **terms** (`/terms`), linked from every page and the sign-up form. Drafts based on what the app really stores and which services process it; **review them (not legal advice)** and set `VITE_OPERATOR_NAME` / `VITE_CONTACT_EMAIL`.
 - ⚠️ **Gemini in the EU:** Google's Gemini API terms allow only _paid_ services for apps used by people in the EEA, UK or Switzerland. Turn on billing for the key's Google Cloud project before launch (cheap with the daily limit; set a budget alert).
-- ⏭ Later: Bulgarian interface (separate step), Google sign-in (separate step), own domain with SPF/DKIM for email deliverability.
+- ⏭ Later: Google sign-in (separate step), own domain with SPF/DKIM for email deliverability.
+
+### Interface languages (EN · BG · DE) ✅ built (awaiting review)
+
+- ✅ **Language dropdown** in every header (app, sign-in pages, legal pages, editor; compact "EN/BG/DE" in the editor). Switching is instant and keeps the page, open documents and unsaved edits; the `<html lang>` follows.
+- ✅ **First visit:** the browser's language (bg/de, else English); the choice is remembered in the browser and, when signed in, on the account (`users.locale`), so another browser opens in the same language.
+- ✅ **Everything the app says is translated:** navigation, all pages and panels, editor controls, AI panels, dialogs, notices, empty states, plurals ("1 job / 3 jobs"), dates (formatted per language), API error messages (translated by error code), privacy policy and terms, and the **account emails** (confirmation, password reset).
+- ✅ **The CV keeps its own language:** CV content, section titles and placeholders follow the CV language (EN-US/EN-GB/BG), so a German interface can edit an English CV.
+- ✅ **Built with i18next:** English is the source (`apps/web/src/i18n/locales/en`); Bulgarian and German files are type-checked against it (a missing or extra key fails the build) and a test checks that every `{{placeholder}}` matches. Bulgarian and German download only when chosen. How to add text: `apps/web/src/i18n/README.md`.
+- ✅ Browser tests switch languages in place (no reload), check that the choice is remembered and saved on the account, and run the accessibility checks in Bulgarian and German.
+- ⚠️ The Bulgarian and German texts were written carefully but not by native-speaker reviewers; the legal pages especially should be reviewed before launch.
+- ⏭ Possible next: German as a **CV language** (German section titles, placeholders and date formats for CVs written in German).
 
 ### Step 18 (optional): Premium
 

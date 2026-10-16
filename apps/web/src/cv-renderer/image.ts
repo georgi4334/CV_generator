@@ -1,9 +1,11 @@
+import { i18n } from '../i18n'
+
 const MAX_FILE_BYTES = 5 * 1024 * 1024
 
 /** Scales an image file down in the browser, so uploads stay small. */
 export async function resizeImage(file: File, maxSize: number): Promise<Blob> {
-  if (!file.type.startsWith('image/')) throw new Error('Please choose an image file.')
-  if (file.size > MAX_FILE_BYTES) throw new Error('The image must be smaller than 5 MB.')
+  if (!file.type.startsWith('image/')) throw new Error(i18n.t('renderer.imageNotImage'))
+  if (file.size > MAX_FILE_BYTES) throw new Error(i18n.t('renderer.imageTooLarge'))
 
   const bitmap = await createImageBitmap(file)
   const scale = Math.min(1, maxSize / Math.max(bitmap.width, bitmap.height))
@@ -15,7 +17,7 @@ export async function resizeImage(file: File, maxSize: number): Promise<Blob> {
   const type = file.type === 'image/png' ? 'image/png' : 'image/jpeg'
   return new Promise((resolve, reject) =>
     canvas.toBlob(
-      (blob) => (blob ? resolve(blob) : reject(new Error('Could not read the image.'))),
+      (blob) => (blob ? resolve(blob) : reject(new Error(i18n.t('renderer.imageUnreadable')))),
       type,
       0.85,
     ),

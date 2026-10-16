@@ -1,7 +1,9 @@
 import type { CvRecord } from '@cv/shared'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router'
 import { toApiRequestError } from '../../lib/api'
+import { errorMessage } from '../../lib/errorMessage'
 import { useCv, useRenameCv } from '../../lib/cvQueries'
 import { NotFoundPage } from '../../pages/NotFoundPage'
 import { AiTargetContext } from '../ai/aiTarget'
@@ -22,6 +24,7 @@ import { useUndoShortcuts } from './useUndoShortcuts'
 import { VersionPreview } from './VersionPreview'
 
 function CvEditor({ record }: { record: CvRecord }) {
+  const { t } = useTranslation()
   useCvSession(record)
   useUndoShortcuts()
   const cv = useCvEditor((s) => (s.docId === record.id ? s.cv : null))
@@ -32,7 +35,7 @@ function CvEditor({ record }: { record: CvRecord }) {
   const aiTarget = useCvAiTarget(record, cv ?? record.document)
 
   const download = () => {
-    notify('In the print dialog, choose “Save as PDF” as the destination.')
+    notify(t('editor.printHint'))
     // The latest edits, even if they are still being saved.
     printCv(useCvEditor.getState().cv ?? record.document, record.title)
   }
@@ -46,7 +49,9 @@ function CvEditor({ record }: { record: CvRecord }) {
             onRename={(title) =>
               rename.mutate(
                 { id: record.id, title },
-                { onError: (e) => notify(`Not renamed: ${toApiRequestError(e).message}`) },
+                {
+                  onError: (e) => notify(t('editor.title.notRenamed', { reason: errorMessage(e) })),
+                },
               )
             }
           />

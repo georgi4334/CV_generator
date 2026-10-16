@@ -1,4 +1,5 @@
 import type { Job } from '@cv/shared'
+import { useTranslation } from 'react-i18next'
 import { JobTypeBadge } from '../../components/Badges'
 import { card } from '../../components/PageHeader'
 import { formatDate } from '../../lib/format'
@@ -8,9 +9,10 @@ import { useJobActions } from './jobContext'
 
 /** Saved Jobs on small screens: one card per job; tap the title for all details. */
 export function JobCards({ jobs }: { jobs: Job[] }) {
+  const { t } = useTranslation()
   const { update, open, cvs } = useJobActions()
   return (
-    <ul aria-label="Saved jobs" className="space-y-3">
+    <ul aria-label={t('jobs.list')} className="space-y-3">
       {jobs.map((job) => {
         const cv = cvs.find((c) => c.id === job.cvId)
         return (
@@ -25,20 +27,20 @@ export function JobCards({ jobs }: { jobs: Job[] }) {
               </button>
               <StatusSelect
                 value={job.status}
-                label={`Status for ${job.position}`}
+                label={t('jobs.cell.statusFor', { position: job.position })}
                 onChange={(status) => update(job, statusChange(job, status))}
               />
             </div>
             <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
-              <dt>Saved</dt>
+              <dt>{t('jobs.card.saved')}</dt>
               <dd>{formatDate(job.dateSaved)}</dd>
-              <dt>Applied</dt>
+              <dt>{t('jobs.card.applied')}</dt>
               <dd>{formatDate(job.dateApplied)}</dd>
-              <dt>Type</dt>
+              <dt>{t('jobs.card.type')}</dt>
               <dd>
                 <JobTypeBadge type={job.type} />
               </dd>
-              <dt>Resume</dt>
+              <dt>{t('jobs.card.resume')}</dt>
               <dd className="truncate">{cv?.title ?? '—'}</dd>
             </dl>
             {job.notes && (

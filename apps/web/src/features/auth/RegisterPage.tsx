@@ -1,13 +1,15 @@
 import { PASSWORD_MIN_LENGTH } from '@cv/shared'
 import { useState, type FormEvent } from 'react'
+import { Trans, useTranslation } from 'react-i18next'
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router'
 import { primaryButton } from '../../components/PageHeader'
-import { toApiRequestError } from '../../lib/api'
 import { useCurrentUser, useRegister } from '../../lib/authQueries'
+import { errorMessage } from '../../lib/errorMessage'
 import { AuthShell, FormError } from './AuthShell'
 import { field, linkClass, safeNext } from './authStyles'
 
 export function RegisterPage() {
+  const { t } = useTranslation()
   const [params] = useSearchParams()
   const next = safeNext(params.get('next'))
   const navigate = useNavigate()
@@ -29,20 +31,20 @@ export function RegisterPage() {
 
   return (
     <AuthShell
-      title="Create your account"
-      description="Free: up to 20 CVs and 30 versions each."
+      title={t('auth.register.title')}
+      description={t('auth.register.description')}
       footer={
         <>
-          Already have an account?{' '}
+          {t('auth.register.haveAccount')}{' '}
           <Link to="/login" className={linkClass}>
-            Sign in
+            {t('auth.signIn')}
           </Link>
         </>
       }
     >
       <form onSubmit={submit} className="space-y-4">
         <label className="block space-y-1 text-sm">
-          <span className="font-medium">Name (optional)</span>
+          <span className="font-medium">{t('auth.register.nameOptional')}</span>
           <input
             autoComplete="name"
             maxLength={100}
@@ -52,7 +54,7 @@ export function RegisterPage() {
           />
         </label>
         <label className="block space-y-1 text-sm">
-          <span className="font-medium">Email</span>
+          <span className="font-medium">{t('auth.email')}</span>
           <input
             type="email"
             autoComplete="email"
@@ -63,7 +65,7 @@ export function RegisterPage() {
           />
         </label>
         <label className="block space-y-1 text-sm">
-          <span className="font-medium">Password</span>
+          <span className="font-medium">{t('auth.password')}</span>
           <input
             type="password"
             autoComplete="new-password"
@@ -74,27 +76,25 @@ export function RegisterPage() {
             className={field}
           />
           <span className="block text-xs text-slate-500 dark:text-slate-400">
-            At least {PASSWORD_MIN_LENGTH} characters. A few short words work well.
+            {t('auth.register.passwordHint', { min: PASSWORD_MIN_LENGTH })}
           </span>
         </label>
-        <FormError message={register.isError ? toApiRequestError(register.error).message : null} />
+        <FormError message={register.isError ? errorMessage(register.error) : null} />
         <p className="text-xs text-slate-500 dark:text-slate-400">
-          By creating an account you accept the{' '}
-          <Link to="/terms" className={linkClass}>
-            Terms
-          </Link>{' '}
-          and the{' '}
-          <Link to="/privacy" className={linkClass}>
-            Privacy policy
-          </Link>
-          .
+          <Trans
+            i18nKey="auth.register.consent"
+            components={{
+              terms: <Link to="/terms" className={linkClass} />,
+              privacy: <Link to="/privacy" className={linkClass} />,
+            }}
+          />
         </p>
         <button
           type="submit"
           disabled={register.isPending}
           className={`${primaryButton} w-full justify-center`}
         >
-          {register.isPending ? 'Creating account…' : 'Create account'}
+          {register.isPending ? t('auth.register.submitting') : t('auth.register.submit')}
         </button>
       </form>
     </AuthShell>

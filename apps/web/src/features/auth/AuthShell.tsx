@@ -1,6 +1,8 @@
 import { FileText } from 'lucide-react'
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
+import { LanguageSelect } from '../../components/LanguageSelect'
 import { ThemeToggle } from '../../components/ThemeToggle'
 import { card } from '../../components/PageHeader'
 import { LegalFooter } from '../../pages/legal/LegalLayout'
@@ -17,13 +19,15 @@ export function AuthShell({
   children: ReactNode
   footer?: ReactNode
 }) {
+  const { t } = useTranslation()
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-slate-50 px-4 py-10 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-      <div className="absolute top-3 right-3">
+      <div className="absolute top-3 right-3 flex items-center gap-1">
+        <LanguageSelect />
         <ThemeToggle />
       </div>
       <Link to="/" className="flex items-center gap-2 text-lg font-semibold">
-        <FileText className="size-6 text-teal-600 dark:text-teal-400" /> CV Generator
+        <FileText className="size-6 text-teal-600 dark:text-teal-400" /> {t('common.appName')}
       </Link>
       <main className={`${card} w-full max-w-sm p-6`}>
         <h1 className="text-xl font-semibold">{title}</h1>

@@ -14,6 +14,7 @@ import {
   type SkillItem,
 } from '@cv/shared'
 import { Building2, Star, X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useEditor, useRender } from './context'
 import { assetUrl } from '../lib/api'
 import { itemPath } from './editorApi'
@@ -51,6 +52,7 @@ function CompanyLogo({ item, refs }: { item: ExperienceItem; refs: ItemRef }) {
   const { mode } = useRender()
   const editor = useEditor()
   const update = useUpdate(refs)
+  const { t } = useTranslation()
   const size = 'size-[2.6em] shrink-0 rounded-full'
 
   const image = item.logoUrl ? (
@@ -69,13 +71,13 @@ function CompanyLogo({ item, refs }: { item: ExperienceItem; refs: ItemRef }) {
     <span className="group/logo relative shrink-0 self-start">
       <button
         type="button"
-        title={item.logoUrl ? 'Change company logo' : 'Upload company logo'}
-        aria-label={item.logoUrl ? 'Change company logo' : 'Upload company logo'}
+        title={item.logoUrl ? t('renderer.changeLogo') : t('renderer.uploadLogo')}
+        aria-label={item.logoUrl ? t('renderer.changeLogo') : t('renderer.uploadLogo')}
         className="block cursor-pointer rounded-full border-0 bg-transparent p-0"
         onClick={() =>
           pickAndUpload(160, editor.uploadImage).then(
             (url) => url && update({ logoUrl: url }),
-            (e: Error) => editor.notify(`Logo not uploaded: ${e.message}`),
+            (e: Error) => editor.notify(t('renderer.logoFailed', { message: e.message })),
           )
         }
       >
@@ -84,7 +86,7 @@ function CompanyLogo({ item, refs }: { item: ExperienceItem; refs: ItemRef }) {
       {item.logoUrl && (
         <button
           type="button"
-          aria-label="Remove company logo"
+          aria-label={t('renderer.removeLogo')}
           className="absolute -top-1 -right-1 hidden size-4 items-center justify-center rounded-full bg-slate-800 text-white group-hover/logo:flex"
           onClick={() => update({ logoUrl: null })}
         >
@@ -200,11 +202,16 @@ export function EducationView({ item, refs }: { item: EducationItem; refs: ItemR
 function AchievementIcon({ item, refs }: { item: AchievementItem; refs: ItemRef }) {
   const editor = useEditor()
   const update = useUpdate(refs)
+  const { t } = useTranslation()
   const Icon = ACHIEVEMENT_ICONS[item.icon] ?? Star
   const icon = <Icon className="mt-[0.2em] size-[1.05em] shrink-0" style={accent} />
   if (!editor) return icon
   return (
-    <PopoverTrigger label="Choose icon" display={icon} className="flex shrink-0 self-start">
+    <PopoverTrigger
+      label={t('renderer.chooseIcon')}
+      display={icon}
+      className="flex shrink-0 self-start"
+    >
       <div className="grid grid-cols-5 gap-2">
         {Object.entries(ACHIEVEMENT_ICONS).map(([key, Choice]) => (
           <button
@@ -466,11 +473,12 @@ function LevelLabel({
   onChange: (level: number) => void
 }) {
   const editor = useEditor()
+  const { t } = useTranslation()
   if (!editor) return <>{label}</>
   return (
     <button
       type="button"
-      title="Click to change the level"
+      title={t('renderer.changeLevel')}
       className="cv-editable cursor-pointer border-0 bg-transparent p-0 text-inherit"
       style={{ font: 'inherit' }}
       onClick={() => onChange((level % 5) + 1)}

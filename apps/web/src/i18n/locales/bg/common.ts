@@ -1,0 +1,30 @@
+import type { Messages } from '../../types'
+
+export const common: Messages['common'] = {
+  appName: 'CV Generator',
+  save: 'Запази',
+  saved: 'Запазено',
+  saving: 'Запазване…',
+  cancel: 'Отказ',
+  close: 'Затвори',
+  delete: 'Изтрий',
+  edit: 'Редактирай',
+  back: 'Назад',
+  create: 'Създай',
+  apply: 'Приложи',
+  discard: 'Откажи',
+  replace: 'Замени',
+  tryAgain: 'Опитай отново',
+  loading: 'Зареждане…',
+  none: '— Няма —',
+  optional: 'по избор',
+  untitled: 'Без заглавие',
+  language: 'Език',
+  interfaceLanguage: 'Език на интерфейса',
+  theme: {
+    system: 'Тема: системна',
+    light: 'Тема: светла',
+    dark: 'Тема: тъмна',
+    hint: '{{mode}} (щракнете за смяна)',
+  },
+}

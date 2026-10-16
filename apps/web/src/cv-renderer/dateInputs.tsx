@@ -1,6 +1,11 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+/** Short month names in the interface language (this is the date picker, not the CV). */
+function monthNames(language: string): string[] {
+  const format = new Intl.DateTimeFormat(language, { month: 'short', timeZone: 'UTC' })
+  return Array.from({ length: 12 }, (_, i) => format.format(new Date(Date.UTC(2000, i, 15))))
+}
 
 const inputClass =
   'rounded-md border border-slate-300 bg-white px-2 py-1 text-sm dark:border-slate-600 dark:bg-slate-800'
@@ -17,6 +22,7 @@ export function YearMonthInput({
   onChange: (value: string | null) => void
   disabled?: boolean
 }) {
+  const { t, i18n } = useTranslation()
   const [initialYear, initialMonth] = (value ?? '').split('-')
   // Kept locally so a month chosen before the year is not lost.
   const [yearText, setYearText] = useState(initialYear ?? '')
@@ -32,7 +38,7 @@ export function YearMonthInput({
       <legend className="sr-only">{label}</legend>
       <span className="w-12 text-xs text-slate-500">{label}</span>
       <select
-        aria-label={`${label} month`}
+        aria-label={t('renderer.monthOf', { label })}
         className={inputClass}
         value={month}
         onChange={(e) => {
@@ -41,17 +47,17 @@ export function YearMonthInput({
         }}
       >
         <option value="">—</option>
-        {MONTHS.map((name, i) => (
+        {monthNames(i18n.language).map((name, i) => (
           <option key={name} value={String(i + 1).padStart(2, '0')}>
             {name}
           </option>
         ))}
       </select>
       <input
-        aria-label={`${label} year`}
+        aria-label={t('renderer.yearOf', { label })}
         className={`${inputClass} w-20`}
         inputMode="numeric"
-        placeholder="Year"
+        placeholder={t('renderer.year')}
         maxLength={4}
         value={yearText}
         onChange={(e) => {
@@ -77,15 +83,16 @@ export function DateRangeForm({
   value: DateRangeValue
   onChange: (patch: Partial<DateRangeValue>) => void
 }) {
+  const { t } = useTranslation()
   return (
     <div className="space-y-2">
       <YearMonthInput
-        label="Start"
+        label={t('renderer.start')}
         value={value.startDate}
         onChange={(startDate) => onChange({ startDate })}
       />
       <YearMonthInput
-        label="End"
+        label={t('renderer.end')}
         value={value.endDate}
         disabled={value.isCurrent}
         onChange={(endDate) => onChange({ endDate })}
@@ -96,7 +103,7 @@ export function DateRangeForm({
           checked={value.isCurrent}
           onChange={(e) => onChange({ isCurrent: e.target.checked })}
         />
-        Present (still here)
+        {t('renderer.present')}
       </label>
     </div>
   )

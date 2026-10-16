@@ -7,10 +7,12 @@ import {
   ResetPasswordInputSchema,
   UpdateProfileInputSchema,
   VerifyEmailInputSchema,
+  type Locale,
   type User,
 } from '@cv/shared'
 import { and, count, eq, gt, isNull, ne } from 'drizzle-orm'
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
+import { resetEmail, verificationEmail } from '../auth/emails'
 import { hashPassword, verifyAgainstDummy, verifyPassword } from '../auth/password'
 import {
   createSession,
@@ -60,6 +62,7 @@ const toUser = (user: SessionUser & { createdAt: Date }): User => ({
   name: user.name,
   plan: user.plan,
   emailVerified: user.emailVerified,
+  locale: user.locale,
   createdAt: user.createdAt.toISOString(),
 })
 
@@ -141,20 +144,15 @@ export async function authRoutes(app: FastifyInstance, opts: AuthRouteOptions) {
     opts.mailer.send(email).catch((error) => request.log.error(error, 'could not send email'))
   }
 
-  async function sendVerification(request: FastifyRequest, user: { id: string; email: string }) {
+  async function sendVerification(
+    request: FastifyRequest,
+    user: { id: string; email: string; locale: Locale },
+  ) {
     const token = await issueToken(user.id, 'email_verification', VERIFY_TOKEN_MS)
-    sendMail(request, {
-      to: user.email,
-      subject: 'Confirm your email address',
-      text: [
-        'Welcome to CV Generator!',
-        '',
-        'Confirm your email address by opening this link:',
-        `${opts.appUrl}/verify-email?token=${token}`,
-        '',
-        'If you did not create an account, you can ignore this email.',
-      ].join('\n'),
-    })
+    sendMail(
+      request,
+      verificationEmail(user.email, user.locale, `${opts.appUrl}/verify-email?token=${token}`),
+    )
   }
 
   app.post('/auth/register', async (request, reply) => {
@@ -182,7 +180,7 @@ export async function authRoutes(app: FastifyInstance, opts: AuthRouteOptions) {
 
         const [user] = await tx
           .insert(users)
-          .values({ email: input.email, name: input.name, passwordHash })
+          .values({ email: input.email, name: input.name, locale: input.locale, passwordHash })
           .returning()
 
         if (dev && others?.n === 0) {
@@ -236,24 +234,20 @@ export async function authRoutes(app: FastifyInstance, opts: AuthRouteOptions) {
 
   app.post('/auth/forgot-password', async (request, reply) => {
     allow(limits.forgotIp, request.clientIp)
-    const { email } = ForgotPasswordInputSchema.parse(request.body)
+    const { email, locale } = ForgotPasswordInputSchema.parse(request.body)
     // Same answer whether or not the account exists.
     if (limits.forgotEmail.hit(email)) {
       const [user] = await db.select().from(users).where(eq(users.email, email))
       if (user?.passwordHash) {
         const token = await issueToken(user.id, 'password_reset', RESET_TOKEN_MS)
-        sendMail(request, {
-          to: user.email,
-          subject: 'Reset your password',
-          text: [
-            'Someone asked to reset the password of your CV Generator account.',
-            '',
-            'Choose a new password by opening this link (valid for 1 hour):',
+        sendMail(
+          request,
+          resetEmail(
+            user.email,
+            locale ?? user.locale,
             `${opts.appUrl}/reset-password?token=${token}`,
-            '',
-            'If this was not you, ignore this email: your password stays as it is.',
-          ].join('\n'),
-        })
+          ),
+        )
       }
     }
     return reply.status(204).send()
@@ -300,10 +294,10 @@ export async function authRoutes(app: FastifyInstance, opts: AuthRouteOptions) {
     })
 
     me.patch('/auth/me', async (request) => {
-      const { name } = UpdateProfileInputSchema.parse(request.body)
+      const change = UpdateProfileInputSchema.parse(request.body)
       const [user] = await db
         .update(users)
-        .set({ name })
+        .set(change)
         .where(eq(users.id, request.user.id))
         .returning()
       return { user: toUser({ ...user!, emailVerified: user!.emailVerifiedAt !== null }) }

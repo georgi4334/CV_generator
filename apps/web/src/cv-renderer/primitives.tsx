@@ -1,4 +1,5 @@
 import { useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useEditor, useRender } from './context'
 import { DateRangeForm, YearMonthInput, type DateRangeValue } from './dateInputs'
 import { EditableText } from './EditableText'
@@ -177,6 +178,7 @@ export function LevelIndicator({
 }) {
   const editor = useEditor()
   const editable = editor !== null && onChange !== undefined
+  const { t } = useTranslation()
 
   if (display === 'bar') {
     return (
@@ -187,7 +189,7 @@ export function LevelIndicator({
         aria-valuemin={editable ? 1 : undefined}
         aria-valuemax={editable ? 5 : undefined}
         aria-valuenow={editable ? level : undefined}
-        aria-label={`${level} of 5`}
+        aria-label={t('renderer.levelOf', { level })}
         tabIndex={editable ? 0 : undefined}
         onClick={(e) => {
           if (!editable) return
@@ -208,14 +210,14 @@ export function LevelIndicator({
     )
   }
   return (
-    <span className="inline-flex gap-[0.25em]" aria-label={`${level} of 5`}>
+    <span className="inline-flex gap-[0.25em]" aria-label={t('renderer.levelOf', { level })}>
       {[1, 2, 3, 4, 5].map((n) => {
         const dot = { background: n <= level ? 'var(--cv-accent-text)' : 'var(--cv-rule)' }
         return editable ? (
           <button
             key={n}
             type="button"
-            aria-label={`Set level ${n} of 5`}
+            aria-label={t('renderer.setLevel', { level: n })}
             className="inline-block size-[0.6em] cursor-pointer rounded-full border-0 p-0 hover:scale-125"
             style={dot}
             onClick={() => onChange(n)}
@@ -280,10 +282,15 @@ export function DateRangeField({
   onChange: (patch: Partial<DateRangeValue>) => void
 }) {
   const editor = useEditor()
+  const { t } = useTranslation()
   const display = <Field value={text} placeholder={placeholder} />
   if (!editor) return display
   return (
-    <PopoverTrigger label="Edit dates" display={display} visibleText={text || placeholder}>
+    <PopoverTrigger
+      label={t('renderer.editDates')}
+      display={display}
+      visibleText={text || placeholder}
+    >
       <DateRangeForm value={value} onChange={onChange} />
     </PopoverTrigger>
   )
@@ -301,11 +308,16 @@ export function SingleDateField({
   onChange: (value: string | null) => void
 }) {
   const editor = useEditor()
+  const { t } = useTranslation()
   const display = <Field value={text} placeholder={placeholder} />
   if (!editor) return display
   return (
-    <PopoverTrigger label="Edit date" display={display} visibleText={text || placeholder}>
-      <YearMonthInput label="Date" value={value} onChange={onChange} />
+    <PopoverTrigger
+      label={t('renderer.editDate')}
+      display={display}
+      visibleText={text || placeholder}
+    >
+      <YearMonthInput label={t('renderer.date')} value={value} onChange={onChange} />
     </PopoverTrigger>
   )
 }

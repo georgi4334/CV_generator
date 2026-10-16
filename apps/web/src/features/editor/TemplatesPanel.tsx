@@ -9,9 +9,9 @@ import {
 } from '@cv/shared'
 import { Info } from 'lucide-react'
 import { memo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { RecommendedBadge } from '../../components/Badges'
-import { CvThumbnail, getTemplate, templateChoice, withTemplate } from '../../cv-renderer'
-import { CV_LANGUAGE_NAMES } from '../../lib/languages'
+import { CvThumbnail, templateChoice, withTemplate } from '../../cv-renderer'
 import { useEditorUi } from '../../stores/editorUi'
 import { useCvEditor } from './cvEditorStore'
 import { useDesignTarget } from './designTarget'
@@ -31,6 +31,7 @@ const segment = 'flex-1 rounded-md py-1.5 text-sm font-medium'
 
 /** `professionId` marks the templates recommended for the CV's profession. */
 export function TemplatesPanel({ professionId = null }: { professionId?: ProfessionId | null }) {
+  const { t } = useTranslation()
   const cv = useCvEditor((s) => s.cv)
   const { kind, design, language, updateDesign, setLanguage, renderThumbnail } = useDesignTarget()
   const closePanel = useEditorUi((s) => s.closePanel)
@@ -45,7 +46,7 @@ export function TemplatesPanel({ professionId = null }: { professionId?: Profess
 
   return (
     <>
-      <ul className="grid grid-cols-2 gap-3" aria-label="Templates">
+      <ul className="grid grid-cols-2 gap-3" aria-label={t('editor.panels.templates')}>
         {TEMPLATE_IDS.map((id) => {
           const selected = id === current
           const isRecommended = recommended.includes(id)
@@ -65,7 +66,7 @@ export function TemplatesPanel({ professionId = null }: { professionId?: Profess
                 <span
                   className={`mt-1 block ${selected ? 'font-semibold text-teal-700 dark:text-teal-300' : ''}`}
                 >
-                  {getTemplate(id).name}
+                  {t(`labels.template.${id}`)}
                 </span>
                 {isRecommended && (
                   <>
@@ -84,14 +85,14 @@ export function TemplatesPanel({ professionId = null }: { professionId?: Profess
         onClick={closePanel}
         className="mt-4 w-full rounded-lg bg-teal-700 py-2 text-sm font-medium text-white hover:bg-teal-800"
       >
-        Continue Editing
+        {t('editor.templates.continueEditing')}
       </button>
 
       <div className="mt-5 flex items-center gap-3">
-        <span className="w-24 text-sm">Document size:</span>
+        <span className="w-24 text-sm">{t('editor.templates.documentSizeLabel')}</span>
         <div
           role="radiogroup"
-          aria-label="Document size"
+          aria-label={t('editor.templates.documentSize')}
           className="flex flex-1 gap-1 rounded-lg bg-slate-100 p-1 dark:bg-slate-800"
         >
           {(['A4', 'Letter'] as const).map((size) => (
@@ -107,7 +108,7 @@ export function TemplatesPanel({ professionId = null }: { professionId?: Profess
                   : 'text-slate-600 dark:text-slate-300'
               }`}
             >
-              {size === 'A4' ? 'A4' : 'US Letter'}
+              {size === 'A4' ? 'A4' : t('editor.templates.usLetter')}
             </button>
           ))}
         </div>
@@ -115,12 +116,14 @@ export function TemplatesPanel({ professionId = null }: { professionId?: Profess
 
       <label className="mt-4 flex items-center gap-3">
         <span className="flex w-24 items-center gap-1 text-sm">
-          {kind === 'cv' ? 'Resume language' : 'Letter language'}
+          {kind === 'cv'
+            ? t('editor.templates.resumeLanguage')
+            : t('editor.templates.letterLanguage')}
           <span
             title={
               kind === 'cv'
-                ? "Sets the section titles, date formats and placeholders on your CV. It does not change the app's language."
-                : "Sets the placeholders on your letter. It does not change the app's language or your text."
+                ? t('editor.templates.resumeLanguageHint')
+                : t('editor.templates.letterLanguageHint')
             }
             className="text-slate-400"
           >
@@ -134,7 +137,7 @@ export function TemplatesPanel({ professionId = null }: { professionId?: Profess
         >
           {CV_LANGUAGES.map((language) => (
             <option key={language} value={language}>
-              {CV_LANGUAGE_NAMES[language]}
+              {t(`labels.cvLanguage.${language}`)}
             </option>
           ))}
         </select>

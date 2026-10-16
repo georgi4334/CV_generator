@@ -1,6 +1,7 @@
 import type { DocumentType } from '@cv/shared'
 import { ArrowLeft, Download, Link2 } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { FitToWidth } from '../../components/FitToWidth'
 import { primaryButton, secondaryButton } from '../../components/PageHeader'
 import { PAGE_SIZE_PX } from '../../cv-renderer/tokens'
@@ -28,6 +29,7 @@ function PreviewFrame({
   actions?: ReactNode
   children: ReactNode
 }) {
+  const { t } = useTranslation()
   return (
     <div className="min-h-screen bg-slate-200 dark:bg-slate-950">
       <header className="sticky top-0 z-10 flex h-12 items-center gap-3 border-b border-slate-300 bg-white px-4 text-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100">
@@ -35,9 +37,11 @@ function PreviewFrame({
           to={editTo}
           className="inline-flex items-center gap-1.5 font-medium text-teal-700 hover:underline dark:text-teal-300"
         >
-          <ArrowLeft className="size-4" /> Back to editing
+          <ArrowLeft className="size-4" /> {t('editor.preview.backToEditing')}
         </Link>
-        <span className="min-w-0 flex-1 truncate text-slate-500">Preview · {title}</span>
+        <span className="min-w-0 flex-1 truncate text-slate-500">
+          {t('editor.preview.title', { title })}
+        </span>
         {actions}
       </header>
       <div className="px-4 py-6 sm:px-6 sm:py-8">{children}</div>
@@ -46,21 +50,27 @@ function PreviewFrame({
 }
 
 function PreviewActions({ onShare, onDownload }: { onShare: () => void; onDownload: () => void }) {
+  const { t } = useTranslation()
   return (
     <>
-      <button type="button" onClick={onShare} className={secondaryButton} aria-label="Share">
+      <button
+        type="button"
+        onClick={onShare}
+        className={secondaryButton}
+        aria-label={t('editor.preview.share')}
+      >
         <Link2 className="size-4" aria-hidden />
-        <span className="hidden sm:inline">Share</span>
+        <span className="hidden sm:inline">{t('editor.preview.share')}</span>
       </button>
       <button
         type="button"
         onClick={onDownload}
         className={primaryButton}
-        aria-label="Download PDF"
-        title="Opens the print dialog: choose “Save as PDF”"
+        aria-label={t('editor.preview.downloadPdf')}
+        title={t('editor.printTitle')}
       >
         <Download className="size-4" aria-hidden />
-        <span className="hidden sm:inline">Download PDF</span>
+        <span className="hidden sm:inline">{t('editor.preview.downloadPdf')}</span>
       </button>
     </>
   )

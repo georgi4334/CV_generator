@@ -8,8 +8,10 @@ import {
   useTable,
   type SortingState,
 } from '@tanstack/react-table'
+import type { TFunction } from 'i18next'
 import { ArrowDown, ArrowUp, ChevronsUpDown, Pencil, Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { formatDate } from '../../lib/format'
 import { DateInput, DocumentSelect, InlineText, StatusSelect, TypeSelect } from './fields'
 import { statusChange } from './jobHelpers'
@@ -23,6 +25,12 @@ const features = tableFeatures({
 
 const helper = createColumnHelper<typeof features, Job>()
 const text = (value: string) => value.toLocaleLowerCase()
+
+function DateSavedCell({ job }: { job: Job }) {
+  // Re-renders with the interface language so the date follows it.
+  useTranslation()
+  return <span className="whitespace-nowrap">{formatDate(job.dateSaved)}</span>
+}
 
 function PositionCell({ job }: { job: Job }) {
   const { open } = useJobActions()
@@ -38,22 +46,24 @@ function PositionCell({ job }: { job: Job }) {
 }
 
 function StatusCell({ job }: { job: Job }) {
+  const { t } = useTranslation()
   const { update } = useJobActions()
   return (
     <StatusSelect
       value={job.status}
-      label={`Status for ${job.position}`}
+      label={t('jobs.cell.statusFor', { position: job.position })}
       onChange={(status) => update(job, statusChange(job, status))}
     />
   )
 }
 
 function DateAppliedCell({ job }: { job: Job }) {
+  const { t } = useTranslation()
   const { update } = useJobActions()
   return (
     <DateInput
       value={job.dateApplied}
-      label={`Date applied for ${job.position}`}
+      label={t('jobs.cell.dateAppliedFor', { position: job.position })}
       onChange={(dateApplied) => update(job, { dateApplied })}
       className="w-36 rounded-md border border-transparent bg-transparent px-1 py-0.5 text-sm hover:border-slate-300 focus:border-teal-600 dark:hover:border-slate-600"
     />
@@ -61,11 +71,12 @@ function DateAppliedCell({ job }: { job: Job }) {
 }
 
 function TypeCell({ job }: { job: Job }) {
+  const { t } = useTranslation()
   const { update } = useJobActions()
   return (
     <TypeSelect
       value={job.type}
-      label={`Type for ${job.position}`}
+      label={t('jobs.cell.typeFor', { position: job.position })}
       onChange={(type) => update(job, { type })}
       className="rounded-md border border-transparent bg-transparent px-1 py-0.5 text-sm hover:border-slate-300 dark:hover:border-slate-600"
     />
@@ -73,12 +84,13 @@ function TypeCell({ job }: { job: Job }) {
 }
 
 function ResumeCell({ job }: { job: Job }) {
+  const { t } = useTranslation()
   const { cvs, update } = useJobActions()
   return (
     <DocumentSelect
       value={job.cvId}
       docs={cvs}
-      label={`Resume for ${job.position}`}
+      label={t('jobs.cell.resumeFor', { position: job.position })}
       onChange={(cvId) => update(job, { cvId })}
       className="max-w-44 rounded-md border border-transparent bg-transparent px-1 py-0.5 text-sm hover:border-slate-300 dark:hover:border-slate-600"
     />
@@ -86,12 +98,13 @@ function ResumeCell({ job }: { job: Job }) {
 }
 
 function CoverLetterCell({ job }: { job: Job }) {
+  const { t } = useTranslation()
   const { letters, update } = useJobActions()
   return (
     <DocumentSelect
       value={job.coverLetterId}
       docs={letters}
-      label={`Cover letter for ${job.position}`}
+      label={t('jobs.cell.coverLetterFor', { position: job.position })}
       onChange={(coverLetterId) => update(job, { coverLetterId })}
       className="max-w-44 rounded-md border border-transparent bg-transparent px-1 py-0.5 text-sm hover:border-slate-300 dark:hover:border-slate-600"
     />
@@ -99,27 +112,29 @@ function CoverLetterCell({ job }: { job: Job }) {
 }
 
 function NotesCell({ job }: { job: Job }) {
+  const { t } = useTranslation()
   const { update } = useJobActions()
   return (
     <InlineText
       value={job.notes}
-      label={`Notes for ${job.position}`}
-      placeholder="Add a note"
+      label={t('jobs.cell.notesFor', { position: job.position })}
+      placeholder={t('jobs.cell.addNote')}
       onSave={(notes) => update(job, { notes })}
     />
   )
 }
 
 function ActionsCell({ job }: { job: Job }) {
+  const { t } = useTranslation()
   const { open, remove } = useJobActions()
-  const name = `${job.position} at ${job.company}`
+  const name = t('jobs.cell.name', { position: job.position, company: job.company })
   return (
     <span className="flex items-center gap-0.5">
       <button
         type="button"
         onClick={() => open(job)}
-        aria-label={`Edit ${name}`}
-        title="Edit all details"
+        aria-label={t('jobs.cell.edit', { name })}
+        title={t('jobs.cell.editTitle')}
         className="rounded-md p-1.5 text-slate-400 hover:bg-teal-50 hover:text-teal-700 dark:hover:bg-teal-950 dark:hover:text-teal-300"
       >
         <Pencil className="size-4" />
@@ -127,8 +142,8 @@ function ActionsCell({ job }: { job: Job }) {
       <button
         type="button"
         onClick={() => remove(job)}
-        aria-label={`Delete ${name}`}
-        title="Delete"
+        aria-label={t('jobs.cell.delete', { name })}
+        title={t('common.delete')}
         className="rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950"
       >
         <Trash2 className="size-4" />
@@ -138,68 +153,69 @@ function ActionsCell({ job }: { job: Job }) {
 }
 
 /** Sort values: statuses and types in their natural order, empty values last. */
-const columns = helper.columns([
-  helper.accessor((job) => text(job.position), {
-    id: 'position',
-    header: 'Position',
-    cell: ({ row }) => <PositionCell job={row.original} />,
-  }),
-  helper.accessor((job) => text(job.company), {
-    id: 'company',
-    header: 'Company',
-    cell: ({ row }) => row.original.company,
-  }),
-  helper.accessor((job) => JOB_STATUSES.indexOf(job.status), {
-    id: 'status',
-    header: 'Status',
-    cell: ({ row }) => <StatusCell job={row.original} />,
-  }),
-  helper.accessor('dateSaved', {
-    header: 'Date saved',
-    cell: ({ row }) => (
-      <span className="whitespace-nowrap">{formatDate(row.original.dateSaved)}</span>
-    ),
-    sortDescFirst: true,
-  }),
-  helper.accessor((job) => job.dateApplied ?? undefined, {
-    id: 'dateApplied',
-    header: 'Date applied',
-    cell: ({ row }) => <DateAppliedCell job={row.original} />,
-    sortUndefined: 'last',
-    sortDescFirst: true,
-  }),
-  helper.accessor((job) => (job.type ? JOB_TYPES.indexOf(job.type) : undefined), {
-    id: 'type',
-    header: 'Type',
-    cell: ({ row }) => <TypeCell job={row.original} />,
-    sortUndefined: 'last',
-  }),
-  helper.display({
-    id: 'resume',
-    header: 'Resume',
-    cell: ({ row }) => <ResumeCell job={row.original} />,
-  }),
-  helper.display({
-    id: 'coverLetter',
-    header: 'Cover letter',
-    cell: ({ row }) => <CoverLetterCell job={row.original} />,
-  }),
-  helper.display({
-    id: 'notes',
-    header: 'Notes',
-    cell: ({ row }) => <NotesCell job={row.original} />,
-  }),
-  helper.display({
-    id: 'actions',
-    header: () => <span className="sr-only">Actions</span>,
-    cell: ({ row }) => <ActionsCell job={row.original} />,
-  }),
-])
+const makeColumns = (t: TFunction) =>
+  helper.columns([
+    helper.accessor((job) => text(job.position), {
+      id: 'position',
+      header: t('jobs.columns.position'),
+      cell: ({ row }) => <PositionCell job={row.original} />,
+    }),
+    helper.accessor((job) => text(job.company), {
+      id: 'company',
+      header: t('jobs.columns.company'),
+      cell: ({ row }) => row.original.company,
+    }),
+    helper.accessor((job) => JOB_STATUSES.indexOf(job.status), {
+      id: 'status',
+      header: t('jobs.columns.status'),
+      cell: ({ row }) => <StatusCell job={row.original} />,
+    }),
+    helper.accessor('dateSaved', {
+      header: t('jobs.columns.dateSaved'),
+      cell: ({ row }) => <DateSavedCell job={row.original} />,
+      sortDescFirst: true,
+    }),
+    helper.accessor((job) => job.dateApplied ?? undefined, {
+      id: 'dateApplied',
+      header: t('jobs.columns.dateApplied'),
+      cell: ({ row }) => <DateAppliedCell job={row.original} />,
+      sortUndefined: 'last',
+      sortDescFirst: true,
+    }),
+    helper.accessor((job) => (job.type ? JOB_TYPES.indexOf(job.type) : undefined), {
+      id: 'type',
+      header: t('jobs.columns.type'),
+      cell: ({ row }) => <TypeCell job={row.original} />,
+      sortUndefined: 'last',
+    }),
+    helper.display({
+      id: 'resume',
+      header: t('jobs.columns.resume'),
+      cell: ({ row }) => <ResumeCell job={row.original} />,
+    }),
+    helper.display({
+      id: 'coverLetter',
+      header: t('jobs.columns.coverLetter'),
+      cell: ({ row }) => <CoverLetterCell job={row.original} />,
+    }),
+    helper.display({
+      id: 'notes',
+      header: t('jobs.columns.notes'),
+      cell: ({ row }) => <NotesCell job={row.original} />,
+    }),
+    helper.display({
+      id: 'actions',
+      header: () => <span className="sr-only">{t('jobs.columns.actions')}</span>,
+      cell: ({ row }) => <ActionsCell job={row.original} />,
+    }),
+  ])
 
 const ARIA_SORT = { asc: 'ascending', desc: 'descending' } as const
 
 /** The Saved Jobs table: click a column title to sort; most cells edit in place. */
 export function JobsTable({ jobs }: { jobs: Job[] }) {
+  const { t } = useTranslation()
+  const columns = useMemo(() => makeColumns(t), [t])
   const [sorting, setSorting] = useState<SortingState>([{ id: 'dateSaved', desc: true }])
   const table = useTable({
     features,

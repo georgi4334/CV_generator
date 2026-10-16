@@ -9,6 +9,7 @@ import {
 } from '@cv/shared'
 import { useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
+import { i18n } from '../../i18n'
 import { cvApi } from '../../lib/cvApi'
 import { cvKeys, rememberCv } from '../../lib/cvQueries'
 import { jobKeys } from '../../lib/jobQueries'
@@ -30,15 +31,22 @@ function bulletEntries(cv: CvDocument): BulletEntry[] {
     const isExperience = section.type === 'experience'
     const names: [string, string][] =
       section.type === 'experience'
-        ? section.items.map((i) => [
-            i.id,
-            [i.title, i.company].filter((t) => t.trim()).join(' at '),
-          ])
+        ? section.items.map((i) => {
+            const parts = [i.title, i.company].filter((p) => p.trim())
+            return [
+              i.id,
+              parts.length === 2
+                ? i18n.t('ai.entry.titleAtCompany', { title: i.title, company: i.company })
+                : (parts[0] ?? ''),
+            ]
+          })
         : section.items.map((i) => [i.id, i.name])
     for (const [itemId, name] of names) {
       entries.push({
         path: `sections.${section.id}.items.${itemId}`,
-        label: `${isExperience ? 'Experience' : 'Project'}: ${name.trim() || 'untitled'}`,
+        label: i18n.t(isExperience ? 'ai.entry.experience' : 'ai.entry.project', {
+          name: name.trim() || i18n.t('ai.entry.untitled'),
+        }),
         sectionId: section.id,
         itemId,
       })
@@ -83,7 +91,7 @@ export function useCvAiTarget(record: CvRecord, cv: CvDocument): AiTarget {
             revision: copy.revision,
             document,
             // A copy for a saved job is already named after the company.
-            ...(jobId ? {} : { title: `${record.title} – tailored` }),
+            ...(jobId ? {} : { title: i18n.t('ai.tailoredSuffix', { title: record.title }) }),
           })
           rememberCv(queryClient, saved)
           await queryClient.invalidateQueries({ queryKey: cvKeys.list })
