@@ -22,9 +22,9 @@ export const common: Messages['common'] = {
   language: 'Sprache',
   interfaceLanguage: 'Sprache der Oberfläche',
   theme: {
-    system: 'Design: System',
-    light: 'Design: hell',
-    dark: 'Design: dunkel',
-    hint: '{{mode}} (zum Wechseln klicken)',
+    label: 'Design',
+    system: 'System',
+    light: 'Hell',
+    dark: 'Dunkel',
   },
 }

@@ -1,0 +1,95 @@
+import { Check, ChevronDown, Monitor, Moon, Sun } from 'lucide-react'
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useThemeStore, type ThemeMode } from '@/shared/stores/theme'
+
+const MODES: { mode: ThemeMode; icon: typeof Sun }[] = [
+  { mode: 'system', icon: Monitor },
+  { mode: 'light', icon: Sun },
+  { mode: 'dark', icon: Moon },
+]
+
+/**
+ * Theme picker for headers: a dropdown with System, Light and Dark, each with
+ * its icon. `compact` shows only the icon of the current theme where space is short.
+ */
+export function ThemeSelect({ compact = false }: { compact?: boolean }) {
+  const { t } = useTranslation()
+  const mode = useThemeStore((s) => s.mode)
+  const setMode = useThemeStore((s) => s.setMode)
+  const [open, setOpen] = useState(false)
+  const root = useRef<HTMLDivElement>(null)
+  const menu = useRef<HTMLDivElement>(null)
+  const current = MODES.find((m) => m.mode === mode) ?? MODES[0]!
+  const label = `${t('common.theme.label')}: ${t(`common.theme.${mode}`)}`
+
+  useEffect(() => {
+    if (!open) return
+    // Start on the chosen theme, so Enter keeps it and the arrows move from there.
+    menu.current?.querySelector<HTMLElement>('[aria-checked="true"]')?.focus()
+    const close = (e: PointerEvent) => {
+      if (!root.current?.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('pointerdown', close)
+    return () => document.removeEventListener('pointerdown', close)
+  }, [open])
+
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      e.stopPropagation()
+      setOpen(false)
+      root.current?.querySelector('button')?.focus()
+      return
+    }
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return
+    e.preventDefault()
+    const items = [...(menu.current?.querySelectorAll<HTMLElement>('[role="menuitemradio"]') ?? [])]
+    const at = items.indexOf(document.activeElement as HTMLElement)
+    const step = e.key === 'ArrowDown' ? 1 : -1
+    items[(at + step + items.length) % items.length]?.focus()
+  }
+
+  return (
+    <div ref={root} className="relative" onKeyDown={onKeyDown}>
+      <button
+        type="button"
+        aria-label={label}
+        title={label}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}
+        className="flex items-center gap-1.5 rounded-tight border border-transparent px-2 py-1.5 text-sm text-fg-soft hover:bg-muted focus-visible:border-line-strong"
+      >
+        <current.icon className="size-4 text-fg-muted" aria-hidden />
+        {!compact && <span>{t(`common.theme.${mode}`)}</span>}
+        <ChevronDown className="size-3.5 text-fg-muted" aria-hidden />
+      </button>
+      {open && (
+        <div
+          ref={menu}
+          role="menu"
+          aria-label={t('common.theme.label')}
+          className="absolute right-0 z-(--z-dropdown) mt-1 w-menu rounded-control border border-line bg-surface py-1 text-sm shadow-overlay"
+        >
+          {MODES.map(({ mode: option, icon: Icon }) => (
+            <button
+              key={option}
+              type="button"
+              role="menuitemradio"
+              aria-checked={option === mode}
+              onClick={() => {
+                setMode(option)
+                setOpen(false)
+              }}
+              className="flex w-full items-center gap-3 px-3 py-2 text-left text-fg hover:bg-muted focus-visible:bg-muted focus-visible:outline-none"
+            >
+              <Icon className="size-4 text-fg-muted" aria-hidden />
+              <span className="flex-1">{t(`common.theme.${option}`)}</span>
+              {option === mode && <Check className="size-4 text-brand-fg" aria-hidden />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}

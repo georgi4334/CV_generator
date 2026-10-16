@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { NavLink, Outlet, useLocation } from 'react-router'
 import { ApiStatus } from '@/shared/ui/ApiStatus'
 import { LanguageSelect } from '@/shared/ui/LanguageSelect'
-import { ThemeToggle } from '@/shared/ui/ThemeToggle'
+import { ThemeSelect } from '@/shared/ui/ThemeSelect'
 import { UserMenu } from '@/features/auth/components/UserMenu'
 import { LegalFooter } from '@/features/legal/LegalLayout'
 import { VerifyBanner } from '@/features/auth/components/VerifyBanner'
@@ -74,16 +74,13 @@ export function AppLayout() {
           )}
 
           <div className="ml-auto flex items-center gap-1 md:gap-3">
-            <span className="hidden lg:inline">
-              <ApiStatus isLoading={health.isLoading} isError={health.isError} data={health.data} />
-            </span>
             <span className="md:hidden">
               <LanguageSelect compact />
             </span>
             <span className="hidden md:inline">
               <LanguageSelect />
             </span>
-            <ThemeToggle />
+            <ThemeSelect compact={!wide} />
             <UserMenu />
           </div>
         </div>
@@ -97,7 +94,9 @@ export function AppLayout() {
       </main>
       {/* On phones, room at the bottom so the tab bar never covers content. */}
       <div className={wide ? '' : 'clear-bottom-nav'}>
-        <LegalFooter />
+        <LegalFooter>
+          <ApiStatus isLoading={health.isLoading} isError={health.isError} data={health.data} />
+        </LegalFooter>
       </div>
 
       {!wide && (

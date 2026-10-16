@@ -7,8 +7,9 @@ export const auth: Messages['auth'] = {
   signIn: 'Anmelden',
   signingIn: 'Anmeldung läuft…',
   signOut: 'Abmelden',
-  accountLabel: 'Konto: {{name}}',
   accountTitle: 'Konto',
+  menu: 'Kontomenü',
+  accountSettings: 'Kontoeinstellungen',
   login: {
     noAccount: 'Noch kein Konto?',
     createOne: 'Konto erstellen',

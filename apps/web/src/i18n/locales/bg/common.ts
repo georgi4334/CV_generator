@@ -22,9 +22,9 @@ export const common: Messages['common'] = {
   language: 'Език',
   interfaceLanguage: 'Език на интерфейса',
   theme: {
-    system: 'Тема: системна',
-    light: 'Тема: светла',
-    dark: 'Тема: тъмна',
-    hint: '{{mode}} (щракнете за смяна)',
+    label: 'Тема',
+    system: 'Системна',
+    light: 'Светла',
+    dark: 'Тъмна',
   },
 }

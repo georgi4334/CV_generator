@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { LanguageSelect } from '@/shared/ui/LanguageSelect'
-import { ThemeToggle } from '@/shared/ui/ThemeToggle'
+import { ThemeSelect } from '@/shared/ui/ThemeSelect'
 import { card } from '@/shared/ui/PageHeader'
 import { LegalFooter } from '@/features/legal/LegalLayout'
 
@@ -24,7 +24,7 @@ export function AuthShell({
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-page px-4 py-10 text-fg">
       <div className="absolute top-3 right-3 flex items-center gap-1">
         <LanguageSelect />
-        <ThemeToggle />
+        <ThemeSelect />
       </div>
       <Link to="/" className="flex items-center gap-2 text-lg font-semibold">
         <FileText className="size-6 text-brand-fg" /> {t('common.appName')}

@@ -168,6 +168,7 @@ describe('signed in', () => {
     useCvEditor.setState({ docId: 'x' })
     const router = renderRoute('/')
     await screen.findByRole('heading', { name: 'Dashboard' })
+    click(/^Account:/)
     click('Sign out')
     await screen.findByRole('heading', { name: 'Sign in' })
     expect(router.state.location.pathname).toBe('/login')

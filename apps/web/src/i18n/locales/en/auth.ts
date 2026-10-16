@@ -5,8 +5,9 @@ export const auth = {
   signIn: 'Sign in',
   signingIn: 'Signing in…',
   signOut: 'Sign out',
-  accountLabel: 'Account: {{name}}',
   accountTitle: 'Account',
+  menu: 'Account menu',
+  accountSettings: 'Account settings',
   login: {
     noAccount: 'No account yet?',
     createOne: 'Create one',

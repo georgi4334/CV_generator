@@ -21,9 +21,9 @@ export const common = {
   language: 'Language',
   interfaceLanguage: 'Interface language',
   theme: {
-    system: 'Theme: system',
-    light: 'Theme: light',
-    dark: 'Theme: dark',
-    hint: '{{mode}} (click to change)',
+    label: 'Theme',
+    system: 'System',
+    light: 'Light',
+    dark: 'Dark',
   },
 }

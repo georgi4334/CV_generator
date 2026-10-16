@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { LanguageSelect } from '@/shared/ui/LanguageSelect'
-import { ThemeToggle } from '@/shared/ui/ThemeToggle'
+import { ThemeSelect } from '@/shared/ui/ThemeSelect'
 
 /** A readable page for the privacy policy and the terms. */
 export function LegalLayout({
@@ -25,7 +25,7 @@ export function LegalLayout({
           </Link>
           <div className="flex items-center gap-1">
             <LanguageSelect />
-            <ThemeToggle />
+            <ThemeSelect />
           </div>
         </div>
       </header>
@@ -41,15 +41,21 @@ export function LegalLayout({
   )
 }
 
-/** Links shown at the bottom of public pages and the app. */
-export function LegalFooter() {
+/** Links shown at the bottom of public pages and the app; `children` go before them (e.g. the API status). */
+export function LegalFooter({ children }: { children?: ReactNode }) {
   const { t } = useTranslation()
   return (
-    <footer className="py-6 text-center text-xs text-fg-muted">
+    <footer className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 py-6 text-xs text-fg-muted">
+      {children && (
+        <>
+          {children}
+          <span aria-hidden>·</span>
+        </>
+      )}
       <Link to="/privacy" className="hover:underline">
         {t('nav.privacy')}
       </Link>
-      <span aria-hidden> · </span>
+      <span aria-hidden>·</span>
       <Link to="/terms" className="hover:underline">
         {t('nav.terms')}
       </Link>

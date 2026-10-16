@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { useEditorUi } from '@/features/cv-editor/state/editorUi'
 import { LanguageSelect } from '@/shared/ui/LanguageSelect'
-import { ThemeToggle } from '@/shared/ui/ThemeToggle'
+import { ThemeSelect } from '@/shared/ui/ThemeSelect'
 
 const item = 'flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-muted'
 
@@ -65,7 +65,7 @@ export function EditorMoreMenu({
       {open && (
         <div
           role="menu"
-          className="absolute right-0 z-(--z-dropdown) mt-2 w-menu overflow-hidden rounded-control border border-line bg-surface py-1 text-sm shadow-overlay"
+          className="absolute right-0 z-(--z-dropdown) mt-2 w-menu rounded-control border border-line bg-surface py-1 text-sm shadow-overlay"
         >
           <Link to={previewTo} role="menuitem" className={item}>
             <Eye className="size-4" aria-hidden />
@@ -106,7 +106,7 @@ export function EditorMoreMenu({
           ))}
           <div className="flex items-center justify-between border-t border-line px-2 py-1">
             <LanguageSelect />
-            <ThemeToggle />
+            <ThemeSelect compact />
           </div>
         </div>
       )}

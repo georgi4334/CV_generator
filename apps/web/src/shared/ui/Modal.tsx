@@ -5,6 +5,8 @@ const VARIANTS = {
   center: 'm-auto w-[calc(100%-2*var(--spacing-gutter))] rounded-card border p-card',
   /** Full height at the right edge (e.g. the job details); the whole screen on phones. */
   drawer: 'm-0 ml-auto h-dvh max-h-none w-full max-w-full p-0 md:max-w-drawer md:border-l',
+  /** A narrow panel that slides in from the right edge (e.g. the account menu). */
+  side: 'm-0 ml-auto h-dvh max-h-none w-full max-w-side-drawer border-l p-0 animate-drawer-in motion-reduce:animate-none',
 }
 
 /** A modal `<dialog>`: Escape and the backdrop's Cancel call `onClose`. */
