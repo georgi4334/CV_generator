@@ -1,6 +1,7 @@
 import { FileText } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
+import { LanguageSelect } from '../../components/LanguageSelect'
 import { ThemeToggle } from '../../components/ThemeToggle'
 
 /** A readable page for the privacy policy and the terms. */
@@ -21,7 +22,10 @@ export function LegalLayout({
             <FileText className="size-5 text-teal-600 dark:text-teal-400" aria-hidden /> CV
             Generator
           </Link>
-          <ThemeToggle />
+          <div className="flex items-center gap-1">
+            <LanguageSelect />
+            <ThemeToggle />
+          </div>
         </div>
       </header>
       <main className="mx-auto max-w-3xl px-4 py-10">

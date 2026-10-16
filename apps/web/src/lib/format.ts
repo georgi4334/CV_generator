@@ -1,13 +1,22 @@
-const dateFormat = new Intl.DateTimeFormat('en-GB', {
-  day: 'numeric',
-  month: 'short',
-  year: 'numeric',
-})
+import { i18n } from '../i18n'
+import { isUiLanguage, UI_LOCALES } from '../i18n/languages'
 
-/** "13 Oct 2026" from an ISO date or datetime string. */
+const formats = new Map<string, Intl.DateTimeFormat>()
+
+/**
+ * "13 Oct 2026" (or "13. Okt. 2026", "13.10.2026 г." …) in the interface
+ * language. Components calling it use `useTranslation`, so they re-render
+ * when the language changes.
+ */
 export function formatDate(value: string | null): string {
   if (!value) return '—'
-  return dateFormat.format(new Date(value))
+  const locale = UI_LOCALES[isUiLanguage(i18n.language) ? i18n.language : 'en']
+  let format = formats.get(locale)
+  if (!format) {
+    format = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric' })
+    formats.set(locale, format)
+  }
+  return format.format(new Date(value))
 }
 
 /** Today in the user's time zone, as an ISO date ("2026-10-15"). */

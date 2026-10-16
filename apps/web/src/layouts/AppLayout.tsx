@@ -1,6 +1,7 @@
 import { FileText } from 'lucide-react'
 import { NavLink, Outlet, useLocation } from 'react-router'
 import { ApiStatus } from '../components/ApiStatus'
+import { LanguageSelect } from '../components/LanguageSelect'
 import { ThemeToggle } from '../components/ThemeToggle'
 import { UserMenu } from '../features/auth/UserMenu'
 import { LegalFooter } from '../pages/legal/LegalLayout'
@@ -51,6 +52,7 @@ export function AppLayout() {
             <span className="hidden md:inline">
               <ApiStatus isLoading={health.isLoading} isError={health.isError} data={health.data} />
             </span>
+            <LanguageSelect />
             <ThemeToggle />
             <UserMenu />
           </div>

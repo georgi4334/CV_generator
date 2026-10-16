@@ -1,0 +1,30 @@
+import type { Messages } from '../../types'
+
+export const common: Messages['common'] = {
+  appName: 'CV Generator',
+  save: 'Speichern',
+  saved: 'Gespeichert',
+  saving: 'Wird gespeichert…',
+  cancel: 'Abbrechen',
+  close: 'Schließen',
+  delete: 'Löschen',
+  edit: 'Bearbeiten',
+  back: 'Zurück',
+  create: 'Erstellen',
+  apply: 'Übernehmen',
+  discard: 'Verwerfen',
+  replace: 'Ersetzen',
+  tryAgain: 'Erneut versuchen',
+  loading: 'Wird geladen…',
+  none: '— Keine —',
+  optional: 'optional',
+  untitled: 'Ohne Titel',
+  language: 'Sprache',
+  interfaceLanguage: 'Sprache der Oberfläche',
+  theme: {
+    system: 'Design: System',
+    light: 'Design: hell',
+    dark: 'Design: dunkel',
+    hint: '{{mode}} (zum Wechseln klicken)',
+  },
+}

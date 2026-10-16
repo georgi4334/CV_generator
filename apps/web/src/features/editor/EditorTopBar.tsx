@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { useState, type ComponentType, type ReactNode } from 'react'
 import { Link } from 'react-router'
+import { LanguageSelect } from '../../components/LanguageSelect'
 import { ThemeToggle } from '../../components/ThemeToggle'
 import { useEditorUi, type EditorPanel } from '../../stores/editorUi'
 import { useCvEditor } from './cvEditorStore'
@@ -194,6 +195,7 @@ export function EditorTopBar({
             </div>
           )}
         </div>
+        <LanguageSelect />
         <ThemeToggle />
       </div>
     </header>
