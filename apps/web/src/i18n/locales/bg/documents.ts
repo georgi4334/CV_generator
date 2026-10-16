@@ -1,3 +1,84 @@
 import type { Messages } from '../../types'
 
-export const documents: Messages['documents'] = {}
+export const documents: Messages['documents'] = {
+  title: 'Документи',
+  description: 'Вашите CV-та и мотивационни писма.',
+  tabsLabel: 'Видове документи',
+  tabs: {
+    all: 'Всички документи',
+    'cover-letters': 'Мотивационни писма',
+    cvs: 'CV-та',
+  },
+  createCv: 'Ново CV',
+  createLetter: 'Ново мотивационно писмо',
+  createNew: 'Създаване',
+  actionsFor: 'Действия за {{title}}',
+  menu: {
+    open: 'Отваряне',
+    rename: 'Преименуване',
+    copy: 'Копиране',
+    downloadPdf: 'Изтегляне като PDF',
+    share: 'Връзка за споделяне',
+  },
+  renameLabel: 'Ново име за {{title}}',
+  search: {
+    label: 'Търсене в документите',
+    placeholder: 'Търсене по име',
+  },
+  sortBy: 'Сортиране по',
+  sort: {
+    updated: 'Последна промяна',
+    created: 'Дата на създаване',
+    name: 'Име (А–Я)',
+    type: 'Вид',
+  },
+  selection: {
+    toolbar: 'Избрани документи',
+    count_one: '{{count}} избран',
+    count_other: '{{count}} избрани',
+    copy: 'Копиране',
+    download: 'Изтегляне',
+    downloadHint: 'Изберете един документ, за да го изтеглите като PDF',
+    selectAll: 'Избиране на всички',
+    select: 'Избиране на {{title}}',
+  },
+  list: {
+    label: 'Документи',
+    name: 'Име',
+    lastEdited: 'Последна промяна',
+    loading: 'Документите Ви се зареждат…',
+    loadError: 'Документите Ви не можаха да бъдат заредени: {{message}}',
+    noMatch: 'Няма документи, които отговарят на търсенето.',
+    empty: 'Все още няма нищо тук.',
+    createFirst: 'Създайте първото си CV',
+    forJob: 'За {{position}} в {{company}}',
+    noJob: 'Без връзка с обява',
+  },
+  messages: {
+    printHint: 'В прозореца за печат изберете „Запазване като PDF“ за принтер.',
+    downloadFailed: '„{{title}}“ не можа да бъде изтеглен: {{message}}',
+    copyFailed: '„{{title}}“ не беше копиран: {{message}}',
+    renameFailed: 'Не беше преименуван: {{message}}',
+    copied_one: 'Копието е създадено.',
+    copied_other: 'Създадени са {{count}} копия.',
+    deleted_one: 'Изтрито.',
+    deleted_other: 'Изтрити са {{count}} документа.',
+    deleteFailed: 'Не всичко беше изтрито: {{message}}',
+  },
+  confirm: {
+    deleteCvTitle: 'Да се изтрие ли това CV?',
+    deleteLetterTitle: 'Да се изтрие ли това мотивационно писмо?',
+    deleteManyTitle_one: 'Да се изтрият ли {{count}} документа?',
+    deleteManyTitle_other: 'Да се изтрият ли {{count}} документа?',
+    deleteCvMessage:
+      '„{{title}}“ и историята на версиите му ще бъдат изтрити. Действието е необратимо.',
+    deleteLetterMessage: '„{{title}}“ ще бъде изтрито. Действието е необратимо.',
+    deleteManyMessage:
+      'Те ще бъдат изтрити, а CV-тата – заедно с историята на версиите. Действието е необратимо.',
+  },
+  badges: {
+    shared: 'Споделен',
+    sharedHint: 'Всеки, който има връзката за споделяне, може да го разглежда',
+    recommended: 'Препоръчан',
+  },
+}

@@ -1,7 +1,5 @@
 import {
-  JOB_STATUS_LABELS,
   JOB_STATUSES,
-  JOB_TYPE_LABELS,
   JOB_TYPES,
   type DocumentSummary,
   type JobStatus,
@@ -9,6 +7,7 @@ import {
 } from '@cv/shared'
 import { ExternalLink } from 'lucide-react'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { JOB_STATUS_STYLES } from '../../components/badgeStyles'
 import { editPath } from '../../lib/paths'
@@ -24,6 +23,7 @@ export function StatusSelect({
   label: string
   onChange: (status: JobStatus) => void
 }) {
+  const { t } = useTranslation()
   return (
     <select
       aria-label={label}
@@ -33,7 +33,7 @@ export function StatusSelect({
     >
       {JOB_STATUSES.map((status) => (
         <option key={status} value={status}>
-          {JOB_STATUS_LABELS[status]}
+          {t(`labels.jobStatus.${status}`)}
         </option>
       ))}
     </select>
@@ -51,6 +51,7 @@ export function TypeSelect({
   onChange: (type: JobType | null) => void
   className?: string
 }) {
+  const { t } = useTranslation()
   return (
     <select
       aria-label={label}
@@ -61,7 +62,7 @@ export function TypeSelect({
       <option value="">—</option>
       {JOB_TYPES.map((type) => (
         <option key={type} value={type}>
-          {JOB_TYPE_LABELS[type]}
+          {t(`labels.jobType.${type}`)}
         </option>
       ))}
     </select>
@@ -142,6 +143,7 @@ export function DocumentSelect({
   onChange: (id: string | null) => void
   className?: string
 }) {
+  const { t } = useTranslation()
   const linked = docs.find((doc) => doc.id === value)
   return (
     <span className="flex min-w-0 items-center gap-1">
@@ -161,8 +163,8 @@ export function DocumentSelect({
       {linked && (
         <Link
           to={editPath(linked)}
-          aria-label={`Open ${linked.title}`}
-          title={`Open ${linked.title}`}
+          aria-label={t('jobs.cell.openDocument', { title: linked.title })}
+          title={t('jobs.cell.openDocument', { title: linked.title })}
           className="shrink-0 rounded p-1 text-teal-700 hover:bg-slate-100 dark:text-teal-300 dark:hover:bg-slate-800"
         >
           <ExternalLink className="size-3.5" />

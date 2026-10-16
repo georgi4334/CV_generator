@@ -1,1 +1,31 @@
-export const dashboard = {}
+export const dashboard = {
+  title: 'Dashboard',
+  description: 'Your documents and job applications at a glance.',
+  quickActions: 'Quick actions',
+  newCv: 'New CV',
+  newLetter: 'New cover letter',
+  addJob: 'Add job',
+  recent: {
+    heading: 'Recent documents',
+    viewAll: 'View all',
+    loading: 'Loading your documents…',
+    empty: 'No documents yet. Your latest CVs and cover letters will show up here.',
+    createFirst: 'Create your first CV',
+  },
+  pipeline: {
+    heading: 'Job pipeline',
+    allJobs: 'All saved jobs',
+  },
+  reminders: {
+    heading: 'Reminders',
+    updateError: 'Could not update the job: {{message}}',
+    none: 'Nothing to follow up on.',
+    jobAt: '{{position}} at {{company}}',
+    noAnswer_one: 'Applied {{count}} day ago and no answer yet.',
+    noAnswer_other: 'Applied {{count}} days ago and no answer yet.',
+    toApply_one: 'Saved {{count}} day ago and still “{{status}}”.',
+    toApply_other: 'Saved {{count}} days ago and still “{{status}}”.',
+    markNoAnswer: 'Mark as “{{status}}”',
+    applied: 'I applied',
+  },
+}

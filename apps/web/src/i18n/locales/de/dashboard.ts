@@ -1,3 +1,33 @@
 import type { Messages } from '../../types'
 
-export const dashboard: Messages['dashboard'] = {}
+export const dashboard: Messages['dashboard'] = {
+  title: 'Übersicht',
+  description: 'Ihre Dokumente und Bewerbungen auf einen Blick.',
+  quickActions: 'Schnellzugriff',
+  newCv: 'Neuer Lebenslauf',
+  newLetter: 'Neues Anschreiben',
+  addJob: 'Stelle hinzufügen',
+  recent: {
+    heading: 'Zuletzt bearbeitet',
+    viewAll: 'Alle anzeigen',
+    loading: 'Ihre Dokumente werden geladen…',
+    empty: 'Noch keine Dokumente. Ihre neuesten Lebensläufe und Anschreiben erscheinen hier.',
+    createFirst: 'Ersten Lebenslauf erstellen',
+  },
+  pipeline: {
+    heading: 'Bewerbungsstand',
+    allJobs: 'Alle gespeicherten Stellen',
+  },
+  reminders: {
+    heading: 'Erinnerungen',
+    updateError: 'Die Stelle konnte nicht aktualisiert werden: {{message}}',
+    none: 'Nichts nachzufassen.',
+    jobAt: '{{position}} bei {{company}}',
+    noAnswer_one: 'Vor {{count}} Tag beworben, noch keine Antwort.',
+    noAnswer_other: 'Vor {{count}} Tagen beworben, noch keine Antwort.',
+    toApply_one: 'Vor {{count}} Tag gespeichert und noch immer „{{status}}“.',
+    toApply_other: 'Vor {{count}} Tagen gespeichert und noch immer „{{status}}“.',
+    markNoAnswer: 'Als „{{status}}“ markieren',
+    applied: 'Ich habe mich beworben',
+  },
+}
