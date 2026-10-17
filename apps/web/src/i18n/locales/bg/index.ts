@@ -16,6 +16,7 @@ import { nav } from './nav'
 import { newCv } from './newCv'
 import { renderer } from './renderer'
 import { share } from './share'
+import { welcome } from './welcome'
 
 /**
  * Bulgarian.
@@ -38,4 +39,5 @@ export const bg: Messages = {
   newCv,
   letters,
   ai,
+  welcome,
 }

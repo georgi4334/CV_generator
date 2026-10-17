@@ -18,6 +18,7 @@ import {
   PrivacyPage,
   SharedDocumentPage,
   TermsPage,
+  WelcomePage,
 } from './lazyPages'
 import { ErrorPage } from './pages/ErrorPage'
 import { NotFoundPage } from './pages/NotFoundPage'
@@ -54,6 +55,7 @@ export const routes: RouteObject[] = [
         ],
       },
       // Public pages.
+      { path: 'welcome', element: <WelcomePage /> },
       { path: 'login', element: <LoginPage /> },
       { path: 'register', element: <RegisterPage /> },
       { path: 'forgot-password', element: <ForgotPasswordPage /> },
