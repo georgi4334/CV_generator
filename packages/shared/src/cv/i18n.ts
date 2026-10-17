@@ -79,6 +79,22 @@ const MONTHS: Record<CvLanguage, string[]> = {
   bg: ['яну', 'фев', 'март', 'апр', 'май', 'юни', 'юли', 'авг', 'септ', 'окт', 'ное', 'дек'],
 }
 
+/** Short month names for a CV language (also used by the date picker, where Intl falls short). */
+export function shortMonthNames(language: CvLanguage): readonly string[] {
+  return MONTHS[language]
+}
+
+/**
+ * Whether `end` comes before `start` ("YYYY" or "YYYY-MM"). A year on its own
+ * counts as its whole year, so "2021" – "2021-03" is fine.
+ */
+export function isBefore(end: string | null, start: string | null): boolean {
+  if (!end || !start) return false
+  const endKey = end.length === 4 ? `${end}-12` : end
+  const startKey = start.length === 4 ? `${start}-01` : start
+  return endKey < startKey
+}
+
 /** "2024" → "2024", "2024-05" → "May 2024" (in the CV language). */
 export function formatYearMonth(value: string | null, language: CvLanguage): string {
   if (!value) return ''
