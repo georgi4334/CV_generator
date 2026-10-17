@@ -3,13 +3,24 @@ import { useEffect, useRef, type ReactNode } from 'react'
 const VARIANTS = {
   /** Centered; on phones it keeps the page gutter on both sides. */
   center: 'm-auto w-[calc(100%-2*var(--spacing-gutter))] rounded-card border p-card',
-  /** Full height at the right edge (e.g. the job details); the whole screen on phones. */
-  drawer: 'm-0 ml-auto h-dvh max-h-none w-full max-w-full p-0 md:max-w-drawer md:border-l',
-  /** A narrow panel at the right edge (e.g. the account menu). */
-  side: 'm-0 ml-auto h-dvh max-h-none w-full max-w-side-drawer border-l p-0',
+  /**
+   * A tall panel floating near the right edge (e.g. the job details), like the
+   * editor's panels; the whole screen on phones.
+   */
+  drawer:
+    'm-0 ml-auto h-dvh max-h-none w-full max-w-full p-0 md:my-(--spacing-drawer-inset) md:mr-(--spacing-drawer-inset) md:h-[calc(100dvh-2*var(--spacing-drawer-inset))] md:max-w-drawer md:rounded-card md:border',
+  /** A narrow panel floating near the right edge (e.g. the account menu). */
+  side: 'm-0 ml-auto h-dvh max-h-none w-full max-w-side-drawer p-0 sm:my-(--spacing-drawer-inset) sm:mr-(--spacing-drawer-inset) sm:h-[calc(100dvh-2*var(--spacing-drawer-inset))] sm:rounded-card sm:border',
 }
 
 /** Drawers slide in from the right and back out; dialogs grow in and shrink away. */
+/** Drawers are frosted like the editor's panels; dialogs keep a solid surface. */
+const SURFACE = {
+  center: 'bg-surface',
+  drawer: 'glass-solid rounded-none',
+  side: 'glass-solid rounded-none',
+}
+
 const MOTION = {
   center: { enter: 'animate-dialog-in', leave: 'animate-dialog-out' },
   drawer: { enter: 'animate-drawer-in', leave: 'animate-drawer-out' },
@@ -92,7 +103,7 @@ export function Modal({
         e.preventDefault()
         ;(onCloseRequest ?? onClose)()
       }}
-      className={`${VARIANTS[variant]} ${closing ? `${motion.leave} backdrop:animate-fade-out` : `${motion.enter} backdrop:animate-fade-in`} border-line bg-surface text-fg shadow-overlay backdrop:bg-backdrop motion-reduce:animate-none motion-reduce:backdrop:animate-none ${className}`}
+      className={`${VARIANTS[variant]} ${closing ? `${motion.leave} backdrop:animate-fade-out` : `${motion.enter} backdrop:animate-fade-in`} ${SURFACE[variant]} border-line text-fg shadow-overlay backdrop:bg-backdrop motion-reduce:animate-none motion-reduce:backdrop:animate-none ${className}`}
     >
       {children}
     </dialog>

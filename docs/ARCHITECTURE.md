@@ -129,6 +129,10 @@ Components use the Tailwind classes generated from those tokens, never raw value
   Tones: info and success fade away after a few seconds; warning and error stay until closed
   with ✕. The editor's `notify()` and the "confirm your email" reminder use them.
 - **Drawers and dialogs** close with ✕, Escape, or a click on the dimmed area around them.
+  Drawers float `--spacing-drawer-inset` from the screen edges, frosted like the editor's panels.
+- **Scrollbars** are slim, rounded and frosted grey (`--theme-scrollbar`, `--scrollbar-size`).
+- **`pb-safe`** (bars) only clears the iPhone home indicator; **`pb-safe-card`** (panel content)
+  keeps the usual padding as well.
 - **Name and logo:** the product name is `APP_NAME` (`packages/shared/src/common/brand.ts`);
   translations write it as `{{app}}`. The logo is `shared/ui/Logo.tsx` (`Logo`, `LogoMark`),
   drawn with the brand tokens; `public/favicon.svg` is the same drawing.

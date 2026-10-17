@@ -36,6 +36,7 @@ import {
   overwriteLetterServerCopy,
   useLetterSession,
 } from '@/features/cover-letters/state/letterSession'
+import { TEMPLATE_THUMBNAIL_WIDTH } from '@/features/cv-editor/panels/templateThumbnail'
 
 const letterHistory = () => useLetterEditor.getState()
 
@@ -152,7 +153,7 @@ function LetterEditor({ record }: { record: CoverLetterRecord }) {
       renderThumbnail: (templateId: TemplateId) => (
         <LetterThumbnail
           letter={{ ...current, design: { ...current.design, ...templateChoice(templateId) } }}
-          width={120}
+          width={TEMPLATE_THUMBNAIL_WIDTH}
         />
       ),
     }),
