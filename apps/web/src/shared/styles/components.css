@@ -207,3 +207,35 @@
 @utility pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
 }
+/* Content padding at the bottom of a panel that also clears the iPhone home indicator. */
+@utility pb-safe-card {
+  padding-bottom: max(var(--spacing-card), env(safe-area-inset-bottom));
+}
+
+/* ----- Scrollbars ----- */
+/* Slim, rounded, frosted grey instead of the browser's default bars. */
+@layer base {
+  ::-webkit-scrollbar {
+    width: var(--scrollbar-size);
+    height: var(--scrollbar-size);
+  }
+  ::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    border: var(--scrollbar-gap) solid transparent;
+    border-radius: 9999px;
+    background: var(--color-scrollbar) padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-scrollbar-hover) padding-box;
+  }
+  /* Firefox has no ::-webkit-scrollbar; it gets the thin bar in the same colour. */
+  @supports not selector(::-webkit-scrollbar) {
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: var(--color-scrollbar) transparent;
+    }
+  }
+}

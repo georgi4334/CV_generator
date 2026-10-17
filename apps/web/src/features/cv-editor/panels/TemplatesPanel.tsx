@@ -11,6 +11,8 @@ import { Info } from 'lucide-react'
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RecommendedBadge } from '@/shared/ui/Badges'
+import { FitToWidth } from '@/shared/ui/FitToWidth'
+import { TEMPLATE_THUMBNAIL_WIDTH } from './templateThumbnail'
 import { CvThumbnail, templateChoice, withTemplate } from '@/renderer'
 import { useEditorUi } from '@/features/cv-editor/state/editorUi'
 import { useCvEditor } from '@/features/cv-editor/state/cvEditorStore'
@@ -24,7 +26,7 @@ const TemplateThumbnail = memo(function TemplateThumbnail({
   cv: CvDocument
   templateId: TemplateId
 }) {
-  return <CvThumbnail cv={withTemplate(cv, templateId)} width={120} />
+  return <CvThumbnail cv={withTemplate(cv, templateId)} width={TEMPLATE_THUMBNAIL_WIDTH} />
 })
 
 const segment = 'flex-1 rounded-md py-1.5 text-sm font-medium'
@@ -60,7 +62,8 @@ export function TemplatesPanel({ professionId = null }: { professionId?: Profess
                   selected ? 'ring-2 ring-brand-line' : 'hover:ring-2 hover:ring-line-strong '
                 }`}
               >
-                {thumbnail(id)}
+                {/* Fits the column, so the selection ring lines up and nothing scrolls sideways. */}
+                <FitToWidth width={TEMPLATE_THUMBNAIL_WIDTH}>{thumbnail(id)}</FitToWidth>
                 <span className={`mt-1 block ${selected ? 'font-semibold text-brand-fg ' : ''}`}>
                   {t(`labels.template.${id}`)}
                 </span>

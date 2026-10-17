@@ -193,7 +193,7 @@ export function UserMenu() {
                     onClick={() => setView('theme')}
                   />
                 </nav>
-                <div className="pb-safe border-t border-line p-card">
+                <div className="pb-safe-card border-t border-line p-card">
                   <button
                     type="button"
                     disabled={logout.isPending}
@@ -229,7 +229,7 @@ export function UserMenu() {
                 </div>
                 <div
                   key={view}
-                  className="pb-safe flex-1 animate-view-in overflow-y-auto p-card motion-reduce:animate-none"
+                  className="pb-safe-card flex-1 animate-view-in overflow-y-auto p-card motion-reduce:animate-none"
                 >
                   {view === 'account' ? <AccountSettings /> : <ThemeOptions />}
                 </div>

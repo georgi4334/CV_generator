@@ -50,6 +50,9 @@
   --theme-backdrop: color-mix(in oklab, var(--color-slate-950) 50%, transparent);
   --theme-skeleton: var(--color-slate-200); /* loading placeholders */
   --theme-skeleton-shine: var(--color-slate-100); /* the light sweeping across them */
+  /* Scrollbars: slim, rounded, frosted grey. */
+  --theme-scrollbar: color-mix(in oklab, var(--color-slate-500) 35%, transparent);
+  --theme-scrollbar-hover: color-mix(in oklab, var(--color-slate-500) 60%, transparent);
 
   /* Liquid glass: see-through panels that blur what is behind them (glass, glass-bar). */
   --theme-glass: color-mix(in oklab, var(--color-white) 50%, transparent);
@@ -113,6 +116,8 @@
   --theme-backdrop: color-mix(in oklab, var(--color-black) 60%, transparent);
   --theme-skeleton: var(--color-slate-800);
   --theme-skeleton-shine: var(--color-slate-700);
+  --theme-scrollbar: color-mix(in oklab, var(--color-slate-300) 28%, transparent);
+  --theme-scrollbar-hover: color-mix(in oklab, var(--color-slate-300) 50%, transparent);
 
   --theme-glass: color-mix(in oklab, var(--color-slate-900) 55%, transparent);
   --theme-glass-strong: color-mix(in oklab, var(--color-slate-900) 85%, transparent);
@@ -170,6 +175,8 @@
   --color-paper: var(--color-white);
   --color-skeleton: var(--theme-skeleton);
   --color-skeleton-shine: var(--theme-skeleton-shine);
+  --color-scrollbar: var(--theme-scrollbar);
+  --color-scrollbar-hover: var(--theme-scrollbar-hover);
   --color-glass: var(--theme-glass);
   --color-glass-strong: var(--theme-glass-strong);
   --color-glass-hover: var(--theme-glass-hover);
@@ -259,18 +266,19 @@
   --aspect-paper: 210 / 297; /* A4 page, for placeholders (aspect-paper) */
 
   /* Drawers slide in from the right edge (animate-drawer-in). */
+  --spacing-drawer-inset: 0.75rem; /* drawers float this far from the screen edges */
   --container-side-drawer: 22rem; /* account drawer */
   --container-toast: 24rem; /* notifications */
   --animate-drawer-in: drawer-in var(--duration-zoom) var(--ease-spring) both;
   --animate-drawer-out: drawer-out var(--duration-leave) var(--ease-leave) both;
   @keyframes drawer-in {
     from {
-      transform: translateX(100%);
+      transform: translateX(calc(100% + var(--spacing-drawer-inset)));
     }
   }
   @keyframes drawer-out {
     to {
-      transform: translateX(100%);
+      transform: translateX(calc(100% + var(--spacing-drawer-inset)));
     }
   }
   /* Dialogs grow in from slightly smaller and shrink away when closed. */
@@ -390,4 +398,8 @@
 
   /* Glass makes the colours behind it richer, like real glass. */
   --glass-saturation: 180%;
+
+  /* Scrollbar thickness, and the clear gap around the thumb that makes it look slimmer. */
+  --scrollbar-size: 10px;
+  --scrollbar-gap: 2px;
 }
