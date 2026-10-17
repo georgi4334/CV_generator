@@ -78,22 +78,30 @@
   --theme-illus-2: var(--color-sky-500);
   --theme-illus-3: var(--color-violet-400);
   /* The base under the glows: a soft sky-to-mint wash. */
+  /* Drawers and side panels: in light mode the strong glass. */
+  --theme-panel: var(--theme-glass-strong);
   --theme-backdrop-from: var(--color-sky-100);
   --theme-backdrop-to: var(--color-emerald-50);
+  --theme-backdrop-mid: color-mix(
+    in oklab,
+    var(--theme-backdrop-from) 50%,
+    var(--theme-backdrop-to)
+  );
+  --theme-backdrop-angle: 160deg;
 }
 
 .dark {
-  --theme-page: var(--color-slate-950);
-  --theme-surface: var(--color-slate-900);
-  --theme-sunken: var(--color-slate-950);
-  --theme-muted: var(--color-slate-800);
-  --theme-muted-strong: var(--color-slate-700);
-  --theme-line: var(--color-slate-800);
-  --theme-line-strong: var(--color-slate-600);
-  --theme-fg: var(--color-slate-100);
-  --theme-fg-soft: var(--color-slate-300);
-  --theme-fg-muted: var(--color-slate-400);
-  --theme-fg-faint: var(--color-slate-500);
+  --theme-page: #0d1250;
+  --theme-surface: #1b1a5b;
+  --theme-sunken: #0a0f45;
+  --theme-muted: #262567;
+  --theme-muted-strong: #35337c;
+  --theme-line: #34327a;
+  --theme-line-strong: #504e9b;
+  --theme-fg: #f6f2ff;
+  --theme-fg-soft: #ebe5f8;
+  --theme-fg-muted: #ebe5f8;
+  --theme-fg-faint: #c3b8e2;
   --theme-brand: var(--color-teal-700);
   --theme-brand-hover: var(--color-teal-600);
   --theme-brand-fg: var(--color-teal-300);
@@ -116,29 +124,34 @@
   --theme-success-soft: var(--color-emerald-950);
   --theme-inverse: var(--color-slate-100);
   --theme-on-inverse: var(--color-slate-900);
-  --theme-backdrop: color-mix(in oklab, var(--color-black) 60%, transparent);
-  --theme-skeleton: var(--color-slate-800);
-  --theme-skeleton-shine: var(--color-slate-700);
+  --theme-backdrop: color-mix(in oklab, #05072a 62%, transparent);
+  --theme-skeleton: #2c2b70;
+  --theme-skeleton-shine: #3f3e8c;
   --theme-chart: var(--color-teal-600);
-  --theme-chart-track: color-mix(in oklab, var(--color-white) 8%, transparent);
-  --theme-scrollbar: color-mix(in oklab, var(--color-slate-300) 28%, transparent);
-  --theme-scrollbar-hover: color-mix(in oklab, var(--color-slate-300) 50%, transparent);
+  --theme-chart-track: color-mix(in oklab, var(--color-white) 10%, transparent);
+  --theme-scrollbar: color-mix(in oklab, #d9cdf5 30%, transparent);
+  --theme-scrollbar-hover: color-mix(in oklab, #d9cdf5 52%, transparent);
 
-  --theme-glass: color-mix(in oklab, var(--color-slate-900) 55%, transparent);
-  --theme-glass-strong: color-mix(in oklab, var(--color-slate-900) 85%, transparent);
-  --theme-glass-hover: color-mix(in oklab, var(--color-white) 6%, transparent);
-  --theme-glass-border: color-mix(in oklab, var(--color-white) 12%, transparent);
-  --theme-glass-edge: color-mix(in oklab, var(--color-black) 40%, transparent);
-  --theme-glass-sheen: color-mix(in oklab, var(--color-white) 7%, transparent);
-  --theme-glow-1: color-mix(in oklab, var(--color-teal-500) 35%, transparent);
-  --theme-glow-2: color-mix(in oklab, var(--color-sky-600) 30%, transparent);
-  --theme-glow-3: color-mix(in oklab, var(--color-violet-600) 25%, transparent);
-  --theme-glow-4: color-mix(in oklab, var(--color-emerald-600) 22%, transparent);
+  --theme-glass: color-mix(in oklab, #1d1a63 46%, transparent);
+  --theme-glass-strong: color-mix(in oklab, #17155a 84%, transparent);
+  --theme-glass-hover: color-mix(in oklab, var(--color-white) 9%, transparent);
+  --theme-glass-border: color-mix(in oklab, var(--color-white) 20%, transparent);
+  --theme-glass-edge: color-mix(in oklab, #05072a 45%, transparent);
+  --theme-glass-sheen: color-mix(in oklab, var(--color-white) 14%, transparent);
+  --theme-glow-1: color-mix(in oklab, #cfd4fa 24%, transparent);
+  --theme-glow-2: color-mix(in oklab, #8a90ea 28%, transparent);
+  --theme-glow-3: color-mix(in oklab, #2f3fb0 55%, transparent);
+  --theme-glow-4: color-mix(in oklab, #d49be0 30%, transparent);
   --theme-illus-1: var(--color-teal-300);
   --theme-illus-2: var(--color-sky-300);
   --theme-illus-3: var(--color-violet-300);
-  --theme-backdrop-from: var(--color-slate-950);
-  --theme-backdrop-to: color-mix(in oklab, var(--color-slate-950) 85%, var(--color-teal-950));
+  /* Drawers and side panels: solid deep navy, clearly apart from the gradient behind them. */
+  --theme-panel: #0b0e3a;
+  --theme-backdrop-from: #394090;
+  --theme-backdrop-to: #0e1456;
+  /* The mauve band across the middle, like a dusk sky. */
+  --theme-backdrop-mid: #664a99;
+  --theme-backdrop-angle: 180deg;
 }
 
 @theme inline {
@@ -198,6 +211,8 @@
   --color-illus-2: var(--theme-illus-2);
   --color-illus-3: var(--theme-illus-3);
   --color-backdrop-from: var(--theme-backdrop-from);
+  --color-panel: var(--theme-panel);
+  --color-backdrop-mid: var(--theme-backdrop-mid);
   --color-backdrop-to: var(--theme-backdrop-to);
 }
 

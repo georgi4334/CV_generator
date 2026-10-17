@@ -53,14 +53,20 @@
           transform 0.45s var(--splash-ease);
       }
       html.dark #splash {
-        --splash-from: #020617;
-        --splash-to: #04131a;
-        --splash-glow-1: rgb(20 184 166 / 0.35);
-        --splash-glow-2: rgb(2 132 199 / 0.3);
-        --splash-glow-3: rgb(124 58 237 / 0.25);
-        --splash-glass: rgb(15 23 42 / 0.55);
-        --splash-rim: rgb(255 255 255 / 0.12);
-        --splash-text: #f1f5f9;
+        --splash-from: #394090;
+        --splash-to: #0e1456;
+        --splash-glow-1: rgb(207 212 250 / 0.24);
+        --splash-glow-2: rgb(138 144 234 / 0.28);
+        --splash-glow-3: rgb(47 63 176 / 0.55);
+        --splash-glass: rgb(29 26 99 / 0.5);
+        --splash-rim: rgb(255 255 255 / 0.2);
+        --splash-text: #f6f2ff;
+        /* Dusk, as in the app: indigo at the top, mauve in the middle, navy below. */
+        background:
+          radial-gradient(at 8% 0%, var(--splash-glow-1), transparent 45%),
+          radial-gradient(at 92% 8%, var(--splash-glow-2), transparent 42%),
+          radial-gradient(at 75% 85%, var(--splash-glow-3), transparent 45%),
+          linear-gradient(180deg, var(--splash-from), #664a99, var(--splash-to));
       }
       /* Leaving: the splash grows and fades, as if the app zooms open. */
       #splash.splash-hide {

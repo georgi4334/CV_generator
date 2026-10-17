@@ -22,7 +22,8 @@ export function ZoomControl({ percent, fitted }: { percent: number; fitted: bool
     <div
       role="group"
       aria-label={t('editor.zoom.label')}
-      className="glass-pill pointer-events-auto flex items-center gap-1 px-1.5 py-1"
+      // Floats over the white page: the stronger glass keeps its numbers readable there.
+      className="glass-pill pointer-events-auto flex items-center gap-1 bg-glass-strong! px-1.5 py-1"
     >
       <button
         type="button"

@@ -15,6 +15,7 @@ import { nav } from './nav'
 import { newCv } from './newCv'
 import { renderer } from './renderer'
 import { share } from './share'
+import { welcome } from './welcome'
 
 /**
  * English, the source language. Every other language must have exactly the
@@ -38,4 +39,5 @@ export const en = {
   newCv,
   letters,
   ai,
+  welcome,
 }

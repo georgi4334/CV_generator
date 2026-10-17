@@ -17,7 +17,7 @@ import { remindersFor } from './reminders'
 import { JobInsights } from './JobInsights'
 import { TransitionLink } from '@/shared/ui/TransitionLink'
 import { useDocTransitionStyle } from '@/shared/lib/viewTransitions'
-import { LoadingRegion, Skeleton } from '@/shared/ui/Skeleton'
+import { LoadingRegion, Skeleton, SkeletonText } from '@/shared/ui/Skeleton'
 
 const QUICK_ACTIONS = [
   { to: NEW_CV_PATH, label: 'dashboard.newCv', icon: FilePlus2 },
@@ -232,11 +232,51 @@ function Reminders({ jobs, today }: { jobs: Job[]; today: string }) {
   )
 }
 
+/**
+ * While the jobs load, the cards that depend on them are skeletons: showing
+ * them empty would claim "Nothing to follow up on" before anyone has looked.
+ */
+function JobCardsSkeleton() {
+  const { t } = useTranslation()
+  const card = (className: string, lines: number) => (
+    <section className={`glass p-5 ${className}`}>
+      <LoadingRegion label={t('jobs.loading')}>
+        <Skeleton className="mb-4 h-4 w-1/3" />
+        <SkeletonText lines={lines} />
+      </LoadingRegion>
+    </section>
+  )
+  return (
+    <>
+      {card('', 5)}
+      {card('lg:col-span-2', 5)}
+      {card('', 3)}
+      {card('lg:col-span-3', 2)}
+    </>
+  )
+}
+
+/** If the jobs cannot be loaded, say so (and offer to retry) instead of showing empty cards. */
+function JobCardsError({ error, onRetry }: { error: unknown; onRetry: () => void }) {
+  const { t } = useTranslation()
+  return (
+    <section className="glass flex flex-wrap items-center gap-3 p-5 lg:col-span-3">
+      <p role="alert" className="min-w-0 flex-1 text-sm text-danger-fg">
+        {t('dashboard.jobsError', { message: errorMessage(error) })}
+      </p>
+      <button type="button" className={secondaryButton} onClick={onRetry}>
+        {t('common.tryAgain')}
+      </button>
+    </section>
+  )
+}
+
 export function DashboardPage() {
   const { t } = useTranslation()
   const cvs = useCvList()
   const letters = useCoverLetterList()
-  const jobs = useJobs().data ?? []
+  const jobsQuery = useJobs()
+  const jobs = jobsQuery.data ?? []
   const today = localToday()
   const recent = [...(cvs.data ?? []), ...(letters.data ?? [])]
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
@@ -263,9 +303,17 @@ export function DashboardPage() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <RecentDocuments docs={recent} loading={cvs.isPending || letters.isPending} />
-        <JobPipeline jobs={jobs} />
-        <JobInsights jobs={jobs} />
-        <Reminders jobs={jobs} today={today} />
+        {jobsQuery.isError ? (
+          <JobCardsError error={jobsQuery.error} onRetry={() => void jobsQuery.refetch()} />
+        ) : jobsQuery.isPending ? (
+          <JobCardsSkeleton />
+        ) : (
+          <>
+            <JobPipeline jobs={jobs} />
+            <JobInsights jobs={jobs} />
+            <Reminders jobs={jobs} today={today} />
+          </>
+        )}
       </div>
     </>
   )

@@ -23,6 +23,9 @@ export const PreviewPage = lazyPage(() =>
 export const SharedDocumentPage = lazyPage(() =>
   import('@/features/share/SharedDocumentPage').then((m) => m.SharedDocumentPage),
 )
+export const WelcomePage = lazyPage(() =>
+  import('@/features/welcome/WelcomePage').then((m) => m.WelcomePage),
+)
 export const PrintHost = lazyPage(() =>
   import('@/features/print/PrintHost').then((m) => m.PrintHost),
 )

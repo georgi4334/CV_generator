@@ -90,9 +90,10 @@ export function EditorTopBar({
     </>
   )
 
+  // The top bar sits above the page (z-dropdown), so its menus open over the canvas, not behind it.
   if (compact) {
     return (
-      <header className="glass-bar flex h-14 shrink-0 items-center gap-1 px-2">
+      <header className="glass-bar relative z-(--z-dropdown) flex h-14 shrink-0 items-center gap-1 px-2">
         <TransitionLink
           transition="doc-close"
           to={backTo}
@@ -122,7 +123,7 @@ export function EditorTopBar({
   // Floating over the page: the way back and the title, the tools in a glass
   // pill in the middle, and the document's own actions in a second pill.
   return (
-    <header className="grid shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 pt-3 pb-1">
+    <header className="relative z-(--z-dropdown) grid shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 pt-3 pb-1">
       <div className="flex min-w-0 items-center gap-2">
         <TransitionLink
           transition="doc-close"

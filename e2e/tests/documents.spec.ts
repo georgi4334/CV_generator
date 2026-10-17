@@ -13,6 +13,16 @@ test('a CV is created, edited, saved and shared', async ({ page, browser }) => {
   await page.reload()
   await expect(page.getByRole('document', { name: 'CV' })).toContainText('Ada Lovelace')
 
+  // The theme can be changed while editing: the top bar's menu opens over the page.
+  for (const [choice, dark] of [
+    ['Dark', true],
+    ['Light', false],
+  ] as const) {
+    await page.getByRole('button', { name: /^Theme/ }).click()
+    await page.getByRole('menuitemradio', { name: choice }).click()
+    await expect(page.locator('html')).toHaveClass(dark ? /dark/ : /^(?!.*dark)/)
+  }
+
   // Share it and open the link signed out.
   await page.getByRole('button', { name: 'Share link' }).click()
   const dialog = page.getByRole('dialog')
