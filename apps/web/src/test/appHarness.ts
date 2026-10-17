@@ -10,6 +10,7 @@ import { useCvEditor } from '@/features/cv-editor/state/cvEditorStore'
 import { useSaveState } from '@/features/cv-editor/state/editorSession'
 import { useEditorUi } from '@/features/cv-editor/state/editorUi'
 import { auth, fake } from './fakeHolders'
+import { useToasts } from '@/shared/stores/toasts'
 
 vi.mock('@/features/cv-editor/api', async () => {
   const { createFakeCvApi } = await import('./fakeCvApi')
@@ -53,4 +54,5 @@ beforeEach(() => {
   useEditorUi.setState({ activePanel: null, notice: null, previewVersionId: null })
   useCvEditor.setState({ docId: null, cv: null, past: [], future: [] })
   useSaveState.setState({ status: 'saved', lastSavedAt: null, error: null })
+  useToasts.setState({ toasts: [] })
 })

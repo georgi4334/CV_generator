@@ -7,7 +7,7 @@ import { Logo } from '@/shared/ui/Logo'
 import { LanguageSelect } from '@/shared/ui/LanguageSelect'
 import { UserMenu } from '@/features/auth/components/UserMenu'
 import { LegalFooter } from '@/features/legal/LegalLayout'
-import { VerifyBanner } from '@/features/auth/components/VerifyBanner'
+import { VerifyReminder } from '@/features/auth/components/VerifyReminder'
 import { NEW_CV_PATH, NEW_LETTER_PATH } from '@/shared/lib/paths'
 import { useHealth } from '@/shared/api/useHealth'
 import { useBreakpoint } from '@/shared/lib/useBreakpoint'
@@ -77,7 +77,7 @@ export function AppLayout() {
           </div>
         </div>
       </header>
-      <VerifyBanner />
+      <VerifyReminder />
 
       <main
         className={`page-container flex-1 py-section md:py-8 ${wide ? '' : 'clear-bottom-nav'}`}
@@ -99,6 +99,7 @@ export function AppLayout() {
       {!wide && (
         <nav
           aria-label={t('nav.main')}
+          data-bottom-bar
           className="pb-safe glass-bar fixed inset-x-0 bottom-0 z-(--z-nav) border-t border-b-0"
         >
           <ul className="grid h-bottom-nav grid-cols-3">

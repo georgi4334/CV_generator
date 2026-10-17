@@ -166,7 +166,7 @@ export function DocumentSelect({
           to={editPath(linked)}
           aria-label={t('jobs.cell.openDocument', { title: linked.title })}
           title={t('jobs.cell.openDocument', { title: linked.title })}
-          className="shrink-0 rounded-tight p-1 text-brand-fg hover:bg-muted"
+          className="shrink-0 rounded-tight p-1 text-brand-fg hover:bg-glass-hover"
         >
           <ExternalLink className="size-3.5" />
         </TransitionLink>

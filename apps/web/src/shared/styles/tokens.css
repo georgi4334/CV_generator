@@ -238,12 +238,29 @@
     inset 0 1px 0 0 var(--theme-glass-border), 0 0 0 1px var(--theme-glass-edge),
     0 8px 32px -8px rgb(15 23 42 / 0.18);
 
+  /* Buttons: a bright top rim and a soft coloured glow that grows on hover. */
+  --shadow-btn-rim: inset 0 1px 0 0 rgb(255 255 255 / 0.35);
+  --shadow-btn-brand:
+    var(--shadow-btn-rim), 0 6px 18px -8px color-mix(in oklab, var(--theme-brand) 70%, transparent);
+  --shadow-btn-brand-hover:
+    var(--shadow-btn-rim), 0 10px 26px -8px color-mix(in oklab, var(--theme-brand) 80%, transparent);
+  --shadow-btn-danger:
+    var(--shadow-btn-rim), 0 6px 18px -8px color-mix(in oklab, var(--theme-danger) 70%, transparent);
+  --shadow-btn-glass: inset 0 1px 0 0 var(--theme-glass-border), 0 0 0 1px var(--theme-glass-edge);
+  --shadow-btn-glass-hover:
+    inset 0 1px 0 0 var(--theme-glass-border), 0 0 0 1px var(--theme-glass-edge),
+    0 8px 22px -10px rgb(15 23 42 / 0.25);
+  /* Inputs: a faint inner shade, and a soft brand halo when focused. */
+  --shadow-input: inset 0 1px 2px 0 rgb(15 23 42 / 0.06);
+  --shadow-input-focus: 0 0 0 3px color-mix(in oklab, var(--theme-brand) 25%, transparent);
+
   --blur-glass: 24px; /* how much glass blurs what is behind it (backdrop-blur-glass) */
 
   --aspect-paper: 210 / 297; /* A4 page, for placeholders (aspect-paper) */
 
   /* Drawers slide in from the right edge (animate-drawer-in). */
   --container-side-drawer: 22rem; /* account drawer */
+  --container-toast: 24rem; /* notifications */
   --animate-drawer-in: drawer-in var(--duration-zoom) var(--ease-spring) both;
   --animate-drawer-out: drawer-out var(--duration-leave) var(--ease-leave) both;
   @keyframes drawer-in {
@@ -320,6 +337,22 @@
     from {
       opacity: 0;
       transform: translateX(calc(-1 * var(--page-shift)));
+    }
+  }
+
+  /* Toasts rise in from below and slide out to the right when closed. */
+  --animate-toast-in: toast-in var(--duration-page) var(--ease-spring) both;
+  --animate-toast-out: toast-out var(--duration-leave) var(--ease-leave) both;
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.75rem) scale(0.96);
+    }
+  }
+  @keyframes toast-out {
+    to {
+      opacity: 0;
+      transform: translateX(110%);
     }
   }
 

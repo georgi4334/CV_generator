@@ -19,7 +19,7 @@ export function LanguageSelect({ compact = false }: { compact?: boolean }) {
         title={t('common.interfaceLanguage')}
         value={language}
         onChange={(e) => void setLanguage(e.target.value as UiLanguage)}
-        className="cursor-pointer appearance-none rounded-tight border border-transparent bg-transparent py-1.5 pr-2 pl-7 text-sm text-fg-soft hover:bg-muted focus-visible:border-line-strong"
+        className="cursor-pointer appearance-none rounded-pill border border-transparent bg-transparent py-1.5 pr-2.5 pl-7 text-sm text-fg-soft transition-[background-color,box-shadow] hover:bg-glass-hover hover:shadow-btn-glass focus-visible:border-line-strong"
       >
         {UI_LANGUAGES.map((code) => (
           <option key={code} value={code} lang={code}>

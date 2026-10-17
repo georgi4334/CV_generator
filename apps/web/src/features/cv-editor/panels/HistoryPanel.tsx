@@ -27,9 +27,9 @@ export function HistoryPanel({ cvId }: { cvId: string }) {
       await cvApi.createVersion(cvId, label.trim() || undefined)
       setLabel('')
       await queryClient.invalidateQueries({ queryKey: cvKeys.versions(cvId) })
-      notify(t('editor.history.saved'))
+      notify(t('editor.history.saved'), 'success')
     } catch (e) {
-      notify(t('editor.history.notSaved', { reason: errorMessage(e) }))
+      notify(t('editor.history.notSaved', { reason: errorMessage(e) }), 'error')
     } finally {
       setSaving(false)
     }
@@ -90,7 +90,7 @@ export function HistoryPanel({ cvId }: { cvId: string }) {
                 className={`w-full rounded-tight px-2.5 py-2 text-left text-sm ${
                   selected
                     ? 'bg-brand-soft text-brand-fg-strong ring-1 ring-brand-line '
-                    : 'hover:bg-muted '
+                    : 'hover:bg-glass-hover '
                 }`}
               >
                 <span className="block font-medium">

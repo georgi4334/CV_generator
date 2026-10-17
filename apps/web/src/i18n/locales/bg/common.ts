@@ -11,6 +11,7 @@ export const common: Messages['common'] = {
   delete: 'Изтрий',
   edit: 'Редактирай',
   back: 'Назад',
+  notifications: 'Известия',
   create: 'Създай',
   apply: 'Приложи',
   discard: 'Откажи',

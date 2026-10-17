@@ -9,7 +9,6 @@ import { EditorRail } from './EditorRail'
 import { EditorSidePanel } from './EditorSidePanel'
 import { EditorToolbar } from './EditorToolbar'
 import { EditorTopBar, type UndoRedo } from './EditorTopBar'
-import { Toast } from './Toast'
 
 interface EditorLayoutProps {
   title: ReactNode
@@ -84,7 +83,6 @@ export function EditorLayout({
         </div>
       </div>
       {compact && <EditorToolbar kind={kind} />}
-      <Toast raised={compact} />
     </div>
   )
 }

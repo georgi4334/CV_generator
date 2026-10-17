@@ -51,7 +51,7 @@ function SectionRowContent({ section, language, handle }: RowProps & { handle?: 
   const notify = useEditorUi((s) => s.notify)
   const defaultTitle = DEFAULT_SECTION_TITLES[language][section.type]
   const VisibilityIcon = section.visible ? Eye : EyeOff
-  const iconButton = 'rounded-tight p-1 text-fg-muted hover:bg-muted hover:text-fg'
+  const iconButton = 'rounded-tight p-1 text-fg-muted hover:bg-glass-hover hover:text-fg'
 
   return (
     <div
@@ -62,7 +62,7 @@ function SectionRowContent({ section, language, handle }: RowProps & { handle?: 
       {handle}
       <input
         aria-label={t('editor.rearrange.titleOf', { title: defaultTitle })}
-        className="min-w-0 flex-1 rounded-tight bg-transparent px-1 py-0.5 text-sm outline-none placeholder:text-fg focus:bg-muted"
+        className="min-w-0 flex-1 rounded-tight bg-transparent px-1 py-0.5 text-sm outline-none placeholder:text-fg focus:bg-glass-hover"
         placeholder={defaultTitle}
         value={section.title ?? ''}
         onChange={(e) => renameSection(section.id, e.target.value)}

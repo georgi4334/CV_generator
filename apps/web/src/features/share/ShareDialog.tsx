@@ -62,7 +62,7 @@ export function ShareDialog({
           type="button"
           onClick={requestClose}
           aria-label={t('common.close')}
-          className="rounded-tight p-1 text-fg-muted hover:bg-muted "
+          className="btn-icon p-1"
         >
           <X className="size-4" />
         </button>

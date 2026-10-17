@@ -6,7 +6,7 @@ import { useEditorUi } from '@/features/cv-editor/state/editorUi'
 import { LanguageSelect } from '@/shared/ui/LanguageSelect'
 import { ThemeSelect } from '@/shared/ui/ThemeSelect'
 
-const item = 'flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-muted'
+const item = 'menu-item gap-3 py-2.5'
 
 function Entry({ icon, label, onClick }: { icon: ReactNode; label: string; onClick: () => void }) {
   return (
@@ -63,10 +63,7 @@ export function EditorMoreMenu({
         <MoreVertical className="size-5" />
       </button>
       {open && (
-        <div
-          role="menu"
-          className="absolute right-0 z-(--z-dropdown) mt-2 w-menu rounded-control border border-line bg-surface py-1 text-sm shadow-overlay"
-        >
+        <div role="menu" className="glass-menu absolute right-0 z-(--z-dropdown) mt-2 w-menu">
           <Link to={previewTo} role="menuitem" className={item}>
             <Eye className="size-4" aria-hidden />
             {t('editor.rail.preview')}
