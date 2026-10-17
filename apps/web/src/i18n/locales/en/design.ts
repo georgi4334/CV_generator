@@ -67,6 +67,8 @@ export const design = {
     hint: 'JPG, PNG or WebP up to 5 MB. You can also drop an image on the preview.',
     show: 'Show the photo',
     shape: 'Photo shape',
+    position: 'Position',
+    positions: { name: 'Next to name', 'top-left': 'Top left', 'top-right': 'Top right' },
     shapes: { circle: 'Circle', rounded: 'Rounded', square: 'Square' },
   },
   backgrounds: {

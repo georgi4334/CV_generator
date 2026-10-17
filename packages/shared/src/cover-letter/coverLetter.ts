@@ -57,6 +57,7 @@ const EMPTY_HEADER: CvHeader = {
   photoUrl: null,
   showPhoto: false,
   photoShape: 'circle',
+  photoPosition: 'name',
 }
 
 /**

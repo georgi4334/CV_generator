@@ -9,6 +9,8 @@ export const renderer = {
   addEntryBelow: 'Add entry below',
   duplicateEntry: 'Duplicate entry',
   deleteEntry: 'Delete entry',
+  entry: 'Entry',
+  editEntry: 'Edit entry',
   addEntry: 'Add entry',
   addPhoto: 'Add photo',
   changePhoto: 'Change photo',

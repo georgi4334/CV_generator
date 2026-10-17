@@ -10,6 +10,8 @@ export const renderer: Messages['renderer'] = {
   addEntryBelow: 'Добави запис отдолу',
   duplicateEntry: 'Дублирай записа',
   deleteEntry: 'Изтрий записа',
+  entry: 'Запис',
+  editEntry: 'Редактирай записа',
   addEntry: 'Добави запис',
   addPhoto: 'Добави снимка',
   changePhoto: 'Смени снимката',

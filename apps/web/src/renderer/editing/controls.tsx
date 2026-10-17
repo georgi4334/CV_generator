@@ -7,6 +7,7 @@ import {
   ImageMinus,
   ImagePlus,
   ListPlus,
+  Pencil,
   Plus,
   Trash2,
   type LucideIcon,
@@ -17,10 +18,36 @@ import { useEditor } from '@/renderer/context'
 import { PHOTO_MAX_SIZE, pickAndUpload } from './image'
 import { Popover } from './Popover'
 
+/**
+ * The floating toolbar of an entry, a section title or the header. It sits on
+ * the top edge of what it belongs to (no gap the pointer could fall through
+ * on its way up) and lingers briefly after the pointer leaves, so it can be
+ * reached without vanishing.
+ */
 const toolbar =
-  'cv-controls absolute z-(--z-raised) hidden items-center gap-0.5 rounded-tight border border-line bg-surface p-0.5 text-fg-soft shadow-overlay group-hover/ctl:flex group-focus-within/ctl:flex'
+  'cv-controls invisible absolute right-2 top-0 z-(--z-raised) flex -translate-y-1/2 items-center gap-0.5 rounded-pill border border-line bg-surface p-1 text-fg-soft opacity-0 shadow-overlay transition-[opacity,visibility] delay-300 duration-150 group-hover/ctl:visible group-hover/ctl:opacity-100 group-hover/ctl:delay-0 group-focus-within/ctl:visible group-focus-within/ctl:opacity-100 group-focus-within/ctl:delay-0 motion-reduce:transition-none'
 const outline =
   'group/ctl relative rounded-sm outline-1 outline-offset-2 outline-transparent outline-dashed hover:outline-slate-400/70 focus-within:outline-slate-400/70'
+const toolButton =
+  'flex size-8 items-center justify-center rounded-full hover:bg-muted hover:text-fg disabled:opacity-30 disabled:hover:bg-transparent'
+
+/** The toolbar's main action: "+ Entry". */
+function AddEntryButton({ label, onClick }: { label: string; onClick: () => void }) {
+  const { t } = useTranslation()
+  return (
+    <button
+      type="button"
+      title={label}
+      aria-label={label}
+      onMouseDown={(e) => e.preventDefault()}
+      onClick={onClick}
+      className="mr-0.5 inline-flex h-8 items-center gap-1 rounded-pill bg-brand pr-3 pl-2 text-sm font-medium text-on-brand hover:bg-brand-hover"
+    >
+      <Plus className="size-4" aria-hidden />
+      {t('renderer.entry')}
+    </button>
+  )
+}
 
 function ToolButton({
   icon: Icon,
@@ -42,9 +69,9 @@ function ToolButton({
       // Keep focus (and the caret) in the field being edited.
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
-      className="rounded-tight p-1 hover:bg-muted hover:text-fg disabled:opacity-30"
+      className={toolButton}
     >
-      <Icon className="size-3.5" />
+      <Icon className="size-4" />
     </button>
   )
 }
@@ -71,14 +98,20 @@ export function ItemControls({
 }: ItemControlsProps) {
   const editor = useEditor()
   const { t } = useTranslation()
+  const ref = useRef<HTMLDivElement>(null)
   if (!editor) return <>{children}</>
   return (
-    <div className={outline} data-item-id={itemId}>
-      <div
-        className={`${toolbar} -top-1 right-0 -translate-y-full`}
-        role="toolbar"
-        aria-label={t('renderer.entryActions')}
-      >
+    <div ref={ref} className={outline} data-item-id={itemId}>
+      <div className={toolbar} role="toolbar" aria-label={t('renderer.entryActions')}>
+        <AddEntryButton
+          label={t('renderer.addEntryBelow')}
+          onClick={() => editor.addItem(sectionId, itemId)}
+        />
+        <ToolButton
+          icon={Pencil}
+          label={t('renderer.editEntry')}
+          onClick={() => ref.current?.querySelector<HTMLElement>('[contenteditable]')?.focus()}
+        />
         <ToolButton
           icon={ArrowUp}
           label={t('renderer.moveUp')}
@@ -98,11 +131,6 @@ export function ItemControls({
             onClick={() => editor.addBullet(sectionId, itemId, bulletCount - 1)}
           />
         )}
-        <ToolButton
-          icon={Plus}
-          label={t('renderer.addEntryBelow')}
-          onClick={() => editor.addItem(sectionId, itemId)}
-        />
         <ToolButton
           icon={Copy}
           label={t('renderer.duplicateEntry')}
@@ -137,17 +165,9 @@ export function SectionControls({
   if (!editor || !canAdd) return <>{children}</>
   return (
     <div className="group/ctl relative">
-      <div
-        className={`${toolbar} top-0 right-0`}
-        role="toolbar"
-        aria-label={t('renderer.sectionActions')}
-      >
+      <div className={toolbar} role="toolbar" aria-label={t('renderer.sectionActions')}>
+        <AddEntryButton label={t('renderer.addEntry')} onClick={() => editor.addItem(sectionId)} />
         {skillDisplay && <SkillStyleButton sectionId={sectionId} value={skillDisplay} />}
-        <ToolButton
-          icon={Plus}
-          label={t('renderer.addEntry')}
-          onClick={() => editor.addItem(sectionId)}
-        />
       </div>
       {children}
     </div>
@@ -227,9 +247,9 @@ function SkillStyleButton({ sectionId, value }: { sectionId: string; value: Skil
         aria-expanded={open}
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => setOpen((o) => !o)}
-        className="rounded-tight p-1 hover:bg-muted hover:text-fg"
+        className={toolButton}
       >
-        <Palette className="size-3.5" />
+        <Palette className="size-4" />
       </button>
       {open && (
         <Popover anchor={ref} label={t('renderer.skillStyle')} onClose={() => setOpen(false)}>
@@ -278,11 +298,7 @@ export function HeaderControls({ hasPhoto, children }: { hasPhoto: boolean; chil
     )
   return (
     <div className={outline}>
-      <div
-        className={`${toolbar} -top-1 right-0 -translate-y-full`}
-        role="toolbar"
-        aria-label={t('renderer.headerActions')}
-      >
+      <div className={toolbar} role="toolbar" aria-label={t('renderer.headerActions')}>
         <ToolButton
           icon={ImagePlus}
           label={hasPhoto ? t('renderer.changePhoto') : t('renderer.addPhoto')}

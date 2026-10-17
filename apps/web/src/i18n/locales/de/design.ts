@@ -68,6 +68,8 @@ export const design: Messages['design'] = {
     hint: 'JPG, PNG oder WebP bis 5 MB. Sie können ein Bild auch auf die Vorschau ziehen.',
     show: 'Foto anzeigen',
     shape: 'Form des Fotos',
+    position: 'Position',
+    positions: { name: 'Neben dem Namen', 'top-left': 'Oben links', 'top-right': 'Oben rechts' },
     shapes: { circle: 'Kreis', rounded: 'Abgerundet', square: 'Quadrat' },
   },
   backgrounds: {

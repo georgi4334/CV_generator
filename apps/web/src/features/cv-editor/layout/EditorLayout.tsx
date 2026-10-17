@@ -71,29 +71,27 @@ export function EditorLayout({
         {activePanel && <EditorSidePanel panel={activePanel} cvId={cvId} sheet={compact} />}
         <div className="relative flex min-w-0 flex-1 flex-col">
           <div className="flex-1 overflow-auto">
+            {/* On wide screens: room on both sides for the rail (w-11 + gap-4), so the page stays centred. */}
             <div
               className={
-                compact
-                  ? 'px-gutter pt-section pb-zoom-clear'
-                  : 'flex gap-4 px-6 pt-6 pb-zoom-clear'
+                compact ? 'px-gutter pt-section pb-zoom-clear' : 'px-21 pt-6 pb-zoom-clear'
               }
             >
-              {!compact && (
-                <EditorRail previewTo={previewTo} onDownload={onDownload} onShare={onShare} />
-              )}
-              <div className="min-w-0 flex-1">
-                <FitToWidth
-                  width={pageWidth}
-                  scale={zoom === null ? null : zoom / 100}
-                  onFit={setFit}
-                  // The page zooms open from its thumbnail and shrinks back into it.
-                  boxStyle={{ viewTransitionName: DOC_TRANSITION_NAME }}
-                >
-                  {children}
-                </FitToWidth>
-              </div>
-              {/* As wide as the rail, so the page stays centred. */}
-              {!compact && <div aria-hidden className="w-11 shrink-0" />}
+              <FitToWidth
+                width={pageWidth}
+                scale={zoom === null ? null : zoom / 100}
+                onFit={setFit}
+                // The page zooms open from its thumbnail and shrinks back into it.
+                boxStyle={{ viewTransitionName: DOC_TRANSITION_NAME }}
+                // The rail stays attached to the page's left edge, at the bottom of the screen.
+                aside={
+                  compact ? undefined : (
+                    <EditorRail previewTo={previewTo} onDownload={onDownload} onShare={onShare} />
+                  )
+                }
+              >
+                {children}
+              </FitToWidth>
             </div>
           </div>
           <div className="pointer-events-none absolute inset-x-0 bottom-4 z-(--z-raised) flex justify-center">

@@ -16,14 +16,20 @@ type SectionInput = {
 
 /** Builds an example CV with fresh ids, so every copy is independent. */
 export function buildExample(
-  header: Omit<CvHeader, 'photoUrl' | 'showPhoto' | 'photoShape'>,
+  header: Omit<CvHeader, 'photoUrl' | 'showPhoto' | 'photoShape' | 'photoPosition'>,
   sections: SectionInput[],
   design: Partial<CvDesign> = {},
 ): CvDocument {
   return {
     schemaVersion: CV_SCHEMA_VERSION,
     language: 'en-US',
-    header: { ...header, photoUrl: null, showPhoto: false, photoShape: 'circle' },
+    header: {
+      ...header,
+      photoUrl: null,
+      showPhoto: false,
+      photoShape: 'circle',
+      photoPosition: 'name',
+    },
     sections: sections.map(
       (s) =>
         ({
