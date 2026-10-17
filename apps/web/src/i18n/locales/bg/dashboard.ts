@@ -40,6 +40,7 @@ export const dashboard: Messages['dashboard'] = {
     interviews: 'Интервюта',
     interviewsHint: 'Стигнаха до интервю или по-нататък',
   },
+  jobsError: 'Обявите не можаха да бъдат заредени: {{message}}',
   reminders: {
     heading: 'Напомняния',
     updateError: 'Обявата не можа да бъде обновена: {{message}}',

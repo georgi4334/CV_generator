@@ -2,7 +2,8 @@
 import '@/test/appHarness'
 import { fake } from '@/test/fakeHolders'
 import { cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import type { Job } from '@cv/shared'
+import { describe, expect, it, vi } from 'vitest'
 import { localToday } from '@/shared/lib/format'
 import { renderRoute } from '@/test/renderRoute'
 
@@ -168,5 +169,33 @@ describe('dashboard', () => {
     expect(router.state.location.pathname).toBe('/jobs')
     expect(await screen.findByRole('dialog', { name: 'Designer' })).toBeDefined()
     expect(fake.current.jobs.get(job.id)!.status).toBe('to_apply')
+  })
+
+  it('shows skeletons, not "Nothing to follow up on", while the jobs load', async () => {
+    let finish: (jobs: Job[]) => void = () => {}
+    vi.spyOn(fake.current.jobsApi, 'list').mockReturnValue(
+      new Promise((resolve) => (finish = resolve)),
+    )
+    renderRoute('/')
+    await screen.findByRole('heading', { name: 'Dashboard' })
+    expect(screen.getAllByText('Loading your jobs…').length).toBeGreaterThan(0)
+    expect(screen.queryByText('Nothing to follow up on.')).toBeNull()
+    expect(screen.queryByRole('heading', { name: 'Job pipeline' })).toBeNull()
+    finish([])
+    expect(await screen.findByText('Nothing to follow up on.')).toBeDefined()
+  })
+
+  it('says so, and can retry, when the jobs cannot be loaded', async () => {
+    const list = vi
+      .spyOn(fake.current.jobsApi, 'list')
+      .mockRejectedValueOnce(new Error('Server down'))
+    renderRoute('/')
+    expect((await screen.findByRole('alert')).textContent).toContain(
+      'Your jobs could not be loaded',
+    )
+    expect(screen.queryByText('Nothing to follow up on.')).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
+    expect(await screen.findByText('Nothing to follow up on.')).toBeDefined()
+    expect(list).toHaveBeenCalledTimes(2)
   })
 })
