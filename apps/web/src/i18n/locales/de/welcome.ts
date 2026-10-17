@@ -9,11 +9,6 @@ export const welcome: Messages['welcome'] = {
   logIn: 'Anmelden',
   haveAccount: 'Sie haben schon ein Konto?',
   previewLabel: 'Ein Beispiel-Lebenslauf, erstellt mit {{app}}',
-  chips: {
-    ai: 'KI-Korrektur',
-    templates: '8 Vorlagen',
-    share: 'Per Link teilen',
-  },
   featuresTitle: 'Alles für Ihre Jobsuche',
   features: {
     templates: {

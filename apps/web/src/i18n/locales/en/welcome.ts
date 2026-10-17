@@ -7,11 +7,6 @@ export const welcome = {
   logIn: 'Log in',
   haveAccount: 'Already have an account?',
   previewLabel: 'An example CV made with {{app}}',
-  chips: {
-    ai: 'AI proofreading',
-    templates: '8 templates',
-    share: 'Share by link',
-  },
   featuresTitle: 'Everything for your job search',
   features: {
     templates: {
