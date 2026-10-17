@@ -84,6 +84,7 @@ export function createEmptyCv(
       link: '',
       photoUrl: null,
       showPhoto: false,
+      photoShape: 'circle',
     },
     sections,
     design: { ...DEFAULT_DESIGN },

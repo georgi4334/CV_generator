@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { RenderContext, useEditor, useRender, type RenderMode } from '@/renderer/context'
 import { HeaderControls } from '@/renderer/editing/controls'
 import type { EditorApi } from '@/renderer/editing/editorApi'
-import { backgroundImage } from '@/renderer/templates/backgrounds'
+import { backgroundStyle } from '@/renderer/templates/backgrounds'
 import { pageStyle, SOLID_SIDEBAR_VARS } from '@/renderer/templates/pageStyle'
 import { usePlaceholders, type Placeholders } from '@/renderer/placeholders'
 import { Field } from '@/renderer/editing/primitives'
@@ -113,7 +113,7 @@ export function LetterRenderer({
               className={`relative flex flex-col bg-paper ${pageClassName ?? ''}`}
               style={{
                 ...pageStyle(design, tokens),
-                backgroundImage: backgroundImage(design.background, design.accentColor),
+                ...backgroundStyle(design.background, design.accentColor),
                 minHeight: tokens.page.height,
               }}
             >
@@ -137,10 +137,7 @@ export function LetterRenderer({
                       }),
                 }}
               >
-                <HeaderControls
-                  supportsPhoto={template.supportsPhoto}
-                  hasPhoto={header.showPhoto && header.photoUrl !== null}
-                >
+                <HeaderControls hasPhoto={header.showPhoto && header.photoUrl !== null}>
                   <Header header={header} />
                 </HeaderControls>
               </div>
