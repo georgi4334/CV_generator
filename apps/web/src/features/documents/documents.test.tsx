@@ -21,6 +21,21 @@ describe('documents', () => {
     expect(screen.queryByText('Frontend CV')).toBeNull()
   })
 
+  it('draws a CV and a cover letter with different icons and colours', async () => {
+    fake.current.seed('Frontend CV')
+    fake.current.seedLetter('Cover letter – general')
+    renderRoute('/documents/all')
+    await screen.findByText('Cover letter – general')
+    const icons = Array.from(document.querySelectorAll<HTMLElement>('[data-doc-icon]'))
+    const cv = icons.find((i) => i.dataset.docType === 'cv')!
+    const letter = icons.find((i) => i.dataset.docType === 'coverLetter')!
+    expect(cv.className).not.toBe(letter.className)
+    expect(cv.className).toContain('teal')
+    expect(letter.className).toContain('sky')
+    expect(cv.querySelector('svg')!.getAttribute('class')).toContain('lucide-file-user')
+    expect(letter.querySelector('svg')!.getAttribute('class')).toContain('lucide-mail')
+  })
+
   it('offers CV or cover letter from "Create new" on All documents', () => {
     renderRoute('/documents/all')
     fireEvent.click(screen.getByRole('button', { name: /create new/i }))

@@ -3,7 +3,6 @@ import { ArrowLeft, Download, Link2 } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FitToWidth } from '@/shared/ui/FitToWidth'
-import { primaryButton, secondaryButton } from '@/shared/ui/PageHeader'
 import { PAGE_SIZE_PX } from '@/renderer/templates/tokens'
 import { Link, useParams } from 'react-router'
 import { toApiRequestError } from '@/shared/api/client'
@@ -30,20 +29,22 @@ function PreviewFrame({
   children: ReactNode
 }) {
   const { t } = useTranslation()
+  // The same floating glass pills as the editor's top bar, over the app's gradient.
   return (
-    <div className="min-h-screen bg-muted-strong">
-      <header className="sticky top-0 z-(--z-raised) flex h-12 items-center gap-3 border-b border-line-strong bg-surface px-4 text-sm">
+    <div className="app-backdrop min-h-dvh text-fg">
+      <header className="pointer-events-none sticky top-0 z-(--z-raised) flex items-center gap-2 px-3 pt-3 pb-1 *:pointer-events-auto md:gap-3 md:px-4">
         <Link
           to={editTo}
-          className="inline-flex items-center gap-1.5 font-medium text-brand-fg hover:underline"
+          className="glass flex h-10 shrink-0 items-center gap-2 rounded-pill px-3.5 text-sm font-medium text-fg-soft hover:text-fg max-sm:size-10 max-sm:justify-center max-sm:px-0"
+          aria-label={t('editor.preview.backToEditing')}
         >
-          <ArrowLeft className="size-4" />{' '}
+          <ArrowLeft className="size-4" aria-hidden />
           <span className="max-sm:sr-only">{t('editor.preview.backToEditing')}</span>
         </Link>
-        <span className="min-w-0 flex-1 truncate text-fg-muted">
-          {t('editor.preview.title', { title })}
+        <span className="glass-pill flex h-10 min-w-0 flex-1 items-center px-4 text-sm text-fg-muted md:max-w-xl md:flex-none">
+          <span className="truncate">{t('editor.preview.title', { title })}</span>
         </span>
-        {actions}
+        <div className="ml-auto">{actions}</div>
       </header>
       <div className="px-4 py-6 sm:px-6 sm:py-8">{children}</div>
     </div>
@@ -53,11 +54,11 @@ function PreviewFrame({
 function PreviewActions({ onShare, onDownload }: { onShare: () => void; onDownload: () => void }) {
   const { t } = useTranslation()
   return (
-    <>
+    <div className="glass-pill flex items-center gap-1">
       <button
         type="button"
         onClick={onShare}
-        className={secondaryButton}
+        className="pill-item h-8"
         aria-label={t('editor.preview.share')}
       >
         <Link2 className="size-4" aria-hidden />
@@ -66,14 +67,14 @@ function PreviewActions({ onShare, onDownload }: { onShare: () => void; onDownlo
       <button
         type="button"
         onClick={onDownload}
-        className={primaryButton}
+        className="btn btn-primary btn-sm h-8 rounded-pill"
         aria-label={t('editor.preview.downloadPdf')}
         title={t('editor.printTitle')}
       >
         <Download className="size-4" aria-hidden />
         <span className="hidden sm:inline">{t('editor.preview.downloadPdf')}</span>
       </button>
-    </>
+    </div>
   )
 }
 
