@@ -9,7 +9,7 @@ export function EditorToolbar({ kind }: { kind: 'cv' | 'coverLetter' }) {
   return (
     <nav
       aria-label={t('editor.topBar.tools')}
-      className="pb-safe shrink-0 border-t border-line bg-surface"
+      className="pb-safe glass-bar shrink-0 border-t border-b-0"
     >
       <ul className="flex h-bottom-nav overflow-x-auto">
         {ALL_TOOLS.map(({ icon: Icon, panel }) => {

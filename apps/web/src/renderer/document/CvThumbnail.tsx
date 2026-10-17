@@ -24,7 +24,7 @@ export const CvThumbnail = memo(function CvThumbnail({
     <div
       aria-hidden
       inert
-      className="pointer-events-none overflow-hidden rounded border border-line bg-surface"
+      className="pointer-events-none overflow-hidden rounded border border-line bg-paper"
       style={{ width, height: Math.round(page.height * scale) }}
     >
       <div style={{ width: page.width, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
@@ -51,7 +51,7 @@ export const LetterThumbnail = memo(function LetterThumbnail({
     <div
       aria-hidden
       inert
-      className="pointer-events-none overflow-hidden rounded border border-line bg-surface"
+      className="pointer-events-none overflow-hidden rounded border border-line bg-paper"
       style={{ width, height: Math.round(page.height * scale) }}
     >
       <div style={{ width: page.width, transform: `scale(${scale})`, transformOrigin: 'top left' }}>

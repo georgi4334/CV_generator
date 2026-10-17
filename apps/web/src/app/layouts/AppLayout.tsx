@@ -53,18 +53,14 @@ export function AppLayout() {
           </NavLink>
 
           {wide && (
-            <nav aria-label={t('nav.main')} className="flex h-full items-stretch gap-1">
+            <nav aria-label={t('nav.main')} className="glass-pill flex items-center gap-0.5">
               {TABS.map((tab) => (
                 <NavLink
                   key={tab.to}
                   to={tab.to}
                   end={tab.end}
                   className={({ isActive }) =>
-                    `flex items-center border-b-2 px-3 text-sm font-medium transition-colors ${
-                      active(tab, isActive)
-                        ? 'border-brand-line text-brand-fg'
-                        : 'border-transparent text-fg-muted hover:text-fg'
-                    }`
+                    `pill-item ${active(tab, isActive) ? 'pill-item-active' : ''}`
                   }
                 >
                   {t(tab.label)}

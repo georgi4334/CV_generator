@@ -4,7 +4,7 @@ import { useEditorUi } from '@/features/cv-editor/state/editorUi'
 import { PAGE_SIZE_PX } from '@/renderer/templates/tokens'
 import { useBreakpoint } from '@/shared/lib/useBreakpoint'
 import { FitToWidth } from '@/shared/ui/FitToWidth'
-import { EditorRightRail } from './EditorRightRail'
+import { EditorRail } from './EditorRail'
 import { EditorSidePanel } from './EditorSidePanel'
 import { EditorToolbar } from './EditorToolbar'
 import { EditorTopBar, type UndoRedo } from './EditorTopBar'
@@ -29,7 +29,7 @@ interface EditorLayoutProps {
   children: ReactNode
 }
 
-/** Top bar, left panel, page area and right rail shared by the CV and cover letter editors. */
+/** Top bar, left panel, page area and action rail shared by the CV and cover letter editors. */
 export function EditorLayout({
   title,
   status,
@@ -48,7 +48,7 @@ export function EditorLayout({
   // Phones and small tablets: bottom toolbar, panels as a sheet, page fitted to the width.
   const compact = !useBreakpoint('lg')
   return (
-    <div className="flex h-dvh flex-col bg-muted text-fg">
+    <div className="app-backdrop flex h-dvh flex-col text-fg">
       <EditorTopBar
         title={title}
         status={status}
@@ -70,9 +70,11 @@ export function EditorLayout({
               <FitToWidth width={PAGE_SIZE_PX[pageSize].width}>{children}</FitToWidth>
             </div>
           ) : (
-            <div className="flex min-w-max justify-center gap-4 px-6 py-8">
+            <div className="flex min-w-max justify-center gap-4 px-6 py-6">
+              <EditorRail previewTo={previewTo} onDownload={onDownload} onShare={onShare} />
               {children}
-              <EditorRightRail previewTo={previewTo} onDownload={onDownload} onShare={onShare} />
+              {/* As wide as the rail, so the page stays centred. */}
+              <div aria-hidden className="w-11 shrink-0" />
             </div>
           )}
         </div>

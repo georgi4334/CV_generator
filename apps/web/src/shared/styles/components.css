@@ -99,14 +99,34 @@
   }
 }
 
-/* The app's background: the page colour with soft glows of the brand colours. */
+/* The app's background: a soft wash with glows of the brand colours (an aurora). */
 @utility app-backdrop {
-  background-color: var(--color-page);
+  background-color: var(--color-backdrop-from);
   background-image:
-    radial-gradient(at 10% 0%, var(--color-glow-1), transparent 50%),
-    radial-gradient(at 90% 15%, var(--color-glow-2), transparent 45%),
-    radial-gradient(at 50% 100%, var(--color-glow-3), transparent 55%);
+    radial-gradient(at 8% 0%, var(--color-glow-1), transparent 45%),
+    radial-gradient(at 92% 8%, var(--color-glow-2), transparent 42%),
+    radial-gradient(at 75% 85%, var(--color-glow-3), transparent 45%),
+    radial-gradient(at 15% 90%, var(--color-glow-4), transparent 45%),
+    linear-gradient(160deg, var(--color-backdrop-from), var(--color-backdrop-to));
   background-attachment: fixed;
+}
+
+/* Glass that holds forms and longer text (editor panels): more frosted, so it reads like paper. */
+@utility glass-solid {
+  @apply glass;
+  background-color: var(--color-glass-strong);
+}
+
+/* A rounded glass pill holding a row of choices (tabs, editor tools). */
+@utility glass-pill {
+  @apply glass rounded-pill p-1;
+}
+/* One choice in a glass pill; the chosen one is a brighter pill inside it. */
+@utility pill-item {
+  @apply inline-flex items-center gap-1.5 rounded-pill px-3 py-1.5 text-sm font-medium whitespace-nowrap text-fg-soft transition-colors hover:bg-glass-hover hover:text-fg;
+}
+@utility pill-item-active {
+  @apply bg-glass-strong text-fg shadow-glass hover:bg-glass-strong;
 }
 
 /* ----- Loading ----- */

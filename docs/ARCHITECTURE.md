@@ -101,6 +101,11 @@ Components use the Tailwind classes generated from those tokens, never raw value
   `--blur-glass` and the rim and shadow `--shadow-glass`. `app-backdrop` gives the page soft
   glows (`--theme-glow-*`) for the glass to blur. Browsers that cannot blur, and people who
   ask for reduced transparency, get solid panels instead.
+- **Frosted pills and illustrations:** `glass-pill` with `pill-item` / `pill-item-active` is
+  a row of choices (the app's tabs, the editor's tools); `glass-solid` is more frosted glass
+  for panels with forms. The not-found and error pages draw `shared/ui/illustrations.tsx`
+  with the `--theme-illus-*` colours. CV and letter pages use `bg-paper`, which is white in
+  both themes.
 - **Name and logo:** the product name is `APP_NAME` (`packages/shared/src/common/brand.ts`);
   translations write it as `{{app}}`. The logo is `shared/ui/Logo.tsx` (`Logo`, `LogoMark`),
   drawn with the brand tokens; `public/favicon.svg` is the same drawing.

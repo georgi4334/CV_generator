@@ -331,7 +331,7 @@ export function TimelineEntry({ dated, children }: { dated: boolean; children: R
   return (
     <div className="relative border-l-2 pl-[1.1em]" style={{ borderColor: 'var(--cv-rule)' }}>
       <span
-        className="absolute top-[0.35em] -left-[0.4em] size-[0.7em] rounded-pill border-2 bg-surface"
+        className="absolute top-[0.35em] -left-[0.4em] size-[0.7em] rounded-pill border-2 bg-paper"
         style={{ borderColor: 'var(--cv-accent)' }}
       />
       {children}
