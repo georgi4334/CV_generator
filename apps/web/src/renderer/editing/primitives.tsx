@@ -1,3 +1,4 @@
+import { isBefore } from '@cv/shared'
 import { useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEditor, useRender } from '@/renderer/context'
@@ -291,11 +292,17 @@ export function DateRangeField({
   const { t } = useTranslation()
   const display = <Field value={text} placeholder={placeholder} />
   if (!editor) return display
+  const outOfOrder = !value.isCurrent && isBefore(value.endDate, value.startDate)
   return (
     <PopoverTrigger
-      label={t('renderer.editDates')}
+      label={
+        outOfOrder
+          ? `${t('renderer.editDates')} (${t('renderer.datesOutOfOrder')})`
+          : t('renderer.editDates')
+      }
       display={display}
       visibleText={text || placeholder}
+      className={outOfOrder ? 'cv-date-warning' : undefined}
     >
       <DateRangeForm value={value} onChange={onChange} />
     </PopoverTrigger>
@@ -344,11 +351,17 @@ export function CertificateDatesField({
   const { t } = useTranslation()
   const display = <Field value={text} placeholder={placeholder} />
   if (!editor) return display
+  const outOfOrder = isBefore(value.expiryDate, value.date)
   return (
     <PopoverTrigger
-      label={t('renderer.editDates')}
+      label={
+        outOfOrder
+          ? `${t('renderer.editDates')} (${t('renderer.datesOutOfOrder')})`
+          : t('renderer.editDates')
+      }
       display={display}
       visibleText={text || placeholder}
+      className={outOfOrder ? 'cv-date-warning' : undefined}
     >
       <CertificateDatesForm value={value} onChange={onChange} />
     </PopoverTrigger>
