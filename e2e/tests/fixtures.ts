@@ -43,6 +43,16 @@ export const test = base.extend<{ consoleErrors: string[] }>({
 
 /** Accessibility check: no serious or critical WCAG 2.1 AA violations. */
 export async function expectAccessible(page: Page) {
+  // Colours are only final once fades and slides have finished.
+  // (Endless ones, like the loading shimmer, are skipped; cancelled ones count as done.)
+  await page.evaluate(() =>
+    Promise.allSettled(
+      document
+        .getAnimations()
+        .filter((a) => a.effect?.getComputedTiming().endTime !== Infinity)
+        .map((a) => a.finished),
+    ),
+  )
   const results = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
     .analyze()

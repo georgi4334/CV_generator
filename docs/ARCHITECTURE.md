@@ -95,6 +95,12 @@ Components use the Tailwind classes generated from those tokens, never raw value
   Their colours are `--theme-skeleton` and `--theme-skeleton-shine` (light and dark), the
   sweep is `animate-shimmer`, and it stops for people who prefer reduced motion. Wrap
   skeletons in `LoadingRegion` so screen readers hear one "Loading…" message.
+- **Liquid glass:** `glass` (panels: dashboard cards, the documents list, the Saved Jobs table
+  and cards) and `glass-bar` (the sticky header and the phone tab bar) blur what is behind
+  them. Their colours are the `--theme-glass*` tokens (light and dark), the blur is
+  `--blur-glass` and the rim and shadow `--shadow-glass`. `app-backdrop` gives the page soft
+  glows (`--theme-glow-*`) for the glass to blur. Browsers that cannot blur, and people who
+  ask for reduced transparency, get solid panels instead.
 - **Name and logo:** the product name is `APP_NAME` (`packages/shared/src/common/brand.ts`);
   translations write it as `{{app}}`. The logo is `shared/ui/Logo.tsx` (`Logo`, `LogoMark`),
   drawn with the brand tokens; `public/favicon.svg` is the same drawing.

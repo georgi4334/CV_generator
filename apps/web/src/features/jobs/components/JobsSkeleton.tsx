@@ -13,7 +13,7 @@ export function JobsSkeleton({ wide }: { wide: boolean }) {
   return (
     <LoadingRegion label={t('jobs.loading')}>
       {wide ? (
-        <div className="card overflow-hidden">
+        <div className="glass overflow-hidden">
           <div className="flex gap-6 border-b border-line px-3 py-3">
             {PLACEHOLDER_COLUMNS.map((_, i) => (
               <Skeleton key={i} className="h-3 flex-1" />
@@ -34,7 +34,7 @@ export function JobsSkeleton({ wide }: { wide: boolean }) {
       ) : (
         <ul className="space-y-3">
           {rows.map((row) => (
-            <li key={row} className="card space-y-3 p-4">
+            <li key={row} className="glass space-y-3 p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 space-y-2">
                   <Skeleton className="h-4 w-2/3" />

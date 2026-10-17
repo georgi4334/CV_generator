@@ -1,14 +1,27 @@
+import { ArrowLeft, LayoutDashboard } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
+import { StatusPage } from './StatusPage'
 
+/** A broken link, a mistyped address or a document that no longer exists. */
 export function NotFoundPage() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
+  // "Go back" only when there is a page of this app to go back to: the first
+  // page of a visit has the key "default".
+  const canGoBack = useLocation().key !== 'default'
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-page text-fg">
-      <h1 className="text-2xl font-semibold">{t('nav.notFound.title')}</h1>
-      <Link to="/" className="text-brand-fg hover:underline">
-        {t('nav.notFound.back')}
+    <StatusPage code="404" title={t('nav.notFound.title')} text={t('nav.notFound.text')}>
+      <Link to="/" className="btn btn-primary">
+        <LayoutDashboard className="size-4" aria-hidden />
+        {t('nav.notFound.home')}
       </Link>
-    </div>
+      {canGoBack && (
+        <button type="button" onClick={() => void navigate(-1)} className="btn btn-secondary">
+          <ArrowLeft className="size-4" aria-hidden />
+          {t('nav.notFound.goBack')}
+        </button>
+      )}
+    </StatusPage>
   )
 }

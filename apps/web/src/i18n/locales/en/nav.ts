@@ -15,7 +15,9 @@ export const nav = {
   },
   notFound: {
     title: 'Page not found',
-    back: 'Back to the dashboard',
+    text: 'The link may be broken, or the page was moved or deleted.',
+    home: 'Go to dashboard',
+    goBack: 'Go back',
   },
   error: {
     outdatedTitle: 'A new version is available',
@@ -23,6 +25,7 @@ export const nav = {
     title: 'Something went wrong',
     text: 'The page could not be shown. Your saved work is safe; reloading usually helps.',
     reload: 'Reload',
+    home: 'Go to dashboard',
   },
   load: {
     failedTitle: 'Could not open this document',

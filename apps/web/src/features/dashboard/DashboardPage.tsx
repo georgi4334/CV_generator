@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { DocumentTypeBadge, SharedBadge } from '@/shared/ui/Badges'
 import { JOB_STATUS_STYLES } from '@/shared/ui/badgeStyles'
-import { card, PageHeader, primaryButton, secondaryButton } from '@/shared/ui/PageHeader'
+import { PageHeader, primaryButton, secondaryButton } from '@/shared/ui/PageHeader'
 import { CvThumbnail, LetterThumbnail } from '@/renderer'
 import { statusChange } from '@/features/jobs/jobHelpers'
 import { errorMessage } from '@/shared/api/errorMessage'
@@ -62,7 +62,7 @@ function RecentDocumentsSkeleton() {
 function RecentDocuments({ docs, loading }: { docs: DocumentSummary[]; loading: boolean }) {
   const { t } = useTranslation()
   return (
-    <section className={`${card} p-5 lg:col-span-2`} aria-labelledby="recent-heading">
+    <section className="glass p-5 lg:col-span-2" aria-labelledby="recent-heading">
       <div className="mb-4 flex items-center justify-between">
         <h2 id="recent-heading" className="font-semibold">
           {t('dashboard.recent.heading')}
@@ -86,7 +86,7 @@ function RecentDocuments({ docs, loading }: { docs: DocumentSummary[]; loading: 
             <li key={doc.id}>
               <Link
                 to={editPath(doc)}
-                className="group flex h-full flex-col gap-2 rounded-control p-2 hover:bg-muted"
+                className="group flex h-full flex-col gap-2 rounded-control p-2 hover:bg-glass-hover"
               >
                 <DocumentThumbnail doc={doc} />
                 <span className="line-clamp-2 text-sm font-medium group-hover:text-brand-fg">
@@ -114,7 +114,7 @@ function JobPipeline({ jobs }: { jobs: Job[] }) {
   }))
   const most = Math.max(1, ...counts.map((c) => c.count))
   return (
-    <section className={`${card} p-5`} aria-labelledby="pipeline-heading">
+    <section className="glass p-5" aria-labelledby="pipeline-heading">
       <h2 id="pipeline-heading" className="mb-4 font-semibold">
         {t('dashboard.pipeline.heading')}
       </h2>
@@ -123,7 +123,7 @@ function JobPipeline({ jobs }: { jobs: Job[] }) {
           <li key={status}>
             <Link
               to={`/jobs?status=${status}`}
-              className="block rounded-tight px-2 py-1.5 text-sm hover:bg-muted"
+              className="block rounded-tight px-2 py-1.5 text-sm hover:bg-glass-hover"
             >
               <span className="flex items-center justify-between">
                 <span className="text-fg-soft">{t(`labels.jobStatus.${status}`)}</span>
@@ -157,7 +157,7 @@ function Reminders({ jobs, today }: { jobs: Job[]; today: string }) {
     update.mutate({ id: job.id, change: statusChange(job, status) })
 
   return (
-    <section className={`${card} p-5 lg:col-span-3`} aria-labelledby="reminders-heading">
+    <section className="glass p-5 lg:col-span-3" aria-labelledby="reminders-heading">
       <h2 id="reminders-heading" className="mb-4 flex items-center gap-2 font-semibold">
         <Bell className="size-4" aria-hidden /> {t('dashboard.reminders.heading')}
         {reminders.length > 0 && (
@@ -236,7 +236,7 @@ export function DashboardPage() {
           <Link
             key={label}
             to={to}
-            className={`${card} flex items-center gap-3 p-4 font-medium hover:border-brand-line`}
+            className="glass flex items-center gap-3 p-4 font-medium hover:border-brand-line"
           >
             <span className="rounded-control bg-brand-soft p-2 text-brand-fg">
               <Icon className="size-5" />

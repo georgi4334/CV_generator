@@ -347,7 +347,7 @@ export function DocumentsPage() {
         </p>
       )}
 
-      <div className={card}>
+      <div className="glass">
         <div className="flex items-center gap-4 border-b border-line px-4 py-2 text-xs text-fg-muted">
           <input
             type="checkbox"
@@ -398,7 +398,7 @@ export function DocumentsPage() {
           {documents.map((doc) => {
             const job = jobs.find((j) => j.id === doc.jobId)
             return (
-              <li key={doc.id} className="flex items-center gap-4 px-4 py-3 hover:bg-muted">
+              <li key={doc.id} className="flex items-center gap-4 px-4 py-3 hover:bg-glass-hover">
                 <input
                   type="checkbox"
                   aria-label={t('documents.selection.select', { title: doc.title })}

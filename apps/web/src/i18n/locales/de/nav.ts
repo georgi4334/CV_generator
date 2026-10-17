@@ -17,7 +17,9 @@ export const nav: Messages['nav'] = {
   },
   notFound: {
     title: 'Seite nicht gefunden',
-    back: 'Zurück zur Übersicht',
+    text: 'Der Link ist vielleicht fehlerhaft, oder die Seite wurde verschoben oder gelöscht.',
+    home: 'Zur Übersicht',
+    goBack: 'Zurück',
   },
   error: {
     outdatedTitle: 'Eine neue Version ist verfügbar',
@@ -25,6 +27,7 @@ export const nav: Messages['nav'] = {
     title: 'Etwas ist schiefgelaufen',
     text: 'Die Seite konnte nicht angezeigt werden. Ihre gespeicherte Arbeit ist sicher; ein Neuladen hilft meist.',
     reload: 'Neu laden',
+    home: 'Zur Übersicht',
   },
   load: {
     failedTitle: 'Dieses Dokument konnte nicht geöffnet werden',
