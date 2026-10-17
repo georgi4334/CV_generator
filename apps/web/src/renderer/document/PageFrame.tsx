@@ -2,7 +2,7 @@ import type { CvDesign, CvHeader } from '@cv/shared'
 import type { CSSProperties } from 'react'
 import type { Block } from '@/renderer/sections/blocks'
 import { HeaderControls } from '@/renderer/editing/controls'
-import { backgroundImage } from '@/renderer/templates/backgrounds'
+import { backgroundStyle } from '@/renderer/templates/backgrounds'
 import {
   sidebarFor,
   type SidebarFill,
@@ -55,10 +55,7 @@ export function PageFrame({
   // A full-width header is measured with its padding (and band), a header in
   // the main column without it; see the capacity calculation in CvRenderer.
   const headerContent = isFirstPage ? (
-    <HeaderControls
-      supportsPhoto={template.supportsPhoto}
-      hasPhoto={header.showPhoto && header.photoUrl !== null}
-    >
+    <HeaderControls hasPhoto={header.showPhoto && header.photoUrl !== null}>
       <Header header={header} />
     </HeaderControls>
   ) : null
@@ -141,7 +138,7 @@ export function PageFrame({
       data-cv-page={measuring ? undefined : design.pageSize}
       style={{
         ...pageStyle(design, tokens),
-        backgroundImage: backgroundImage(design.background, design.accentColor),
+        ...backgroundStyle(design.background, design.accentColor),
         height: measuring ? undefined : tokens.page.height,
       }}
     >

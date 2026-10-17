@@ -14,7 +14,7 @@ import {
 import { useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEditor } from '@/renderer/context'
-import { pickAndUpload } from './image'
+import { PHOTO_MAX_SIZE, pickAndUpload } from './image'
 import { Popover } from './Popover'
 
 const toolbar =
@@ -267,20 +267,12 @@ function SkillStyleButton({ sectionId, value }: { sectionId: string; value: Skil
 }
 
 /** Hover toolbar on the header: add, change or remove the photo. */
-export function HeaderControls({
-  supportsPhoto,
-  hasPhoto,
-  children,
-}: {
-  supportsPhoto: boolean
-  hasPhoto: boolean
-  children: ReactNode
-}) {
+export function HeaderControls({ hasPhoto, children }: { hasPhoto: boolean; children: ReactNode }) {
   const editor = useEditor()
   const { t } = useTranslation()
-  if (!editor || !supportsPhoto) return <>{children}</>
+  if (!editor) return <>{children}</>
   const upload = () =>
-    pickAndUpload(320, editor.uploadImage).then(
+    pickAndUpload(PHOTO_MAX_SIZE, editor.uploadImage).then(
       (url) => url && editor.updateHeader({ photoUrl: url, showPhoto: true }),
       (e: Error) => editor.notify(t('renderer.photoFailed', { message: e.message })),
     )

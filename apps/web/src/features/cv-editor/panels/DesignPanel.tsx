@@ -9,11 +9,12 @@ import { Check, ChevronDown, Minus, Plus, RotateCcw, TriangleAlert } from 'lucid
 import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getTemplate } from '@/renderer'
-import { BACKGROUNDS, backgroundImage } from '@/renderer/templates/backgrounds'
+import { BACKGROUNDS, backgroundStyle } from '@/renderer/templates/backgrounds'
 import { FONT_STACKS } from '@/renderer/templates/fonts'
 import { sidebarFor, type TemplateDefinition } from '@/renderer/templates/templates'
 import { contrastWithWhite } from '@/features/cv-editor/lib/contrast'
 import { useDesignTarget } from '@/features/cv-editor/state/designTarget'
+import { PhotoPicker } from './PhotoPicker'
 
 const FONT_SIZE_KEYS = ['xs', 's', 'm', 'l', 'xl'] as const
 
@@ -328,7 +329,7 @@ function BackgroundPicker({ design }: { design: CvDesign }) {
               className={`aspect-square rounded-tight border bg-surface ${
                 selected ? 'border-brand-line ring-2 ring-brand-line' : 'border-line-strong '
               }`}
-              style={{ backgroundImage: backgroundImage(id, design.accentColor) }}
+              style={backgroundStyle(id, design.accentColor, true)}
             />
           )
         })}
@@ -353,6 +354,7 @@ export function DesignPanel() {
 
   return (
     <>
+      <PhotoPicker />
       <LevelSlider
         valueLabel={String(design.pageMargins)}
         field="pageMargins"

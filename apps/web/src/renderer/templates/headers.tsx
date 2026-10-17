@@ -4,6 +4,7 @@ import { assetUrl } from '@/shared/api/client'
 import { useRender } from '@/renderer/context'
 import { Field } from '@/renderer/editing/primitives'
 import { usePlaceholders } from '@/renderer/placeholders'
+import { PHOTO_SHAPE_CLASS } from './photo'
 
 const CONTACTS: Array<{ key: 'phone' | 'email' | 'link' | 'location'; icon: LucideIcon }> = [
   { key: 'phone', icon: Phone },
@@ -38,7 +39,7 @@ function Photo({ header }: { header: CvHeader }) {
     <img
       src={assetUrl(header.photoUrl)}
       alt=""
-      className="size-[5.5em] shrink-0 rounded-full object-cover"
+      className={`size-[5.5em] shrink-0 object-cover ${PHOTO_SHAPE_CLASS[header.photoShape] ?? PHOTO_SHAPE_CLASS.circle}`}
     />
   )
 }
@@ -74,12 +75,15 @@ export function PolishedHeader({ header }: { header: CvHeader }) {
 export function SingleColumnHeader({ header }: { header: CvHeader }) {
   const P = usePlaceholders()
   return (
-    <div className="text-center">
+    <div className="flex flex-col items-center text-center">
+      <Photo header={header} />
       <Field
         value={header.name}
         path="header.name"
         placeholder={P.name}
-        className="block text-[2.1em] leading-tight font-semibold"
+        className={`block text-[2.1em] leading-tight font-semibold ${
+          header.showPhoto && header.photoUrl ? 'mt-[0.3em]' : ''
+        }`}
         style={{ color: 'var(--cv-strong)' }}
       />
       <Field
