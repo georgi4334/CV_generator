@@ -6,7 +6,7 @@ test('public pages are accessible and protected by security headers', async ({ p
   expect(csp).toContain("script-src 'self' 'sha256-")
   expect(csp).toContain("frame-ancestors 'none'")
   await expectAccessible(page)
-  for (const path of ['/register', '/forgot-password', '/privacy', '/terms']) {
+  for (const path of ['/welcome', '/register', '/forgot-password', '/privacy', '/terms']) {
     await page.goto(path)
     await page.getByRole('heading', { level: 1 }).first().waitFor()
     await expectAccessible(page)

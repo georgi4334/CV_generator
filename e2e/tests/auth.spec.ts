@@ -1,4 +1,4 @@
-import { expect, PASSWORD, test } from './fixtures'
+import { expect, expectAccessible, PASSWORD, test } from './fixtures'
 
 test('sign up, sign out and sign in again', async ({ page }) => {
   const email = `e2e-ui-${Date.now()}@example.com`
@@ -40,4 +40,19 @@ test('legal pages are public and linked from sign-up', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Privacy policy' })).toBeVisible()
   await page.getByRole('link', { name: 'Terms' }).click()
   await expect(page.getByRole('heading', { name: 'Terms of use' })).toBeVisible()
+})
+
+test('first-time visitors see the welcome page, with ways to log in or register', async ({
+  page,
+}) => {
+  await page.goto('/')
+  await expect(page).toHaveURL(/\/welcome$/)
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Build a CV')
+  await expectAccessible(page)
+
+  await page.getByRole('main').getByRole('link', { name: 'Create your CV' }).first().click()
+  await expect(page.getByRole('heading', { name: 'Create your account' })).toBeVisible()
+  await page.goto('/welcome')
+  await page.getByRole('banner').getByRole('link', { name: 'Log in' }).click()
+  await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible()
 })
