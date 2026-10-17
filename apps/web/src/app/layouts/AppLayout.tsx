@@ -57,25 +57,33 @@ export function AppLayout() {
 
   return (
     <div className="app-backdrop flex min-h-dvh flex-col text-fg">
-      {/* Always visible: it stays at the top while the page scrolls under its glass. */}
-      <header className="glass-bar sticky top-0 z-(--z-nav)">
-        <div className="page-container flex h-14 items-center gap-3 md:gap-6">
-          <NavLink to="/" className="flex items-center gap-2 font-semibold">
-            <Logo nameClassName="max-sm:sr-only" />
-          </NavLink>
-
-          {wide && <TabPill tabs={TABS} current={currentTab} />}
-
-          <div className="ml-auto flex items-center gap-1 md:gap-3">
-            <span className="md:hidden">
-              <LanguageSelect compact />
-            </span>
-            <span className="hidden md:inline">
-              <LanguageSelect />
-            </span>
-            <UserMenu />
+      {/* Always visible: it stays at the top while the page scrolls under it. */}
+      <header className={`sticky top-0 z-(--z-nav) ${wide ? 'pointer-events-none' : 'glass-bar'}`}>
+        {wide ? (
+          // Floating glass pills, like the editor's top bar: the logo, the tabs, the account.
+          <div className="page-container grid grid-cols-[1fr_auto_1fr] items-center gap-3 pt-3 pb-1 *:pointer-events-auto">
+            <NavLink to="/" className="glass flex h-11 w-fit items-center rounded-pill px-4">
+              <Logo />
+            </NavLink>
+            <TabPill tabs={TABS} current={currentTab} />
+            <div className="flex justify-end">
+              <div className="glass-pill flex items-center gap-1">
+                <LanguageSelect />
+                <UserMenu />
+              </div>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="page-container flex h-14 items-center gap-3">
+            <NavLink to="/" className="flex items-center gap-2 font-semibold">
+              <Logo nameClassName="max-sm:sr-only" />
+            </NavLink>
+            <div className="ml-auto flex items-center gap-1">
+              <LanguageSelect compact />
+              <UserMenu />
+            </div>
+          </div>
+        )}
       </header>
       <VerifyReminder />
 
