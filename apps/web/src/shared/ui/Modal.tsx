@@ -17,8 +17,8 @@ const VARIANTS = {
 /** Drawers are frosted like the editor's panels; dialogs keep a solid surface. */
 const SURFACE = {
   center: 'bg-surface',
-  drawer: 'glass-solid rounded-none',
-  side: 'glass-solid rounded-none',
+  drawer: 'glass-panel rounded-none',
+  side: 'glass-panel rounded-none',
 }
 
 const MOTION = {

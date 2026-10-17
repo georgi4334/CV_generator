@@ -52,4 +52,8 @@ test('the editor uses a bottom toolbar and opens tools as a sheet', async ({ pag
 
   await page.getByRole('button', { name: 'More' }).click()
   await expect(page.getByRole('menuitem', { name: /Download PDF/ })).toBeVisible()
+  // The menu opens over the page and holds the theme.
+  await page.getByRole('button', { name: /^Theme/ }).click()
+  await page.getByRole('menuitemradio', { name: 'Dark' }).click()
+  await expect(page.locator('html')).toHaveClass(/dark/)
 })

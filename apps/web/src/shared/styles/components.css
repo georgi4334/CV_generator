@@ -158,6 +158,11 @@
   @apply glass;
   background-color: var(--color-glass-strong);
 }
+/* Drawers and side panels: in dark mode a solid deep navy, so they stand out from the gradient. */
+@utility glass-panel {
+  @apply glass;
+  background-color: var(--color-panel);
+}
 
 /* A rounded glass pill holding a row of choices (tabs, editor tools). */
 @utility glass-pill {

@@ -39,7 +39,7 @@ export function EditorSidePanel({
       className={
         sheet
           ? 'pb-safe-card fixed inset-x-0 bottom-0 z-(--z-overlay) max-h-sheet overflow-x-hidden overflow-y-auto rounded-t-card border-t border-line bg-surface p-4 shadow-overlay'
-          : `${width} glass-solid my-4 ml-4 shrink-0 overflow-x-hidden overflow-y-auto p-4`
+          : `${width} glass-panel my-4 ml-4 shrink-0 overflow-x-hidden overflow-y-auto p-4`
       }
     >
       <div className="mb-4 flex items-center justify-between">
