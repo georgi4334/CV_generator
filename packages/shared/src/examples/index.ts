@@ -106,7 +106,8 @@ const examples: Record<ProfessionId, () => CvDocument> = {
               name: 'AWS Certified Developer',
               issuer: 'Amazon Web Services',
               date: '2023-05',
-              link: '',
+              expiryDate: '2026-05',
+              link: 'aws.amazon.com/verification',
             },
           ],
         },
@@ -285,7 +286,7 @@ const examples: Record<ProfessionId, () => CvDocument> = {
         {
           type: 'skills',
           column: 'sidebar',
-          levelDisplay: 'none',
+          levelDisplay: 'pills',
           items: [
             { name: 'Negotiation', level: null },
             { name: 'HubSpot & Salesforce', level: null },
@@ -383,15 +384,22 @@ const examples: Record<ProfessionId, () => CvDocument> = {
               name: 'Advanced Cardiac Life Support (ACLS)',
               issuer: 'ERC',
               date: '2024-03',
+              expiryDate: '2026-03',
               link: '',
             },
-            { name: 'Basic Life Support (BLS)', issuer: 'ERC', date: '2024-03', link: '' },
+            {
+              name: 'Basic Life Support (BLS)',
+              issuer: 'ERC',
+              date: '2024-03',
+              expiryDate: '2026-03',
+              link: '',
+            },
           ],
         },
         {
           type: 'skills',
           column: 'sidebar',
-          levelDisplay: 'none',
+          levelDisplay: 'bullets',
           items: [
             { name: 'Ventilator management', level: null },
             { name: 'Patient assessment', level: null },

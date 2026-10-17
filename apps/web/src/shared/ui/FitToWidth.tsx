@@ -1,42 +1,106 @@
-import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 
 /**
- * Shows content of a fixed `width` (e.g. CV pages) at full size when it fits,
- * and scaled down to the available width on narrow screens.
+ * Content of a fixed `width` (e.g. CV pages) drawn at `scale`, taking up the
+ * scaled size in the layout so scrolling and centring work at any zoom. The
+ * structure stays the same at every scale, so zooming never remounts the page.
  */
-export function FitToWidth({ width, children }: { width: number; children: ReactNode }) {
-  const outer = useRef<HTMLDivElement>(null)
+export function ScaledBox({
+  width,
+  scale,
+  style,
+  children,
+}: {
+  width: number
+  scale: number
+  /** Extra style for the box, e.g. a view-transition name. */
+  style?: CSSProperties
+  children: ReactNode
+}) {
   const inner = useRef<HTMLDivElement>(null)
-  const [fit, setFit] = useState<{ scale: number; height: number } | null>(null)
+  const [height, setHeight] = useState<number | null>(null)
+
+  useLayoutEffect(() => {
+    const update = () => inner.current && setHeight(inner.current.offsetHeight)
+    update()
+    if (typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver(update)
+    observer.observe(inner.current!)
+    return () => observer.disconnect()
+  }, [])
+
+  const scaled = scale !== 1
+  return (
+    <div
+      className="mx-auto"
+      style={{
+        ...style,
+        width: Math.round(width * scale),
+        height: scaled && height !== null ? Math.ceil(height * scale) : undefined,
+      }}
+    >
+      <div
+        ref={inner}
+        style={{
+          width,
+          transform: scaled ? `scale(${scale})` : undefined,
+          transformOrigin: 'top left',
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  )
+}
+
+/** The largest scale (at most 1) at which `width` fits in `available`. */
+export const fitScale = (available: number, width: number) => Math.min(1, available / width) || 1
+
+/**
+ * Shows content of a fixed `width` at full size when it fits, and scaled down
+ * to the available width on narrow screens. `scale` overrides the fitted size
+ * (zoom); `onFit` reports the fitted scale, e.g. to show it as a percentage.
+ */
+export function FitToWidth({
+  width,
+  scale,
+  onFit,
+  boxStyle,
+  children,
+}: {
+  width: number
+  scale?: number | null
+  onFit?: (scale: number) => void
+  /** Style for the scaled box itself (not the full-width wrapper). */
+  boxStyle?: CSSProperties
+  children: ReactNode
+}) {
+  const outer = useRef<HTMLDivElement>(null)
+  const [fit, setFit] = useState(1)
+  const onFitRef = useRef(onFit)
+  useLayoutEffect(() => {
+    onFitRef.current = onFit
+  })
 
   useLayoutEffect(() => {
     const update = () => {
-      if (!outer.current || !inner.current) return
-      const scale = Math.min(1, outer.current.clientWidth / width) || 1
-      const height = Math.ceil(inner.current.offsetHeight * scale)
-      setFit((prev) => (prev?.scale === scale && prev.height === height ? prev : { scale, height }))
+      if (!outer.current) return
+      const next = fitScale(outer.current.clientWidth, width)
+      setFit(next)
+      onFitRef.current?.(next)
     }
     update()
     if (typeof ResizeObserver === 'undefined') return
     const observer = new ResizeObserver(update)
     observer.observe(outer.current!)
-    observer.observe(inner.current!)
     return () => observer.disconnect()
   }, [width])
 
-  const scaled = fit !== null && fit.scale < 1
   return (
-    <div ref={outer} className="w-full" style={scaled ? { height: fit.height } : undefined}>
-      <div
-        ref={inner}
-        className={scaled ? undefined : 'mx-auto'}
-        style={{
-          width,
-          ...(scaled && { transform: `scale(${fit.scale})`, transformOrigin: 'top left' }),
-        }}
-      >
+    <div ref={outer} className="w-full">
+      <ScaledBox width={width} scale={scale ?? fit} style={boxStyle}>
         {children}
-      </div>
+      </ScaledBox>
     </div>
   )
 }

@@ -25,15 +25,19 @@ export const editor: Messages['editor'] = {
   },
   printHint: 'Wählen Sie im Druckdialog „Als PDF speichern“ als Ziel.',
   printTitle: 'Öffnet den Druckdialog: „Als PDF speichern“ wählen',
+  zoom: {
+    label: 'Seitenzoom',
+    zoomIn: 'Vergrößern',
+    zoomOut: 'Verkleinern',
+    fit: 'An Bildschirm anpassen',
+  },
   rail: {
     preview: 'Vorschau',
     downloadPdf: 'PDF herunterladen',
     shareLink: 'Link teilen',
     aiAssistant: 'KI-Assistent',
-    premium: 'Premium',
     letterDownloads: 'Downloads für Anschreiben kommen in Schritt 13.',
     letterLinks: 'Links für Anschreiben kommen in Schritt 13.',
-    premiumPlanned: 'Premium-Funktionen sind für Schritt 18 geplant.',
   },
   topBar: {
     more: 'Mehr',
