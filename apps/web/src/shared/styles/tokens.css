@@ -50,6 +50,9 @@
   --theme-backdrop: color-mix(in oklab, var(--color-slate-950) 50%, transparent);
   --theme-skeleton: var(--color-slate-200); /* loading placeholders */
   --theme-skeleton-shine: var(--color-slate-100); /* the light sweeping across them */
+  /* Charts: one teal for single-series bars (validated in light and dark), and the track behind them. */
+  --theme-chart: var(--color-teal-600);
+  --theme-chart-track: color-mix(in oklab, var(--color-slate-900) 7%, transparent);
   /* Scrollbars: slim, rounded, frosted grey. */
   --theme-scrollbar: color-mix(in oklab, var(--color-slate-500) 35%, transparent);
   --theme-scrollbar-hover: color-mix(in oklab, var(--color-slate-500) 60%, transparent);
@@ -116,6 +119,8 @@
   --theme-backdrop: color-mix(in oklab, var(--color-black) 60%, transparent);
   --theme-skeleton: var(--color-slate-800);
   --theme-skeleton-shine: var(--color-slate-700);
+  --theme-chart: var(--color-teal-600);
+  --theme-chart-track: color-mix(in oklab, var(--color-white) 8%, transparent);
   --theme-scrollbar: color-mix(in oklab, var(--color-slate-300) 28%, transparent);
   --theme-scrollbar-hover: color-mix(in oklab, var(--color-slate-300) 50%, transparent);
 
@@ -176,6 +181,8 @@
   --color-skeleton: var(--theme-skeleton);
   --color-skeleton-shine: var(--theme-skeleton-shine);
   --color-scrollbar: var(--theme-scrollbar);
+  --color-chart: var(--theme-chart);
+  --color-chart-track: var(--theme-chart-track);
   --color-scrollbar-hover: var(--theme-scrollbar-hover);
   --color-glass: var(--theme-glass);
   --color-glass-strong: var(--theme-glass-strong);
@@ -266,6 +273,7 @@
   --aspect-paper: 210 / 297; /* A4 page, for placeholders (aspect-paper) */
 
   /* Drawers slide in from the right edge (animate-drawer-in). */
+  --spacing-chart-label: 6.5rem; /* the label column of bar charts (dashboard funnel) */
   --spacing-drawer-inset: 0.75rem; /* drawers float this far from the screen edges */
   --container-side-drawer: 22rem; /* account drawer */
   --container-toast: 24rem; /* notifications */

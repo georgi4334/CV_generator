@@ -69,6 +69,36 @@ describe('dashboard', () => {
     expect(router.state.location.search).toBe('')
   })
 
+  it('shows how far applications get, and the headline numbers', async () => {
+    fake.current.seedJob({ position: 'A', company: 'A', status: 'applied' })
+    fake.current.seedJob({ position: 'B', company: 'B', status: 'interviewing' })
+    fake.current.seedJob({ position: 'C', company: 'C', status: 'rejected' })
+    fake.current.seedJob({ position: 'D', company: 'D' })
+    renderRoute('/')
+    const funnel = await screen.findByRole('region', { name: 'Application funnel' })
+    await waitFor(() => expect(within(funnel).getAllByRole('listitem')).toHaveLength(4))
+    const [saved, applied, interview, offer] = within(funnel).getAllByRole('listitem')
+    expect(saved!.textContent).toContain('Saved4')
+    expect(applied!.textContent).toContain('75% of the step before')
+    expect(interview!.textContent).toContain('Interview1')
+    expect(offer!.textContent).toContain('Offer0')
+    expect(funnel.textContent).toContain('Rejected: 1 · No answer: 0')
+
+    const stats = screen.getByRole('region', { name: 'Application numbers' })
+    // Active: applied + interviewing; answered: interviewing + rejected of 3 applied.
+    expect(stats.textContent).toContain('Active applications2')
+    expect(stats.textContent).toContain('Response rate67%')
+    expect(stats.textContent).toContain('Interviews1')
+  })
+
+  it('invites you to apply before showing a funnel', async () => {
+    fake.current.seedJob({ position: 'D', company: 'D' })
+    renderRoute('/')
+    const funnel = await screen.findByRole('region', { name: 'Application funnel' })
+    await waitFor(() => expect(funnel.textContent).toContain('mark them as applied'))
+    expect(screen.getByRole('region', { name: 'Application numbers' }).textContent).toContain('—')
+  })
+
   it('reminds about stale jobs, longest-waiting first', async () => {
     fake.current.seedJob({
       position: 'Frontend Engineer',

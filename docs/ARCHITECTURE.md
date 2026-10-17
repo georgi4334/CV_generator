@@ -133,6 +133,9 @@ Components use the Tailwind classes generated from those tokens, never raw value
 - **Scrollbars** are slim, rounded and frosted grey (`--theme-scrollbar`, `--scrollbar-size`).
 - **`pb-safe`** (bars) only clears the iPhone home indicator; **`pb-safe-card`** (panel content)
   keeps the usual padding as well.
+- **Charts** use `--theme-chart` (one teal, checked for contrast in light and dark) on a
+  `--theme-chart-track`. The dashboard funnel and stat tiles are `features/dashboard/JobInsights.tsx`;
+  the numbers come from `pipelineStats.ts` (tested on its own).
 - **Name and logo:** the product name is `APP_NAME` (`packages/shared/src/common/brand.ts`);
   translations write it as `{{app}}`. The logo is `shared/ui/Logo.tsx` (`Logo`, `LogoMark`),
   drawn with the brand tokens; `public/favicon.svg` is the same drawing.

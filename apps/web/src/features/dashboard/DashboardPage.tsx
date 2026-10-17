@@ -14,6 +14,7 @@ import { useJobs, useUpdateJob } from '@/features/jobs/queries'
 import { useCoverLetter, useCoverLetterList } from '@/features/cover-letters/queries'
 import { editPath, NEW_CV_PATH, NEW_LETTER_PATH } from '@/shared/lib/paths'
 import { remindersFor } from './reminders'
+import { JobInsights } from './JobInsights'
 import { TransitionLink } from '@/shared/ui/TransitionLink'
 import { useDocTransitionStyle } from '@/shared/lib/viewTransitions'
 import { LoadingRegion, Skeleton } from '@/shared/ui/Skeleton'
@@ -263,6 +264,7 @@ export function DashboardPage() {
       <div className="grid gap-6 lg:grid-cols-3">
         <RecentDocuments docs={recent} loading={cvs.isPending || letters.isPending} />
         <JobPipeline jobs={jobs} />
+        <JobInsights jobs={jobs} />
         <Reminders jobs={jobs} today={today} />
       </div>
     </>
