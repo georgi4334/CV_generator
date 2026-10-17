@@ -106,15 +106,20 @@ Components use the Tailwind classes generated from those tokens, never raw value
   for panels with forms. The not-found and error pages draw `shared/ui/illustrations.tsx`
   with the `--theme-illus-*` colours. CV and letter pages use `bg-paper`, which is white in
   both themes.
-- **Splash and page transitions:** the splash screen is plain HTML and CSS in `index.html`
-  (it paints before any JavaScript) and `shared/lib/splash.ts` fades it out once the app has
-  rendered. Page transitions use the View Transitions API (`shared/lib/viewTransitions.ts`,
-  `TransitionLink`, animations in `shared/styles/transitions.css`, timings `--duration-page`,
-  `--duration-zoom`, `--ease-spring`): tabs slide sideways in the direction you move, and a
-  document zooms open from its thumbnail and shrinks back into it when closed. Browsers
-  without the API, and people who prefer reduced motion, just get the new page. The router
-  must be the `RouterProvider` from `react-router/dom`, so a navigation can render inside the
-  transition at once.
+- **Splash and motion:** the splash screen is plain HTML and CSS in `index.html` (it paints
+  before any JavaScript) and `shared/lib/splash.ts` fades it out once the app has rendered.
+  - **Tabs** switch instantly: the highlight glides to the chosen tab (`app/layouts/TabPill.tsx`)
+    and the new page eases in from that side (`animate-page-from-right/left`). Nothing waits
+    or freezes, so it feels like one app; each tab's page has its own loading skeleton.
+  - **Documents** zoom open from their thumbnail and shrink back when closed, with the View
+    Transitions API (`shared/lib/viewTransitions.ts`, `TransitionLink`, animations in
+    `shared/styles/transitions.css`). The router must be the `RouterProvider` from
+    `react-router/dom`, so the new page renders inside the transition at once.
+  - **Drawers and dialogs** slide or grow in and play an exit animation before closing
+    (`Modal` with `useModalClose`).
+  - Timings are tokens (`--duration-page`, `--duration-zoom`, `--duration-leave`,
+    `--ease-spring`). Browsers without the API, and people who prefer reduced motion, get no
+    animation.
 - **Name and logo:** the product name is `APP_NAME` (`packages/shared/src/common/brand.ts`);
   translations write it as `{{app}}`. The logo is `shared/ui/Logo.tsx` (`Logo`, `LogoMark`),
   drawn with the brand tokens; `public/favicon.svg` is the same drawing.

@@ -13,7 +13,12 @@ describe('ApiStatus', () => {
       <ApiStatus
         isLoading={false}
         isError={false}
-        data={{ status: 'ok', database: 'down', timestamp: new Date().toISOString() }}
+        data={{
+          status: 'ok',
+          database: 'down',
+          email: 'service',
+          timestamp: new Date().toISOString(),
+        }}
       />,
     )
     expect(screen.getByText('API online, database down')).toBeDefined()

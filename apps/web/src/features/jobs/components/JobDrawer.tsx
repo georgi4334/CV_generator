@@ -11,6 +11,7 @@ import { useId, useState, type FormEvent, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { Modal } from '@/shared/ui/Modal'
+import { useModalClose } from '@/shared/ui/useModalClose'
 import { primaryButton, secondaryButton } from '@/shared/ui/PageHeader'
 import { errorMessage } from '@/shared/api/errorMessage'
 import { useCvList } from '@/features/cv-editor/queries'
@@ -88,6 +89,8 @@ export function JobDrawer({
 }) {
   const { t } = useTranslation()
   const headingId = useId()
+  // Slides back out to the right before it goes.
+  const { closing, requestClose, closed } = useModalClose(onClose)
   const cvs = (useCvList().data ?? []).filter((doc) => doc.type === 'cv')
   const letters = useCoverLetterList().data ?? []
   const create = useCreateJob()
@@ -104,10 +107,10 @@ export function JobDrawer({
     const trimmed = { ...draft, position: draft.position.trim(), company: draft.company.trim() }
     if (job) {
       const change = changes(job, trimmed)
-      if (Object.keys(change).length === 0) return onClose()
-      update.mutate({ id: job.id, change }, { onSuccess: onClose })
+      if (Object.keys(change).length === 0) return requestClose()
+      update.mutate({ id: job.id, change }, { onSuccess: requestClose })
     } else {
-      create.mutate({ ...trimmed, dateSaved: localToday() }, { onSuccess: onClose })
+      create.mutate({ ...trimmed, dateSaved: localToday() }, { onSuccess: requestClose })
     }
   }
 
@@ -125,7 +128,13 @@ export function JobDrawer({
   }
 
   return (
-    <Modal labelledBy={headingId} onClose={onClose} variant="drawer">
+    <Modal
+      labelledBy={headingId}
+      onClose={closed}
+      onCloseRequest={requestClose}
+      closing={closing}
+      variant="drawer"
+    >
       <form onSubmit={submit} className="flex h-full flex-col">
         <header className="flex items-start justify-between gap-4 border-b border-line px-5 py-4">
           <div className="min-w-0">
@@ -140,7 +149,7 @@ export function JobDrawer({
           </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={requestClose}
             aria-label={t('common.close')}
             className="rounded-tight p-1 text-fg-muted hover:bg-muted"
           >
@@ -324,7 +333,7 @@ export function JobDrawer({
               <Trash2 className="size-4" /> {t('common.delete')}
             </button>
           )}
-          <button type="button" onClick={onClose} className={`${secondaryButton} ml-auto`}>
+          <button type="button" onClick={requestClose} className={`${secondaryButton} ml-auto`}>
             {t('common.cancel')}
           </button>
           <button type="submit" disabled={saving} className={primaryButton}>

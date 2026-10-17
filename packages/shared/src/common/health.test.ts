@@ -6,6 +6,7 @@ describe('HealthResponseSchema', () => {
     const result = HealthResponseSchema.safeParse({
       status: 'ok',
       database: 'up',
+      email: 'service',
       timestamp: new Date().toISOString(),
     })
     expect(result.success).toBe(true)

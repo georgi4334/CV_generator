@@ -346,6 +346,20 @@ describe.skipIf(!dbAvailable)('auth API', () => {
       expect(ctx.mailer.outbox).toHaveLength(2)
       expect((await post(app, '/resend-verification')).statusCode).toBe(401)
     })
+
+    it('says so when a new link cannot be sent, instead of "on its way"', async () => {
+      const failing = {
+        delivers: true,
+        send: async () => {
+          throw new Error('Brevo answered 401: key not found')
+        },
+      }
+      const app = await freshApp({ mailer: failing })
+      const { cookie } = await register(app)
+      const res = await post(app, '/resend-verification', undefined, cookie)
+      expect(res.statusCode).toBe(502)
+      expect(res.json().error.code).toBe('email_failed')
+    })
   })
 
   describe('forgotten password', () => {
@@ -423,6 +437,7 @@ describe.skipIf(!dbAvailable)('auth API', () => {
     it('does not break when the email service fails', async () => {
       const app = await freshApp({
         mailer: {
+          delivers: true,
           send: async () => {
             throw new Error('mail service down')
           },

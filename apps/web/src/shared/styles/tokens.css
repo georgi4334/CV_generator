@@ -244,13 +244,44 @@
 
   /* Drawers slide in from the right edge (animate-drawer-in). */
   --container-side-drawer: 22rem; /* account drawer */
-  --animate-drawer-in: drawer-in 0.2s ease-out;
+  --animate-drawer-in: drawer-in var(--duration-zoom) var(--ease-spring) both;
+  --animate-drawer-out: drawer-out var(--duration-leave) var(--ease-leave) both;
   @keyframes drawer-in {
     from {
       transform: translateX(100%);
     }
+  }
+  @keyframes drawer-out {
     to {
-      transform: translateX(0);
+      transform: translateX(100%);
+    }
+  }
+  /* Dialogs grow in from slightly smaller and shrink away when closed. */
+  --animate-dialog-in: dialog-in var(--duration-page) var(--ease-spring) both;
+  --animate-dialog-out: dialog-out var(--duration-leave) var(--ease-leave) both;
+  @keyframes dialog-in {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+  }
+  @keyframes dialog-out {
+    to {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+  }
+  /* The dimmed backdrop behind drawers and dialogs fades with them. */
+  --animate-fade-in: fade-in var(--duration-page) ease-out both;
+  --animate-fade-out: fade-out var(--duration-leave) var(--ease-leave) both;
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+  @keyframes fade-out {
+    to {
+      opacity: 0;
     }
   }
 
@@ -269,10 +300,28 @@
 
   /* Page transitions: springy, like opening and closing apps on a phone. */
   --ease-spring: cubic-bezier(0.2, 0.9, 0.2, 1);
-  --duration-page: 380ms; /* tabs sliding */
-  --duration-zoom: 520ms; /* a document zooming open or closed */
-  --page-shift: 6%; /* how far a page slides when tabs change */
+  --duration-page: 280ms; /* the tab highlight gliding and the new tab easing in */
+  --duration-zoom: 520ms; /* a document zooming open or closed; a drawer sliding in */
+  --duration-leave: 220ms; /* closing is quicker than opening, like on phones */
+  --ease-leave: cubic-bezier(0.4, 0, 1, 1);
+  --page-shift: 1.25rem; /* how far a tab's page eases in from the side */
   --recede-scale: 0.94; /* the page behind an opening document shrinks to this */
+
+  /* A tab's page eases in from the side you moved towards (no freeze, no crossfade). */
+  --animate-page-from-right: page-from-right var(--duration-page) var(--ease-spring) both;
+  --animate-page-from-left: page-from-left var(--duration-page) var(--ease-spring) both;
+  @keyframes page-from-right {
+    from {
+      opacity: 0;
+      transform: translateX(var(--page-shift));
+    }
+  }
+  @keyframes page-from-left {
+    from {
+      opacity: 0;
+      transform: translateX(calc(-1 * var(--page-shift)));
+    }
+  }
 
   /* Illustrations drift gently up and down (animate-float). */
   --animate-float: float 6s ease-in-out infinite;

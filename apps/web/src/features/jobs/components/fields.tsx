@@ -8,10 +8,10 @@ import {
 import { ExternalLink } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router'
 import { JOB_STATUS_STYLES } from '@/shared/ui/badgeStyles'
 import { editPath } from '@/shared/lib/paths'
 import { inputClass } from '@/features/jobs/jobHelpers'
+import { TransitionLink } from '@/shared/ui/TransitionLink'
 
 /** Status as a colored badge that is also a dropdown. */
 export function StatusSelect({
@@ -161,14 +161,15 @@ export function DocumentSelect({
         ))}
       </select>
       {linked && (
-        <Link
+        <TransitionLink
+          transition="doc-open"
           to={editPath(linked)}
           aria-label={t('jobs.cell.openDocument', { title: linked.title })}
           title={t('jobs.cell.openDocument', { title: linked.title })}
           className="shrink-0 rounded-tight p-1 text-brand-fg hover:bg-muted"
         >
           <ExternalLink className="size-3.5" />
-        </Link>
+        </TransitionLink>
       )}
     </span>
   )

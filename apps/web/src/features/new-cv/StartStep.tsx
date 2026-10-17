@@ -16,6 +16,7 @@ import type { RenderMode } from '@/renderer/context'
 import { errorMessage } from '@/shared/api/errorMessage'
 import { useCreateCv } from '@/features/cv-editor/queries'
 import { buildNewCv, type StartFrom } from './buildNewCv'
+import { runViewTransition } from '@/shared/lib/viewTransitions'
 
 /** Width in pixels of the example CV preview. */
 const EXAMPLE_PREVIEW_WIDTH = 260
@@ -103,7 +104,13 @@ export function StartStep({
         professionId,
         document: documents[startFrom] ?? documents.blank,
       },
-      { onSuccess: (record) => navigate(`/cvs/${record.id}/edit`, { replace: true }) },
+      {
+        // The new CV opens like an app: the wizard steps back as the page grows in.
+        onSuccess: (record) =>
+          runViewTransition('doc-open', () =>
+            navigate(`/cvs/${record.id}/edit`, { replace: true, flushSync: true }),
+          ),
+      },
     )
   }
 

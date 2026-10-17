@@ -57,6 +57,13 @@ if (aiProvider === 'mock' && env.NODE_ENV === 'production') {
   throw new Error('AI_PROVIDER=mock is for development only')
 }
 
+const mailer = env.BREVO_API_KEY
+  ? createBrevoMailer({
+      apiKey: env.BREVO_API_KEY,
+      from: { email: env.MAIL_FROM, name: env.MAIL_FROM_NAME },
+    })
+  : createLogMailer()
+
 const app = await buildApp({
   corsOrigin: env.CORS_ORIGIN,
   database,
@@ -69,12 +76,7 @@ const app = await buildApp({
           bucket: env.R2_BUCKET,
         })
       : createLocalStorage(env.UPLOAD_DIR),
-  mailer: env.BREVO_API_KEY
-    ? createBrevoMailer({
-        apiKey: env.BREVO_API_KEY,
-        from: { email: env.MAIL_FROM, name: env.MAIL_FROM_NAME },
-      })
-    : createLogMailer(),
+  mailer,
   proxySecret: env.PROXY_SECRET || undefined,
   onServerError: env.SENTRY_DSN
     ? (error, request) =>
@@ -117,3 +119,8 @@ process.on('SIGINT', shutdown)
 process.on('SIGTERM', shutdown)
 
 await app.listen({ port: env.PORT, host: '0.0.0.0' })
+app.log.info(
+  mailer.delivers
+    ? `Account emails are sent through Brevo from ${env.MAIL_FROM}`
+    : 'Account emails are only printed in this log (BREVO_API_KEY is not set)',
+)

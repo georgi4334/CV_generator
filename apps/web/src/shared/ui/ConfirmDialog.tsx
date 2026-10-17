@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Modal } from './Modal'
+import { useModalClose } from './useModalClose'
 
 interface ConfirmDialogProps {
   title: string
@@ -22,8 +23,15 @@ export function ConfirmDialog({
   onCancel,
 }: ConfirmDialogProps) {
   const { t } = useTranslation()
+  const { closing, requestClose, closed } = useModalClose(onCancel)
   return (
-    <Modal labelledBy="confirm-title" onClose={onCancel} className="max-w-sm">
+    <Modal
+      labelledBy="confirm-title"
+      onClose={closed}
+      onCloseRequest={requestClose}
+      closing={closing}
+      className="max-w-sm"
+    >
       <h2 id="confirm-title" className="text-lg font-semibold">
         {title}
       </h2>
@@ -31,7 +39,7 @@ export function ConfirmDialog({
       <div className="mt-5 flex justify-end gap-2">
         <button
           type="button"
-          onClick={onCancel}
+          onClick={requestClose}
           className="rounded-control border border-line-strong px-4 py-2 text-sm"
         >
           {t('common.cancel')}

@@ -7,6 +7,8 @@ export interface Email {
 /** Sends email. A real service (Brevo, Resend, …) implements this at deployment. */
 export interface Mailer {
   send: (email: Email) => Promise<void>
+  /** False when emails only go to the log, so nobody actually receives them. */
+  delivers: boolean
 }
 
 /**
@@ -15,6 +17,7 @@ export interface Mailer {
  */
 export function createLogMailer(log: (message: string) => void = console.info): Mailer {
   return {
+    delivers: false,
     async send({ to, subject, text }) {
       log(`\n--- Email to ${to}: ${subject} ---\n${text}\n---`)
     },
@@ -26,6 +29,7 @@ export function createMemoryMailer(): Mailer & { outbox: Email[] } {
   const outbox: Email[] = []
   return {
     outbox,
+    delivers: true,
     async send(email) {
       outbox.push(email)
     },
@@ -42,6 +46,7 @@ interface BrevoOptions {
 /** Sends through Brevo's transactional email API (free: 300 emails a day). */
 export function createBrevoMailer({ apiKey, from, fetch: doFetch = fetch }: BrevoOptions): Mailer {
   return {
+    delivers: true,
     async send({ to, subject, text }) {
       const response = await doFetch('https://api.brevo.com/v3/smtp/email', {
         method: 'POST',

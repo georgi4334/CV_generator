@@ -5,6 +5,7 @@ import { useNavigate, useSearchParams } from 'react-router'
 import { useCurrentUser, useLogout } from '@/features/auth/queries'
 import { AccountSettings } from './AccountSettings'
 import { Modal } from '@/shared/ui/Modal'
+import { useModalClose } from '@/shared/ui/useModalClose'
 import { THEME_MODES } from '@/shared/ui/themeModes'
 import { useThemeStore } from '@/shared/stores/theme'
 
@@ -130,10 +131,12 @@ export function UserMenu() {
     )
   }, [requested, setParams])
 
+  // The drawer slides back out to the right before it goes.
+  const { closing, requestClose, closed } = useModalClose(() => setView(null))
+
   if (!user) return null
   const label = user.name || user.email
   const avatar = initials(user.name, user.email)
-  const close = () => setView(null)
   const ThemeIcon = THEME_MODES.find((m) => m.mode === themeMode)?.icon ?? Settings
   const titles = { account: t('auth.accountSettings'), theme: t('common.theme.label') }
 
@@ -157,7 +160,13 @@ export function UserMenu() {
       </button>
 
       {view && (
-        <Modal labelledBy={headingId} onClose={close} variant="side">
+        <Modal
+          labelledBy={headingId}
+          onClose={closed}
+          onCloseRequest={requestClose}
+          closing={closing}
+          variant="side"
+        >
           <div className="flex h-full flex-col">
             {view === 'menu' ? (
               <>
@@ -169,7 +178,7 @@ export function UserMenu() {
                     </h2>
                     {user.name && <p className="truncate text-sm text-fg-muted">{user.email}</p>}
                   </div>
-                  <CloseButton onClick={close} />
+                  <CloseButton onClick={requestClose} />
                 </div>
                 <nav aria-label={t('auth.menu')} className="flex-1 space-y-1 p-2">
                   <MenuRow
@@ -216,7 +225,7 @@ export function UserMenu() {
                   <h2 id={headingId} className="min-w-0 flex-1 truncate font-semibold">
                     {titles[view]}
                   </h2>
-                  <CloseButton onClick={close} />
+                  <CloseButton onClick={requestClose} />
                 </div>
                 <div
                   key={view}

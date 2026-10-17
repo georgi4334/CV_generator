@@ -144,15 +144,17 @@ export async function authRoutes(app: FastifyInstance, opts: AuthRouteOptions) {
     opts.mailer.send(email).catch((error) => request.log.error(error, 'could not send email'))
   }
 
+  async function verificationFor(user: { id: string; email: string; locale: Locale }) {
+    const token = await issueToken(user.id, 'email_verification', VERIFY_TOKEN_MS)
+    return verificationEmail(user.email, user.locale, `${opts.appUrl}/verify-email?token=${token}`)
+  }
+
+  /** After sign-up: in the background, so a mail problem never blocks creating the account. */
   async function sendVerification(
     request: FastifyRequest,
     user: { id: string; email: string; locale: Locale },
   ) {
-    const token = await issueToken(user.id, 'email_verification', VERIFY_TOKEN_MS)
-    sendMail(
-      request,
-      verificationEmail(user.email, user.locale, `${opts.appUrl}/verify-email?token=${token}`),
-    )
+    sendMail(request, await verificationFor(user))
   }
 
   app.post('/auth/register', async (request, reply) => {
@@ -303,9 +305,18 @@ export async function authRoutes(app: FastifyInstance, opts: AuthRouteOptions) {
       return { user: toUser({ ...user!, emailVerified: user!.emailVerifiedAt !== null }) }
     })
 
+    // Asked for by the person, so they hear whether it worked: the email is sent
+    // before answering, and a failure is reported instead of "on its way".
     me.post('/auth/resend-verification', async (request, reply) => {
       allow(limits.resend, request.user.id)
-      if (!request.user.emailVerified) await sendVerification(request, request.user)
+      if (!request.user.emailVerified) {
+        try {
+          await opts.mailer.send(await verificationFor(request.user))
+        } catch (error) {
+          request.log.error(error, 'could not send email')
+          throw new HttpError(502, 'email_failed', 'The email could not be sent')
+        }
+      }
       return reply.status(204).send()
     })
 
