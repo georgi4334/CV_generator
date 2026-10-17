@@ -267,6 +267,13 @@
     }
   }
 
+  /* Page transitions: springy, like opening and closing apps on a phone. */
+  --ease-spring: cubic-bezier(0.2, 0.9, 0.2, 1);
+  --duration-page: 380ms; /* tabs sliding */
+  --duration-zoom: 520ms; /* a document zooming open or closed */
+  --page-shift: 6%; /* how far a page slides when tabs change */
+  --recede-scale: 0.94; /* the page behind an opening document shrinks to this */
+
   /* Illustrations drift gently up and down (animate-float). */
   --animate-float: float 6s ease-in-out infinite;
   @keyframes float {

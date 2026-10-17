@@ -1,7 +1,7 @@
 import { ArrowLeft, CircleHelp, History, PanelLeft, Redo2, Undo2 } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router'
+import { TransitionLink } from '@/shared/ui/TransitionLink'
 import { LanguageSelect } from '@/shared/ui/LanguageSelect'
 import { ThemeSelect } from '@/shared/ui/ThemeSelect'
 import { useEditorUi } from '@/features/cv-editor/state/editorUi'
@@ -93,14 +93,15 @@ export function EditorTopBar({
   if (compact) {
     return (
       <header className="glass-bar flex h-14 shrink-0 items-center gap-1 px-2">
-        <Link
+        <TransitionLink
+          transition="doc-close"
           to={backTo}
           className={iconButton}
           aria-label={t('editor.topBar.backToDocuments')}
           title={t('editor.topBar.backToDocuments')}
         >
           <ArrowLeft className="size-5" />
-        </Link>
+        </TransitionLink>
         <div className="flex min-w-0 flex-1 items-center gap-2 text-sm text-fg-muted [&>*:first-child]:min-w-0 [&>*:first-child]:truncate">
           {title}
           {status}
@@ -123,14 +124,15 @@ export function EditorTopBar({
   return (
     <header className="grid shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 pt-3 pb-1">
       <div className="flex min-w-0 items-center gap-2">
-        <Link
+        <TransitionLink
+          transition="doc-close"
           to={backTo}
           className="glass flex size-10 shrink-0 items-center justify-center rounded-pill text-fg-soft hover:text-fg"
           aria-label={t('editor.topBar.backToDocuments')}
           title={t('editor.topBar.backToDocuments')}
         >
           <ArrowLeft className="size-4" />
-        </Link>
+        </TransitionLink>
         <div className="glass-pill flex min-w-0 items-center gap-1">
           <button
             type="button"

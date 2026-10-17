@@ -33,6 +33,8 @@ import {
 } from '@/shared/lib/paths'
 import { useJobs } from '@/features/jobs/queries'
 import { ListSkeleton } from '@/shared/ui/Skeleton'
+import { TransitionLink } from '@/shared/ui/TransitionLink'
+import { useDocTransitionStyle } from '@/shared/lib/viewTransitions'
 
 type SortKey = 'updated' | 'created' | 'name' | 'type'
 
@@ -96,6 +98,20 @@ interface RowActions {
   onDownload: () => void
   onShare: () => void
   onDelete: () => void
+}
+
+/** The file icon of a row: the opened page shrinks back into it when closed. */
+function DocumentIcon({ docId }: { docId: string }) {
+  const transitionStyle = useDocTransitionStyle(docId)
+  return (
+    <span
+      data-doc-icon
+      style={transitionStyle}
+      className="flex h-12 w-9 shrink-0 items-center justify-center rounded-tight border border-line bg-page"
+    >
+      <FileText className="size-4 text-fg-faint" />
+    </span>
+  )
 }
 
 function RowMenu({ doc, actions }: { doc: DocumentSummary; actions: RowActions }) {
@@ -405,9 +421,7 @@ export function DocumentsPage() {
                   checked={selected.has(doc.id)}
                   onChange={() => toggle(doc.id)}
                 />
-                <span className="flex h-12 w-9 shrink-0 items-center justify-center rounded-tight border border-line bg-page">
-                  <FileText className="size-4 text-fg-faint" />
-                </span>
+                <DocumentIcon docId={doc.id} />
                 <div className="min-w-0 flex-1">
                   {renaming === doc.id ? (
                     <RenameInput
@@ -425,12 +439,18 @@ export function DocumentsPage() {
                       }}
                     />
                   ) : (
-                    <Link
+                    <TransitionLink
                       to={editPath(doc)}
+                      transition="doc-open"
+                      docId={doc.id}
+                      // The row's icon is what grows into the page.
+                      transitionSource={(link) =>
+                        link.closest('li')?.querySelector<HTMLElement>('[data-doc-icon]')
+                      }
                       className="block truncate font-medium hover:text-brand-fg"
                     >
                       {doc.title}
-                    </Link>
+                    </TransitionLink>
                   )}
                   <span className="block truncate text-sm text-fg-muted">
                     {job

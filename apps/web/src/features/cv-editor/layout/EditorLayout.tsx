@@ -4,6 +4,7 @@ import { useEditorUi } from '@/features/cv-editor/state/editorUi'
 import { PAGE_SIZE_PX } from '@/renderer/templates/tokens'
 import { useBreakpoint } from '@/shared/lib/useBreakpoint'
 import { FitToWidth } from '@/shared/ui/FitToWidth'
+import { DOC_TRANSITION_NAME } from '@/shared/lib/viewTransitions'
 import { EditorRail } from './EditorRail'
 import { EditorSidePanel } from './EditorSidePanel'
 import { EditorToolbar } from './EditorToolbar'
@@ -67,12 +68,15 @@ export function EditorLayout({
         <div className="flex-1 overflow-auto">
           {compact ? (
             <div className="px-gutter py-section">
-              <FitToWidth width={PAGE_SIZE_PX[pageSize].width}>{children}</FitToWidth>
+              <div style={{ viewTransitionName: DOC_TRANSITION_NAME }}>
+                <FitToWidth width={PAGE_SIZE_PX[pageSize].width}>{children}</FitToWidth>
+              </div>
             </div>
           ) : (
             <div className="flex min-w-max justify-center gap-4 px-6 py-6">
               <EditorRail previewTo={previewTo} onDownload={onDownload} onShare={onShare} />
-              {children}
+              {/* The page zooms open from its thumbnail and shrinks back into it. */}
+              <div style={{ viewTransitionName: DOC_TRANSITION_NAME }}>{children}</div>
               {/* As wide as the rail, so the page stays centred. */}
               <div aria-hidden className="w-11 shrink-0" />
             </div>

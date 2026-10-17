@@ -15,9 +15,160 @@
         document.documentElement.classList.toggle('dark', dark)
       } catch {}
     </script>
+    <style>
+      /*
+       * Splash screen, shown until the app has rendered (removed by shared/lib/splash.ts).
+       * Plain CSS because it paints before the app's stylesheet loads; the colours
+       * mirror the tokens in src/shared/styles/tokens.css (backdrop, glows, brand, glass).
+       */
+      #splash {
+        --splash-from: #e0f2fe;
+        --splash-to: #ecfdf5;
+        --splash-glow-1: rgb(94 234 212 / 0.6);
+        --splash-glow-2: rgb(56 189 248 / 0.45);
+        --splash-glow-3: rgb(196 181 253 / 0.4);
+        --splash-glass: rgb(255 255 255 / 0.5);
+        --splash-rim: rgb(255 255 255 / 0.75);
+        --splash-text: #0f172a;
+        --splash-brand: #0f766e;
+        --splash-ease: cubic-bezier(0.2, 0.9, 0.2, 1);
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        pointer-events: none;
+        font-family: Inter, system-ui, sans-serif;
+        color: var(--splash-text);
+        background:
+          radial-gradient(at 8% 0%, var(--splash-glow-1), transparent 45%),
+          radial-gradient(at 92% 8%, var(--splash-glow-2), transparent 42%),
+          radial-gradient(at 75% 85%, var(--splash-glow-3), transparent 45%),
+          linear-gradient(160deg, var(--splash-from), var(--splash-to));
+        transition:
+          opacity 0.45s var(--splash-ease),
+          transform 0.45s var(--splash-ease);
+      }
+      html.dark #splash {
+        --splash-from: #020617;
+        --splash-to: #04131a;
+        --splash-glow-1: rgb(20 184 166 / 0.35);
+        --splash-glow-2: rgb(2 132 199 / 0.3);
+        --splash-glow-3: rgb(124 58 237 / 0.25);
+        --splash-glass: rgb(15 23 42 / 0.55);
+        --splash-rim: rgb(255 255 255 / 0.12);
+        --splash-text: #f1f5f9;
+      }
+      /* Leaving: the splash grows and fades, as if the app zooms open. */
+      #splash.splash-hide {
+        opacity: 0;
+        transform: scale(1.06);
+      }
+      .splash-tile {
+        display: grid;
+        place-items: center;
+        width: 112px;
+        height: 112px;
+        border-radius: 30px;
+        background: var(--splash-glass);
+        border: 1px solid var(--splash-rim);
+        box-shadow:
+          inset 0 1px 0 var(--splash-rim),
+          0 20px 50px -12px rgb(15 23 42 / 0.3);
+        backdrop-filter: blur(24px) saturate(180%);
+        animation: splash-pop 0.7s var(--splash-ease) both;
+      }
+      .splash-check {
+        stroke-dasharray: 16;
+        stroke-dashoffset: 16;
+        animation: splash-draw 0.5s 0.45s var(--splash-ease) forwards;
+      }
+      .splash-name {
+        font-size: 28px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        animation: splash-rise 0.6s 0.25s var(--splash-ease) both;
+      }
+      .splash-bar {
+        width: 120px;
+        height: 3px;
+        border-radius: 3px;
+        overflow: hidden;
+        background: var(--splash-rim);
+        animation: splash-rise 0.6s 0.35s var(--splash-ease) both;
+      }
+      .splash-bar::after {
+        content: '';
+        display: block;
+        width: 40%;
+        height: 100%;
+        border-radius: 3px;
+        background: var(--splash-brand);
+        animation: splash-load 1.2s ease-in-out infinite;
+      }
+      @keyframes splash-pop {
+        from {
+          opacity: 0;
+          transform: scale(0.6);
+          filter: blur(8px);
+        }
+      }
+      @keyframes splash-draw {
+        to {
+          stroke-dashoffset: 0;
+        }
+      }
+      @keyframes splash-rise {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+      }
+      @keyframes splash-load {
+        from {
+          transform: translateX(-100%);
+        }
+        to {
+          transform: translateX(250%);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #splash,
+        #splash * {
+          animation: none !important;
+          transition: none !important;
+        }
+        .splash-check {
+          stroke-dashoffset: 0;
+        }
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
+    <div id="splash" aria-hidden="true">
+      <div class="splash-tile">
+        <svg viewBox="0 0 32 32" width="64" height="64">
+          <rect width="32" height="32" rx="8" fill="#0f766e" />
+          <path d="M10 6.5h8.5l4.5 4.5v14.5H10z" fill="#fff" />
+          <path d="M18.5 6.5V11H23z" fill="#0f766e" opacity=".35" />
+          <path
+            class="splash-check"
+            d="M13.4 16.6l2.7 3.1 4.5-6.3"
+            fill="none"
+            stroke="#0f766e"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </div>
+      <div class="splash-name">Vitae</div>
+      <div class="splash-bar"></div>
+    </div>
     <script type="module" src="/src/app/main.tsx"></script>
   </body>
 </html>

@@ -14,6 +14,8 @@ import { useJobs, useUpdateJob } from '@/features/jobs/queries'
 import { useCoverLetter, useCoverLetterList } from '@/features/cover-letters/queries'
 import { editPath, NEW_CV_PATH, NEW_LETTER_PATH } from '@/shared/lib/paths'
 import { remindersFor } from './reminders'
+import { TransitionLink } from '@/shared/ui/TransitionLink'
+import { useDocTransitionStyle } from '@/shared/lib/viewTransitions'
 import { LoadingRegion, Skeleton } from '@/shared/ui/Skeleton'
 
 const QUICK_ACTIONS = [
@@ -31,9 +33,19 @@ const RECENT_PLACEHOLDERS = RECENT_COUNT
 function DocumentThumbnail({ doc }: { doc: DocumentSummary }) {
   const cv = useCv(doc.type === 'cv' ? doc.id : undefined).data
   const letter = useCoverLetter(doc.type === 'coverLetter' ? doc.id : undefined).data
-  if (cv) return <CvThumbnail cv={cv.document} width={THUMBNAIL_WIDTH} />
-  if (letter) return <LetterThumbnail letter={letter.document} width={THUMBNAIL_WIDTH} />
-  return <ThumbnailSkeleton />
+  // The page zooms open from here, and shrinks back here when closed.
+  const transitionStyle = useDocTransitionStyle(doc.id)
+  return (
+    <div data-transition-source style={transitionStyle} className="w-fit">
+      {cv ? (
+        <CvThumbnail cv={cv.document} width={THUMBNAIL_WIDTH} />
+      ) : letter ? (
+        <LetterThumbnail letter={letter.document} width={THUMBNAIL_WIDTH} />
+      ) : (
+        <ThumbnailSkeleton />
+      )}
+    </div>
+  )
 }
 
 /** A page-shaped placeholder the size of a thumbnail. */
@@ -84,8 +96,10 @@ function RecentDocuments({ docs, loading }: { docs: DocumentSummary[]; loading: 
         <ul className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           {docs.map((doc) => (
             <li key={doc.id}>
-              <Link
+              <TransitionLink
                 to={editPath(doc)}
+                transition="doc-open"
+                docId={doc.id}
                 className="group flex h-full flex-col gap-2 rounded-control p-2 hover:bg-glass-hover"
               >
                 <DocumentThumbnail doc={doc} />
@@ -97,7 +111,7 @@ function RecentDocuments({ docs, loading }: { docs: DocumentSummary[]; loading: 
                   {doc.shared && <SharedBadge />}
                   {formatDate(doc.updatedAt)}
                 </span>
-              </Link>
+              </TransitionLink>
             </li>
           ))}
         </ul>
