@@ -12,20 +12,86 @@ import {
   Trash2,
   type LucideIcon,
 } from 'lucide-react'
-import { useRef, useState, type ReactNode } from 'react'
+import { useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEditor } from '@/renderer/context'
 import { PHOTO_MAX_SIZE, pickAndUpload } from './image'
 import { Popover } from './Popover'
 
 /**
- * The floating toolbar of an entry, a section title or the header. It sits on
- * the top edge of what it belongs to (no gap the pointer could fall through
- * on its way up) and lingers briefly after the pointer leaves, so it can be
- * reached without vanishing.
+ * The floating toolbar of an entry, a section title or the header. It sits
+ * just above what it belongs to, joined to it by a transparent strip so the
+ * pointer never falls into a gap on its way up, and lingers briefly after the
+ * pointer leaves. Entry toolbars vanish fully when hidden; section toolbars
+ * only fade, so their buttons stay in the Tab order and show when focused.
  */
-const toolbar =
-  'cv-controls invisible absolute right-2 top-0 z-(--z-raised) flex -translate-y-1/2 items-center gap-0.5 rounded-pill border border-line bg-surface p-1 text-fg-soft opacity-0 shadow-overlay transition-[opacity,visibility] delay-300 duration-150 group-hover/ctl:visible group-hover/ctl:opacity-100 group-hover/ctl:delay-0 group-focus-within/ctl:visible group-focus-within/ctl:opacity-100 group-focus-within/ctl:delay-0 motion-reduce:transition-none'
+const toolbarBase =
+  'cv-controls absolute right-2 bottom-full z-(--z-raised) origin-bottom-right pb-1 opacity-0 transition-[opacity,visibility] delay-300 duration-150 group-hover/ctl:opacity-100 group-hover/ctl:delay-0 group-focus-within/ctl:opacity-100 group-focus-within/ctl:delay-0 motion-reduce:transition-none'
+const toolbarHidden = {
+  vanish: 'invisible group-hover/ctl:visible group-focus-within/ctl:visible',
+  fade: 'pointer-events-none group-hover/ctl:pointer-events-auto group-focus-within/ctl:pointer-events-auto',
+}
+const toolbarPill =
+  'flex items-center gap-0.5 rounded-pill border border-line bg-surface p-1 text-fg-soft shadow-overlay'
+/** Space kept between a toolbar and the page edge, in screen pixels. */
+const PAGE_EDGE = 4
+
+/**
+ * Keeps a toolbar at its real size whatever the page's scale (zoom, phones)
+ * and inside the page, which clips what sticks out: measured each time it is
+ * about to show.
+ */
+function useToolbarPlacement(ref: RefObject<HTMLDivElement | null>) {
+  useLayoutEffect(() => {
+    const bar = ref.current
+    const group = bar?.parentElement
+    if (!bar || !group) return
+    const place = () => {
+      const page = bar.closest<HTMLElement>('[data-cv-page]')
+      if (!page?.offsetWidth) return
+      const pageRect = page.getBoundingClientRect()
+      const scale = pageRect.width / page.offsetWidth
+      if (!scale) return
+      bar.style.scale = String(1 / scale)
+      bar.style.marginRight = '0px'
+      bar.style.marginBottom = '0px'
+      const rect = bar.getBoundingClientRect()
+      let shiftX = 0
+      if (rect.left < pageRect.left + PAGE_EDGE) shiftX = pageRect.left + PAGE_EDGE - rect.left
+      else if (rect.right > pageRect.right - PAGE_EDGE)
+        shiftX = pageRect.right - PAGE_EDGE - rect.right
+      const shiftY = Math.max(0, pageRect.top + PAGE_EDGE - rect.top)
+      bar.style.marginRight = `${-shiftX / scale}px`
+      bar.style.marginBottom = `${-shiftY / scale}px`
+    }
+    group.addEventListener('pointerenter', place)
+    group.addEventListener('focusin', place)
+    return () => {
+      group.removeEventListener('pointerenter', place)
+      group.removeEventListener('focusin', place)
+    }
+  }, [ref])
+}
+
+function Toolbar({
+  label,
+  hidden = 'vanish',
+  children,
+}: {
+  label: string
+  hidden?: keyof typeof toolbarHidden
+  children: ReactNode
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+  useToolbarPlacement(ref)
+  return (
+    <div ref={ref} className={`${toolbarBase} ${toolbarHidden[hidden]}`}>
+      <div className={toolbarPill} role="toolbar" aria-label={label}>
+        {children}
+      </div>
+    </div>
+  )
+}
 const outline =
   'group/ctl relative rounded-sm outline-1 outline-offset-2 outline-transparent outline-dashed hover:outline-slate-400/70 focus-within:outline-slate-400/70'
 const toolButton =
@@ -102,7 +168,7 @@ export function ItemControls({
   if (!editor) return <>{children}</>
   return (
     <div ref={ref} className={outline} data-item-id={itemId}>
-      <div className={toolbar} role="toolbar" aria-label={t('renderer.entryActions')}>
+      <Toolbar label={t('renderer.entryActions')}>
         <AddEntryButton
           label={t('renderer.addEntryBelow')}
           onClick={() => editor.addItem(sectionId, itemId)}
@@ -141,7 +207,7 @@ export function ItemControls({
           label={t('renderer.deleteEntry')}
           onClick={() => editor.removeItem(sectionId, itemId)}
         />
-      </div>
+      </Toolbar>
       {children}
     </div>
   )
@@ -165,10 +231,10 @@ export function SectionControls({
   if (!editor || !canAdd) return <>{children}</>
   return (
     <div className="group/ctl relative">
-      <div className={toolbar} role="toolbar" aria-label={t('renderer.sectionActions')}>
+      <Toolbar label={t('renderer.sectionActions')} hidden="fade">
         <AddEntryButton label={t('renderer.addEntry')} onClick={() => editor.addItem(sectionId)} />
         {skillDisplay && <SkillStyleButton sectionId={sectionId} value={skillDisplay} />}
-      </div>
+      </Toolbar>
       {children}
     </div>
   )
@@ -298,7 +364,7 @@ export function HeaderControls({ hasPhoto, children }: { hasPhoto: boolean; chil
     )
   return (
     <div className={outline}>
-      <div className={toolbar} role="toolbar" aria-label={t('renderer.headerActions')}>
+      <Toolbar label={t('renderer.headerActions')}>
         <ToolButton
           icon={ImagePlus}
           label={hasPhoto ? t('renderer.changePhoto') : t('renderer.addPhoto')}
@@ -311,7 +377,7 @@ export function HeaderControls({ hasPhoto, children }: { hasPhoto: boolean; chil
             onClick={() => editor.updateHeader({ photoUrl: null, showPhoto: false })}
           />
         )}
-      </div>
+      </Toolbar>
       {children}
     </div>
   )

@@ -108,3 +108,32 @@ describe('describeYearMonth', () => {
     expect(describeYearMonth(null, 'en')).toBe('—')
   })
 })
+
+describe('date order and month names', () => {
+  it('warns when the end date is before the start date', () => {
+    render(<Range initial={{ startDate: '2019-06', endDate: '2018-03', isCurrent: false }} />)
+    fireEvent.click(screen.getByRole('tab', { name: /To/ }))
+    expect(screen.getByRole('status').textContent).toContain('end date is before the start date')
+  })
+
+  it('does not warn while the job is current', () => {
+    render(<Range initial={{ startDate: '2019-06', endDate: '2018-03', isCurrent: true }} />)
+    fireEvent.click(screen.getByRole('tab', { name: /To/ }))
+    expect(screen.queryByRole('status')).toBeNull()
+  })
+
+  it('warns when a certificate expires before it was issued', () => {
+    render(
+      <CertificateDatesForm
+        value={{ date: '2023-05', expiryDate: '2020-01' }}
+        onChange={() => {}}
+      />,
+    )
+    fireEvent.click(screen.getByRole('tab', { name: /Expires/ }))
+    expect(screen.getByRole('status').textContent).toContain('expiry date is before the issue date')
+  })
+
+  it('names Bulgarian months (browsers give numbers)', () => {
+    expect(describeYearMonth('2022-03', 'bg')).toBe('март 2022')
+  })
+})

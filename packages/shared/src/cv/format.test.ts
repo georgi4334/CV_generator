@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatCertificateDates, formatDateRange, formatYearMonth } from './i18n'
+import { formatCertificateDates, formatDateRange, formatYearMonth, isBefore } from './i18n'
 
 describe('formatYearMonth', () => {
   it('formats year-only and year-month values', () => {
@@ -49,5 +49,16 @@ describe('formatCertificateDates', () => {
 
   it('reads older certificates without an expiry date', () => {
     expect(formatCertificateDates({ date: '2021' }, 'en-GB')).toBe('2021')
+  })
+})
+
+describe('isBefore', () => {
+  it('compares year-month dates, a lone year counting as the whole year', () => {
+    expect(isBefore('2018-03', '2019-06')).toBe(true)
+    expect(isBefore('2019-06', '2019-06')).toBe(false)
+    expect(isBefore('2021-03', '2021')).toBe(false)
+    expect(isBefore('2021', '2021-11')).toBe(false)
+    expect(isBefore('2020', '2021-01')).toBe(true)
+    expect(isBefore(null, '2021')).toBe(false)
   })
 })

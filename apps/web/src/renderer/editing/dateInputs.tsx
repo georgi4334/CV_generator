@@ -1,4 +1,5 @@
-import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react'
+import { isBefore, shortMonthNames } from '@cv/shared'
+import { ChevronLeft, ChevronRight, ChevronDown, TriangleAlert } from 'lucide-react'
 import { useId, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -12,10 +13,28 @@ const YEARS_AHEAD = 15
 const thisYear = () => new Date().getFullYear()
 const lastYear = () => thisYear() + YEARS_AHEAD
 
-/** Short month names in the interface language (this is the date picker, not the CV). */
+/**
+ * Short month names in the interface language (this is the date picker, not
+ * the CV). Browsers give Bulgarian short months as numbers ("03"), so
+ * Bulgarian uses the CV's own table.
+ */
 function monthNames(language: string): string[] {
+  if (language.startsWith('bg')) return [...shortMonthNames('bg')]
   const format = new Intl.DateTimeFormat(language, { month: 'short', timeZone: 'UTC' })
   return Array.from({ length: 12 }, (_, i) => format.format(new Date(Date.UTC(2000, i, 15))))
+}
+
+/** A gentle note under the picker, e.g. when the end date comes before the start. */
+function DateWarning({ children }: { children: ReactNode }) {
+  return (
+    <p
+      role="status"
+      className="flex items-start gap-1.5 rounded-control border border-warning-line bg-warning-soft px-2 py-1.5 text-xs text-warning-fg"
+    >
+      <TriangleAlert className="mt-px size-3.5 shrink-0" aria-hidden />
+      {children}
+    </p>
+  )
 }
 
 /** "2022-03" → { year: 2022, month: '03' }; "2022" → month ''. */
@@ -291,6 +310,9 @@ export function DateRangeForm({
                 />
                 {t('renderer.present')}
               </label>
+              {!value.isCurrent && isBefore(value.endDate, value.startDate) && (
+                <DateWarning>{t('renderer.endBeforeStart')}</DateWarning>
+              )}
             </div>
           ),
         },
@@ -352,12 +374,17 @@ export function CertificateDatesForm({
             ? describeYearMonth(value.expiryDate, i18n.language)
             : t('renderer.noExpiry'),
           content: (
-            <YearMonthPicker
-              label={t('renderer.expires')}
-              value={value.expiryDate}
-              initialYear={parse(value.date).year}
-              onChange={(expiryDate) => onChange({ expiryDate })}
-            />
+            <div className="space-y-3">
+              <YearMonthPicker
+                label={t('renderer.expires')}
+                value={value.expiryDate}
+                initialYear={parse(value.date).year}
+                onChange={(expiryDate) => onChange({ expiryDate })}
+              />
+              {isBefore(value.expiryDate, value.date) && (
+                <DateWarning>{t('renderer.expiryBeforeIssue')}</DateWarning>
+              )}
+            </div>
           ),
         },
       ]}
