@@ -78,6 +78,8 @@
   --theme-illus-2: var(--color-sky-500);
   --theme-illus-3: var(--color-violet-400);
   /* The base under the glows: a soft sky-to-mint wash. */
+  /* Drawers and side panels: in light mode the strong glass. */
+  --theme-panel: var(--theme-glass-strong);
   --theme-backdrop-from: var(--color-sky-100);
   --theme-backdrop-to: var(--color-emerald-50);
   --theme-backdrop-mid: color-mix(
@@ -143,6 +145,8 @@
   --theme-illus-1: var(--color-teal-300);
   --theme-illus-2: var(--color-sky-300);
   --theme-illus-3: var(--color-violet-300);
+  /* Drawers and side panels: solid deep navy, clearly apart from the gradient behind them. */
+  --theme-panel: #0b0e3a;
   --theme-backdrop-from: #394090;
   --theme-backdrop-to: #0e1456;
   /* The mauve band across the middle, like a dusk sky. */
@@ -207,6 +211,7 @@
   --color-illus-2: var(--theme-illus-2);
   --color-illus-3: var(--theme-illus-3);
   --color-backdrop-from: var(--theme-backdrop-from);
+  --color-panel: var(--theme-panel);
   --color-backdrop-mid: var(--theme-backdrop-mid);
   --color-backdrop-to: var(--theme-backdrop-to);
 }
