@@ -31,29 +31,66 @@
 }
 
 /* ----- Buttons ----- */
+/*
+ * Liquid glass, like the panels: the main button is brand colour with a bright
+ * rim and a soft glow; the others are frosted glass. Hover lifts them a little
+ * and the glow grows; pressing settles them back.
+ */
 @utility btn {
-  @apply inline-flex items-center justify-center gap-2 rounded-control px-control-x py-control-y text-sm font-medium whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-line disabled:cursor-not-allowed disabled:opacity-50;
+  @apply inline-flex items-center justify-center gap-2 rounded-control px-control-x py-control-y text-sm font-medium whitespace-nowrap transition-[background-color,box-shadow,transform,color] duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-line enabled:hover:-translate-y-px enabled:active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transform-none motion-reduce:transition-none;
 }
 @utility btn-primary {
-  @apply bg-brand text-on-brand hover:bg-brand-hover;
+  @apply text-on-brand;
+  background-color: var(--color-brand);
+  background-image: linear-gradient(180deg, var(--color-glass-sheen), transparent 70%);
+  box-shadow: var(--shadow-btn-brand);
+  &:hover:not(:disabled) {
+    background-color: var(--color-brand-hover);
+    box-shadow: var(--shadow-btn-brand-hover);
+  }
 }
 @utility btn-secondary {
-  @apply border border-line-strong text-fg-soft hover:bg-muted;
+  @apply text-fg-soft hover:text-fg;
+  background-color: var(--color-glass);
+  box-shadow: var(--shadow-btn-glass);
+  backdrop-filter: blur(var(--blur-glass)) saturate(var(--glass-saturation));
+  &:hover:not(:disabled) {
+    background-color: var(--color-glass-strong);
+    box-shadow: var(--shadow-btn-glass-hover);
+  }
 }
 @utility btn-danger {
-  @apply bg-danger text-on-danger hover:bg-danger-hover;
+  @apply text-on-danger;
+  background-color: var(--color-danger);
+  background-image: linear-gradient(180deg, var(--color-glass-sheen), transparent 70%);
+  box-shadow: var(--shadow-btn-danger);
+  &:hover:not(:disabled) {
+    background-color: var(--color-danger-hover);
+  }
 }
 @utility btn-ghost {
-  @apply text-fg-soft hover:bg-muted;
+  @apply text-fg-soft hover:bg-glass-hover hover:text-fg hover:shadow-btn-glass;
 }
 /* Square icon-only button; at least a finger's size on touch screens. */
 @utility btn-icon {
-  @apply inline-flex items-center justify-center rounded-tight p-2 text-fg-muted hover:bg-muted hover:text-fg disabled:opacity-40 disabled:hover:bg-transparent pointer-coarse:min-h-touch pointer-coarse:min-w-touch;
+  @apply inline-flex items-center justify-center rounded-control p-2 text-fg-muted transition-[background-color,box-shadow,color] duration-200 hover:bg-glass-hover hover:text-fg hover:shadow-btn-glass disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:shadow-none pointer-coarse:min-h-touch pointer-coarse:min-w-touch;
 }
 
 /* ----- Form fields ----- */
+/* Frosted fields (inputs and drop-downs) with a soft brand halo when focused. */
 @utility input {
-  @apply w-full rounded-control border border-line-strong bg-surface px-3 py-2 text-sm text-fg placeholder:text-fg-faint;
+  @apply w-full rounded-control border border-line-strong px-3 py-2 text-sm text-fg shadow-input transition-[border-color,box-shadow] duration-200 placeholder:text-fg-faint hover:border-fg-faint focus:border-brand-line focus:shadow-input-focus focus:outline-none;
+  background-color: var(--color-glass-strong);
+  backdrop-filter: blur(var(--blur-glass)) saturate(var(--glass-saturation));
+}
+
+/* ----- Menus ----- */
+/* A drop-down menu: a frosted card with rounded items that light up on hover. */
+@utility glass-menu {
+  @apply glass-solid rounded-card p-1 text-sm shadow-overlay;
+}
+@utility menu-item {
+  @apply flex w-full items-center gap-2 rounded-control px-3 py-2 text-left text-fg transition-colors hover:bg-glass-hover focus-visible:bg-glass-hover focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent;
 }
 
 /* ----- Text ----- */
@@ -129,6 +166,15 @@
   @apply bg-glass-strong text-fg shadow-glass hover:bg-glass-strong;
 }
 
+/* ----- Notifications ----- */
+/* Toasts stack in the bottom-right corner; on phones above the tab bar or editor toolbar. */
+@utility toaster {
+  @apply pointer-events-none fixed right-gutter bottom-section z-(--z-toast) flex w-[calc(100%-2*var(--spacing-gutter))] max-w-toast flex-col gap-2;
+  body:has([data-bottom-bar]) & {
+    bottom: calc(var(--spacing-bottom-nav) + var(--spacing-section) + env(safe-area-inset-bottom));
+  }
+}
+
 /* ----- Loading ----- */
 /* A grey placeholder in the shape of content that is still loading (light and dark). */
 @utility skeleton {
@@ -160,4 +206,36 @@
 }
 @utility pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
+}
+/* Content padding at the bottom of a panel that also clears the iPhone home indicator. */
+@utility pb-safe-card {
+  padding-bottom: max(var(--spacing-card), env(safe-area-inset-bottom));
+}
+
+/* ----- Scrollbars ----- */
+/* Slim, rounded, frosted grey instead of the browser's default bars. */
+@layer base {
+  ::-webkit-scrollbar {
+    width: var(--scrollbar-size);
+    height: var(--scrollbar-size);
+  }
+  ::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    border: var(--scrollbar-gap) solid transparent;
+    border-radius: 9999px;
+    background: var(--color-scrollbar) padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-scrollbar-hover) padding-box;
+  }
+  /* Firefox has no ::-webkit-scrollbar; it gets the thin bar in the same colour. */
+  @supports not selector(::-webkit-scrollbar) {
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: var(--color-scrollbar) transparent;
+    }
+  }
 }

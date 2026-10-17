@@ -18,6 +18,28 @@ export const dashboard: Messages['dashboard'] = {
     heading: 'Bewerbungsstand',
     allJobs: 'Alle gespeicherten Stellen',
   },
+  funnel: {
+    heading: 'Bewerbungstrichter',
+    description: 'Wie weit Ihre Bewerbungen kommen.',
+    saved: 'Gespeichert',
+    applied: 'Beworben',
+    interview: 'Gespräch',
+    offer: 'Angebot',
+    ofPrevious: '{{percent}} % des vorherigen Schritts',
+    detail: '{{count}} von {{previous}} ({{percent}} %) erreichten „{{stage}}“',
+    elsewhere: 'Abgesagt: {{rejected}} · Keine Antwort: {{noAnswer}}',
+    empty:
+      'Speichern Sie Stellen und markieren Sie sie als beworben, um zu sehen, wie weit Ihre Bewerbungen kommen.',
+  },
+  stats: {
+    label: 'Bewerbungszahlen',
+    active: 'Aktive Bewerbungen',
+    activeHint: 'Beworben, im Gespräch oder in Verhandlung',
+    responseRate: 'Antwortquote',
+    responseHint: 'Bewerbungen mit einer Antwort',
+    interviews: 'Gespräche',
+    interviewsHint: 'Gespräch oder weiter erreicht',
+  },
   reminders: {
     heading: 'Erinnerungen',
     updateError: 'Die Stelle konnte nicht aktualisiert werden: {{message}}',

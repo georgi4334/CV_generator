@@ -21,6 +21,13 @@ describe('GET /api/health', () => {
     expect(HealthResponseSchema.parse(res.json()).database).toBe(expected)
     await app.close()
   })
+
+  it('says when emails are only printed in the log (no email service)', async () => {
+    const app = await appWithDb(true)
+    const res = await app.inject({ method: 'GET', url: '/api/health' })
+    expect(HealthResponseSchema.parse(res.json()).email).toBe('log')
+    await app.close()
+  })
 })
 
 describe('errors', () => {

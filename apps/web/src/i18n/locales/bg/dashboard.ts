@@ -18,6 +18,28 @@ export const dashboard: Messages['dashboard'] = {
     heading: 'Етапи на кандидатстване',
     allJobs: 'Всички запазени обяви',
   },
+  funnel: {
+    heading: 'Фуния на кандидатурите',
+    description: 'Докъде стигат кандидатурите ви.',
+    saved: 'Запазени',
+    applied: 'Кандидатствах',
+    interview: 'Интервю',
+    offer: 'Оферта',
+    ofPrevious: '{{percent}}% от предишната стъпка',
+    detail: '{{count}} от {{previous}} ({{percent}}%) стигнаха до „{{stage}}“',
+    elsewhere: 'Отказани: {{rejected}} · Без отговор: {{noAnswer}}',
+    empty:
+      'Запазете обяви и ги отбележете като „Кандидатствах“, за да видите докъде стигат кандидатурите ви.',
+  },
+  stats: {
+    label: 'Числа за кандидатурите',
+    active: 'Активни кандидатури',
+    activeHint: 'Кандидатствах, интервю или преговори',
+    responseRate: 'Дял на отговорите',
+    responseHint: 'Кандидатури с отговор',
+    interviews: 'Интервюта',
+    interviewsHint: 'Стигнаха до интервю или по-нататък',
+  },
   reminders: {
     heading: 'Напомняния',
     updateError: 'Обявата не можа да бъде обновена: {{message}}',

@@ -9,6 +9,7 @@ export function EditorToolbar({ kind }: { kind: 'cv' | 'coverLetter' }) {
   return (
     <nav
       aria-label={t('editor.topBar.tools')}
+      data-bottom-bar
       className="pb-safe glass-bar shrink-0 border-t border-b-0"
     >
       <ul className="flex h-bottom-nav overflow-x-auto">

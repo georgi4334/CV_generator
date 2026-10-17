@@ -50,6 +50,12 @@
   --theme-backdrop: color-mix(in oklab, var(--color-slate-950) 50%, transparent);
   --theme-skeleton: var(--color-slate-200); /* loading placeholders */
   --theme-skeleton-shine: var(--color-slate-100); /* the light sweeping across them */
+  /* Charts: one teal for single-series bars (validated in light and dark), and the track behind them. */
+  --theme-chart: var(--color-teal-600);
+  --theme-chart-track: color-mix(in oklab, var(--color-slate-900) 7%, transparent);
+  /* Scrollbars: slim, rounded, frosted grey. */
+  --theme-scrollbar: color-mix(in oklab, var(--color-slate-500) 35%, transparent);
+  --theme-scrollbar-hover: color-mix(in oklab, var(--color-slate-500) 60%, transparent);
 
   /* Liquid glass: see-through panels that blur what is behind them (glass, glass-bar). */
   --theme-glass: color-mix(in oklab, var(--color-white) 50%, transparent);
@@ -113,6 +119,10 @@
   --theme-backdrop: color-mix(in oklab, var(--color-black) 60%, transparent);
   --theme-skeleton: var(--color-slate-800);
   --theme-skeleton-shine: var(--color-slate-700);
+  --theme-chart: var(--color-teal-600);
+  --theme-chart-track: color-mix(in oklab, var(--color-white) 8%, transparent);
+  --theme-scrollbar: color-mix(in oklab, var(--color-slate-300) 28%, transparent);
+  --theme-scrollbar-hover: color-mix(in oklab, var(--color-slate-300) 50%, transparent);
 
   --theme-glass: color-mix(in oklab, var(--color-slate-900) 55%, transparent);
   --theme-glass-strong: color-mix(in oklab, var(--color-slate-900) 85%, transparent);
@@ -170,6 +180,10 @@
   --color-paper: var(--color-white);
   --color-skeleton: var(--theme-skeleton);
   --color-skeleton-shine: var(--theme-skeleton-shine);
+  --color-scrollbar: var(--theme-scrollbar);
+  --color-chart: var(--theme-chart);
+  --color-chart-track: var(--theme-chart-track);
+  --color-scrollbar-hover: var(--theme-scrollbar-hover);
   --color-glass: var(--theme-glass);
   --color-glass-strong: var(--theme-glass-strong);
   --color-glass-hover: var(--theme-glass-hover);
@@ -238,19 +252,69 @@
     inset 0 1px 0 0 var(--theme-glass-border), 0 0 0 1px var(--theme-glass-edge),
     0 8px 32px -8px rgb(15 23 42 / 0.18);
 
+  /* Buttons: a bright top rim and a soft coloured glow that grows on hover. */
+  --shadow-btn-rim: inset 0 1px 0 0 rgb(255 255 255 / 0.35);
+  --shadow-btn-brand:
+    var(--shadow-btn-rim), 0 6px 18px -8px color-mix(in oklab, var(--theme-brand) 70%, transparent);
+  --shadow-btn-brand-hover:
+    var(--shadow-btn-rim), 0 10px 26px -8px color-mix(in oklab, var(--theme-brand) 80%, transparent);
+  --shadow-btn-danger:
+    var(--shadow-btn-rim), 0 6px 18px -8px color-mix(in oklab, var(--theme-danger) 70%, transparent);
+  --shadow-btn-glass: inset 0 1px 0 0 var(--theme-glass-border), 0 0 0 1px var(--theme-glass-edge);
+  --shadow-btn-glass-hover:
+    inset 0 1px 0 0 var(--theme-glass-border), 0 0 0 1px var(--theme-glass-edge),
+    0 8px 22px -10px rgb(15 23 42 / 0.25);
+  /* Inputs: a faint inner shade, and a soft brand halo when focused. */
+  --shadow-input: inset 0 1px 2px 0 rgb(15 23 42 / 0.06);
+  --shadow-input-focus: 0 0 0 3px color-mix(in oklab, var(--theme-brand) 25%, transparent);
+
   --blur-glass: 24px; /* how much glass blurs what is behind it (backdrop-blur-glass) */
 
   --aspect-paper: 210 / 297; /* A4 page, for placeholders (aspect-paper) */
 
   /* Drawers slide in from the right edge (animate-drawer-in). */
+  --spacing-chart-label: 6.5rem; /* the label column of bar charts (dashboard funnel) */
+  --spacing-drawer-inset: 0.75rem; /* drawers float this far from the screen edges */
   --container-side-drawer: 22rem; /* account drawer */
-  --animate-drawer-in: drawer-in 0.2s ease-out;
+  --container-toast: 24rem; /* notifications */
+  --animate-drawer-in: drawer-in var(--duration-zoom) var(--ease-spring) both;
+  --animate-drawer-out: drawer-out var(--duration-leave) var(--ease-leave) both;
   @keyframes drawer-in {
     from {
-      transform: translateX(100%);
+      transform: translateX(calc(100% + var(--spacing-drawer-inset)));
     }
+  }
+  @keyframes drawer-out {
     to {
-      transform: translateX(0);
+      transform: translateX(calc(100% + var(--spacing-drawer-inset)));
+    }
+  }
+  /* Dialogs grow in from slightly smaller and shrink away when closed. */
+  --animate-dialog-in: dialog-in var(--duration-page) var(--ease-spring) both;
+  --animate-dialog-out: dialog-out var(--duration-leave) var(--ease-leave) both;
+  @keyframes dialog-in {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+  }
+  @keyframes dialog-out {
+    to {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+  }
+  /* The dimmed backdrop behind drawers and dialogs fades with them. */
+  --animate-fade-in: fade-in var(--duration-page) ease-out both;
+  --animate-fade-out: fade-out var(--duration-leave) var(--ease-leave) both;
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+  @keyframes fade-out {
+    to {
+      opacity: 0;
     }
   }
 
@@ -269,10 +333,44 @@
 
   /* Page transitions: springy, like opening and closing apps on a phone. */
   --ease-spring: cubic-bezier(0.2, 0.9, 0.2, 1);
-  --duration-page: 380ms; /* tabs sliding */
-  --duration-zoom: 520ms; /* a document zooming open or closed */
-  --page-shift: 6%; /* how far a page slides when tabs change */
+  --duration-page: 280ms; /* the tab highlight gliding and the new tab easing in */
+  --duration-zoom: 520ms; /* a document zooming open or closed; a drawer sliding in */
+  --duration-leave: 220ms; /* closing is quicker than opening, like on phones */
+  --ease-leave: cubic-bezier(0.4, 0, 1, 1);
+  --page-shift: 1.25rem; /* how far a tab's page eases in from the side */
   --recede-scale: 0.94; /* the page behind an opening document shrinks to this */
+
+  /* A tab's page eases in from the side you moved towards (no freeze, no crossfade). */
+  --animate-page-from-right: page-from-right var(--duration-page) var(--ease-spring) both;
+  --animate-page-from-left: page-from-left var(--duration-page) var(--ease-spring) both;
+  @keyframes page-from-right {
+    from {
+      opacity: 0;
+      transform: translateX(var(--page-shift));
+    }
+  }
+  @keyframes page-from-left {
+    from {
+      opacity: 0;
+      transform: translateX(calc(-1 * var(--page-shift)));
+    }
+  }
+
+  /* Toasts rise in from below and slide out to the right when closed. */
+  --animate-toast-in: toast-in var(--duration-page) var(--ease-spring) both;
+  --animate-toast-out: toast-out var(--duration-leave) var(--ease-leave) both;
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.75rem) scale(0.96);
+    }
+  }
+  @keyframes toast-out {
+    to {
+      opacity: 0;
+      transform: translateX(110%);
+    }
+  }
 
   /* Illustrations drift gently up and down (animate-float). */
   --animate-float: float 6s ease-in-out infinite;
@@ -308,4 +406,8 @@
 
   /* Glass makes the colours behind it richer, like real glass. */
   --glass-saturation: 180%;
+
+  /* Scrollbar thickness, and the clear gap around the thumb that makes it look slimmer. */
+  --scrollbar-size: 10px;
+  --scrollbar-gap: 2px;
 }

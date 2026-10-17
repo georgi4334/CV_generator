@@ -106,15 +106,36 @@ Components use the Tailwind classes generated from those tokens, never raw value
   for panels with forms. The not-found and error pages draw `shared/ui/illustrations.tsx`
   with the `--theme-illus-*` colours. CV and letter pages use `bg-paper`, which is white in
   both themes.
-- **Splash and page transitions:** the splash screen is plain HTML and CSS in `index.html`
-  (it paints before any JavaScript) and `shared/lib/splash.ts` fades it out once the app has
-  rendered. Page transitions use the View Transitions API (`shared/lib/viewTransitions.ts`,
-  `TransitionLink`, animations in `shared/styles/transitions.css`, timings `--duration-page`,
-  `--duration-zoom`, `--ease-spring`): tabs slide sideways in the direction you move, and a
-  document zooms open from its thumbnail and shrinks back into it when closed. Browsers
-  without the API, and people who prefer reduced motion, just get the new page. The router
-  must be the `RouterProvider` from `react-router/dom`, so a navigation can render inside the
-  transition at once.
+- **Splash and motion:** the splash screen is plain HTML and CSS in `index.html` (it paints
+  before any JavaScript) and `shared/lib/splash.ts` fades it out once the app has rendered.
+  - **Tabs** switch instantly: the highlight glides to the chosen tab (`app/layouts/TabPill.tsx`)
+    and the new page eases in from that side (`animate-page-from-right/left`). Nothing waits
+    or freezes, so it feels like one app; each tab's page has its own loading skeleton.
+  - **Documents** zoom open from their thumbnail and shrink back when closed, with the View
+    Transitions API (`shared/lib/viewTransitions.ts`, `TransitionLink`, animations in
+    `shared/styles/transitions.css`). The router must be the `RouterProvider` from
+    `react-router/dom`, so the new page renders inside the transition at once.
+  - **Drawers and dialogs** slide or grow in and play an exit animation before closing
+    (`Modal` with `useModalClose`).
+  - Timings are tokens (`--duration-page`, `--duration-zoom`, `--duration-leave`,
+    `--ease-spring`). Browsers without the API, and people who prefer reduced motion, get no
+    animation.
+- **Buttons, fields and menus** are liquid glass too: `btn-primary` / `btn-danger` have a
+  bright rim and a soft glow (`--shadow-btn-*`), `btn-secondary` is frosted glass, and hover
+  lifts them a little. `input` (fields and drop-downs) is frosted with a brand halo on focus.
+  Drop-down menus use `glass-menu` with `menu-item` rows.
+- **Notifications** are toasts in the bottom-right corner (above the tab bar on phones):
+  `showToast({ tone, message })` from `shared/stores/toasts.ts`, drawn by `shared/ui/Toaster.tsx`.
+  Tones: info and success fade away after a few seconds; warning and error stay until closed
+  with ✕. The editor's `notify()` and the "confirm your email" reminder use them.
+- **Drawers and dialogs** close with ✕, Escape, or a click on the dimmed area around them.
+  Drawers float `--spacing-drawer-inset` from the screen edges, frosted like the editor's panels.
+- **Scrollbars** are slim, rounded and frosted grey (`--theme-scrollbar`, `--scrollbar-size`).
+- **`pb-safe`** (bars) only clears the iPhone home indicator; **`pb-safe-card`** (panel content)
+  keeps the usual padding as well.
+- **Charts** use `--theme-chart` (one teal, checked for contrast in light and dark) on a
+  `--theme-chart-track`. The dashboard funnel and stat tiles are `features/dashboard/JobInsights.tsx`;
+  the numbers come from `pipelineStats.ts` (tested on its own).
 - **Name and logo:** the product name is `APP_NAME` (`packages/shared/src/common/brand.ts`);
   translations write it as `{{app}}`. The logo is `shared/ui/Logo.tsx` (`Logo`, `LogoMark`),
   drawn with the brand tokens; `public/favicon.svg` is the same drawing.

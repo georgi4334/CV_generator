@@ -40,6 +40,26 @@ The API creates and updates the tables itself when it starts.
 Without your own domain, some providers may put these emails in spam; a domain with
 SPF/DKIM (later) fixes that.
 
+### No confirmation email arrives?
+
+Check these in order:
+
+1. **Running locally?** Without `BREVO_API_KEY` no email is sent: the link is printed in the
+   API's terminal (`--- Email to … ---`), and the app's banner says so. Copy the link from there.
+2. **The API log** (Render → your service → Logs). At start it says
+   `Account emails are sent through Brevo from …` or `… only printed in this log`. A failed
+   send logs `could not send email` with Brevo's answer, e.g. `401` (wrong API key) or
+   `400 … sender` (the `MAIL_FROM` address is not a verified sender). "Send it again" in the
+   app now also says when sending failed.
+3. **Brevo → Transactional → Logs**: shows whether Brevo accepted, delivered, or blocked
+   each email. A new Brevo account may need its profile completed (and sometimes a short
+   review) before it sends transactional email.
+4. **Sending from a Gmail address**: Gmail and other providers often reject or hide emails
+   that claim to come from `@gmail.com` but are sent by another service (DMARC). If Brevo's
+   log says "delivered" but nothing arrives, this is the likely cause. The reliable fix is a
+   domain of your own, authenticated in Brevo (**Senders, domains → Domains**, add the
+   SPF/DKIM records it shows), with `MAIL_FROM` on that domain.
+
 ## 4. AI: Google Gemini
 
 1. Get a key at <https://aistudio.google.com/apikey>. → `GEMINI_API_KEY`

@@ -53,7 +53,7 @@ export function ThemeSelect({ compact = false }: { compact?: boolean }) {
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-1.5 rounded-tight border border-transparent px-2 py-1.5 text-sm text-fg-soft hover:bg-muted focus-visible:border-line-strong"
+        className="flex items-center gap-1.5 rounded-pill border border-transparent px-2.5 py-1.5 text-sm text-fg-soft transition-[background-color,box-shadow] hover:bg-glass-hover hover:shadow-btn-glass focus-visible:border-line-strong"
       >
         <current.icon className="size-4 text-fg-muted" aria-hidden />
         {!compact && <span>{t(`common.theme.${mode}`)}</span>}
@@ -64,7 +64,7 @@ export function ThemeSelect({ compact = false }: { compact?: boolean }) {
           ref={menu}
           role="menu"
           aria-label={t('common.theme.label')}
-          className="absolute right-0 z-(--z-dropdown) mt-1 w-menu rounded-control border border-line bg-surface py-1 text-sm shadow-overlay"
+          className="glass-menu absolute right-0 z-(--z-dropdown) mt-1 w-menu"
         >
           {THEME_MODES.map(({ mode: option, icon: Icon }) => (
             <button
@@ -76,7 +76,7 @@ export function ThemeSelect({ compact = false }: { compact?: boolean }) {
                 setMode(option)
                 setOpen(false)
               }}
-              className="flex w-full items-center gap-3 px-3 py-2 text-left text-fg hover:bg-muted focus-visible:bg-muted focus-visible:outline-none"
+              className="menu-item gap-3"
             >
               <Icon className="size-4 text-fg-muted" aria-hidden />
               <span className="flex-1">{t(`common.theme.${option}`)}</span>

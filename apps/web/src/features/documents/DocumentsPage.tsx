@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next'
 import { Link, Navigate, NavLink, useParams } from 'react-router'
 import { DocumentTypeBadge, SharedBadge } from '@/shared/ui/Badges'
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog'
-import { card, PageHeader, primaryButton, secondaryButton } from '@/shared/ui/PageHeader'
+import { PageHeader, primaryButton, secondaryButton } from '@/shared/ui/PageHeader'
 import { ShareDialog } from '@/features/share/ShareDialog'
 import { errorMessage } from '@/shared/api/errorMessage'
 import { useCvList } from '@/features/cv-editor/queries'
@@ -35,6 +35,7 @@ import { useJobs } from '@/features/jobs/queries'
 import { ListSkeleton } from '@/shared/ui/Skeleton'
 import { TransitionLink } from '@/shared/ui/TransitionLink'
 import { useDocTransitionStyle } from '@/shared/lib/viewTransitions'
+import { showToast, type ToastTone } from '@/shared/stores/toasts'
 
 type SortKey = 'updated' | 'created' | 'name' | 'type'
 
@@ -76,14 +77,11 @@ function CreateNewButton({ subtab }: { subtab: DocumentSubtab }) {
         <Plus className="size-4" /> {t('documents.createNew')} <ChevronDown className="size-4" />
       </button>
       {open && (
-        <div
-          role="menu"
-          className={`${card} absolute right-0 z-(--z-dropdown) mt-2 w-menu overflow-hidden py-1 text-sm`}
-        >
-          <Link role="menuitem" to={NEW_CV_PATH} className="block px-4 py-2 hover:bg-muted">
+        <div role="menu" className="glass-menu absolute right-0 z-(--z-dropdown) mt-2 w-menu">
+          <Link role="menuitem" to={NEW_CV_PATH} className="menu-item">
             {t('labels.documentType.cv')}
           </Link>
-          <Link role="menuitem" to={NEW_LETTER_PATH} className="block px-4 py-2 hover:bg-muted">
+          <Link role="menuitem" to={NEW_LETTER_PATH} className="menu-item">
             {t('labels.documentType.coverLetter')}
           </Link>
         </div>
@@ -117,8 +115,7 @@ function DocumentIcon({ docId }: { docId: string }) {
 function RowMenu({ doc, actions }: { doc: DocumentSummary; actions: RowActions }) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
-  const item =
-    'flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent'
+  const item = 'menu-item'
   const run = (action: () => void) => () => {
     setOpen(false)
     action()
@@ -133,18 +130,24 @@ function RowMenu({ doc, actions }: { doc: DocumentSummary; actions: RowActions }
         aria-label={t('documents.actionsFor', { title: doc.title })}
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className="rounded-tight p-1.5 text-fg-muted hover:bg-muted"
+        className="btn-icon p-1.5"
       >
         <MoreVertical className="size-4" />
       </button>
       {open && (
-        <div
-          role="menu"
-          className={`${card} absolute right-0 z-(--z-dropdown) mt-1 w-menu overflow-hidden py-1 text-sm`}
-        >
-          <Link role="menuitem" to={editPath(doc)} className={item}>
+        <div role="menu" className="glass-menu absolute right-0 z-(--z-dropdown) mt-1 w-menu">
+          <TransitionLink
+            role="menuitem"
+            to={editPath(doc)}
+            transition="doc-open"
+            docId={doc.id}
+            transitionSource={(link) =>
+              link.closest('li')?.querySelector<HTMLElement>('[data-doc-icon]')
+            }
+            className={item}
+          >
             <FileText className="size-4" /> {t('documents.menu.open')}
-          </Link>
+          </TransitionLink>
           <button type="button" role="menuitem" className={item} onClick={run(actions.onRename)}>
             <Pencil className="size-4" /> {t('documents.menu.rename')}
           </button>
@@ -211,7 +214,6 @@ export function DocumentsPage() {
   const [renaming, setRenaming] = useState<string | null>(null)
   const [toDelete, setToDelete] = useState<DocumentSummary[] | null>(null)
   const [sharing, setSharing] = useState<DocumentSummary | null>(null)
-  const [message, setMessage] = useState<string | null>(null)
 
   const documents = useMemo(() => {
     if (!isDocumentSubtab(subtab)) return []
@@ -240,21 +242,21 @@ export function DocumentsPage() {
       else next.add(id)
       return next
     })
+  // Results show as toasts: failures stay until closed, the rest fade away.
+  const say = (tone: ToastTone, message: string) => showToast({ id: 'documents', tone, message })
   const report = (build: (message: string) => string) => (e: unknown) =>
-    setMessage(build(errorMessage(e)))
+    say('error', build(errorMessage(e)))
 
   const download = async (doc: DocumentSummary) => {
-    setMessage(null)
     try {
       await actions.download(doc)
-      setMessage(t('documents.messages.printHint'))
+      say('info', t('documents.messages.printHint'))
     } catch (e) {
       report((message) => t('documents.messages.downloadFailed', { title: doc.title, message }))(e)
     }
   }
 
   const duplicateMany = async (docs: DocumentSummary[]) => {
-    setMessage(null)
     for (const doc of docs) {
       try {
         await actions.duplicate(doc)
@@ -263,7 +265,7 @@ export function DocumentsPage() {
         return
       }
     }
-    setMessage(t('documents.messages.copied', { count: docs.length }))
+    say('success', t('documents.messages.copied', { count: docs.length }))
   }
 
   return (
@@ -284,7 +286,7 @@ export function DocumentsPage() {
               `rounded-pill px-4 py-1.5 text-sm font-medium ${
                 isActive
                   ? 'bg-brand text-on-brand'
-                  : 'bg-surface text-fg-soft ring-1 ring-line hover:bg-muted '
+                  : 'bg-glass text-fg-soft ring-1 ring-glass-border backdrop-blur-glass hover:bg-glass-strong'
               }`
             }
           >
@@ -355,12 +357,6 @@ export function DocumentsPage() {
             <Trash2 className="size-4" /> {t('common.delete')}
           </button>
         </div>
-      )}
-
-      {message && (
-        <p role="status" className="mb-3 text-sm text-fg-soft">
-          {message}
-        </p>
       )}
 
       <div className="glass">
@@ -516,7 +512,8 @@ export function DocumentsPage() {
           onConfirm={() => {
             const ids = toDelete.map((doc) => doc.id)
             remove.mutate(toDelete, {
-              onSuccess: () => setMessage(t('documents.messages.deleted', { count: ids.length })),
+              onSuccess: () =>
+                say('success', t('documents.messages.deleted', { count: ids.length })),
               onError: report((message) => t('documents.messages.deleteFailed', { message })),
               onSettled: () => {
                 setToDelete(null)

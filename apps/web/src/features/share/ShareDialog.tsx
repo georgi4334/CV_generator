@@ -3,6 +3,7 @@ import { Check, Copy, ExternalLink, X } from 'lucide-react'
 import { useId, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Modal } from '@/shared/ui/Modal'
+import { useModalClose } from '@/shared/ui/useModalClose'
 import { primaryButton, secondaryButton } from '@/shared/ui/PageHeader'
 import { errorMessage } from '@/shared/api/errorMessage'
 import { useDocumentShare, useUpdateDocumentShare } from './queries'
@@ -28,6 +29,7 @@ export function ShareDialog({
   const update = useUpdateDocumentShare(type, id)
   const input = useRef<HTMLInputElement>(null)
   const [copied, setCopied] = useState(false)
+  const { closing, requestClose, closed } = useModalClose(onClose)
 
   const link = share.data?.link ?? null
   const active = link?.isActive ?? false
@@ -45,16 +47,22 @@ export function ShareDialog({
   }
 
   return (
-    <Modal labelledBy={headingId} onClose={onClose} className="max-w-md">
+    <Modal
+      labelledBy={headingId}
+      onClose={closed}
+      onCloseRequest={requestClose}
+      closing={closing}
+      className="max-w-md"
+    >
       <div className="flex items-start justify-between gap-4">
         <h2 id={headingId} className="text-lg font-semibold break-words">
           {t('share.dialog.heading', { title })}
         </h2>
         <button
           type="button"
-          onClick={onClose}
+          onClick={requestClose}
           aria-label={t('common.close')}
-          className="rounded-tight p-1 text-fg-muted hover:bg-muted "
+          className="btn-icon p-1"
         >
           <X className="size-4" />
         </button>
@@ -157,7 +165,7 @@ export function ShareDialog({
       )}
 
       <div className="mt-5 flex justify-end">
-        <button type="button" onClick={onClose} className={primaryButton}>
+        <button type="button" onClick={requestClose} className={primaryButton}>
           {t('share.dialog.done')}
         </button>
       </div>

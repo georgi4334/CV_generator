@@ -1,12 +1,13 @@
 import { Suspense, useEffect } from 'react'
 import { Outlet } from 'react-router'
 import { PageLoading } from '@/shared/ui/LoadStates'
+import { Toaster } from '@/shared/ui/Toaster'
 import { usePrintJob } from '@/features/print/printCv'
 import { preloadPages } from '@/shared/lib/lazyPage'
 import { PrintHost } from '@/app/lazyPages'
 
-/** How long after the first page loads to start fetching the others. */
-const PRELOAD_DELAY_MS = 1500
+/** How long after the first page loads to start fetching the others (soon, so tabs open at once). */
+const PRELOAD_DELAY_MS = 300
 
 /** Wraps every page; holds what all pages share, like printing. */
 export function RootLayout() {
@@ -23,6 +24,7 @@ export function RootLayout() {
       <Suspense fallback={<PageLoading />}>
         <Outlet />
       </Suspense>
+      <Toaster />
       {/* Its own boundary: loading the printer must never blank the page. */}
       <Suspense fallback={null}>{printing && <PrintHost />}</Suspense>
     </>

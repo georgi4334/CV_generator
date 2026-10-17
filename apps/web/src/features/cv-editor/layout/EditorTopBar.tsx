@@ -204,16 +204,13 @@ export function EditorTopBar({
               <CircleHelp className="size-4" />
             </button>
             {helpOpen && (
-              <div
-                role="menu"
-                className="absolute right-0 z-(--z-dropdown) mt-2 w-menu rounded-control border border-line bg-surface py-1 text-sm shadow-overlay"
-              >
+              <div role="menu" className="glass-menu absolute right-0 z-(--z-dropdown) mt-2 w-menu">
                 {(['helpCenter', 'contactUs'] as const).map((key) => (
                   <button
                     key={key}
                     type="button"
                     role="menuitem"
-                    className="block w-full px-4 py-2 text-left hover:bg-muted"
+                    className="menu-item"
                     onClick={() => {
                       setHelpOpen(false)
                       notify(t('editor.topBar.notAvailable', { item: t(`editor.topBar.${key}`) }))

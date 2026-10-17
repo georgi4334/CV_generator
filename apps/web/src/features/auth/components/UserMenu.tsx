@@ -5,6 +5,7 @@ import { useNavigate, useSearchParams } from 'react-router'
 import { useCurrentUser, useLogout } from '@/features/auth/queries'
 import { AccountSettings } from './AccountSettings'
 import { Modal } from '@/shared/ui/Modal'
+import { useModalClose } from '@/shared/ui/useModalClose'
 import { THEME_MODES } from '@/shared/ui/themeModes'
 import { useThemeStore } from '@/shared/stores/theme'
 
@@ -55,7 +56,7 @@ function MenuRow({
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-center gap-3 rounded-control px-3 py-2.5 text-left text-sm hover:bg-muted"
+      className="flex w-full items-center gap-3 rounded-control px-3 py-2.5 text-left text-sm hover:bg-glass-hover"
     >
       {icon}
       <span className="flex-1">{label}</span>
@@ -76,7 +77,7 @@ function ThemeOptions() {
       {THEME_MODES.map(({ mode: option, icon: Icon }) => (
         <label
           key={option}
-          className="flex cursor-pointer items-center gap-3 rounded-control px-3 py-2.5 text-sm hover:bg-muted has-checked:bg-brand-soft has-checked:text-brand-fg-strong has-focus-visible:outline-2 has-focus-visible:outline-brand-line"
+          className="flex cursor-pointer items-center gap-3 rounded-control px-3 py-2.5 text-sm hover:bg-glass-hover has-checked:bg-brand-soft has-checked:text-brand-fg-strong has-focus-visible:outline-2 has-focus-visible:outline-brand-line"
         >
           <input
             type="radio"
@@ -130,10 +131,12 @@ export function UserMenu() {
     )
   }, [requested, setParams])
 
+  // The drawer slides back out to the right before it goes.
+  const { closing, requestClose, closed } = useModalClose(() => setView(null))
+
   if (!user) return null
   const label = user.name || user.email
   const avatar = initials(user.name, user.email)
-  const close = () => setView(null)
   const ThemeIcon = THEME_MODES.find((m) => m.mode === themeMode)?.icon ?? Settings
   const titles = { account: t('auth.accountSettings'), theme: t('common.theme.label') }
 
@@ -145,7 +148,7 @@ export function UserMenu() {
         aria-haspopup="dialog"
         aria-expanded={view !== null}
         onClick={() => setView('menu')}
-        className="flex items-center gap-2 rounded-pill p-0.5 text-sm text-fg-soft hover:bg-muted lg:pr-2"
+        className="flex items-center gap-2 rounded-pill p-0.5 text-sm text-fg-soft hover:bg-glass-hover lg:pr-2"
       >
         <Avatar text={avatar} />
         {/* The name is always in the button's accessible name, visible from lg: up. */}
@@ -157,7 +160,13 @@ export function UserMenu() {
       </button>
 
       {view && (
-        <Modal labelledBy={headingId} onClose={close} variant="side">
+        <Modal
+          labelledBy={headingId}
+          onClose={closed}
+          onCloseRequest={requestClose}
+          closing={closing}
+          variant="side"
+        >
           <div className="flex h-full flex-col">
             {view === 'menu' ? (
               <>
@@ -169,7 +178,7 @@ export function UserMenu() {
                     </h2>
                     {user.name && <p className="truncate text-sm text-fg-muted">{user.email}</p>}
                   </div>
-                  <CloseButton onClick={close} />
+                  <CloseButton onClick={requestClose} />
                 </div>
                 <nav aria-label={t('auth.menu')} className="flex-1 space-y-1 p-2">
                   <MenuRow
@@ -184,7 +193,7 @@ export function UserMenu() {
                     onClick={() => setView('theme')}
                   />
                 </nav>
-                <div className="pb-safe border-t border-line p-card">
+                <div className="pb-safe-card border-t border-line p-card">
                   <button
                     type="button"
                     disabled={logout.isPending}
@@ -216,11 +225,11 @@ export function UserMenu() {
                   <h2 id={headingId} className="min-w-0 flex-1 truncate font-semibold">
                     {titles[view]}
                   </h2>
-                  <CloseButton onClick={close} />
+                  <CloseButton onClick={requestClose} />
                 </div>
                 <div
                   key={view}
-                  className="pb-safe flex-1 animate-view-in overflow-y-auto p-card motion-reduce:animate-none"
+                  className="pb-safe-card flex-1 animate-view-in overflow-y-auto p-card motion-reduce:animate-none"
                 >
                   {view === 'account' ? <AccountSettings /> : <ThemeOptions />}
                 </div>

@@ -46,6 +46,8 @@ export const auth = {
     banner: 'Please confirm your email address: we sent a link to <strong>{{email}}</strong>.',
     resent: 'A new link is on its way.',
     resend: 'Send it again',
+    notSent:
+      "This server does not send emails yet: the confirmation link is printed in the API's log. Set BREVO_API_KEY and MAIL_FROM to send real emails.",
     title: 'Confirm your email',
     goToApp: 'Go to the app',
     incomplete: 'This link is incomplete. Open the link from the email again.',

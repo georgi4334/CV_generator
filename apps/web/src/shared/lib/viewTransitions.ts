@@ -2,12 +2,11 @@ import type { CSSProperties, MouseEvent } from 'react'
 import { useDocTransition } from '@/shared/stores/docTransition'
 
 /**
- * Page transitions with the browser's View Transitions API: tabs slide
- * sideways, a document zooms open from its thumbnail and shrinks back when
- * closed. Browsers without the API, and people who prefer reduced motion,
+ * Document transitions with the browser's View Transitions API: a document
+ * zooms open from its thumbnail and shrinks back when closed. Browsers without the API, and people who prefer reduced motion,
  * simply get the new page. The animations are in shared/styles/transitions.css.
  */
-export type TransitionKind = 'tab-forward' | 'tab-back' | 'doc-open' | 'doc-close'
+export type TransitionKind = 'doc-open' | 'doc-close'
 
 /** The view-transition name shared by a document's thumbnail and its open page. */
 export const DOC_TRANSITION_NAME = 'doc'

@@ -22,6 +22,7 @@ import { useCoverLetterList } from '@/features/cover-letters/queries'
 import { useDeleteJob, useJobs, useUpdateJob } from './queries'
 import { useBreakpoint } from '@/shared/lib/useBreakpoint'
 import { JobsSkeleton } from './components/JobsSkeleton'
+import { showToast } from '@/shared/stores/toasts'
 
 const select = 'input w-auto'
 
@@ -51,7 +52,6 @@ export function JobsPage() {
     return params.get('add') === '1' ? { kind: 'add' } : null
   })
   const [toDelete, setToDelete] = useState<Job | null>(null)
-  const [message, setMessage] = useState<string | null>(null)
 
   useEffect(() => {
     // The request is read once; keep the address clean afterwards.
@@ -77,12 +77,15 @@ export function JobsPage() {
       cvs: (cvs ?? []).filter((doc) => doc.type === 'cv'),
       letters: letters ?? [],
       update: (job: Job, change: UpdateJobInput) => {
-        setMessage(null)
         update.mutate(
           { id: job.id, change },
           {
             onError: (e) =>
-              setMessage(t('jobs.saveError', { position: job.position, message: errorMessage(e) })),
+              showToast({
+                id: 'jobs',
+                tone: 'error',
+                message: t('jobs.saveError', { position: job.position, message: errorMessage(e) }),
+              }),
           },
         )
       },
@@ -164,12 +167,6 @@ export function JobsPage() {
         )}
       </div>
 
-      {message && (
-        <p role="alert" className="mb-3 text-sm text-danger-fg ">
-          {message}
-        </p>
-      )}
-
       {jobsQuery.isPending ? (
         <JobsSkeleton wide={wide} />
       ) : jobsQuery.isError ? (
@@ -244,7 +241,12 @@ export function JobsPage() {
               onSuccess: () => {
                 if (drawer?.kind === 'job' && drawer.id === toDelete.id) setDrawer(null)
               },
-              onError: (e) => setMessage(t('jobs.deleteError', { message: errorMessage(e) })),
+              onError: (e) =>
+                showToast({
+                  id: 'jobs',
+                  tone: 'error',
+                  message: t('jobs.deleteError', { message: errorMessage(e) }),
+                }),
               onSettled: () => setToDelete(null),
             })
           }

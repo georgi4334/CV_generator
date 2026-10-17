@@ -114,7 +114,10 @@ export async function buildApp(opts: AppOptions) {
   await app.register(
     async (api) => {
       // Public routes
-      await api.register(healthRoutes, { isDbHealthy: opts.database.isHealthy })
+      await api.register(healthRoutes, {
+        isDbHealthy: opts.database.isHealthy,
+        emailDelivers: mailer.delivers,
+      })
       // For keep-warm services: answers without touching the database, so the
       // database can still sleep when nobody uses the app.
       api.get('/ping', async () => ({ ok: true }))

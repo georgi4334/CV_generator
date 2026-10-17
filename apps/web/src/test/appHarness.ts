@@ -10,6 +10,7 @@ import { useCvEditor } from '@/features/cv-editor/state/cvEditorStore'
 import { useSaveState } from '@/features/cv-editor/state/editorSession'
 import { useEditorUi } from '@/features/cv-editor/state/editorUi'
 import { auth, fake } from './fakeHolders'
+import { useToasts } from '@/shared/stores/toasts'
 
 vi.mock('@/features/cv-editor/api', async () => {
   const { createFakeCvApi } = await import('./fakeCvApi')
@@ -43,7 +44,7 @@ vi.mock('@/shared/api/useHealth', () => ({
   useHealth: () => ({
     isLoading: false,
     isError: false,
-    data: { status: 'ok', database: 'up', timestamp: '2026-10-13T10:00:00Z' },
+    data: { status: 'ok', database: 'up', email: 'service', timestamp: '2026-10-13T10:00:00Z' },
   }),
 }))
 
@@ -53,4 +54,5 @@ beforeEach(() => {
   useEditorUi.setState({ activePanel: null, notice: null, previewVersionId: null })
   useCvEditor.setState({ docId: null, cv: null, past: [], future: [] })
   useSaveState.setState({ status: 'saved', lastSavedAt: null, error: null })
+  useToasts.setState({ toasts: [] })
 })

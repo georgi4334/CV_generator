@@ -17,6 +17,7 @@ export const errors: Messages['errors'] = {
   too_many_requests: 'Zu viele Versuche. Bitte warten Sie etwas und versuchen Sie es erneut.',
   invalid_token: 'Dieser Link ist ungültig oder abgelaufen',
   wrong_password: 'Das Passwort ist nicht korrekt',
+  email_failed: 'Die E-Mail konnte nicht gesendet werden. Bitte versuchen Sie es später erneut.',
   plan_limit: 'Sie haben das Limit Ihres Tarifs erreicht.',
   file_too_large: 'Bilder dürfen höchstens 5 MB groß sein',
   unsupported_type: 'Nur PNG-, JPEG- und WebP-Bilder sind erlaubt',

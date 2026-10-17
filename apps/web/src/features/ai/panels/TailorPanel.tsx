@@ -107,10 +107,10 @@ export function TailorPanel() {
     setCopying(true)
     try {
       const id = await cv.createTailoredCopy(rewrites, job?.id ?? null)
-      notify(t('ai.tailor.copyCreated'))
+      notify(t('ai.tailor.copyCreated'), 'success')
       navigate(`/cvs/${id}/edit`)
     } catch (error) {
-      notify(t('ai.tailor.copyFailed', { message: errorMessage(error) }))
+      notify(t('ai.tailor.copyFailed', { message: errorMessage(error) }), 'error')
     } finally {
       setCopying(false)
     }
