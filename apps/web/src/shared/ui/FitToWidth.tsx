@@ -9,12 +9,15 @@ export function ScaledBox({
   width,
   scale,
   style,
+  aside,
   children,
 }: {
   width: number
   scale: number
   /** Extra style for the box, e.g. a view-transition name. */
   style?: CSSProperties
+  /** Shown just left of the box, as tall as it (e.g. the editor's rail, sticky inside). */
+  aside?: ReactNode
   children: ReactNode
 }) {
   const inner = useRef<HTMLDivElement>(null)
@@ -32,7 +35,7 @@ export function ScaledBox({
   const scaled = scale !== 1
   return (
     <div
-      className="mx-auto"
+      className="relative mx-auto"
       style={{
         ...style,
         width: Math.round(width * scale),
@@ -49,6 +52,11 @@ export function ScaledBox({
       >
         {children}
       </div>
+      {aside && (
+        <div className="absolute top-0 right-full bottom-0 flex flex-col justify-end pr-4">
+          {aside}
+        </div>
+      )}
     </div>
   )
 }
@@ -66,6 +74,7 @@ export function FitToWidth({
   scale,
   onFit,
   boxStyle,
+  aside,
   children,
 }: {
   width: number
@@ -73,6 +82,8 @@ export function FitToWidth({
   onFit?: (scale: number) => void
   /** Style for the scaled box itself (not the full-width wrapper). */
   boxStyle?: CSSProperties
+  /** Shown just left of the box (see ScaledBox). */
+  aside?: ReactNode
   children: ReactNode
 }) {
   const outer = useRef<HTMLDivElement>(null)
@@ -98,7 +109,7 @@ export function FitToWidth({
 
   return (
     <div ref={outer} className="w-full">
-      <ScaledBox width={width} scale={scale ?? fit} style={boxStyle}>
+      <ScaledBox width={width} scale={scale ?? fit} style={boxStyle} aside={aside}>
         {children}
       </ScaledBox>
     </div>

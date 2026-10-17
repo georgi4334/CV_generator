@@ -10,6 +10,8 @@ export const renderer: Messages['renderer'] = {
   addEntryBelow: 'Eintrag darunter hinzufügen',
   duplicateEntry: 'Eintrag duplizieren',
   deleteEntry: 'Eintrag löschen',
+  entry: 'Eintrag',
+  editEntry: 'Eintrag bearbeiten',
   addEntry: 'Eintrag hinzufügen',
   addPhoto: 'Foto hinzufügen',
   changePhoto: 'Foto ändern',

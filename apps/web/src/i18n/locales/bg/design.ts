@@ -68,6 +68,8 @@ export const design: Messages['design'] = {
     hint: 'JPG, PNG или WebP до 5 MB. Можете и да пуснете изображение върху прегледа.',
     show: 'Показвай снимката',
     shape: 'Форма на снимката',
+    position: 'Позиция',
+    positions: { name: 'До името', 'top-left': 'Горе вляво', 'top-right': 'Горе вдясно' },
     shapes: { circle: 'Кръг', rounded: 'Заоблена', square: 'Квадрат' },
   },
   backgrounds: {

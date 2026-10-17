@@ -148,6 +148,8 @@ describe('Photo', () => {
     expect(state().cv!.header.showPhoto).toBe(false)
     fireEvent.click(screen.getByRole('radio', { name: 'Square' }))
     expect(state().cv!.header.photoShape).toBe('square')
+    fireEvent.click(screen.getByRole('radio', { name: 'Top right' }))
+    expect(state().cv!.header.photoPosition).toBe('top-right')
 
     fireEvent.click(screen.getByRole('button', { name: 'Remove' }))
     expect(state().cv!.header.photoUrl).toBeNull()

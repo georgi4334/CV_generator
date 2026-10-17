@@ -1,4 +1,4 @@
-import { PHOTO_SHAPES } from '@cv/shared'
+import { PHOTO_POSITIONS, PHOTO_SHAPES, type PhotoPosition } from '@cv/shared'
 import { ImagePlus, Trash2, UserRound } from 'lucide-react'
 import { useId, useState, type DragEvent } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -25,6 +25,7 @@ export function PhotoPicker() {
 
   const hasPhoto = header.photoUrl !== null
   const shape = header.photoShape ?? 'circle'
+  const position = header.photoPosition ?? 'name'
 
   const upload = async (image: Promise<Blob | null>) => {
     setUploading(true)
@@ -158,6 +159,63 @@ export function PhotoPicker() {
           </button>
         ))}
       </div>
+      <h4 className="mt-4 mb-2 text-xs text-fg-muted">{t('design.photo.position')}</h4>
+      <div
+        role="radiogroup"
+        aria-label={t('design.photo.position')}
+        className="grid grid-cols-3 gap-2"
+      >
+        {PHOTO_POSITIONS.map((option) => (
+          <button
+            key={option}
+            type="button"
+            role="radio"
+            aria-checked={position === option}
+            onClick={() => updateHeader({ photoPosition: option })}
+            className={`flex flex-col items-center gap-1.5 rounded-control border px-2 py-2 text-xs transition-colors hover:bg-glass-hover ${
+              position === option
+                ? 'border-brand-line bg-brand-soft text-brand-fg-strong'
+                : 'border-line-strong text-fg-soft'
+            }`}
+          >
+            <PositionSample position={option} />
+            {t(`design.photo.positions.${option}`)}
+          </button>
+        ))}
+      </div>
     </section>
+  )
+}
+
+/** A tiny page header: where the photo (the dot) sits for each position. */
+function PositionSample({ position }: { position: PhotoPosition }) {
+  const dot = <span className="size-2.5 shrink-0 rounded-full bg-current" />
+  const lines = (
+    <span className="flex flex-1 flex-col gap-0.5">
+      <span className="h-1 w-full rounded-pill bg-fg-faint" />
+      <span className="h-1 w-2/3 rounded-pill bg-fg-faint" />
+    </span>
+  )
+  return (
+    <span
+      aria-hidden
+      className={`flex h-6 w-12 items-start gap-1 rounded-xs border border-line-strong bg-surface p-1 ${
+        position === 'top-right' ? 'flex-row-reverse' : ''
+      } ${position === 'name' ? 'items-center' : ''}`}
+    >
+      {position === 'name' ? (
+        <>
+          <span className="w-1" />
+          {dot}
+          {lines}
+        </>
+      ) : (
+        <>
+          {dot}
+          <span className="flex-1" />
+          {lines}
+        </>
+      )}
+    </span>
   )
 }
