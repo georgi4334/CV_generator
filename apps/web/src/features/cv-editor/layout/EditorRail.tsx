@@ -4,21 +4,25 @@ import { Link } from 'react-router'
 import { useEditorUi } from '@/features/cv-editor/state/editorUi'
 
 const railButton =
-  'flex size-9 items-center justify-center rounded-tight text-fg-soft hover:bg-surface hover:text-fg hover:shadow-card'
+  'flex size-9 items-center justify-center rounded-pill text-fg-soft hover:bg-glass-strong hover:text-fg'
 
-interface EditorRightRailProps {
+interface EditorRailProps {
   previewTo: string
   /** Not set for cover letters yet (Step 13). */
   onDownload?: () => void
   onShare?: () => void
 }
 
-export function EditorRightRail({ previewTo, onDownload, onShare }: EditorRightRailProps) {
+/**
+ * Quick actions in a vertical glass pill beside the page: preview, PDF, share
+ * link, AI assistant and premium. It stays in view near the bottom of the screen.
+ */
+export function EditorRail({ previewTo, onDownload, onShare }: EditorRailProps) {
   const { t } = useTranslation()
   const { togglePanel, notify } = useEditorUi()
 
   return (
-    <div className="sticky top-6 flex flex-col gap-2 self-start">
+    <div className="glass-pill sticky bottom-6 flex flex-col gap-1 self-end">
       <Link
         to={previewTo}
         className={railButton}
@@ -56,7 +60,7 @@ export function EditorRightRail({ previewTo, onDownload, onShare }: EditorRightR
       </button>
       <button
         type="button"
-        className="flex size-9 items-center justify-center rounded-tight bg-amber-400 text-warning-fg hover:bg-amber-300"
+        className="flex size-9 items-center justify-center rounded-pill bg-amber-400 text-warning-fg hover:bg-amber-300"
         aria-label={t('editor.rail.premium')}
         title={t('editor.rail.premium')}
         onClick={() => notify(t('editor.rail.premiumPlanned'))}

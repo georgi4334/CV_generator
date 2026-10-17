@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import type { ApiRequestError } from '@/shared/api/client'
 import { errorMessage } from '@/shared/api/errorMessage'
+import { DOC_TRANSITION_NAME } from '@/shared/lib/viewTransitions'
 import { LoadingRegion, PaperSkeleton, Skeleton, SkeletonText } from '@/shared/ui/Skeleton'
 
 /** While a page loads: the outline of the app (header, title, cards), shimmering. */
@@ -49,7 +50,13 @@ export function EditorLoading({ label }: { label?: string }) {
         </div>
       </div>
       <div className="flex flex-1 justify-center overflow-hidden px-gutter py-section md:py-8">
-        <PaperSkeleton />
+        {/* Named like the open page, so the zoom from the thumbnail lands here while it loads. */}
+        <div
+          className="flex w-full justify-center"
+          style={{ viewTransitionName: DOC_TRANSITION_NAME }}
+        >
+          <PaperSkeleton />
+        </div>
       </div>
     </LoadingRegion>
   )

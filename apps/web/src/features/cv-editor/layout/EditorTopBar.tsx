@@ -1,7 +1,7 @@
 import { ArrowLeft, CircleHelp, History, PanelLeft, Redo2, Undo2 } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router'
+import { TransitionLink } from '@/shared/ui/TransitionLink'
 import { LanguageSelect } from '@/shared/ui/LanguageSelect'
 import { ThemeSelect } from '@/shared/ui/ThemeSelect'
 import { useEditorUi } from '@/features/cv-editor/state/editorUi'
@@ -9,10 +9,9 @@ import { useCvEditor } from '@/features/cv-editor/state/cvEditorStore'
 import { EditorMoreMenu } from './EditorMoreMenu'
 import { CENTER_TOOLS, toolUnavailable } from './tools'
 
-const toolButton =
-  'inline-flex items-center gap-1.5 whitespace-nowrap rounded-tight px-2.5 py-1.5 text-sm text-fg-soft hover:bg-muted'
-const activeTool = 'bg-brand-soft text-brand-fg'
 const iconButton = 'btn-icon'
+/** An icon-only choice inside a glass pill. */
+const pillIcon = 'pill-item px-2 disabled:opacity-40 disabled:hover:bg-transparent'
 
 interface EditorTopBarProps {
   /** The document title (editable for CVs). */
@@ -66,11 +65,11 @@ export function EditorTopBar({
   }
   const [helpOpen, setHelpOpen] = useState(false)
 
-  const undoRedoButtons = (
+  const undoRedoButtons = (buttonClass: string) => (
     <>
       <button
         type="button"
-        className={iconButton}
+        className={buttonClass}
         disabled={!canUndo}
         onClick={undo}
         aria-label={t('editor.topBar.undo')}
@@ -80,7 +79,7 @@ export function EditorTopBar({
       </button>
       <button
         type="button"
-        className={iconButton}
+        className={buttonClass}
         disabled={!canRedo}
         onClick={redo}
         aria-label={t('editor.topBar.redo')}
@@ -93,20 +92,21 @@ export function EditorTopBar({
 
   if (compact) {
     return (
-      <header className="flex h-14 shrink-0 items-center gap-1 border-b border-line bg-surface px-2">
-        <Link
+      <header className="glass-bar flex h-14 shrink-0 items-center gap-1 px-2">
+        <TransitionLink
+          transition="doc-close"
           to={backTo}
           className={iconButton}
           aria-label={t('editor.topBar.backToDocuments')}
           title={t('editor.topBar.backToDocuments')}
         >
           <ArrowLeft className="size-5" />
-        </Link>
+        </TransitionLink>
         <div className="flex min-w-0 flex-1 items-center gap-2 text-sm text-fg-muted [&>*:first-child]:min-w-0 [&>*:first-child]:truncate">
           {title}
           {status}
         </div>
-        {undoRedoButtons}
+        {undoRedoButtons(iconButton)}
         <EditorMoreMenu
           previewTo={previewTo}
           onDownload={onDownload}
@@ -117,36 +117,43 @@ export function EditorTopBar({
     )
   }
 
+  const toolClass = (active: boolean) => `pill-item ${active ? 'pill-item-active' : ''}`
+
+  // Floating over the page: the way back and the title, the tools in a glass
+  // pill in the middle, and the document's own actions in a second pill.
   return (
-    <header className="flex h-12 shrink-0 items-center gap-2 border-b border-line bg-surface px-3">
-      <div className="flex min-w-0 flex-1 items-center gap-1">
-        <Link
+    <header className="grid shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 pt-3 pb-1">
+      <div className="flex min-w-0 items-center gap-2">
+        <TransitionLink
+          transition="doc-close"
           to={backTo}
-          className={iconButton}
+          className="glass flex size-10 shrink-0 items-center justify-center rounded-pill text-fg-soft hover:text-fg"
           aria-label={t('editor.topBar.backToDocuments')}
           title={t('editor.topBar.backToDocuments')}
         >
           <ArrowLeft className="size-4" />
-        </Link>
-        <button
-          type="button"
-          className={`${toolButton} ${activePanel === 'ai' ? activeTool : ''}`}
-          aria-pressed={activePanel === 'ai'}
-          aria-label={t('editor.panels.ai')}
-          title={t('editor.panels.ai')}
-          onClick={() => togglePanel('ai')}
-        >
-          <PanelLeft className="size-4" />{' '}
-          <span className="hidden 2xl:inline">{t('editor.panels.ai')}</span>
-        </button>
-        {/* Keeps room for the title when the tool names are long (e.g. in Bulgarian). */}
-        <span className="ml-2 hidden min-w-40 items-center gap-2 text-sm text-fg-muted lg:flex">
-          {title}
-          {status}
-        </span>
+        </TransitionLink>
+        <div className="glass-pill flex min-w-0 items-center gap-1">
+          <button
+            type="button"
+            className={toolClass(activePanel === 'ai')}
+            aria-pressed={activePanel === 'ai'}
+            aria-label={t('editor.panels.ai')}
+            title={t('editor.panels.ai')}
+            onClick={() => togglePanel('ai')}
+          >
+            <PanelLeft className="size-4" />{' '}
+            <span className="hidden 2xl:inline">{t('editor.panels.ai')}</span>
+          </button>
+          {/* Keeps room for the title when the tool names are long (e.g. in Bulgarian). */}
+          <span className="flex min-w-0 items-center gap-2 pr-3 text-sm text-fg-muted [&>*:first-child]:min-w-0 [&>*:first-child]:truncate">
+            {title}
+            {status}
+          </span>
+        </div>
       </div>
 
-      <nav aria-label={t('editor.topBar.tools')} className="flex items-center gap-0.5">
+      <nav aria-label={t('editor.topBar.tools')} className="glass-pill flex items-center gap-0.5">
         {CENTER_TOOLS.map(({ icon: Icon, panel }) => {
           const label = t(`editor.panels.${panel}`)
           const active = activePanel === panel
@@ -154,7 +161,7 @@ export function EditorTopBar({
             <button
               key={panel}
               type="button"
-              className={`${toolButton} ${active ? activeTool : ''}`}
+              className={toolClass(active)}
               aria-pressed={active}
               aria-label={label}
               title={label}
@@ -170,55 +177,57 @@ export function EditorTopBar({
         })}
       </nav>
 
-      <div className="flex flex-1 items-center justify-end gap-0.5">
-        {undoRedoButtons}
-        <button
-          type="button"
-          className={`${toolButton} ${activePanel === 'history' ? activeTool : ''}`}
-          aria-pressed={activePanel === 'history'}
-          aria-label={t('editor.panels.history')}
-          title={t('editor.panels.history')}
-          onClick={() =>
-            historyEnabled ? togglePanel('history') : notify(t('editor.topBar.historyOnCvs'))
-          }
-        >
-          <History className="size-4" />{' '}
-          <span className="hidden 2xl:inline">{t('editor.panels.history')}</span>
-        </button>
-        <div className="relative">
+      <div className="flex justify-end">
+        <div className="glass-pill flex items-center gap-0.5">
+          {undoRedoButtons(pillIcon)}
           <button
             type="button"
-            className={iconButton}
-            aria-label={t('editor.topBar.help')}
-            aria-expanded={helpOpen}
-            onClick={() => setHelpOpen((o) => !o)}
+            className={toolClass(activePanel === 'history')}
+            aria-pressed={activePanel === 'history'}
+            aria-label={t('editor.panels.history')}
+            title={t('editor.panels.history')}
+            onClick={() =>
+              historyEnabled ? togglePanel('history') : notify(t('editor.topBar.historyOnCvs'))
+            }
           >
-            <CircleHelp className="size-4" />
+            <History className="size-4" />{' '}
+            <span className="hidden 2xl:inline">{t('editor.panels.history')}</span>
           </button>
-          {helpOpen && (
-            <div
-              role="menu"
-              className="absolute right-0 z-(--z-dropdown) mt-2 w-menu rounded-control border border-line bg-surface py-1 text-sm shadow-overlay"
+          <div className="relative">
+            <button
+              type="button"
+              className={pillIcon}
+              aria-label={t('editor.topBar.help')}
+              aria-expanded={helpOpen}
+              onClick={() => setHelpOpen((o) => !o)}
             >
-              {(['helpCenter', 'contactUs'] as const).map((key) => (
-                <button
-                  key={key}
-                  type="button"
-                  role="menuitem"
-                  className="block w-full px-4 py-2 text-left hover:bg-muted"
-                  onClick={() => {
-                    setHelpOpen(false)
-                    notify(t('editor.topBar.notAvailable', { item: t(`editor.topBar.${key}`) }))
-                  }}
-                >
-                  {t(`editor.topBar.${key}`)}
-                </button>
-              ))}
-            </div>
-          )}
+              <CircleHelp className="size-4" />
+            </button>
+            {helpOpen && (
+              <div
+                role="menu"
+                className="absolute right-0 z-(--z-dropdown) mt-2 w-menu rounded-control border border-line bg-surface py-1 text-sm shadow-overlay"
+              >
+                {(['helpCenter', 'contactUs'] as const).map((key) => (
+                  <button
+                    key={key}
+                    type="button"
+                    role="menuitem"
+                    className="block w-full px-4 py-2 text-left hover:bg-muted"
+                    onClick={() => {
+                      setHelpOpen(false)
+                      notify(t('editor.topBar.notAvailable', { item: t(`editor.topBar.${key}`) }))
+                    }}
+                  >
+                    {t(`editor.topBar.${key}`)}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <LanguageSelect compact />
+          <ThemeSelect compact />
         </div>
-        <LanguageSelect compact />
-        <ThemeSelect compact />
       </div>
     </header>
   )

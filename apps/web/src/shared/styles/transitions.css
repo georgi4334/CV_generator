@@ -1,0 +1,101 @@
+/*
+ * Page transitions (View Transitions API, see shared/lib/viewTransitions.ts).
+ * <html data-transition="…"> says which kind is running. Timings are tokens.
+ */
+
+@keyframes vt-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes vt-slide-from-right {
+  from {
+    opacity: 0;
+    transform: translateX(var(--page-shift));
+  }
+}
+@keyframes vt-slide-to-left {
+  to {
+    opacity: 0;
+    transform: translateX(calc(-1 * var(--page-shift)));
+  }
+}
+@keyframes vt-slide-from-left {
+  from {
+    opacity: 0;
+    transform: translateX(calc(-1 * var(--page-shift)));
+  }
+}
+@keyframes vt-slide-to-right {
+  to {
+    opacity: 0;
+    transform: translateX(var(--page-shift));
+  }
+}
+/* The page behind an opening document steps back, like a home screen. */
+@keyframes vt-recede {
+  to {
+    opacity: 0;
+    transform: scale(var(--recede-scale));
+  }
+}
+@keyframes vt-return {
+  from {
+    opacity: 0;
+    transform: scale(var(--recede-scale));
+  }
+}
+
+/* Tabs: only the page content moves; the header and tab bar stay put. */
+html[data-transition^='tab'] main {
+  view-transition-name: page;
+}
+html[data-transition^='tab']::view-transition-group(page) {
+  animation-duration: var(--duration-page);
+  animation-timing-function: var(--ease-spring);
+}
+html[data-transition='tab-forward']::view-transition-old(page) {
+  animation: vt-slide-to-left var(--duration-page) var(--ease-spring) both;
+}
+html[data-transition='tab-forward']::view-transition-new(page) {
+  animation: vt-slide-from-right var(--duration-page) var(--ease-spring) both;
+}
+html[data-transition='tab-back']::view-transition-old(page) {
+  animation: vt-slide-to-right var(--duration-page) var(--ease-spring) both;
+}
+html[data-transition='tab-back']::view-transition-new(page) {
+  animation: vt-slide-from-left var(--duration-page) var(--ease-spring) both;
+}
+
+/* Opening a document: it grows out of its thumbnail while the list recedes. */
+html[data-transition^='doc']::view-transition-group(doc) {
+  animation-duration: var(--duration-zoom);
+  animation-timing-function: var(--ease-spring);
+}
+html[data-transition^='doc']::view-transition-old(doc),
+html[data-transition^='doc']::view-transition-new(doc) {
+  animation-duration: var(--duration-zoom);
+  animation-timing-function: var(--ease-spring);
+  /* Keep the page's shape while it grows; no squashed snapshot. */
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+html[data-transition='doc-open']::view-transition-old(root) {
+  animation: vt-recede var(--duration-zoom) var(--ease-spring) both;
+}
+html[data-transition='doc-open']::view-transition-new(root) {
+  animation: vt-fade-in var(--duration-zoom) var(--ease-spring) both;
+}
+/* Closing: the document shrinks back into its thumbnail as the list returns. */
+html[data-transition='doc-close']::view-transition-old(root) {
+  animation: vt-fade-out var(--duration-zoom) var(--ease-spring) both;
+}
+html[data-transition='doc-close']::view-transition-new(root) {
+  animation: vt-return var(--duration-zoom) var(--ease-spring) both;
+}

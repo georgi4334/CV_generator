@@ -16,6 +16,7 @@ test('public pages are accessible and protected by security headers', async ({ p
 test('app pages are accessible', async ({ page }) => {
   await signUp(page)
   await createExampleCv(page)
+  const editor = page.url()
   await expectAccessible(page)
   for (const path of ['/', '/documents/all', '/jobs', '/cvs/new']) {
     await page.goto(path)
@@ -32,6 +33,12 @@ test('app pages are accessible', async ({ page }) => {
   await page.getByRole('button', { name: /^Theme/ }).click()
   await page.getByText('Dark', { exact: true }).click()
   await expect(page.locator('html')).toHaveClass(/dark/)
+  await expectAccessible(page)
+
+  // In dark mode the editor is dark, but the CV stays white paper.
+  await page.goto(editor)
+  const paper = page.locator('[data-cv-page]').first()
+  await expect(paper).toHaveCSS('background-color', 'rgb(255, 255, 255)')
   await expectAccessible(page)
 })
 

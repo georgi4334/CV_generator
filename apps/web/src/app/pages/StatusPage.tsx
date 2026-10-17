@@ -3,15 +3,15 @@ import { Logo } from '@/shared/ui/Logo'
 
 /**
  * A full-screen message on a glass card (not found, something went wrong):
- * the logo, an optional big code ("404"), a title, a short text and actions.
+ * the logo, an illustration, a title, a short text and actions.
  */
 export function StatusPage({
-  code,
+  illustration,
   title,
   text,
   children,
 }: {
-  code?: string
+  illustration: ReactNode
   title: string
   text: string
   children: ReactNode
@@ -22,12 +22,8 @@ export function StatusPage({
       <a href="/">
         <Logo />
       </a>
-      <main className="glass w-full max-w-form space-y-4 p-card text-center">
-        {code && (
-          <p aria-hidden className="text-6xl font-bold tracking-tight text-brand-fg">
-            {code}
-          </p>
-        )}
+      <main className="glass w-full max-w-reading space-y-4 p-card sm:p-10 text-center">
+        <div className="mx-auto w-full max-w-72">{illustration}</div>
         <h1 className="text-2xl font-semibold">{title}</h1>
         <p className="text-sm text-fg-muted">{text}</p>
         <div className="flex flex-wrap justify-center gap-3 pt-2">{children}</div>

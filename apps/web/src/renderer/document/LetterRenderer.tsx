@@ -110,7 +110,7 @@ export function LetterRenderer({
           >
             <div
               data-letter-page={design.pageSize}
-              className={`relative flex flex-col bg-surface ${pageClassName ?? ''}`}
+              className={`relative flex flex-col bg-paper ${pageClassName ?? ''}`}
               style={{
                 ...pageStyle(design, tokens),
                 backgroundImage: backgroundImage(design.background, design.accentColor),
