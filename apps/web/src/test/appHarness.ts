@@ -43,7 +43,7 @@ vi.mock('@/shared/api/useHealth', () => ({
   useHealth: () => ({
     isLoading: false,
     isError: false,
-    data: { status: 'ok', database: 'up', timestamp: '2026-10-13T10:00:00Z' },
+    data: { status: 'ok', database: 'up', email: 'service', timestamp: '2026-10-13T10:00:00Z' },
   }),
 }))
 

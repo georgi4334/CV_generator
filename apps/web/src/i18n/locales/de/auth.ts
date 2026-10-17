@@ -51,6 +51,8 @@ export const auth: Messages['auth'] = {
       'Bitte bestätigen Sie Ihre E-Mail-Adresse: Wir haben einen Link an <strong>{{email}}</strong> gesendet.',
     resent: 'Ein neuer Link ist unterwegs.',
     resend: 'Erneut senden',
+    notSent:
+      'Dieser Server versendet noch keine E-Mails: Der Bestätigungslink steht im Log der API. Setzen Sie BREVO_API_KEY und MAIL_FROM, um echte E-Mails zu senden.',
     title: 'E-Mail-Adresse bestätigen',
     goToApp: 'Zur App',
     incomplete: 'Dieser Link ist unvollständig. Öffnen Sie den Link aus der E-Mail erneut.',

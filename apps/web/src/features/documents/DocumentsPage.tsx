@@ -142,9 +142,18 @@ function RowMenu({ doc, actions }: { doc: DocumentSummary; actions: RowActions }
           role="menu"
           className={`${card} absolute right-0 z-(--z-dropdown) mt-1 w-menu overflow-hidden py-1 text-sm`}
         >
-          <Link role="menuitem" to={editPath(doc)} className={item}>
+          <TransitionLink
+            role="menuitem"
+            to={editPath(doc)}
+            transition="doc-open"
+            docId={doc.id}
+            transitionSource={(link) =>
+              link.closest('li')?.querySelector<HTMLElement>('[data-doc-icon]')
+            }
+            className={item}
+          >
             <FileText className="size-4" /> {t('documents.menu.open')}
-          </Link>
+          </TransitionLink>
           <button type="button" role="menuitem" className={item} onClick={run(actions.onRename)}>
             <Pencil className="size-4" /> {t('documents.menu.rename')}
           </button>

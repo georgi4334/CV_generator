@@ -3,12 +3,15 @@ import { Trans, useTranslation } from 'react-i18next'
 import { authApi } from '@/features/auth/api'
 import { useCurrentUser } from '@/features/auth/queries'
 import { errorMessage } from '@/shared/api/errorMessage'
+import { useHealth } from '@/shared/api/useHealth'
 
 /** Until the email is confirmed, a thin reminder under the header. */
 export function VerifyBanner() {
   const { t } = useTranslation()
   const user = useCurrentUser().data
   const resend = useMutation({ mutationFn: authApi.resendVerification })
+  // Without an email service (local setup) nobody receives the link: say where it is.
+  const emailOff = useHealth().data?.email === 'log'
   if (!user || user.emailVerified) return null
   return (
     <div
@@ -33,6 +36,7 @@ export function VerifyBanner() {
         </button>
       )}
       {resend.isError && <span role="alert"> {errorMessage(resend.error)}</span>}
+      {emailOff && <span className="block text-xs">{t('auth.verify.notSent')}</span>}
     </div>
   )
 }

@@ -5,14 +5,27 @@ const VARIANTS = {
   center: 'm-auto w-[calc(100%-2*var(--spacing-gutter))] rounded-card border p-card',
   /** Full height at the right edge (e.g. the job details); the whole screen on phones. */
   drawer: 'm-0 ml-auto h-dvh max-h-none w-full max-w-full p-0 md:max-w-drawer md:border-l',
-  /** A narrow panel that slides in from the right edge (e.g. the account menu). */
-  side: 'm-0 ml-auto h-dvh max-h-none w-full max-w-side-drawer border-l p-0 animate-drawer-in motion-reduce:animate-none',
+  /** A narrow panel at the right edge (e.g. the account menu). */
+  side: 'm-0 ml-auto h-dvh max-h-none w-full max-w-side-drawer border-l p-0',
 }
 
-/** A modal `<dialog>`: Escape and the backdrop's Cancel call `onClose`. */
+/** Drawers slide in from the right and back out; dialogs grow in and shrink away. */
+const MOTION = {
+  center: { enter: 'animate-dialog-in', leave: 'animate-dialog-out' },
+  drawer: { enter: 'animate-drawer-in', leave: 'animate-drawer-out' },
+  side: { enter: 'animate-drawer-in', leave: 'animate-drawer-out' },
+}
+
+/**
+ * A modal `<dialog>`. Escape and the backdrop's Cancel ask to close
+ * (`onCloseRequest`, else `onClose`). With `closing` set, it plays its exit
+ * animation and then calls `onClose`.
+ */
 export function Modal({
   labelledBy,
   onClose,
+  onCloseRequest,
+  closing = false,
   variant = 'center',
   className = '',
   children,
@@ -20,11 +33,18 @@ export function Modal({
   /** Id of the dialog's heading. */
   labelledBy: string
   onClose: () => void
+  onCloseRequest?: () => void
+  closing?: boolean
   variant?: keyof typeof VARIANTS
   className?: string
   children: ReactNode
 }) {
   const ref = useRef<HTMLDialogElement>(null)
+  // The latest onClose, so the exit below runs once even if the parent passes a new function.
+  const onCloseRef = useRef(onClose)
+  useEffect(() => {
+    onCloseRef.current = onClose
+  })
 
   useEffect(() => {
     const dialog = ref.current
@@ -36,15 +56,24 @@ export function Modal({
     }
   }, [])
 
+  // Once the exit animation (and the backdrop's fade) has played, really close.
+  useEffect(() => {
+    const dialog = ref.current
+    if (!closing || !dialog) return
+    const animations = dialog.getAnimations?.({ subtree: true }) ?? []
+    void Promise.allSettled(animations.map((a) => a.finished)).then(() => onCloseRef.current())
+  }, [closing])
+
+  const motion = MOTION[variant]
   return (
     <dialog
       ref={ref}
       aria-labelledby={labelledBy}
       onCancel={(e) => {
         e.preventDefault()
-        onClose()
+        ;(onCloseRequest ?? onClose)()
       }}
-      className={`${VARIANTS[variant]} border-line bg-surface text-fg shadow-overlay backdrop:bg-backdrop ${className}`}
+      className={`${VARIANTS[variant]} ${closing ? `${motion.leave} backdrop:animate-fade-out` : `${motion.enter} backdrop:animate-fade-in`} border-line bg-surface text-fg shadow-overlay backdrop:bg-backdrop motion-reduce:animate-none motion-reduce:backdrop:animate-none ${className}`}
     >
       {children}
     </dialog>

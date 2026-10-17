@@ -22,7 +22,7 @@ function fakeStartViewTransition() {
 describe('runViewTransition', () => {
   it('just updates when the browser has no view transitions', () => {
     const update = vi.fn()
-    runViewTransition('tab-forward', update)
+    runViewTransition('doc-close', update)
     expect(update).toHaveBeenCalledOnce()
     expect(document.documentElement.dataset.transition).toBeUndefined()
   })

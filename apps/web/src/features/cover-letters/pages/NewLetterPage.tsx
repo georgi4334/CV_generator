@@ -9,6 +9,7 @@ import { errorMessage } from '@/shared/api/errorMessage'
 import { useCv, useCvList } from '@/features/cv-editor/queries'
 import { useJobs } from '@/features/jobs/queries'
 import { useCreateLetter } from '@/features/cover-letters/queries'
+import { runViewTransition } from '@/shared/lib/viewTransitions'
 
 const field = 'input'
 
@@ -56,7 +57,13 @@ export function NewLetterPage() {
         jobId: jobId || null,
         document: letter,
       },
-      { onSuccess: (record) => navigate(`/cover-letters/${record.id}/edit`, { replace: true }) },
+      {
+        // The new letter opens like an app: the form steps back as the page grows in.
+        onSuccess: (record) =>
+          runViewTransition('doc-open', () =>
+            navigate(`/cover-letters/${record.id}/edit`, { replace: true, flushSync: true }),
+          ),
+      },
     )
   }
 

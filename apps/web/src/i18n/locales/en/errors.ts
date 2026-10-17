@@ -18,6 +18,7 @@ export const errors = {
   too_many_requests: 'Too many attempts. Please wait a while and try again.',
   invalid_token: 'This link is invalid or has expired',
   wrong_password: 'The password is not correct',
+  email_failed: 'The email could not be sent. Please try again later.',
   plan_limit: 'You have reached the limit of your plan.',
   file_too_large: 'Images must be 5 MB or smaller',
   unsupported_type: 'Only PNG, JPEG and WebP images are allowed',

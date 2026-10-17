@@ -5,6 +5,35 @@ import { errorMessage } from '@/shared/api/errorMessage'
 import { DOC_TRANSITION_NAME } from '@/shared/lib/viewTransitions'
 import { LoadingRegion, PaperSkeleton, Skeleton, SkeletonText } from '@/shared/ui/Skeleton'
 
+/** A page title and a few cards, shimmering. */
+function ContentSkeleton() {
+  return (
+    <div className="space-y-section">
+      <div className="space-y-3">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-4 w-72 max-w-full" />
+      </div>
+      <div className="grid-cards">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="card space-y-4 p-card">
+            <Skeleton className="h-5 w-1/2" />
+            <SkeletonText lines={3} />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/** Inside the app frame, while a page's code loads: only the content area waits. */
+export function PageContentLoading() {
+  return (
+    <LoadingRegion>
+      <ContentSkeleton />
+    </LoadingRegion>
+  )
+}
+
 /** While a page loads: the outline of the app (header, title, cards), shimmering. */
 export function PageLoading({ label }: { label?: string }) {
   return (
@@ -19,19 +48,8 @@ export function PageLoading({ label }: { label?: string }) {
           </div>
         </div>
       </div>
-      <div className="page-container space-y-section py-section md:py-8">
-        <div className="space-y-3">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-4 w-72 max-w-full" />
-        </div>
-        <div className="grid-cards">
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="card space-y-4 p-card">
-              <Skeleton className="h-5 w-1/2" />
-              <SkeletonText lines={3} />
-            </div>
-          ))}
-        </div>
+      <div className="page-container py-section md:py-8">
+        <ContentSkeleton />
       </div>
     </LoadingRegion>
   )

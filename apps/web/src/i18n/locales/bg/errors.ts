@@ -16,6 +16,7 @@ export const errors: Messages['errors'] = {
   too_many_requests: 'Твърде много опити. Изчакайте малко и опитайте отново.',
   invalid_token: 'Тази връзка е невалидна или е изтекла',
   wrong_password: 'Паролата не е вярна',
+  email_failed: 'Имейлът не можа да бъде изпратен. Моля, опитайте отново по-късно.',
   plan_limit: 'Достигнахте лимита на вашия план.',
   file_too_large: 'Изображенията трябва да са до 5 MB',
   unsupported_type: 'Разрешени са само PNG, JPEG и WebP изображения',
