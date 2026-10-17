@@ -132,6 +132,36 @@ describe('editor', () => {
     expect('items' in after && after.items.length).toBe(before + 1)
   })
 
+  it('changes how skills look from the section toolbar', async () => {
+    const cv = fake.current.seed('Frontend CV')
+    renderRoute(`/cvs/${cv.id}/edit`)
+    await screen.findByDisplayValue('Frontend CV')
+    fireEvent.click(page().getByRole('button', { name: 'Skills style' }))
+    const styles = screen.getByRole('dialog', { name: 'Skills style' })
+    fireEvent.click(within(styles).getByLabelText('Pills'))
+    const skills = useCvEditor.getState().cv!.sections.find((s) => s.type === 'skills')!
+    expect(skills.type === 'skills' && skills.levelDisplay).toBe('pills')
+    expect(screen.queryByRole('dialog', { name: 'Skills style' })).toBeNull()
+  })
+
+  it('zooms the page and fits it back to the screen', async () => {
+    const cv = fake.current.seed('Frontend CV')
+    renderRoute(`/cvs/${cv.id}/edit`)
+    await screen.findByDisplayValue('Frontend CV')
+    const zoom = screen.getByRole('group', { name: 'Page zoom' })
+    expect(within(zoom).getByText('100%')).toBeDefined()
+    fireEvent.click(within(zoom).getByRole('button', { name: 'Zoom out' }))
+    expect(within(zoom).getByText('90%')).toBeDefined()
+    fireEvent.change(within(zoom).getByRole('slider', { name: 'Page zoom' }), {
+      target: { value: '55' },
+    })
+    expect(within(zoom).getByText('55%')).toBeDefined()
+    fireEvent.click(within(zoom).getByRole('button', { name: 'Zoom in' }))
+    expect(within(zoom).getByText('60%')).toBeDefined()
+    fireEvent.click(within(zoom).getByRole('button', { name: 'Fit to screen' }))
+    expect(within(zoom).getByText('100%')).toBeDefined()
+  })
+
   it('does not show editing controls in preview', async () => {
     const cv = fake.current.seed('Frontend CV')
     renderRoute(`/cvs/${cv.id}/preview`)

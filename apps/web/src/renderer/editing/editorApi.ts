@@ -14,6 +14,8 @@ export interface EditorApi {
   moveItem: (sectionId: string, itemId: string, direction: -1 | 1) => void
   addBullet: (sectionId: string, itemId: string, afterIndex: number) => void
   removeBullet: (sectionId: string, itemId: string, index: number) => void
+  /** Changes a section's own settings, e.g. how a skills section looks. */
+  updateSection: (sectionId: string, patch: Record<string, unknown>) => void
   /** Uploads an image (photo, logo) and returns the URL to store in the CV. */
   uploadImage: (image: Blob) => Promise<string>
   /** Shows a short message to the user. */

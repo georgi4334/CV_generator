@@ -19,6 +19,7 @@ export const cvEditorApi: EditorApi = {
   moveItem: (sectionId, itemId, direction) => s().moveItem(sectionId, itemId, direction),
   addBullet: (sectionId, itemId, afterIndex) => s().addBullet(sectionId, itemId, afterIndex),
   removeBullet: (sectionId, itemId, index) => s().removeBullet(sectionId, itemId, index),
+  updateSection: (sectionId, patch) => s().updateSection(sectionId, patch),
   uploadImage: async (image) => (await cvApi.uploadImage(image)).url,
   notify: (message) => useEditorUi.getState().notify(message),
 }

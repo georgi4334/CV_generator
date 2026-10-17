@@ -150,6 +150,8 @@ function LetterEditor({ record }: { record: CoverLetterRecord }) {
       updateDesign: store.updateDesign,
       endTyping: store.endTyping,
       setLanguage: store.setLanguage,
+      header: current.header,
+      updateHeader: store.updateHeader,
       renderThumbnail: (templateId: TemplateId) => (
         <LetterThumbnail
           letter={{ ...current, design: { ...current.design, ...templateChoice(templateId) } }}

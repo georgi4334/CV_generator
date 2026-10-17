@@ -102,7 +102,7 @@ Screenshots are in [`docs/ui-reference/`](ui-reference/):
 | **Top bar, right**  | Undo · Redo · **History** · Help menu (Help Center, Contact Us)                                                                                                            | History lists saved versions with restore.                                                                                                                    |
 | **Left side panel** | One panel at a time: Templates, Design & Font, or AI Assistant. Closes with ✕.                                                                                             | The canvas stays visible and updates **live** while settings change.                                                                                          |
 | **Canvas**          | A CV page (A4 or US Letter). Two columns: main column (name, headline, contacts, Summary, Experience) and a colored sidebar (Key Achievements, Skills, Courses, Education) | Every field is edited in place; empty fields show grey placeholder text.                                                                                      |
-| **Right rail**      | Preview · Download · Share link · AI assistant · Premium (crown)                                                                                                           | Preview = read-only mode without placeholders.                                                                                                                |
+| **Right rail**      | Preview · Download · Share link · AI assistant                                                                                                                             | Preview = read-only mode without placeholders.                                                                                                                |
 | **App theme**       | Screenshots show both a dark and a light app theme                                                                                                                         | Probably a light/dark toggle (see open questions). The CV colors come from the CV design settings, not the app theme.                                         |
 
 ### 3.2 Design & Font panel
@@ -176,7 +176,7 @@ Implementation notes:
 | Auth                                 | **Self-built** (email/password + Google OAuth, server-side sessions in httpOnly cookies) | Zero cost, no per-user pricing, no lock-in                | Never                                                                                                                |
 | Email (verification, password reset) | **Resend** or **Brevo** free tier                                                        | Simple API                                                | Above the daily/monthly free limit                                                                                   |
 | PDF export                           | **Browser print** (`window.print()` + print CSS) first                                   | Zero server cost, selectable text (ATS-friendly)          | Later: server-side headless Chromium on a paid instance for one-click download                                       |
-| AI features                          | **Google Gemini** free tier or **Groq** free tier for prototyping                        | Free while low volume                                     | Switch or upgrade to a paid model when it's a premium feature                                                        |
+| AI features                          | **Google Gemini** free tier or **Groq** free tier for prototyping                        | Free while low volume                                     | Switch or upgrade to a paid model if free limits run out                                                             |
 | CI                                   | **GitHub Actions**                                                                       | Free for public repos; 2,000 min/month for private ones   | Unlikely                                                                                                             |
 | Error monitoring                     | **Sentry** free developer plan                                                           | Frontend and backend errors                               | Higher event volume                                                                                                  |
 | Payments (later)                     | **Stripe**                                                                               | No monthly fee, only per-transaction                      | Only when money comes in                                                                                             |
@@ -192,7 +192,7 @@ Implementation notes:
 > The source of truth is now the Zod schemas in `packages/shared/src` (Step 2). This section is the overview.
 
 ```
-User        { id, email, name, passwordHash?, emailVerifiedAt?, oauthId? (Google, later), plan: 'free' | 'pro', createdAt }  // plan field ready for premium later
+User        { id, email, name, passwordHash?, emailVerifiedAt?, oauthId? (Google, later), plan: 'free' | 'pro', createdAt }
 Session     { id, userId, tokenHash, createdAt, lastUsedAt, expiresAt }   // one per signed-in browser; only a hash of the cookie token is stored
 AuthToken   { id, userId, purpose: 'password_reset' | 'email_verification', tokenHash, expiresAt, usedAt? }  // one-time email links
 Cv          { id, userId, title, professionId, templateId, jobId?, design (JSON), content (JSONB), updatedAt } // jobId set for tailored copies
@@ -276,7 +276,7 @@ All in `packages/shared/src`, as Zod schemas with inferred TypeScript types:
 - ✅ Dashboard: quick actions, recent documents, job pipeline counts and reminders, from mock data.
 - ✅ Documents: All documents / Cover letters / CVs sub-tabs and a "Create new" button (menu on All documents).
 - ✅ Saved Jobs: read-only table with all 9 columns and colored status badges.
-- ✅ Editor (`/cvs/:id/edit`, `/cover-letters/:id/edit`): top bar (back, AI Assistant, the five tools, undo/redo, History, Help menu), switchable left panel (Templates, Design & Font, AI Assistant) with placeholder content, A4/Letter page canvas and the right rail (Preview, Download, Share, AI, Premium).
+- ✅ Editor (`/cvs/:id/edit`, `/cover-letters/:id/edit`): top bar (back, AI Assistant, the five tools, undo/redo, History, Help menu), switchable left panel (Templates, Design & Font, AI Assistant) with placeholder content, A4/Letter page canvas and the right rail (Preview, Download, Share, AI).
 - ✅ Preview route (`/cvs/:id/preview`) and a "Page not found" page. `/cvs/new/edit` opens a blank CV.
 - Buttons for later steps show a short message saying which step adds them.
 - The page canvas shows the real header text and section titles with placeholder lines; the real template renderer is Step 4.
@@ -327,7 +327,7 @@ Specification: §3.2 and §3.3.
 - ✅ Design & Font panel: page margins, section spacing, font size (Extra small … Extra large) and line height sliders with −/+; 6 color presets plus custom color (picker + hex) with a readability warning for light colors; font list shown in each font; 4 column layouts drawn per template; 8 background patterns; "Reset to <template> defaults".
 - ✅ Every change applies live; a slider drag is one undo step.
 - Switching template keeps the user's colors and fonts; "Reset to defaults" applies the template's own suggestions (e.g. Creative → Montserrat).
-- Deferred: marking templates as premium (crown). Profession-based "Recommended" badges were added in Step 10.
+- Profession-based "Recommended" badges were added in Step 10.
 
 ### Step 8: Backend API & database ✅ built (awaiting review)
 
@@ -501,15 +501,17 @@ Specification: §2.1.
 - ✅ **Splash screen and app-like motion:** a frosted splash shows until the app has rendered. Tabs switch instantly with a highlight that glides to the chosen tab and the page easing in from that side (no freeze, no crossfade). CVs and cover letters grow out of their thumbnail when opened (also right after creating one, and from the Saved Jobs table) and shrink back when closed. The job drawer and the account drawer slide in from the right and back out; dialogs grow in and shrink away. Still for reduced motion.
 - ✅ **Glass buttons, fields, menus and toasts:** buttons have a frosted or glowing glass look with a gentle lift on hover; fields and drop-downs are frosted; menus are frosted cards. Messages (the email reminder, saved/copied/deleted results, errors, editor notices) are frosted toasts in the bottom-right corner, coloured by tone (info, success, warning, error) and closable with ✕. Every drawer and dialog also closes from the dimmed area around it.
 - ✅ **Application funnel and numbers on the dashboard:** next to the job pipeline, a funnel shows how far applications get (Saved → Applied → Interview → Offer, with each step's share of the one before; rejected and no-answer counts beneath), and three stat tiles show active applications, the response rate and interviews. One validated teal in light and dark; a hover sentence per step; translated.
+- ✅ **Skills styles:** a palette button on the Skills title (in the editor) chooses how skills look: a plain list, dots, a progress bar, pills or bullet points (the last two show names only). Pills tint with the accent colour on white pages and white on coloured sidebars.
+- ✅ **Certificates with an expiry date and a link:** each certificate has an optional expiry date ("May 2023 · Expires May 2026") and a credential link shown with a link icon and without "https://"; on the finished CV (preview, shared link, PDF) it is a real link. Older CVs without an expiry date still load.
+- ✅ **Click-to-pick dates:** dates open a picker with **From / To** tabs (experience, education, projects) or **Issued / Expires** (certificates): arrows or a grid of years choose the year, then a month grid; "year only", "Clear" and "Present". Picking the start month moves on to the end, which opens on the start year. The picker opens above the date when there is no room below.
+- ✅ **Zoom for CVs and cover letters:** a floating zoom bar under the page (−, slider, +, percentage, fit to screen) from 25% to 200%. By default the page fits the screen (100% where it fits); on phones too.
+- ✅ **Photo upload in Design & Font:** a Photo section at the top of the panel (CVs and cover letters) uploads a photo (pick a file or drop one on the preview; resized in the browser to 480px), changes or removes it, shows or hides it, and sets its shape: circle, rounded or square. Every template now shows the photo (Single column and Multicolumn centre it above the name). The hover button on the page header still works too.
+- ✅ **More backgrounds:** eleven full-page designs next to the repeating patterns: honeycomb, contour lines, triangles, flowing lines, geometric squares, a halftone wave, chevrons, ribbons, a dot horizon, chevron stripes and rings. All are drawn as SVG in the accent colour and kept faint behind the text; the picker shows each one bolder so it can be recognised.
+- ✅ **Photo position, bigger entry toolbars, rail beside the page:** the photo can sit next to the name (the template's place), top left or top right; a corner on the sidebar's side puts it at the top of the sidebar (filling the space beside the header), otherwise it sits in that corner of the header. The hover toolbars of entries, section titles and the header are larger (a green **+ Entry**, edit, up, down, add bullet, duplicate, delete), sit on the top edge of what they belong to and linger briefly, so they no longer vanish on the way to them. The quick-action rail is attached to the page's left edge at every zoom.
 - ✅ **Email delivery made visible:** "Send it again" waits for the email and says when it could not be sent; without an email service (local setup) the banner says the link is printed in the API's log; the API logs at start how emails are sent. Troubleshooting steps in `docs/DEPLOY.md`.
 - ✅ **Account drawer:** the avatar opens a drawer from the right with the name and email, **Account settings** (profile, password, delete account) and **Theme** (System / Light / Dark), each opened inside the drawer with a back button, and "Sign out" at the bottom. Old `/account` links open it on account settings.
 - ✅ **Name and logo:** the product is called **Vitae** (from _curriculum vitae_), with the tagline "CVs, cover letters and job tracking". The logo is a page with a folded corner and a check: a CV that is ready to send. The name lives in one constant (`APP_NAME` in the shared package), used by the web app (`{{app}}` in translations) and the API (emails, sender name).
 - ✅ Browser tests on a phone (no sideways scrolling, bottom navigation, editor toolbar and sheet, accessibility).
-
-### Step 18 (optional): Premium
-
-- The crown icon suggests premium features (more templates, AI credits, unlimited CVs). Payments via Stripe, which has no monthly fee.
-- Going paid means upgrading hosting plans (Render instance, Neon), not migrating, because the stack is portable.
 
 ## 7. Open questions (deferred)
 

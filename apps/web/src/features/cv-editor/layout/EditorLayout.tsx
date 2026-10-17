@@ -1,5 +1,5 @@
 import type { PageSize } from '@cv/shared'
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useEditorUi } from '@/features/cv-editor/state/editorUi'
 import { PAGE_SIZE_PX } from '@/renderer/templates/tokens'
 import { useBreakpoint } from '@/shared/lib/useBreakpoint'
@@ -9,6 +9,7 @@ import { EditorRail } from './EditorRail'
 import { EditorSidePanel } from './EditorSidePanel'
 import { EditorToolbar } from './EditorToolbar'
 import { EditorTopBar, type UndoRedo } from './EditorTopBar'
+import { ZoomControl } from './ZoomControl'
 
 interface EditorLayoutProps {
   title: ReactNode
@@ -24,7 +25,7 @@ interface EditorLayoutProps {
   /** For a cover letter: its undo/redo and which tools apply. */
   undoRedo?: UndoRedo
   kind?: 'cv' | 'coverLetter'
-  /** The document's paper size: on phones the page is scaled to the screen width. */
+  /** The document's paper size: the page is fitted to the screen width, or zoomed. */
   pageSize: PageSize
   children: ReactNode
 }
@@ -47,6 +48,10 @@ export function EditorLayout({
   const activePanel = useEditorUi((s) => s.activePanel)
   // Phones and small tablets: bottom toolbar, panels as a sheet, page fitted to the width.
   const compact = !useBreakpoint('lg')
+  const zoom = useEditorUi((s) => s.zoom)
+  // The scale at which the page fits the screen (at most 1), for "Fit" and the percentage.
+  const [fit, setFit] = useState(1)
+  const pageWidth = PAGE_SIZE_PX[pageSize].width
   return (
     <div className="app-backdrop flex h-dvh flex-col text-fg">
       <EditorTopBar
@@ -64,22 +69,34 @@ export function EditorLayout({
       {banner}
       <div className="flex min-h-0 flex-1">
         {activePanel && <EditorSidePanel panel={activePanel} cvId={cvId} sheet={compact} />}
-        <div className="flex-1 overflow-auto">
-          {compact ? (
-            <div className="px-gutter py-section">
-              <div style={{ viewTransitionName: DOC_TRANSITION_NAME }}>
-                <FitToWidth width={PAGE_SIZE_PX[pageSize].width}>{children}</FitToWidth>
-              </div>
+        <div className="relative flex min-w-0 flex-1 flex-col">
+          <div className="flex-1 overflow-auto">
+            {/* On wide screens: room on both sides for the rail (w-11 + gap-4), so the page stays centred. */}
+            <div
+              className={
+                compact ? 'px-gutter pt-section pb-zoom-clear' : 'px-21 pt-6 pb-zoom-clear'
+              }
+            >
+              <FitToWidth
+                width={pageWidth}
+                scale={zoom === null ? null : zoom / 100}
+                onFit={setFit}
+                // The page zooms open from its thumbnail and shrinks back into it.
+                boxStyle={{ viewTransitionName: DOC_TRANSITION_NAME }}
+                // The rail stays attached to the page's left edge, at the bottom of the screen.
+                aside={
+                  compact ? undefined : (
+                    <EditorRail previewTo={previewTo} onDownload={onDownload} onShare={onShare} />
+                  )
+                }
+              >
+                {children}
+              </FitToWidth>
             </div>
-          ) : (
-            <div className="flex min-w-max justify-center gap-4 px-6 py-6">
-              <EditorRail previewTo={previewTo} onDownload={onDownload} onShare={onShare} />
-              {/* The page zooms open from its thumbnail and shrinks back into it. */}
-              <div style={{ viewTransitionName: DOC_TRANSITION_NAME }}>{children}</div>
-              {/* As wide as the rail, so the page stays centred. */}
-              <div aria-hidden className="w-11 shrink-0" />
-            </div>
-          )}
+          </div>
+          <div className="pointer-events-none absolute inset-x-0 bottom-4 z-(--z-raised) flex justify-center">
+            <ZoomControl percent={zoom ?? Math.round(fit * 100)} fitted={zoom === null} />
+          </div>
         </div>
       </div>
       {compact && <EditorToolbar kind={kind} />}

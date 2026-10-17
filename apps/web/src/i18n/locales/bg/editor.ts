@@ -25,15 +25,19 @@ export const editor: Messages['editor'] = {
   },
   printHint: 'В диалога за печат изберете „Запазване като PDF“ като местоназначение.',
   printTitle: 'Отваря диалога за печат: изберете „Запазване като PDF“',
+  zoom: {
+    label: 'Мащаб на страницата',
+    zoomIn: 'Увеличи',
+    zoomOut: 'Намали',
+    fit: 'Побери в екрана',
+  },
   rail: {
     preview: 'Преглед',
     downloadPdf: 'Изтегляне на PDF',
     shareLink: 'Връзка за споделяне',
     aiAssistant: 'AI асистент',
-    premium: 'Premium',
     letterDownloads: 'Изтеглянето на мотивационни писма идва в Стъпка 13.',
     letterLinks: 'Връзките за мотивационни писма идват в Стъпка 13.',
-    premiumPlanned: 'Premium функциите са планирани за Стъпка 18.',
   },
   topBar: {
     more: 'Още',

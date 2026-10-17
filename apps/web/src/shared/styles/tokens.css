@@ -224,6 +224,7 @@
   --spacing-control-y: 0.5rem;
   --spacing-touch: 2.75rem; /* smallest comfortable tap target (44px) */
   --spacing-bottom-nav: 4rem; /* height of the phone tab bar and the editor toolbar */
+  --spacing-zoom-clear: 5rem; /* space under the editor page so the floating zoom bar never covers it */
   --spacing-sheet: 65dvh; /* tallest bottom sheet (editor panels on phones): the page stays visible above */
   --text-2xs: 0.625rem; /* tiny labels (text-2xs) */
 

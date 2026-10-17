@@ -1,9 +1,11 @@
 import type { CvHeader } from '@cv/shared'
+import type { ReactNode } from 'react'
 import { AtSign, Link2, MapPin, Phone, type LucideIcon } from 'lucide-react'
 import { assetUrl } from '@/shared/api/client'
 import { useRender } from '@/renderer/context'
 import { Field } from '@/renderer/editing/primitives'
 import { usePlaceholders } from '@/renderer/placeholders'
+import { PHOTO_SHAPE_CLASS } from './photo'
 
 const CONTACTS: Array<{ key: 'phone' | 'email' | 'link' | 'location'; icon: LucideIcon }> = [
   { key: 'phone', icon: Phone },
@@ -32,14 +34,47 @@ function Contacts({ header, layout }: { header: CvHeader; layout: 'row' | 'colum
   )
 }
 
-function Photo({ header }: { header: CvHeader }) {
-  if (!header.showPhoto || !header.photoUrl) return null
+/** The photo in its chosen shape; `className` sets its size (5.5em by default). */
+export function PhotoImage({
+  header,
+  className = 'size-[5.5em]',
+}: {
+  header: CvHeader
+  className?: string
+}) {
+  if (!header.photoUrl) return null
   return (
     <img
       src={assetUrl(header.photoUrl)}
       alt=""
-      className="size-[5.5em] shrink-0 rounded-full object-cover"
+      className={`shrink-0 object-cover ${className} ${PHOTO_SHAPE_CLASS[header.photoShape] ?? PHOTO_SHAPE_CLASS.circle}`}
     />
+  )
+}
+
+function Photo({ header }: { header: CvHeader }) {
+  if (!header.showPhoto) return null
+  return <PhotoImage header={header} />
+}
+
+/** The header with the photo beside it, when the photo goes in a top corner. */
+export function WithCornerPhoto({
+  photo,
+  corner,
+  children,
+}: {
+  photo: CvHeader
+  corner: 'left' | 'right' | null
+  children: ReactNode
+}) {
+  if (!corner) return <>{children}</>
+  return (
+    <div
+      className={`flex items-center gap-[1.2em] ${corner === 'right' ? 'flex-row-reverse' : ''}`}
+    >
+      <PhotoImage header={photo} />
+      <div className="min-w-0 flex-1">{children}</div>
+    </div>
   )
 }
 
@@ -74,12 +109,15 @@ export function PolishedHeader({ header }: { header: CvHeader }) {
 export function SingleColumnHeader({ header }: { header: CvHeader }) {
   const P = usePlaceholders()
   return (
-    <div className="text-center">
+    <div className="flex flex-col items-center text-center">
+      <Photo header={header} />
       <Field
         value={header.name}
         path="header.name"
         placeholder={P.name}
-        className="block text-[2.1em] leading-tight font-semibold"
+        className={`block text-[2.1em] leading-tight font-semibold ${
+          header.showPhoto && header.photoUrl ? 'mt-[0.3em]' : ''
+        }`}
         style={{ color: 'var(--cv-strong)' }}
       />
       <Field

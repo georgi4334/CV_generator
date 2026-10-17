@@ -51,7 +51,7 @@ vi.mock('@/shared/api/useHealth', () => ({
 beforeEach(() => {
   fake.current.reset()
   auth.current.reset()
-  useEditorUi.setState({ activePanel: null, notice: null, previewVersionId: null })
+  useEditorUi.setState({ activePanel: null, notice: null, previewVersionId: null, zoom: null })
   useCvEditor.setState({ docId: null, cv: null, past: [], future: [] })
   useSaveState.setState({ status: 'saved', lastSavedAt: null, error: null })
   useToasts.setState({ toasts: [] })

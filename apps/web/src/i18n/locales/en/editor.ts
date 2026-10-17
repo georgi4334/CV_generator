@@ -24,15 +24,19 @@ export const editor = {
   },
   printHint: 'In the print dialog, choose “Save as PDF” as the destination.',
   printTitle: 'Opens the print dialog: choose “Save as PDF”',
+  zoom: {
+    label: 'Page zoom',
+    zoomIn: 'Zoom in',
+    zoomOut: 'Zoom out',
+    fit: 'Fit to screen',
+  },
   rail: {
     preview: 'Preview',
     downloadPdf: 'Download PDF',
     shareLink: 'Share link',
     aiAssistant: 'AI assistant',
-    premium: 'Premium',
     letterDownloads: 'Cover letter downloads arrive in Step 13.',
     letterLinks: 'Cover letter links arrive in Step 13.',
-    premiumPlanned: 'Premium features are planned for Step 18.',
   },
   topBar: {
     more: 'More',

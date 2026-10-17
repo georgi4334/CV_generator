@@ -50,6 +50,7 @@ interface CvEditorState {
   /** `coalesceKey` lets a whole drag count as one undo step. */
   moveSection: (sectionId: string, toColumn: Column, toIndex: number, coalesceKey?: string) => void
   setSectionVisible: (sectionId: string, visible: boolean) => void
+  updateSection: (sectionId: string, patch: Record<string, unknown>) => void
   /** Empty or null restores the default title for the CV language. */
   renameSection: (sectionId: string, title: string | null) => void
   addSection: (type: SectionType, column: Column) => string
@@ -195,6 +196,12 @@ export const useCvEditor = create<CvEditorState>()((set, get) => ({
     get().change((draft) => {
       const section = draft.sections.find((s) => s.id === sectionId)
       if (section) section.visible = visible
+    }),
+
+  updateSection: (sectionId, patch) =>
+    get().change((draft) => {
+      const section = draft.sections.find((s) => s.id === sectionId)
+      if (section) Object.assign(section, patch)
     }),
 
   renameSection: (sectionId, title) =>

@@ -78,7 +78,11 @@ export function buildBlocks(sections: Section[], language: CvLanguage, mode: Ren
     if (!section.visible) continue
     const canAdd = section.type !== 'summary'
     const title = (
-      <SectionControls sectionId={section.id} canAdd={canAdd}>
+      <SectionControls
+        sectionId={section.id}
+        canAdd={canAdd}
+        skillDisplay={section.type === 'skills' ? section.levelDisplay : undefined}
+      >
         <SectionTitle>{getSectionTitle(section, language)}</SectionTitle>
       </SectionControls>
     )

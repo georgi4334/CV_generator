@@ -39,7 +39,7 @@ renderer/       Draws CVs and letters: document/, templates/, sections/, editing
 shared/
   api/          HTTP client, query client, errorMessage(), health query, auth query keys
   ui/           Generic components: Modal, ConfirmDialog, PageHeader, Badges, LoadStates,
-                ThemeToggle, LanguageSelect, ApiStatus, FitToWidth
+                ThemeToggle, LanguageSelect, ApiStatus, FitToWidth (and ScaledBox, for zoom)
   lib/          format, paths, lazyPage, monitoring, useMediaQuery, useBreakpoint
   styles/       tokens.css (design tokens), components.css (btn, input, card, grids…)
   stores/       theme
@@ -150,6 +150,10 @@ Components use the Tailwind classes generated from those tokens, never raw value
 - **Below `lg` (1024px), the editor** shows a compact top bar (back, title, undo/redo, "More"
   menu with preview, download, share, history, language and theme), a bottom toolbar with the
   tools, and opens each tool as a bottom sheet. The page is scaled to the screen width.
+- **Zoom (every screen size):** the editor page sits in `FitToWidth`, which fits it to the
+  screen (never above 100%) unless the zoom bar sets a scale (`editorUi.zoom`, 25–200%).
+  `ScaledBox` scales with a transform but takes up the scaled size, so scrolling and centring
+  work; its structure never changes with the scale, so zooming does not remount the page.
 - One navigation is rendered at a time (chosen with `useBreakpoint`), so screen readers and
   tests never see two. Touch targets are at least 44px on touch screens (`btn-icon`), and
   bars respect the phone's safe areas (`viewport-fit=cover`).

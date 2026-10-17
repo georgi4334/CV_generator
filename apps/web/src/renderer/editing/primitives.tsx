@@ -1,7 +1,13 @@
 import { useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEditor, useRender } from '@/renderer/context'
-import { DateRangeForm, YearMonthInput, type DateRangeValue } from './dateInputs'
+import {
+  CertificateDatesForm,
+  DateRangeForm,
+  SingleDateForm,
+  type CertificateDates,
+  type DateRangeValue,
+} from './dateInputs'
 import { EditableText } from './EditableText'
 import { Popover } from './Popover'
 
@@ -317,7 +323,34 @@ export function SingleDateField({
       display={display}
       visibleText={text || placeholder}
     >
-      <YearMonthInput label={t('renderer.date')} value={value} onChange={onChange} />
+      <SingleDateForm label={t('renderer.date')} value={value} onChange={onChange} />
+    </PopoverTrigger>
+  )
+}
+
+/** When a certificate was issued and expires; one field on the page, two tabs in the picker. */
+export function CertificateDatesField({
+  text,
+  placeholder,
+  value,
+  onChange,
+}: {
+  text: string
+  placeholder: string
+  value: CertificateDates
+  onChange: (patch: Partial<CertificateDates>) => void
+}) {
+  const editor = useEditor()
+  const { t } = useTranslation()
+  const display = <Field value={text} placeholder={placeholder} />
+  if (!editor) return display
+  return (
+    <PopoverTrigger
+      label={t('renderer.editDates')}
+      display={display}
+      visibleText={text || placeholder}
+    >
+      <CertificateDatesForm value={value} onChange={onChange} />
     </PopoverTrigger>
   )
 }

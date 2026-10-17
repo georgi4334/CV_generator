@@ -97,3 +97,23 @@ export function formatDateRange(
   if (start && end) return `${start} – ${end}`
   return start || end
 }
+
+const EXPIRES: Record<CvLanguage, string> = {
+  'en-US': 'Expires',
+  'en-GB': 'Expires',
+  bg: 'Валиден до',
+}
+
+/**
+ * When a certificate was issued and when it expires: "May 2023 · Expires May 2026",
+ * just "May 2023" when it never expires, or "" when no dates are set.
+ */
+export function formatCertificateDates(
+  dates: { date: string | null; expiryDate?: string | null },
+  language: CvLanguage,
+): string {
+  const issued = formatYearMonth(dates.date, language)
+  const expiry = formatYearMonth(dates.expiryDate ?? null, language)
+  const expires = expiry ? `${EXPIRES[language]} ${expiry}` : ''
+  return [issued, expires].filter(Boolean).join(' · ')
+}

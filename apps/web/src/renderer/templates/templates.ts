@@ -27,7 +27,6 @@ export interface TemplateDefinition {
   headerPlacement: 'main' | 'full'
   /** A full-width header drawn on an accent-colored band. */
   headerBand?: boolean
-  supportsPhoto: boolean
   titleVariant: TitleVariant
   /** Experience, education and project entries sit on a vertical line. */
   timeline?: boolean
@@ -55,7 +54,6 @@ export const TEMPLATES: Record<TemplateId, TemplateDefinition> = {
     columns: 2,
     sidebarSide: 'right',
     headerPlacement: 'main',
-    supportsPhoto: true,
     titleVariant: 'underline',
     Header: PolishedHeader,
     sidebarOptions: [
@@ -79,7 +77,6 @@ export const TEMPLATES: Record<TemplateId, TemplateDefinition> = {
     sidebarSide: 'right',
     headerPlacement: 'full',
     headerBand: true,
-    supportsPhoto: true,
     titleVariant: 'accent-small',
     Header: ContemporaryHeader,
     sidebarOptions: [
@@ -102,7 +99,6 @@ export const TEMPLATES: Record<TemplateId, TemplateDefinition> = {
     columns: 2,
     sidebarSide: 'left',
     headerPlacement: 'main',
-    supportsPhoto: true,
     titleVariant: 'bar',
     Header: CreativeHeader,
     sidebarOptions: [
@@ -125,7 +121,6 @@ export const TEMPLATES: Record<TemplateId, TemplateDefinition> = {
     columns: 1,
     sidebarSide: 'right',
     headerPlacement: 'full',
-    supportsPhoto: true,
     titleVariant: 'accent-rule',
     timeline: true,
     Header: CompactHeader,
@@ -144,7 +139,6 @@ export const TEMPLATES: Record<TemplateId, TemplateDefinition> = {
     columns: 2,
     sidebarSide: 'left',
     headerPlacement: 'full',
-    supportsPhoto: true,
     titleVariant: 'pill',
     Header: StylishHeader,
     // A solid sidebar would hide the pill-shaped titles, so it stays light.
@@ -168,7 +162,6 @@ export const TEMPLATES: Record<TemplateId, TemplateDefinition> = {
     columns: 1,
     sidebarSide: 'right',
     headerPlacement: 'full',
-    supportsPhoto: false,
     titleVariant: 'accent-rule',
     Header: SingleColumnHeader,
     sidebarOptions: NO_SIDEBAR,
@@ -186,7 +179,6 @@ export const TEMPLATES: Record<TemplateId, TemplateDefinition> = {
     columns: 2,
     sidebarSide: 'left',
     headerPlacement: 'full',
-    supportsPhoto: true,
     titleVariant: 'accent-small',
     Header: CompactHeader,
     sidebarOptions: [
@@ -209,7 +201,6 @@ export const TEMPLATES: Record<TemplateId, TemplateDefinition> = {
     columns: 2,
     sidebarSide: 'right',
     headerPlacement: 'full',
-    supportsPhoto: false,
     titleVariant: 'accent-rule',
     Header: SingleColumnHeader,
     sidebarOptions: [

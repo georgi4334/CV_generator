@@ -83,6 +83,7 @@ export const letterEditorApi: EditorApi = {
   moveItem: none,
   addBullet: none,
   removeBullet: none,
+  updateSection: none,
   uploadImage: async (image) => (await cvApi.uploadImage(image)).url,
   notify: (message) => useEditorUi.getState().notify(message),
 }

@@ -2,7 +2,9 @@ import type { CvDesign, CvHeader } from '@cv/shared'
 import type { CSSProperties } from 'react'
 import type { Block } from '@/renderer/sections/blocks'
 import { HeaderControls } from '@/renderer/editing/controls'
-import { backgroundImage } from '@/renderer/templates/backgrounds'
+import { backgroundStyle } from '@/renderer/templates/backgrounds'
+import { PhotoImage, WithCornerPhoto } from '@/renderer/templates/headers'
+import { placePhoto } from '@/renderer/templates/photo'
 import {
   sidebarFor,
   type SidebarFill,
@@ -54,12 +56,12 @@ export function PageFrame({
 
   // A full-width header is measured with its padding (and band), a header in
   // the main column without it; see the capacity calculation in CvRenderer.
+  const photo = placePhoto(header, template)
   const headerContent = isFirstPage ? (
-    <HeaderControls
-      supportsPhoto={template.supportsPhoto}
-      hasPhoto={header.showPhoto && header.photoUrl !== null}
-    >
-      <Header header={header} />
+    <HeaderControls hasPhoto={header.showPhoto && header.photoUrl !== null}>
+      <WithCornerPhoto photo={header} corner={photo.corner}>
+        <Header header={photo.header} />
+      </WithCornerPhoto>
     </HeaderControls>
   ) : null
   const headerNode =
@@ -129,8 +131,14 @@ export function PageFrame({
         ...sidebarStyle(fill, design.accentColor),
       }}
     >
-      {/* Line the sidebar up with the main column's first section, below the header. */}
-      {!fullHeader && isFirstPage && <div style={{ height: headerHeight }} />}
+      {/* Line the sidebar up with the main column's first section, below the header; the photo can sit in that space. */}
+      {!fullHeader && isFirstPage && (
+        <div className="flex items-center justify-center" style={{ height: headerHeight }}>
+          {photo.inSidebar && (
+            <PhotoImage header={header} className="aspect-square h-full max-h-[10em] max-w-full" />
+          )}
+        </div>
+      )}
       {renderBlocks(sidebar)}
     </div>
   ) : null
@@ -141,7 +149,7 @@ export function PageFrame({
       data-cv-page={measuring ? undefined : design.pageSize}
       style={{
         ...pageStyle(design, tokens),
-        backgroundImage: backgroundImage(design.background, design.accentColor),
+        ...backgroundStyle(design.background, design.accentColor),
         height: measuring ? undefined : tokens.page.height,
       }}
     >

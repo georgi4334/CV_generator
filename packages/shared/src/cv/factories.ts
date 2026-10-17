@@ -28,7 +28,7 @@ export function createItem<T extends ItemSectionType>(type: T): ItemOf<T> {
     courses: { id, title: '', institution: '', date: null },
     projects: { id, name: '', role: '', link: '', ...emptyRange, description: '', bullets: [] },
     languages: { id, name: '', level: 3 },
-    certificates: { id, name: '', issuer: '', date: null, link: '' },
+    certificates: { id, name: '', issuer: '', date: null, expiryDate: null, link: '' },
     custom: { id, title: '', subtitle: '', date: '', description: '', bullets: [] },
   }
   return items[type]
@@ -84,6 +84,8 @@ export function createEmptyCv(
       link: '',
       photoUrl: null,
       showPhoto: false,
+      photoShape: 'circle',
+      photoPosition: 'name',
     },
     sections,
     design: { ...DEFAULT_DESIGN },

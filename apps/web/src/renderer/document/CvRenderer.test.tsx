@@ -2,9 +2,12 @@ import {
   createEmptyCv,
   createExampleCv,
   CV_LANGUAGES,
+  CvDocumentSchema,
   PROFESSION_IDS,
+  SKILL_DISPLAYS,
   TEMPLATE_IDS,
   type CvDocument,
+  type SkillDisplay,
 } from '@cv/shared'
 import { render, screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
@@ -56,6 +59,55 @@ describe('CvRenderer', () => {
     const cv = { ...createExampleCv('healthcare'), language: 'bg' as const }
     render(<CvRenderer cv={cv} mode="preview" />)
     expect(visiblePages().getByText('Професионален опит')).toBeDefined()
+  })
+})
+
+describe('skills styles', () => {
+  const withSkills = (levelDisplay: SkillDisplay) => {
+    const cv = createExampleCv('software-developer')
+    const skills = cv.sections.find((s) => s.type === 'skills')!
+    if (skills.type === 'skills') skills.levelDisplay = levelDisplay
+    return cv
+  }
+
+  it('shows dots or a bar with levels, and pills or bullets with names only', () => {
+    const { unmount } = render(<CvRenderer cv={withSkills('dots')} mode="preview" />)
+    expect(visiblePages().getAllByLabelText(/of 5$/).length).toBeGreaterThan(0)
+    unmount()
+
+    for (const display of ['pills', 'bullets'] as const) {
+      const { unmount: done } = render(<CvRenderer cv={withSkills(display)} mode="preview" />)
+      expect(visiblePages().getByText('TypeScript')).toBeDefined()
+      expect(visiblePages().getByText('TypeScript').closest('li')).not.toBeNull()
+      done()
+    }
+  })
+
+  it('accepts every style in the schema', () => {
+    for (const display of SKILL_DISPLAYS) {
+      expect(CvDocumentSchema.safeParse(withSkills(display)).success).toBe(true)
+    }
+  })
+})
+
+describe('certificates', () => {
+  it('show when they expire and link to the credential', () => {
+    render(<CvRenderer cv={createExampleCv('software-developer')} mode="preview" />)
+    expect(visiblePages().getByText('May 2023 · Expires May 2026')).toBeDefined()
+    const link = visiblePages().getByRole('link', { name: 'aws.amazon.com/verification' })
+    expect(link.getAttribute('href')).toBe('https://aws.amazon.com/verification')
+  })
+
+  it('read older CVs without an expiry date', () => {
+    const cv = createExampleCv('software-developer')
+    const stored = JSON.parse(JSON.stringify(cv)) as {
+      sections: Array<{ type: string; items: Array<Record<string, unknown>> }>
+    }
+    const certificates = stored.sections.find((s) => s.type === 'certificates')!
+    delete certificates.items[0]!.expiryDate
+    const parsed = CvDocumentSchema.parse(stored)
+    const section = parsed.sections.find((s) => s.type === 'certificates')!
+    expect(section.type === 'certificates' && section.items[0]!.expiryDate).toBeNull()
   })
 })
 

@@ -1,6 +1,9 @@
 import { createEmptyCv } from '@cv/shared'
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { cvApi } from '@/features/cv-editor/api'
+import * as image from '@/renderer/editing/image'
+import { BACKGROUNDS, backgroundStyle } from '@/renderer/templates/backgrounds'
 import { useCvEditor } from '@/features/cv-editor/state/cvEditorStore'
 import { DesignPanel } from './DesignPanel'
 import { TemplatesPanel } from './TemplatesPanel'
@@ -124,5 +127,48 @@ describe('DesignPanel', () => {
       fontSize: 1,
       sectionSpacing: 1,
     })
+  })
+})
+
+describe('Photo', () => {
+  it('uploads a photo, hides it and changes its shape', async () => {
+    vi.spyOn(image, 'pickImage').mockResolvedValue(new Blob(['x'], { type: 'image/jpeg' }))
+    vi.spyOn(cvApi, 'uploadImage').mockResolvedValue({
+      id: 'me',
+      url: '/api/images/me.jpg',
+      contentType: 'image/jpeg',
+      size: 1,
+    })
+    render(<DesignPanel />)
+    fireEvent.click(screen.getByRole('button', { name: /^Upload photo$/ }))
+    await waitFor(() => expect(state().cv!.header.photoUrl).toBe('/api/images/me.jpg'))
+    expect(state().cv!.header.showPhoto).toBe(true)
+
+    fireEvent.click(screen.getByRole('switch', { name: 'Show the photo' }))
+    expect(state().cv!.header.showPhoto).toBe(false)
+    fireEvent.click(screen.getByRole('radio', { name: 'Square' }))
+    expect(state().cv!.header.photoShape).toBe('square')
+    fireEvent.click(screen.getByRole('radio', { name: 'Top right' }))
+    expect(state().cv!.header.photoPosition).toBe('top-right')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Remove' }))
+    expect(state().cv!.header.photoUrl).toBeNull()
+    vi.restoreAllMocks()
+  })
+})
+
+describe('Backgrounds', () => {
+  it('offers every background and draws artwork over the whole page', () => {
+    render(<DesignPanel />)
+    const group = screen.getByRole('radiogroup', { name: 'Background' })
+    expect(within(group).getAllByRole('radio')).toHaveLength(BACKGROUNDS.length)
+    fireEvent.click(within(group).getByRole('radio', { name: 'Contour lines' }))
+    expect(design().background).toBe('topography')
+
+    for (const { id } of BACKGROUNDS.filter((b) => b.id !== 'none')) {
+      expect(backgroundStyle(id, '#00585a').backgroundImage).toBeTruthy()
+    }
+    expect(backgroundStyle('honeycomb', '#00585a').backgroundSize).toBe('cover')
+    expect(backgroundStyle('dots', '#00585a').backgroundSize).toBeUndefined()
   })
 })

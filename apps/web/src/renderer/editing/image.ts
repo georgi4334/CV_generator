@@ -2,6 +2,9 @@ import { i18n } from '@/i18n'
 
 const MAX_FILE_BYTES = 5 * 1024 * 1024
 
+/** Longest side of an uploaded CV photo, in pixels: sharp when printed at its size on the page. */
+export const PHOTO_MAX_SIZE = 480
+
 /** Scales an image file down in the browser, so uploads stay small. */
 export async function resizeImage(file: File, maxSize: number): Promise<Blob> {
   if (!file.type.startsWith('image/')) throw new Error(i18n.t('renderer.imageNotImage'))
