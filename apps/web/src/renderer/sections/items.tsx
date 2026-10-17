@@ -1,4 +1,5 @@
 import {
+  formatCertificateDates,
   formatDateRange,
   formatYearMonth,
   LANGUAGE_LEVEL_LABELS,
@@ -11,9 +12,10 @@ import {
   type LanguageItem,
   type ProjectItem,
   type SectionOf,
+  type SkillDisplay,
   type SkillItem,
 } from '@cv/shared'
-import { Building2, Star, X } from 'lucide-react'
+import { Building2, Link2, Star, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useEditor, useRender } from '@/renderer/context'
 import { assetUrl } from '@/shared/api/client'
@@ -23,6 +25,7 @@ import { pickAndUpload } from '@/renderer/editing/image'
 import { usePlaceholders } from '@/renderer/placeholders'
 import {
   Bullets,
+  CertificateDatesField,
   DateRangeField,
   Field,
   LevelIndicator,
@@ -34,6 +37,15 @@ import {
 const accent = { color: 'var(--cv-accent-text)' }
 const muted = { color: 'var(--cv-muted)' }
 const mutedStrong = { color: 'var(--cv-muted-strong)' }
+/**
+ * Skill pills: a soft tint and hairline of the accent text colour, so they show
+ * on white pages (accent tint) and on coloured sidebars (white tint) alike.
+ */
+const pill = {
+  background: 'color-mix(in srgb, var(--cv-accent-text) 12%, transparent)',
+  border: '1px solid color-mix(in srgb, var(--cv-accent-text) 30%, transparent)',
+  color: 'var(--cv-accent-text)',
+}
 
 /** Ids and path of the item being rendered, used for editing. */
 interface ItemRef {
@@ -349,10 +361,58 @@ export function ProjectView({ item, refs }: { item: ProjectItem; refs: ItemRef }
   )
 }
 
+/** "https://www.example.com/x/" → "example.com/x", for showing a link on the page. */
+const displayLink = (link: string) =>
+  link
+    .trim()
+    .replace(/^https?:\/\//i, '')
+    .replace(/^www\./i, '')
+    .replace(/\/$/, '')
+
+/** Links without a scheme ("example.com/x") open over https. */
+const linkHref = (link: string) =>
+  /^https?:\/\//i.test(link.trim()) ? link.trim() : `https://${link.trim()}`
+
+/**
+ * A certificate's verification link: a link icon and the address. In the
+ * editor it is typed in place; on the finished page (preview, shared link,
+ * PDF) it is a real link, shown without "https://".
+ */
+function CredentialLink({ link, refs }: { link: string; refs: ItemRef }) {
+  const P = usePlaceholders()
+  const editor = useEditor()
+  const { mode } = useRender()
+  const row = 'mt-[0.15em] flex min-w-0 items-center gap-[0.35em] text-[0.85em]'
+  const icon = <Link2 className="size-[1em] shrink-0" aria-hidden />
+
+  if (editor || (!link.trim() && mode === 'edit')) {
+    return (
+      <span className={row} style={muted}>
+        {icon}
+        <Field value={link} path={pathOf(refs, 'link')} placeholder={P.credentialLink} />
+      </span>
+    )
+  }
+  if (!link.trim()) return null
+  return (
+    <a
+      href={linkHref(link)}
+      target="_blank"
+      rel="noreferrer"
+      className={`${row} no-underline hover:underline`}
+      style={accent}
+    >
+      {icon}
+      <span className="truncate">{displayLink(link)}</span>
+    </a>
+  )
+}
+
 export function CertificateView({ item, refs }: { item: CertificateItem; refs: ItemRef }) {
   const P = usePlaceholders()
   const { language } = useRender()
   const update = useUpdate(refs)
+  const dates = { date: item.date, expiryDate: item.expiryDate ?? null }
   return (
     <div>
       <Field
@@ -364,13 +424,14 @@ export function CertificateView({ item, refs }: { item: CertificateItem; refs: I
       />
       <div className="flex flex-wrap gap-x-[0.5em] text-[0.9em]" style={muted}>
         <Field value={item.issuer} path={pathOf(refs, 'issuer')} placeholder={P.issuer} />
-        <SingleDateField
-          text={formatYearMonth(item.date, language)}
-          placeholder={P.date}
-          value={item.date}
-          onChange={(date) => update({ date })}
+        <CertificateDatesField
+          text={formatCertificateDates(dates, language)}
+          placeholder={P.certificateDates}
+          value={dates}
+          onChange={update}
         />
       </div>
+      <CredentialLink link={item.link} refs={refs} />
     </div>
   )
 }
@@ -488,15 +549,13 @@ function LevelLabel({
   )
 }
 
-type SkillsDisplay = SectionOf<'skills'>['levelDisplay']
-
 export function SkillsView({
   items,
   display,
   sectionId,
 }: {
   items: SkillItem[]
-  display: SkillsDisplay
+  display: SkillDisplay
   sectionId: string
 }) {
   const P = usePlaceholders()
@@ -517,6 +576,36 @@ export function SkillsView({
   )
   const setLevel = (skill: SkillItem) => (level: number) =>
     editor?.updateItem(sectionId, skill.id, { level })
+
+  if (display === 'pills') {
+    return (
+      <ul className="flex flex-wrap gap-[0.4em]">
+        {shown.map((skill) => (
+          <li
+            key={skill.id}
+            className="rounded-pill px-[0.75em] py-[0.15em] text-[0.9em]"
+            style={pill}
+          >
+            {name(skill)}
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
+  if (display === 'bullets') {
+    return (
+      <ul
+        className={`list-disc space-y-[0.2em] pl-[1.2em] marker:text-(--cv-accent-text) ${
+          inlineSkills ? 'grid grid-cols-2 gap-x-[1.5em] space-y-0' : ''
+        }`}
+      >
+        {shown.map((skill) => (
+          <li key={skill.id}>{name(skill)}</li>
+        ))}
+      </ul>
+    )
+  }
 
   if (display === 'none') {
     if (inlineSkills) {

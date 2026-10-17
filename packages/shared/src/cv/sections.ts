@@ -22,6 +22,13 @@ export const EducationItemSchema = z.object({
   bullets: z.array(z.string()),
 })
 
+/**
+ * How a skills section looks: a plain list, a level bar or dots (●●●●○) beside
+ * each skill, rounded pills, or a bulleted list. Pills and bullets show names only.
+ */
+export const SKILL_DISPLAYS = ['none', 'dots', 'bar', 'pills', 'bullets'] as const
+export type SkillDisplay = (typeof SKILL_DISPLAYS)[number]
+
 export const SkillItemSchema = z.object({
   id: IdSchema,
   name: z.string(),
@@ -64,7 +71,10 @@ export const CertificateItemSchema = z.object({
   id: IdSchema,
   name: z.string(),
   issuer: z.string(),
+  /** When it was issued. */
   date: YearMonthSchema.nullable(),
+  /** When it runs out; `null` for certificates that never expire. Missing in older CVs. */
+  expiryDate: YearMonthSchema.nullable().default(null),
   link: z.string(),
 })
 
@@ -127,8 +137,7 @@ export const SkillsSectionSchema = z.object({
   ...sectionBase,
   type: z.literal('skills'),
   items: z.array(SkillItemSchema),
-  /** How levels are shown: hidden, a bar, or dots (●●●●○). */
-  levelDisplay: z.enum(['none', 'bar', 'dots']),
+  levelDisplay: z.enum(SKILL_DISPLAYS),
 })
 
 export const AchievementsSectionSchema = z.object({

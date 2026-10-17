@@ -4,6 +4,14 @@ import { showToast, type ToastTone } from '@/shared/stores/toasts'
 /** Panels that open in the editor's left side panel. */
 export type EditorPanel = 'ai' | 'fix' | 'tailor' | 'templates' | 'design' | 'rearrange' | 'history'
 
+/** Page zoom limits and step, in percent of the real size. */
+export const ZOOM_MIN = 25
+export const ZOOM_MAX = 200
+export const ZOOM_STEP = 10
+
+export const clampZoom = (percent: number) =>
+  Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round(percent)))
+
 interface EditorUiState {
   activePanel: EditorPanel | null
   togglePanel: (panel: EditorPanel) => void
@@ -16,6 +24,9 @@ interface EditorUiState {
   /** A saved version shown instead of the editable CV (History panel). */
   previewVersionId: string | null
   setPreviewVersion: (versionId: string | null) => void
+  /** Page zoom in percent; `null` fits the page to the screen (100% where it fits). */
+  zoom: number | null
+  setZoom: (zoom: number | null) => void
 }
 
 export const useEditorUi = create<EditorUiState>()((set) => ({
@@ -34,4 +45,6 @@ export const useEditorUi = create<EditorUiState>()((set) => ({
   clearNotice: () => set({ notice: null }),
   previewVersionId: null,
   setPreviewVersion: (previewVersionId) => set({ previewVersionId }),
+  zoom: null,
+  setZoom: (zoom) => set({ zoom: zoom === null ? null : clampZoom(zoom) }),
 }))

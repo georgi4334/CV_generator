@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatDateRange, formatYearMonth } from './i18n'
+import { formatCertificateDates, formatDateRange, formatYearMonth } from './i18n'
 
 describe('formatYearMonth', () => {
   it('formats year-only and year-month values', () => {
@@ -34,5 +34,20 @@ describe('formatDateRange', () => {
     expect(formatDateRange({ startDate: '2020', endDate: null, isCurrent: false }, 'en-US')).toBe(
       '2020',
     )
+  })
+})
+
+describe('formatCertificateDates', () => {
+  it('shows the issue date and when it expires', () => {
+    expect(formatCertificateDates({ date: '2023-05', expiryDate: '2026-05' }, 'en-US')).toBe(
+      'May 2023 · Expires May 2026',
+    )
+    expect(formatCertificateDates({ date: '2023-05', expiryDate: null }, 'en-US')).toBe('May 2023')
+    expect(formatCertificateDates({ date: null, expiryDate: '2026' }, 'bg')).toBe('Валиден до 2026')
+    expect(formatCertificateDates({ date: null, expiryDate: null }, 'en-US')).toBe('')
+  })
+
+  it('reads older certificates without an expiry date', () => {
+    expect(formatCertificateDates({ date: '2021' }, 'en-GB')).toBe('2021')
   })
 })

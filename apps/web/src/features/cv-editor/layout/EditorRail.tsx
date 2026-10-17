@@ -1,4 +1,4 @@
-import { Bot, Crown, Download, Eye, Link2 } from 'lucide-react'
+import { Bot, Download, Eye, Link2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { useEditorUi } from '@/features/cv-editor/state/editorUi'
@@ -15,7 +15,7 @@ interface EditorRailProps {
 
 /**
  * Quick actions in a vertical glass pill beside the page: preview, PDF, share
- * link, AI assistant and premium. It stays in view near the bottom of the screen.
+ * link and AI assistant. It stays in view near the bottom of the screen.
  */
 export function EditorRail({ previewTo, onDownload, onShare }: EditorRailProps) {
   const { t } = useTranslation()
@@ -57,15 +57,6 @@ export function EditorRail({ previewTo, onDownload, onShare }: EditorRailProps) 
         onClick={() => togglePanel('ai')}
       >
         <Bot className="size-5" />
-      </button>
-      <button
-        type="button"
-        className="flex size-9 items-center justify-center rounded-pill bg-amber-400 text-warning-fg hover:bg-amber-300"
-        aria-label={t('editor.rail.premium')}
-        title={t('editor.rail.premium')}
-        onClick={() => notify(t('editor.rail.premiumPlanned'))}
-      >
-        <Crown className="size-5" />
       </button>
     </div>
   )

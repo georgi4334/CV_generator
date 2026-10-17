@@ -24,6 +24,14 @@
 button.cv-editable {
   cursor: pointer;
 }
+/* Buttons on the page (dates, levels) are marked with an outline, not a tint, so their muted text keeps its contrast. */
+button.cv-editable:hover,
+button.cv-editable:focus,
+button.cv-editable[aria-expanded='true'] {
+  background: none;
+  outline: 1px dashed currentColor;
+  outline-offset: 1px;
+}
 
 /*
  * Download PDF (browser print): only the CV pages, at their exact paper size.
