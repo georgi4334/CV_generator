@@ -11,6 +11,9 @@ export async function signUp(page: Page, name = 'Test User') {
     data: { email, password: PASSWORD, name },
   })
   expect(res.status(), await res.text()).toBe(201)
+  // People can close the "confirm your email" toast; these tests start with it closed so it
+  // does not cover buttons in the corner (auth.spec checks the reminder itself).
+  await page.addInitScript(() => sessionStorage.setItem('cv-verify-dismissed', '1'))
   return { email }
 }
 

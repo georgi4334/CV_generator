@@ -120,6 +120,15 @@ Components use the Tailwind classes generated from those tokens, never raw value
   - Timings are tokens (`--duration-page`, `--duration-zoom`, `--duration-leave`,
     `--ease-spring`). Browsers without the API, and people who prefer reduced motion, get no
     animation.
+- **Buttons, fields and menus** are liquid glass too: `btn-primary` / `btn-danger` have a
+  bright rim and a soft glow (`--shadow-btn-*`), `btn-secondary` is frosted glass, and hover
+  lifts them a little. `input` (fields and drop-downs) is frosted with a brand halo on focus.
+  Drop-down menus use `glass-menu` with `menu-item` rows.
+- **Notifications** are toasts in the bottom-right corner (above the tab bar on phones):
+  `showToast({ tone, message })` from `shared/stores/toasts.ts`, drawn by `shared/ui/Toaster.tsx`.
+  Tones: info and success fade away after a few seconds; warning and error stay until closed
+  with ✕. The editor's `notify()` and the "confirm your email" reminder use them.
+- **Drawers and dialogs** close with ✕, Escape, or a click on the dimmed area around them.
 - **Name and logo:** the product name is `APP_NAME` (`packages/shared/src/common/brand.ts`);
   translations write it as `{{app}}`. The logo is `shared/ui/Logo.tsx` (`Logo`, `LogoMark`),
   drawn with the brand tokens; `public/favicon.svg` is the same drawing.

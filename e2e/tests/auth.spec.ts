@@ -11,6 +11,10 @@ test('sign up, sign out and sign in again', async ({ page }) => {
   await page.getByRole('button', { name: 'Create account' }).click()
   await expect(page.getByRole('heading', { name: 'Saved Jobs' })).toBeVisible()
   await expect(page.getByText('Please confirm your email address')).toBeVisible()
+  // The reminder is a toast in the corner that can be closed.
+  const notifications = page.getByRole('region', { name: 'Notifications' })
+  await notifications.getByRole('button', { name: 'Close' }).click()
+  await expect(page.getByText('Please confirm your email address')).toHaveCount(0)
 
   const cookie = (await page.context().cookies()).find((c) => c.name === 'cv_session')
   expect(cookie).toMatchObject({ httpOnly: true, sameSite: 'Lax' })

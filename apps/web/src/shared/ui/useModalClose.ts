@@ -1,8 +1,5 @@
 import { useCallback, useState } from 'react'
-
-const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
-/** Whether a closing animation can play (not in tests, not for reduced motion). */
-const canAnimate = () => typeof Element.prototype.getAnimations === 'function' && !reducedMotion()
+import { canAnimate } from '@/shared/lib/motion'
 
 /**
  * Closing with an exit animation: `requestClose` starts it; pass `closing` and

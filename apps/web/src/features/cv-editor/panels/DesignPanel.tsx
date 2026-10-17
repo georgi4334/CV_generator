@@ -29,7 +29,7 @@ function Group({ title, children }: { title: string; children: ReactNode }) {
 }
 
 const stepButton =
-  'rounded-tight p-1 text-fg-muted hover:bg-muted hover:text-fg disabled:opacity-30'
+  'rounded-tight p-1 text-fg-muted hover:bg-glass-hover hover:text-fg disabled:opacity-30'
 
 /** A 1–5 slider with −/+ buttons and labels for both ends, like the reference panel. */
 function LevelSlider({
@@ -205,7 +205,7 @@ function FontPicker({ value }: { value: FontFamily }) {
           <ul
             role="listbox"
             aria-label={t('design.font.list')}
-            className="absolute z-(--z-dropdown) mt-1 max-h-72 w-full overflow-auto rounded-control border border-line bg-surface py-1 shadow-overlay"
+            className="glass-menu absolute z-(--z-dropdown) mt-1 max-h-72 w-full overflow-auto"
           >
             {FONT_FAMILIES.map((font) => (
               <li key={font}>
@@ -217,9 +217,7 @@ function FontPicker({ value }: { value: FontFamily }) {
                     updateDesign({ fontFamily: font })
                     setOpen(false)
                   }}
-                  className={`w-full px-3 py-1.5 text-left text-base hover:bg-muted ${
-                    font === value ? 'text-brand-fg ' : ''
-                  }`}
+                  className={`menu-item py-1.5 text-base ${font === value ? 'text-brand-fg ' : ''}`}
                   style={{ fontFamily: FONT_STACKS[font] }}
                 >
                   {font}
@@ -383,7 +381,7 @@ export function DesignPanel() {
       <button
         type="button"
         onClick={resetToTemplateDefaults}
-        className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-control border border-line-strong py-2 text-sm text-fg-soft hover:bg-muted "
+        className="btn btn-secondary mt-4 w-full gap-1.5"
       >
         <RotateCcw className="size-4" />{' '}
         {t('design.reset', { template: t(`labels.template.${template.id}`) })}

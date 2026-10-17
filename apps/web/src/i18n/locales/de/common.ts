@@ -11,6 +11,7 @@ export const common: Messages['common'] = {
   delete: 'Löschen',
   edit: 'Bearbeiten',
   back: 'Zurück',
+  notifications: 'Benachrichtigungen',
   create: 'Erstellen',
   apply: 'Übernehmen',
   discard: 'Verwerfen',

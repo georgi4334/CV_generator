@@ -56,7 +56,7 @@ function MenuRow({
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-center gap-3 rounded-control px-3 py-2.5 text-left text-sm hover:bg-muted"
+      className="flex w-full items-center gap-3 rounded-control px-3 py-2.5 text-left text-sm hover:bg-glass-hover"
     >
       {icon}
       <span className="flex-1">{label}</span>
@@ -77,7 +77,7 @@ function ThemeOptions() {
       {THEME_MODES.map(({ mode: option, icon: Icon }) => (
         <label
           key={option}
-          className="flex cursor-pointer items-center gap-3 rounded-control px-3 py-2.5 text-sm hover:bg-muted has-checked:bg-brand-soft has-checked:text-brand-fg-strong has-focus-visible:outline-2 has-focus-visible:outline-brand-line"
+          className="flex cursor-pointer items-center gap-3 rounded-control px-3 py-2.5 text-sm hover:bg-glass-hover has-checked:bg-brand-soft has-checked:text-brand-fg-strong has-focus-visible:outline-2 has-focus-visible:outline-brand-line"
         >
           <input
             type="radio"
@@ -148,7 +148,7 @@ export function UserMenu() {
         aria-haspopup="dialog"
         aria-expanded={view !== null}
         onClick={() => setView('menu')}
-        className="flex items-center gap-2 rounded-pill p-0.5 text-sm text-fg-soft hover:bg-muted lg:pr-2"
+        className="flex items-center gap-2 rounded-pill p-0.5 text-sm text-fg-soft hover:bg-glass-hover lg:pr-2"
       >
         <Avatar text={avatar} />
         {/* The name is always in the button's accessible name, visible from lg: up. */}

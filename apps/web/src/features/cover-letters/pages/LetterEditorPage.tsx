@@ -52,7 +52,8 @@ function LinkBar({ record }: { record: CoverLetterRecord }) {
   const notify = useEditorUi((s) => s.notify)
   const applyFromCv = useLetterEditor((s) => s.applyFromCv)
   const [copying, setCopying] = useState(false)
-  const failed = (e: unknown) => notify(t('letters.notSaved', { message: errorMessage(e) }))
+  const failed = (e: unknown) =>
+    notify(t('letters.notSaved', { message: errorMessage(e) }), 'error')
 
   const copyFromCv = async () => {
     if (!record.cvId) return
@@ -60,7 +61,7 @@ function LinkBar({ record }: { record: CoverLetterRecord }) {
     try {
       const cv = await loadCv(record.cvId)
       applyFromCv(cv.document.header, cv.document.design)
-      notify(t('letters.copied', { title: cv.title }))
+      notify(t('letters.copied', { title: cv.title }), 'success')
     } catch (e) {
       failed(e)
     } finally {
@@ -170,7 +171,10 @@ function LetterEditor({ record }: { record: CoverLetterRecord }) {
               onRename={(title) =>
                 rename.mutate(
                   { id: record.id, title },
-                  { onError: (e) => notify(t('letters.notRenamed', { message: errorMessage(e) })) },
+                  {
+                    onError: (e) =>
+                      notify(t('letters.notRenamed', { message: errorMessage(e) }), 'error'),
+                  },
                 )
               }
             />

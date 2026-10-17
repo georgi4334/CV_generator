@@ -28,9 +28,9 @@ export function VersionPreview({ cvId, versionId }: { cvId: string; versionId: s
       loadIntoEditor(record)
       await queryClient.invalidateQueries({ queryKey: cvKeys.versions(cvId) })
       setPreviewVersion(null)
-      notify(t('editor.version.restored'))
+      notify(t('editor.version.restored'), 'success')
     } catch (e) {
-      notify(t('editor.version.notRestored', { reason: errorMessage(e) }))
+      notify(t('editor.version.notRestored', { reason: errorMessage(e) }), 'error')
     } finally {
       setRestoring(false)
     }

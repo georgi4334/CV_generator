@@ -17,7 +17,8 @@ const MOTION = {
 }
 
 /**
- * A modal `<dialog>`. Escape and the backdrop's Cancel ask to close
+ * A modal `<dialog>`. Escape, the backdrop's Cancel and a click on the dimmed
+ * area ask to close
  * (`onCloseRequest`, else `onClose`). With `closing` set, it plays its exit
  * animation and then calls `onClose`.
  */
@@ -64,11 +65,29 @@ export function Modal({
     void Promise.allSettled(animations.map((a) => a.finished)).then(() => onCloseRef.current())
   }, [closing])
 
+  // A click on the dimmed area around it (pressed and released there) closes it too.
+  const pressedOutside = useRef(false)
+  const outside = (event: { clientX: number; clientY: number }) => {
+    const box = ref.current?.getBoundingClientRect()
+    if (!box) return false
+    const { clientX: x, clientY: y } = event
+    return x < box.left || x > box.right || y < box.top || y > box.bottom
+  }
+
   const motion = MOTION[variant]
   return (
     <dialog
       ref={ref}
       aria-labelledby={labelledBy}
+      onPointerDown={(e) => {
+        pressedOutside.current = e.target === e.currentTarget && outside(e)
+      }}
+      onClick={(e) => {
+        if (pressedOutside.current && e.target === e.currentTarget && outside(e)) {
+          ;(onCloseRequest ?? onClose)()
+        }
+        pressedOutside.current = false
+      }}
       onCancel={(e) => {
         e.preventDefault()
         ;(onCloseRequest ?? onClose)()
