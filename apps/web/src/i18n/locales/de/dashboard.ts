@@ -40,6 +40,7 @@ export const dashboard: Messages['dashboard'] = {
     interviews: 'Gespräche',
     interviewsHint: 'Gespräch oder weiter erreicht',
   },
+  jobsError: 'Ihre Stellen konnten nicht geladen werden: {{message}}',
   reminders: {
     heading: 'Erinnerungen',
     updateError: 'Die Stelle konnte nicht aktualisiert werden: {{message}}',

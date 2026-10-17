@@ -37,6 +37,7 @@ export const dashboard = {
     interviews: 'Interviews',
     interviewsHint: 'Reached an interview or further',
   },
+  jobsError: 'Your jobs could not be loaded: {{message}}',
   reminders: {
     heading: 'Reminders',
     updateError: 'Could not update the job: {{message}}',
