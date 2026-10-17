@@ -39,13 +39,6 @@ const FEATURES: Array<{
   { key: 'languages', icon: Languages },
 ]
 
-/** Small glass labels in a row under the example CV. */
-const CHIPS = [
-  { key: 'ai', icon: Sparkles },
-  { key: 'templates', icon: LayoutTemplate },
-  { key: 'share', icon: Link2 },
-] as const
-
 /**
  * What a first-time visitor sees: what the service does, with a way to log in
  * or register. Signed-in people go straight to their dashboard.
@@ -104,17 +97,6 @@ export function WelcomePage() {
           >
             <div className="glass mx-auto w-fit -rotate-2 p-3 shadow-overlay motion-reduce:rotate-0">
               <CvThumbnail cv={EXAMPLE_CV} width={wide ? HERO_CV_WIDTH : HERO_CV_WIDTH_PHONE} />
-            </div>
-            <div className="mt-5 flex flex-wrap justify-center gap-2">
-              {CHIPS.map(({ key, icon: Icon }) => (
-                <span
-                  key={key}
-                  className="glass-pill flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium whitespace-nowrap text-fg-soft"
-                >
-                  <Icon className="size-4 text-brand-fg" aria-hidden />
-                  {t(`welcome.chips.${key}`)}
-                </span>
-              ))}
             </div>
           </figure>
         </section>

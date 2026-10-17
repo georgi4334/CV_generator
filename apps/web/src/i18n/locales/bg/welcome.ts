@@ -9,11 +9,6 @@ export const welcome: Messages['welcome'] = {
   logIn: 'Вход',
   haveAccount: 'Вече имате профил?',
   previewLabel: 'Примерно CV, направено с {{app}}',
-  chips: {
-    ai: 'AI проверка на текста',
-    templates: '8 шаблона',
-    share: 'Споделяне с линк',
-  },
   featuresTitle: 'Всичко за търсенето на работа',
   features: {
     templates: {
