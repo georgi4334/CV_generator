@@ -217,7 +217,12 @@ export function LevelIndicator({
     )
   }
   return (
-    <span className="inline-flex gap-[0.25em]" aria-label={t('renderer.levelOf', { level })}>
+    <span
+      // A label needs a role: a picture when read-only, a group of buttons when editing.
+      role={editable ? 'group' : 'img'}
+      className="inline-flex gap-[0.25em]"
+      aria-label={t('renderer.levelOf', { level })}
+    >
       {[1, 2, 3, 4, 5].map((n) => {
         const dot = { background: n <= level ? 'var(--cv-accent-text)' : 'var(--cv-rule)' }
         return editable ? (

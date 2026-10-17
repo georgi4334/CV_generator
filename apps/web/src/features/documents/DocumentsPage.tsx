@@ -1,9 +1,8 @@
-import type { DocumentSummary } from '@cv/shared'
+import type { DocumentSummary, DocumentType } from '@cv/shared'
 import {
   ChevronDown,
   Copy,
   Download,
-  FileText,
   Link2,
   MoreVertical,
   Pencil,
@@ -14,7 +13,8 @@ import {
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, Navigate, NavLink, useParams } from 'react-router'
-import { DocumentTypeBadge, SharedBadge } from '@/shared/ui/Badges'
+import { DocumentTypeBadge, DocumentTypeIcon, SharedBadge } from '@/shared/ui/Badges'
+import { DOCUMENT_TYPE_STYLES } from '@/shared/ui/badgeStyles'
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog'
 import { PageHeader, primaryButton, secondaryButton } from '@/shared/ui/PageHeader'
 import { ShareDialog } from '@/features/share/ShareDialog'
@@ -98,16 +98,20 @@ interface RowActions {
   onDelete: () => void
 }
 
-/** The file icon of a row: the opened page shrinks back into it when closed. */
-function DocumentIcon({ docId }: { docId: string }) {
+/**
+ * The icon of a row: a CV is a teal page with a person, a cover letter a blue
+ * envelope. The opened page shrinks back into it when closed.
+ */
+function DocumentIcon({ docId, type }: { docId: string; type: DocumentType }) {
   const transitionStyle = useDocTransitionStyle(docId)
   return (
     <span
       data-doc-icon
+      data-doc-type={type}
       style={transitionStyle}
-      className="flex h-12 w-9 shrink-0 items-center justify-center rounded-tight border border-line bg-page"
+      className={`flex h-12 w-9 shrink-0 items-center justify-center rounded-tight border border-line ${DOCUMENT_TYPE_STYLES[type]}`}
     >
-      <FileText className="size-4 text-fg-faint" />
+      <DocumentTypeIcon type={type} className="size-5" />
     </span>
   )
 }
@@ -146,7 +150,7 @@ function RowMenu({ doc, actions }: { doc: DocumentSummary; actions: RowActions }
             }
             className={item}
           >
-            <FileText className="size-4" /> {t('documents.menu.open')}
+            <DocumentTypeIcon type={doc.type} /> {t('documents.menu.open')}
           </TransitionLink>
           <button type="button" role="menuitem" className={item} onClick={run(actions.onRename)}>
             <Pencil className="size-4" /> {t('documents.menu.rename')}
@@ -417,7 +421,7 @@ export function DocumentsPage() {
                   checked={selected.has(doc.id)}
                   onChange={() => toggle(doc.id)}
                 />
-                <DocumentIcon docId={doc.id} />
+                <DocumentIcon docId={doc.id} type={doc.type} />
                 <div className="min-w-0 flex-1">
                   {renaming === doc.id ? (
                     <RenameInput

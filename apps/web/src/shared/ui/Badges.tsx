@@ -1,6 +1,6 @@
-import { Link2 } from 'lucide-react'
+import { FileUser, Link2, Mail } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { JOB_STATUS_STYLES } from './badgeStyles'
+import { DOCUMENT_TYPE_STYLES, JOB_STATUS_STYLES } from './badgeStyles'
 import { type DocumentType, type JobStatus, type JobType } from '@cv/shared'
 
 const pill = 'pill'
@@ -24,15 +24,26 @@ export function JobTypeBadge({ type }: { type: JobType | null }) {
 
 export function DocumentTypeBadge({ type }: { type: DocumentType }) {
   const { t } = useTranslation()
-  return type === 'cv' ? (
-    <span className={`${pill} bg-brand-soft text-brand-fg-strong`}>
-      {t('labels.documentType.cv')}
-    </span>
-  ) : (
-    <span className={`${pill} bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300`}>
-      {t('labels.documentType.coverLetter')}
+  return (
+    <span className={`${pill} ${DOCUMENT_TYPE_STYLES[type]}`}>
+      {t(type === 'cv' ? 'labels.documentType.cv' : 'labels.documentType.coverLetter')}
     </span>
   )
+}
+
+/**
+ * A CV is a page with a person on it (teal); a cover letter is an envelope
+ * (sky blue). Different in shape and colour, so a list can be scanned at a glance.
+ */
+export function DocumentTypeIcon({
+  type,
+  className = 'size-4',
+}: {
+  type: DocumentType
+  className?: string
+}) {
+  const Icon = type === 'cv' ? FileUser : Mail
+  return <Icon aria-hidden className={className} />
 }
 
 /** Marks a template that suits the CV's profession. */

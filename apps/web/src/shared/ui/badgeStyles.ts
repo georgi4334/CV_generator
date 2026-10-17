@@ -1,4 +1,4 @@
-import type { JobStatus } from '@cv/shared'
+import type { DocumentType, JobStatus } from '@cv/shared'
 
 /** Badge colors per job status (also used by the inline status picker). */
 export const JOB_STATUS_STYLES: Record<JobStatus, string> = {
@@ -9,4 +9,10 @@ export const JOB_STATUS_STYLES: Record<JobStatus, string> = {
   accepted: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300',
   rejected: 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300',
   no_answer: 'bg-zinc-200 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-400',
+}
+
+/** Colours of each document type, shared by its badge and its icon: teal for CVs, sky blue for letters. */
+export const DOCUMENT_TYPE_STYLES: Record<DocumentType, string> = {
+  cv: 'bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300',
+  coverLetter: 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300',
 }
