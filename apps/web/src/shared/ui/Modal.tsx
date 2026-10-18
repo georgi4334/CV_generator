@@ -61,10 +61,13 @@ export function Modal({
   useEffect(() => {
     const dialog = ref.current
     if (!dialog || dialog.open) return
+    // What had focus (the button that opened it): it gets focus back when this closes.
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null
     if (typeof dialog.showModal === 'function') dialog.showModal()
     else dialog.setAttribute('open', '')
     return () => {
       if (typeof dialog?.close === 'function') dialog.close()
+      if (opener?.isConnected && opener !== document.body) opener.focus()
     }
   }, [])
 

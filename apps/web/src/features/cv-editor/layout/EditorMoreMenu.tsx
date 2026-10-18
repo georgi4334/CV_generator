@@ -5,6 +5,7 @@ import { Link } from 'react-router'
 import { useEditorUi } from '@/features/cv-editor/state/editorUi'
 import { LanguageSelect } from '@/shared/ui/LanguageSelect'
 import { ThemeSelect } from '@/shared/ui/ThemeSelect'
+import { useMenu } from '@/shared/ui/useMenu'
 
 const item = 'menu-item gap-3 py-2.5'
 
@@ -46,13 +47,16 @@ export function EditorMoreMenu({
     return () => document.removeEventListener('pointerdown', close)
   }, [open])
 
+  const { triggerRef, menuRef, onKeyDown } = useMenu(open, setOpen)
+
   const run = (action: () => void) => () => {
     setOpen(false)
     action()
   }
   return (
-    <div ref={root} className="relative">
+    <div ref={root} className="relative" onKeyDown={onKeyDown}>
       <button
+        ref={triggerRef}
         type="button"
         className="btn-icon"
         aria-label={t('editor.topBar.more')}
@@ -63,7 +67,11 @@ export function EditorMoreMenu({
         <MoreVertical className="size-5" />
       </button>
       {open && (
-        <div role="menu" className="glass-menu absolute right-0 z-(--z-dropdown) mt-2 w-menu">
+        <div
+          ref={menuRef}
+          role="menu"
+          className="glass-menu absolute right-0 z-(--z-dropdown) mt-2 w-menu"
+        >
           <Link to={previewTo} role="menuitem" className={item}>
             <Eye className="size-4" aria-hidden />
             {t('editor.rail.preview')}

@@ -89,17 +89,22 @@ button.cv-editable[aria-expanded='true'] {
   }
 }
 
-/* Cover letters grow past one page when long, so their page is a minimum height. */
+/*
+ * Letters (cover and resignation) grow past one page when long, so their page is a
+ * minimum height. The paper keeps the letter's margin at the bottom of every page
+ * and at the top of every page after the first (see the @page rules in PrintHost),
+ * so a short letter is one page less that bottom margin.
+ */
 @media print {
   .print-root [data-letter-page] {
     box-shadow: none !important;
   }
   .print-root [data-letter-page='A4'] {
     width: 210mm !important;
-    min-height: 297mm !important;
+    min-height: calc(297mm - var(--letter-margin, 0px)) !important;
   }
   .print-root [data-letter-page='Letter'] {
     width: 8.5in !important;
-    min-height: 11in !important;
+    min-height: calc(11in - var(--letter-margin, 0px)) !important;
   }
 }

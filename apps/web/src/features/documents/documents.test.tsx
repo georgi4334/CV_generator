@@ -1,7 +1,7 @@
 // Route-level tests: the real app with fake APIs (see test/appHarness.ts).
 import '@/test/appHarness'
 import { fake } from '@/test/fakeHolders'
-import { fireEvent, screen, waitFor, within } from '@testing-library/react'
+import { cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { renderRoute } from '@/test/renderRoute'
 
@@ -118,5 +118,57 @@ describe('documents', () => {
   it('invites to create a first CV when there are none', async () => {
     renderRoute('/documents/cvs')
     expect(await screen.findByRole('link', { name: 'Create your first CV' })).toBeDefined()
+  })
+
+  it('has a row menu you can use with the keyboard: arrows move, Escape closes and returns focus', async () => {
+    fake.current.seed('Frontend CV')
+    renderRoute('/documents/cvs')
+    const button = await screen.findByRole('button', { name: 'Actions for Frontend CV' })
+    button.focus()
+    fireEvent.keyDown(button, { key: 'ArrowDown' })
+    const menu = await screen.findByRole('menu')
+    const items = within(menu).getAllByRole('menuitem')
+    // Opening moves focus to the first item.
+    expect(document.activeElement).toBe(items[0])
+    fireEvent.keyDown(items[0]!, { key: 'ArrowDown' })
+    expect(document.activeElement).toBe(items[1])
+    fireEvent.keyDown(items[1]!, { key: 'ArrowUp' })
+    fireEvent.keyDown(items[0]!, { key: 'ArrowUp' })
+    expect(document.activeElement).toBe(items[items.length - 1])
+    fireEvent.keyDown(items[items.length - 1]!, { key: 'Home' })
+    expect(document.activeElement).toBe(items[0])
+    fireEvent.keyDown(items[0]!, { key: 'End' })
+    expect(document.activeElement).toBe(items[items.length - 1])
+
+    fireEvent.keyDown(items[items.length - 1]!, { key: 'Escape' })
+    expect(screen.queryByRole('menu')).toBeNull()
+    expect(document.activeElement).toBe(button)
+  })
+
+  it('offers to create the kind of document the empty tab lists', async () => {
+    renderRoute('/documents/resignations')
+    const link = await screen.findByRole('link', { name: 'Create your first resignation letter' })
+    expect(link.getAttribute('href')).toBe('/resignations/new')
+    cleanup()
+    renderRoute('/documents/cover-letters')
+    const letter = await screen.findByRole('link', { name: 'Create your first cover letter' })
+    expect(letter.getAttribute('href')).toBe('/cover-letters/new')
+    cleanup()
+    renderRoute('/documents/all')
+    const cv = await screen.findByRole('link', { name: 'Create your first CV' })
+    expect(cv.getAttribute('href')).toBe('/cvs/new')
+  })
+
+  it('starts the page with a "Skip to content" link to the main content', async () => {
+    renderRoute('/documents/all')
+    await screen.findByRole('heading', { name: 'Documents' })
+    const skip = screen.getByRole('link', { name: 'Skip to content' })
+    expect(skip.getAttribute('href')).toBe('#main-content')
+    const main = screen.getByRole('main')
+    expect(main.id).toBe('main-content')
+    // It is the first link in the page.
+    expect(document.querySelector('a')).toBe(skip)
+    fireEvent.click(skip)
+    expect(document.activeElement).toBe(main)
   })
 })

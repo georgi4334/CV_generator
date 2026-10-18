@@ -146,6 +146,38 @@ describe('resignation letters', () => {
     expect(fake.current.resignations.get(letter.id)!.revision).toBe(2)
   })
 
+  it('hints at an opening for the first paragraph, not at the greeting', async () => {
+    const letter = fake.current.seedResignation('Leaving')
+    letter.document.paragraphs = ['', '']
+    renderRoute(`/resignations/${letter.id}/edit`)
+    await screen.findByDisplayValue('Leaving')
+    const boxes = letterPage().getAllByRole('textbox')
+    const hints = boxes
+      .filter((box) => box.getAttribute('data-path')?.startsWith('paragraphs.'))
+      .map((box) => box.getAttribute('aria-label'))
+    expect(hints[0]).toMatch(/^Opening:/)
+    expect(hints[0]).not.toBe(
+      boxes.find((box) => box.getAttribute('data-path') === 'greeting')!.getAttribute('aria-label'),
+    )
+    expect(hints[1]).toBe('Another paragraph.')
+  })
+
+  it('stops a text at 5,000 characters while typing', async () => {
+    const letter = fake.current.seedResignation('Leaving')
+    renderRoute(`/resignations/${letter.id}/edit`)
+    await screen.findByDisplayValue('Leaving')
+    const paragraph = letterPage()
+      .getAllByRole('textbox')
+      .find((box) => box.getAttribute('data-path') === 'paragraphs.0')!
+    paragraph.textContent = 'w'.repeat(6000)
+    fireEvent.input(paragraph)
+    await waitFor(
+      () =>
+        expect(fake.current.resignations.get(letter.id)!.document.paragraphs[0]).toHaveLength(5000),
+      SAVE_TIMEOUT,
+    )
+  })
+
   it('limits how long the fields can be while typing', async () => {
     const letter = fake.current.seedResignation('Leaving')
     renderRoute(`/resignations/${letter.id}/edit`)

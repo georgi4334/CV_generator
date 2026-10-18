@@ -53,6 +53,8 @@ export const documents: Messages['documents'] = {
     noMatch: 'Няма документи, които отговарят на търсенето.',
     empty: 'Все още няма нищо тук.',
     createFirst: 'Създайте първото си CV',
+    createFirstLetter: 'Създайте първото си мотивационно писмо',
+    createFirstResignation: 'Създайте първото си заявление за напускане',
     forJob: 'За {{position}} в {{company}}',
     noJob: 'Без връзка с обява',
   },

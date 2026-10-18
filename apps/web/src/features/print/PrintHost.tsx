@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import { CvRenderer, LetterRenderer, ResignationRenderer } from '@/renderer'
+import { layoutTokens } from '@/renderer/templates/tokens'
 import { usePrintJob, type PrintJob } from './printCv'
 
 const nextFrame = () =>
@@ -54,9 +55,24 @@ function PrintView({ job }: { job: PrintJob }) {
   const { doc } = job
   const design = doc.kind === 'cv' ? doc.cv.design : doc.letter.design
   const size = design.pageSize === 'Letter' ? 'letter' : 'A4'
+  // CV pages are drawn one by one with their own margins. A letter flows onto more pages when long,
+  // so the paper itself keeps the margins at the top and bottom of every page after the first
+  // (the first page starts with the letter's own top padding, which may be a coloured band).
+  const letter = doc.kind !== 'cv'
+  const margin = layoutTokens(design).margin
   return (
-    <div ref={ref} className="print-root" data-testid="print-root" aria-hidden>
-      <style>{`@page { size: ${size} portrait; margin: 0; }`}</style>
+    <div
+      ref={ref}
+      className="print-root"
+      data-testid="print-root"
+      style={{ '--letter-margin': letter ? `${margin}px` : '0px' } as CSSProperties}
+      aria-hidden
+    >
+      <style>
+        {letter
+          ? `@page { size: ${size} portrait; margin: ${margin}px 0; } @page :first { margin-top: 0; }`
+          : `@page { size: ${size} portrait; margin: 0; }`}
+      </style>
       {doc.kind === 'cv' ? (
         <CvRenderer cv={doc.cv} mode="preview" hidePersonal={job.hidePersonal} />
       ) : doc.kind === 'coverLetter' ? (
