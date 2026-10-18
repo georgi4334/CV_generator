@@ -14,14 +14,22 @@ const CONTACTS: Array<{ key: 'phone' | 'email' | 'link' | 'location'; icon: Luci
   { key: 'location', icon: MapPin },
 ]
 
-function Contacts({ header, layout }: { header: CvHeader; layout: 'row' | 'column' | 'centered' }) {
+function Contacts({
+  header,
+  layout,
+}: {
+  header: CvHeader
+  layout: 'row' | 'column' | 'centered' | 'stacked'
+}) {
   const P = usePlaceholders()
   const { mode } = useRender()
   const shown = CONTACTS.filter(({ key }) => mode === 'edit' || header[key].trim())
   const layoutClass =
     layout === 'column'
       ? 'flex flex-col items-end gap-[0.2em]'
-      : `flex flex-wrap gap-x-[1em] gap-y-[0.2em] ${layout === 'centered' ? 'justify-center' : ''}`
+      : layout === 'stacked'
+        ? 'flex flex-col items-start gap-[0.35em]'
+        : `flex flex-wrap gap-x-[1em] gap-y-[0.2em] ${layout === 'centered' ? 'justify-center' : ''}`
   return (
     <div className={`${layoutClass} text-[0.85em]`} style={{ color: 'var(--cv-muted)' }}>
       {shown.map(({ key, icon: Icon }) => (
@@ -251,6 +259,254 @@ export function StylishHeader({ header }: { header: CvHeader }) {
       <div className="mt-[0.5em] w-full">
         <Contacts header={header} layout="centered" />
       </div>
+    </div>
+  )
+}
+
+/** Name, headline and contacts at the top of a filled sidebar, photo above (Portfolio, Spotlight). */
+function SidebarHeader({ header, centered }: { header: CvHeader; centered: boolean }) {
+  const P = usePlaceholders()
+  return (
+    <div className={`flex flex-col ${centered ? 'items-center text-center' : 'items-start'}`}>
+      {header.showPhoto && (
+        <PhotoImage header={header} className="mb-[0.9em] size-[8.5em] max-w-full" />
+      )}
+      <Field
+        value={header.name}
+        path="header.name"
+        placeholder={P.name}
+        className="block text-[1.9em] leading-[1.1] font-bold"
+        style={{ color: 'var(--cv-strong)' }}
+      />
+      <Field
+        value={header.headline}
+        path="header.headline"
+        placeholder={P.headline}
+        className="mt-[0.35em] block text-[0.95em] font-medium tracking-[0.14em] uppercase"
+        style={{ color: 'var(--cv-accent-text)' }}
+      />
+      <div className="mt-[1.1em] w-full">
+        <Contacts header={header} layout={centered ? 'centered' : 'stacked'} />
+      </div>
+    </div>
+  )
+}
+
+export function PortfolioHeader({ header }: { header: CvHeader }) {
+  return <SidebarHeader header={header} centered={false} />
+}
+
+export function SpotlightHeader({ header }: { header: CvHeader }) {
+  return <SidebarHeader header={header} centered />
+}
+
+/** A large italic serif name and a spaced-out headline, photo on the right (Elegant). */
+export function ElegantHeader({ header }: { header: CvHeader }) {
+  const P = usePlaceholders()
+  return (
+    <div className="flex items-center justify-between gap-[1.5em]">
+      <div className="min-w-0">
+        <Field
+          value={header.name}
+          path="header.name"
+          placeholder={P.name}
+          className="block text-[2.7em] leading-[1.05] font-normal italic"
+          style={{ color: 'var(--cv-strong)' }}
+        />
+        <Field
+          value={header.headline}
+          path="header.headline"
+          placeholder={P.headline}
+          className="mt-[0.4em] block text-[0.95em] tracking-[0.3em] uppercase"
+          style={{ color: 'var(--cv-accent-text)' }}
+        />
+        <div className="mt-[0.8em]">
+          <Contacts header={header} layout="row" />
+        </div>
+      </div>
+      <Photo header={header} />
+    </div>
+  )
+}
+
+/** On a colored band: the photo in a white ring and a heavy name (Vivid). */
+export function VividHeader({ header }: { header: CvHeader }) {
+  const P = usePlaceholders()
+  return (
+    <div className="flex items-center gap-[1.4em]">
+      {header.showPhoto && header.photoUrl && (
+        <span className="shrink-0 rounded-full p-[0.25em]" style={{ background: '#ffffff' }}>
+          <PhotoImage header={header} className="size-[6em]" />
+        </span>
+      )}
+      <div className="min-w-0">
+        <Field
+          value={header.name}
+          path="header.name"
+          placeholder={P.name}
+          className="block text-[2.6em] leading-none font-extrabold"
+          style={{ color: 'var(--cv-strong)' }}
+        />
+        <Field
+          value={header.headline}
+          path="header.headline"
+          placeholder={P.headline}
+          className="mt-[0.35em] block text-[1em] font-semibold tracking-[0.16em] uppercase"
+          style={{ color: 'var(--cv-muted-strong)' }}
+        />
+        <div className="mt-[0.7em]">
+          <Contacts header={header} layout="row" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/** Name on the left over a thick accent bar, the photo on the right with an accent ring (Modern). */
+export function ModernHeader({ header }: { header: CvHeader }) {
+  const P = usePlaceholders()
+  return (
+    <div className="flex items-center justify-between gap-[1.5em]">
+      <div className="min-w-0 flex-1">
+        <Field
+          value={header.name}
+          path="header.name"
+          placeholder={P.name}
+          className="block text-[2.4em] leading-tight font-bold"
+          style={{ color: 'var(--cv-strong)' }}
+        />
+        <Field
+          value={header.headline}
+          path="header.headline"
+          placeholder={P.headline}
+          className="mt-[0.1em] block text-[1.15em] font-medium"
+          style={{ color: 'var(--cv-accent-text)' }}
+        />
+        <span
+          aria-hidden
+          className="my-[0.6em] block h-[0.3em] w-[3.5em] rounded-full"
+          style={{ background: 'var(--cv-accent)' }}
+        />
+        <Contacts header={header} layout="row" />
+      </div>
+      {header.showPhoto && header.photoUrl && (
+        <PhotoImage
+          header={header}
+          className="size-[6.5em] shadow-[0_0_0_0.3em_var(--cv-accent)]"
+        />
+      )}
+    </div>
+  )
+}
+
+/** A very large, heavy, upper-case name (Bold). */
+export function BoldHeader({ header }: { header: CvHeader }) {
+  const P = usePlaceholders()
+  return (
+    <div className="flex items-end justify-between gap-[1.5em]">
+      <div className="min-w-0">
+        <Field
+          value={header.name}
+          path="header.name"
+          placeholder={P.name}
+          className="block text-[3.1em] leading-[0.95] font-black tracking-tight uppercase"
+          style={{ color: 'var(--cv-text)' }}
+        />
+        <Field
+          value={header.headline}
+          path="header.headline"
+          placeholder={P.headline}
+          className="mt-[0.4em] block text-[1.05em] font-bold tracking-[0.08em] uppercase"
+          style={{ color: 'var(--cv-accent-text)' }}
+        />
+        <div className="mt-[0.7em]">
+          <Contacts header={header} layout="row" />
+        </div>
+      </div>
+      <Photo header={header} />
+    </div>
+  )
+}
+
+/** Initials of a name, at most two: "Aman Verma" → "AV". */
+function initials(name: string): string {
+  return name
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => Array.from(word)[0]!.toUpperCase())
+    .join('')
+}
+
+/** The photo, or a circle with the initials when there is none (Monogram). */
+export function MonogramHeader({ header }: { header: CvHeader }) {
+  const P = usePlaceholders()
+  const letters = initials(header.name)
+  const photo = header.showPhoto && header.photoUrl
+  return (
+    <div className="flex items-center gap-[1.3em]">
+      {photo ? (
+        <PhotoImage header={header} />
+      ) : (
+        letters && (
+          <span
+            aria-hidden
+            className="flex size-[4.6em] shrink-0 items-center justify-center rounded-full text-[1.2em] font-bold tracking-wide text-white"
+            style={{ background: 'var(--cv-accent)' }}
+          >
+            {letters}
+          </span>
+        )
+      )}
+      <div className="min-w-0">
+        <Field
+          value={header.name}
+          path="header.name"
+          placeholder={P.name}
+          className="block text-[2.1em] leading-tight font-bold uppercase"
+          style={{ color: 'var(--cv-strong)' }}
+        />
+        <Field
+          value={header.headline}
+          path="header.headline"
+          placeholder={P.headline}
+          className="block text-[1.05em] font-semibold tracking-[0.06em] uppercase"
+          style={{ color: 'var(--cv-accent-text)' }}
+        />
+        <div className="mt-[0.5em]">
+          <Contacts header={header} layout="row" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/** On a colored band: upper-case name and headline with the contacts on the right (Executive). */
+export function ExecutiveHeader({ header }: { header: CvHeader }) {
+  const P = usePlaceholders()
+  return (
+    <div className="flex items-center justify-between gap-[1.5em]">
+      <div className="flex min-w-0 items-center gap-[1.2em]">
+        <Photo header={header} />
+        <div className="min-w-0">
+          <Field
+            value={header.name}
+            path="header.name"
+            placeholder={P.name}
+            className="block text-[2.2em] leading-tight font-bold tracking-wide uppercase"
+            style={{ color: 'var(--cv-strong)' }}
+          />
+          <Field
+            value={header.headline}
+            path="header.headline"
+            placeholder={P.headline}
+            className="block text-[1.05em] tracking-[0.12em] uppercase"
+            style={{ color: 'var(--cv-muted-strong)' }}
+          />
+        </div>
+      </div>
+      <Contacts header={header} layout="column" />
     </div>
   )
 }

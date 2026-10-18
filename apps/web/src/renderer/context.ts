@@ -3,7 +3,18 @@ import { createContext, useContext } from 'react'
 import type { EditorApi } from './editing/editorApi'
 
 export type RenderMode = 'edit' | 'preview'
-export type TitleVariant = 'underline' | 'accent-rule' | 'accent-small' | 'bar' | 'pill'
+export type TitleVariant =
+  | 'underline'
+  | 'accent-rule'
+  | 'accent-small'
+  | 'bar'
+  | 'pill'
+  /** White text on a full-width accent block. */
+  | 'block'
+  /** Heavy capitals over a short thick accent bar. */
+  | 'caps'
+  /** Italic, accent-colored, with a thin rule running after it. */
+  | 'elegant'
 
 export interface RenderContextValue {
   mode: RenderMode

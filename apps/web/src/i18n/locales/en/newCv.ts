@@ -13,8 +13,6 @@ export const newCv = {
   otherDescription: 'Any other job. Start from a general layout.',
   professions: 'Professions',
   recommendedFor: 'Recommended for {{profession}}',
-  moreTemplates: 'More templates',
-  allTemplates: 'All templates',
   previewsNote: 'Previews show sample content.',
   startLegend: 'How do you want to start?',
   startExample: 'Start from an example',

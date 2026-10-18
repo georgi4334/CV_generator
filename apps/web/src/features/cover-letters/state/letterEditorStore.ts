@@ -1,4 +1,10 @@
-import type { CoverLetterDocument, CvDesign, CvHeader, CvLanguage } from '@cv/shared'
+import {
+  letterDesign,
+  type CoverLetterDocument,
+  type CvDesign,
+  type CvHeader,
+  type CvLanguage,
+} from '@cv/shared'
 import { produce, type Draft } from 'immer'
 import { create } from 'zustand'
 import { setAtPath } from '@/features/cv-editor/state/documentPath'
@@ -109,6 +115,6 @@ export const useLetterEditor = create<LetterEditorState>()((set, get) => ({
       // Keep the letter's own signature unless it was the old name.
       if (draft.signature === draft.header.name) draft.signature = header.name
       draft.header = { ...header }
-      draft.design = { ...design }
+      draft.design = letterDesign(design)
     }),
 }))

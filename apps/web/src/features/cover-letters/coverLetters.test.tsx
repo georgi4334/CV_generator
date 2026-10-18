@@ -128,11 +128,11 @@ describe('cover letters', () => {
     renderRoute(`/cover-letters/${letter.id}/edit`)
     await screen.findByDisplayValue('Letter')
     fireEvent.click(screen.getByRole('button', { name: 'Templates' }))
-    fireEvent.click(
-      within(screen.getByRole('list', { name: 'Templates' })).getByRole('button', {
-        name: 'Creative',
-      }),
-    )
+    const templates = within(screen.getByRole('group', { name: 'Templates' }))
+    // The extra CV templates are for CVs only.
+    expect(templates.getAllByRole('button')).toHaveLength(8)
+    expect(templates.queryByRole('button', { name: 'Portfolio' })).toBeNull()
+    fireEvent.click(templates.getByRole('button', { name: 'Creative' }))
     fireEvent.click(screen.getByRole('button', { name: 'Design & Font' }))
     expect(screen.queryByRole('radiogroup', { name: /Column layout/i })).toBeNull()
     await waitFor(
