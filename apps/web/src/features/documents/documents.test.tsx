@@ -36,7 +36,7 @@ describe('documents', () => {
     expect(letter.querySelector('svg')!.getAttribute('class')).toContain('lucide-mail')
   })
 
-  it('offers CV or cover letter from "Create new" on All documents', () => {
+  it('offers CV, cover letter or resignation letter from "Create new" on All documents', () => {
     renderRoute('/documents/all')
     fireEvent.click(screen.getByRole('button', { name: /create new/i }))
     const menu = screen.getByRole('menu')
@@ -44,8 +44,11 @@ describe('documents', () => {
       within(menu)
         .getAllByRole('menuitem')
         .map((m) => m.textContent),
-    ).toEqual(['CV', 'Cover letter'])
+    ).toEqual(['CV', 'Cover letter', 'Resignation letter'])
     expect(within(menu).getByRole('menuitem', { name: 'CV' }).getAttribute('href')).toBe('/cvs/new')
+    expect(
+      within(menu).getByRole('menuitem', { name: 'Resignation letter' }).getAttribute('href'),
+    ).toBe('/resignations/new')
   })
 
   it('searches and sorts by name', async () => {

@@ -1,11 +1,13 @@
 import {
   cvFields,
   letterFields,
+  resignationFields,
   type AiSuggestion,
   type CoverLetterDocument,
   type CoverLetterRecord,
   type CvDocument,
   type CvRecord,
+  type ResignationDocument,
 } from '@cv/shared'
 import { useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
@@ -17,6 +19,7 @@ import { useCvEditor } from '@/features/cv-editor/state/cvEditorStore'
 import { getAtPath, setAtPath } from '@/features/cv-editor/state/documentPath'
 import { flushSave } from '@/features/cv-editor/state/editorSession'
 import { useLetterEditor } from '@/features/cover-letters/state/letterEditorStore'
+import { useResignationEditor } from '@/features/resignation/state/resignationEditorStore'
 import type { AiTarget, BulletEntry } from './aiTarget'
 
 const textAt = (doc: unknown, path: string) => {
@@ -129,4 +132,21 @@ export function useLetterAiTarget(
       },
     } satisfies AiTarget
   }, [letter, record.cvId, record.jobId])
+}
+
+/** The resignation editor's side of the AI panels (Fix Mistakes only). */
+export function useResignationAiTarget(letter: ResignationDocument): AiTarget {
+  return useMemo(() => {
+    const store = useResignationEditor.getState()
+    return {
+      kind: 'resignation',
+      language: letter.language,
+      fields: resignationFields(letter),
+      getText: (path) => textAt(useResignationEditor.getState().letter, path),
+      setText: (path, text) => {
+        store.setField(path, text)
+        store.endTyping()
+      },
+    } satisfies AiTarget
+  }, [letter])
 }

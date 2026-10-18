@@ -33,6 +33,7 @@ export const share: Messages['share'] = {
     hiddenBanner: 'Собственикът е скрил личните си данни в тази връзка.',
     untitledCv: 'Споделено CV',
     untitledLetter: 'Споделено мотивационно писмо',
+    untitledResignation: 'Споделено заявление за напускане',
     madeWith: 'Създадено с',
   },
 }

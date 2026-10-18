@@ -7,6 +7,7 @@ import {
   Sparkles,
   type LucideIcon,
 } from 'lucide-react'
+import type { DocumentType } from '@cv/shared'
 import { i18n } from '@/i18n'
 import type { EditorPanel } from '@/features/cv-editor/state/editorUi'
 
@@ -27,7 +28,14 @@ export const CENTER_TOOLS: Tool[] = [
 export const ALL_TOOLS: Tool[] = [AI_TOOL, ...CENTER_TOOLS]
 
 /** Why a tool does not apply to this kind of document, or null when it does. */
-export function toolUnavailable(kind: 'cv' | 'coverLetter', panel: EditorPanel): string | null {
+export function toolUnavailable(kind: DocumentType, panel: EditorPanel): string | null {
+  if (kind === 'resignation') {
+    if (panel === 'rearrange') return i18n.t('editor.topBar.noSectionsInResignation')
+    if (panel === 'tailor') return i18n.t('editor.topBar.tailorOnCvsOnly')
+    if (panel === 'templates') return i18n.t('editor.topBar.noTemplatesForResignation')
+    if (panel === 'ai') return i18n.t('editor.topBar.noAiForResignation')
+    return null
+  }
   if (kind !== 'coverLetter') return null
   if (panel === 'rearrange') return i18n.t('editor.topBar.noSectionsToRearrange')
   if (panel === 'tailor') return i18n.t('editor.topBar.tailorOnCvs')

@@ -2,6 +2,7 @@ import type { QueryClient } from '@tanstack/react-query'
 import { useCvEditor } from '@/features/cv-editor/state/cvEditorStore'
 import { useSaveState } from '@/features/cv-editor/state/editorSession'
 import { useLetterEditor } from '@/features/cover-letters/state/letterEditorStore'
+import { useResignationEditor } from '@/features/resignation/state/resignationEditorStore'
 import { usePrintJob } from '@/features/print/printCv'
 import { useEditorUi } from '@/features/cv-editor/state/editorUi'
 import { authKeys } from '@/shared/api/authKeys'
@@ -16,6 +17,7 @@ export function resetClientState(queryClient: QueryClient, user: User | null) {
   queryClient.clear()
   useCvEditor.setState({ docId: null, cv: null, past: [], future: [] })
   useLetterEditor.setState({ docId: null, letter: null, past: [], future: [] })
+  useResignationEditor.setState({ docId: null, letter: null, past: [], future: [] })
   useSaveState.setState({ status: 'saved', lastSavedAt: null, error: null })
   useEditorUi.setState({ activePanel: null, notice: null, previewVersionId: null })
   usePrintJob.setState({ job: null })

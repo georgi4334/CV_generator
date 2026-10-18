@@ -32,6 +32,7 @@ export const share = {
     hiddenBanner: 'The owner hid their personal details on this link.',
     untitledCv: 'Shared CV',
     untitledLetter: 'Shared cover letter',
+    untitledResignation: 'Shared resignation letter',
     madeWith: 'Made with',
   },
 }

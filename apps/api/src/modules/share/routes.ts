@@ -11,7 +11,7 @@ import { and, eq, sql } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import type { Database } from '../../db/client'
-import { coverLetters, cvs, shareLinks } from '../../db/schema/index'
+import { coverLetters, cvs, resignations, shareLinks } from '../../db/schema/index'
 import { notFound } from '../../infra/errors'
 
 const IdParams = z.object({ id: z.uuid() })
@@ -37,6 +37,12 @@ const KINDS = [
     column: shareLinks.coverLetterId,
     name: 'Cover letter',
   },
+  {
+    path: '/resignations',
+    table: resignations,
+    column: shareLinks.resignationId,
+    name: 'Resignation letter',
+  },
 ] as const
 
 /** Turning sharing on or off, and replacing the link: owner only. */
@@ -44,7 +50,12 @@ export async function shareRoutes(app: FastifyInstance, opts: { database: Databa
   const { db } = opts.database
 
   for (const kind of KINDS) {
-    const key = kind.column === shareLinks.cvId ? 'cvId' : 'coverLetterId'
+    const key =
+      kind.column === shareLinks.cvId
+        ? 'cvId'
+        : kind.column === shareLinks.coverLetterId
+          ? 'coverLetterId'
+          : 'resignationId'
 
     const assertOwn = async (userId: string, id: string) => {
       const [row] = await db
@@ -120,23 +131,33 @@ export async function publicShareRoutes(app: FastifyInstance, opts: { database: 
           document: coverLetters.document,
           updatedAt: coverLetters.updatedAt,
         },
+        resignation: {
+          title: resignations.title,
+          document: resignations.document,
+          updatedAt: resignations.updatedAt,
+        },
       })
       .from(shareLinks)
       .leftJoin(cvs, eq(cvs.id, shareLinks.cvId))
       .leftJoin(coverLetters, eq(coverLetters.id, shareLinks.coverLetterId))
+      .leftJoin(resignations, eq(resignations.id, shareLinks.resignationId))
       .where(and(eq(shareLinks.slug, params.data.slug), eq(shareLinks.isActive, true)))
     const shared = row?.cv
       ? ({ type: 'cv', ...row.cv } as const)
       : row?.letter
         ? ({ type: 'coverLetter', ...row.letter } as const)
-        : null
+        : row?.resignation
+          ? ({ type: 'resignation', ...row.resignation } as const)
+          : null
     if (!shared) throw notFound('Shared document')
     const hidePersonal = row!.hidePersonal
     // Hidden details are replaced here, so they never leave the server.
     const visible = hidePersonal
       ? shared.type === 'cv'
         ? { ...shared, title: '', document: hidePersonalDetails(shared.document) }
-        : { ...shared, title: '', document: hidePersonalDetails(shared.document) }
+        : shared.type === 'coverLetter'
+          ? { ...shared, title: '', document: hidePersonalDetails(shared.document) }
+          : { ...shared, title: '', document: hidePersonalDetails(shared.document) }
       : shared
     // Shared documents hold contact details: keep them out of search engines and shared caches.
     reply.header('x-robots-tag', 'noindex, nofollow').header('cache-control', 'private, no-store')

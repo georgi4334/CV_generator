@@ -51,5 +51,6 @@ export const labels = {
   documentType: {
     cv: 'CV',
     coverLetter: 'Cover letter',
+    resignation: 'Resignation letter',
   },
 }

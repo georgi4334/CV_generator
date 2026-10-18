@@ -1,4 +1,4 @@
-import type { PageSize } from '@cv/shared'
+import type { DocumentType, PageSize } from '@cv/shared'
 import { useState, type ReactNode } from 'react'
 import { useEditorUi } from '@/features/cv-editor/state/editorUi'
 import { PAGE_SIZE_PX } from '@/renderer/templates/tokens'
@@ -24,7 +24,7 @@ interface EditorLayoutProps {
   onShare?: () => void
   /** For a cover letter: its undo/redo and which tools apply. */
   undoRedo?: UndoRedo
-  kind?: 'cv' | 'coverLetter'
+  kind?: DocumentType
   /** The document's paper size: the page is fitted to the screen width, or zoomed. */
   pageSize: PageSize
   children: ReactNode
@@ -86,7 +86,12 @@ export function EditorLayout({
                 // The rail stays attached to the page's left edge, at the bottom of the screen.
                 aside={
                   compact ? undefined : (
-                    <EditorRail previewTo={previewTo} onDownload={onDownload} onShare={onShare} />
+                    <EditorRail
+                      previewTo={previewTo}
+                      onDownload={onDownload}
+                      onShare={onShare}
+                      kind={kind}
+                    />
                   )
                 }
               >

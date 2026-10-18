@@ -29,6 +29,7 @@ features/
                 panels/ (design, templates, rearrange, history), state/ (stores, autosave,
                 session), lib/, api.ts, queries.ts (CVs)
   cover-letters/ pages/ (editor, new), state/, api.ts, queries.ts
+  resignation/  pages/ (editor, new), state/, api.ts, queries.ts
   new-cv/       The "Create new CV" wizard
   ai/           panels/ (Fix Mistakes, Check & Tailor, Assistant), api.ts, queries.ts
   share/        Share dialog, shared document page, queries.ts
@@ -168,7 +169,7 @@ app.ts          Builds the Fastify app: plugins, hooks, route registration
 config/         env.ts (validated environment), production.ts (start-up checks)
 db/             client.ts, migrate.ts, schema/ (one file per area; index.ts for drizzle-kit)
 modules/<area>/ routes.ts plus that area's logic:
-                auth (sessions, passwords, tokens, emails, requireUser), cvs, cover-letters,
+                auth (sessions, passwords, tokens, emails, requireUser), cvs, cover-letters, resignations,
                 jobs, share, uploads, professions, health, ai (provider, gemini, mock, prompts)
 infra/          errors, rate limits, mailer (log/Brevo), storage (local/R2)
 ```

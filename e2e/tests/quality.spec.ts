@@ -31,7 +31,7 @@ test('app pages are accessible', async ({ page }) => {
   await zoom.getByRole('button', { name: 'Zoom out' }).click()
   await expect(zoom).toContainText('90%')
   await zoom.getByRole('button', { name: 'Fit to screen' }).click()
-  for (const path of ['/', '/documents/all', '/jobs', '/cvs/new']) {
+  for (const path of ['/', '/documents/all', '/jobs', '/cvs/new', '/resignations/new']) {
     await page.goto(path)
     await page.getByRole('heading', { level: 1 }).first().waitFor()
     await expectAccessible(page)

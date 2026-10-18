@@ -4,11 +4,14 @@ import { coverLetterApi } from '@/features/cover-letters/api'
 import { cvApi } from '@/features/cv-editor/api'
 import { cvKeys } from '@/features/cv-editor/queries'
 import { letterKeys } from '@/features/cover-letters/queries'
+import { resignationApi } from '@/features/resignation/api'
+import { resignationKeys } from '@/features/resignation/queries'
 
-const SHARE_API = { cv: cvApi, coverLetter: coverLetterApi }
+const SHARE_API = { cv: cvApi, coverLetter: coverLetterApi, resignation: resignationApi }
 const KEYS = {
   cv: { share: cvKeys.share, list: cvKeys.list },
   coverLetter: { share: letterKeys.share, list: letterKeys.list },
+  resignation: { share: resignationKeys.share, list: resignationKeys.list },
 }
 
 export function useDocumentShare(type: DocumentType, id: string) {

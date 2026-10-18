@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { CoverLetterDocumentSchema, type CoverLetterDocument } from '../cover-letter/coverLetter'
 import { CvDocumentSchema, type CvDocument } from '../cv/document'
+import { ResignationDocumentSchema, type ResignationDocument } from '../resignation/resignation'
 import type { CvHeader } from '../cv/header'
 
 /** A public, read-only link to a document. Off by default. */
@@ -49,10 +50,20 @@ export const SharedCoverLetterSchema = z.object({
 })
 export type SharedCoverLetter = z.infer<typeof SharedCoverLetterSchema>
 
-/** Answer of the public share endpoint: a CV or a cover letter. */
+export const SharedResignationSchema = z.object({
+  type: z.literal('resignation'),
+  title: z.string(),
+  document: ResignationDocumentSchema,
+  hidePersonal: z.boolean(),
+  updatedAt: z.iso.datetime(),
+})
+export type SharedResignation = z.infer<typeof SharedResignationSchema>
+
+/** Answer of the public share endpoint: a CV, a cover letter or a resignation letter. */
 export const SharedDocumentSchema = z.discriminatedUnion('type', [
   SharedCvSchema,
   SharedCoverLetterSchema,
+  SharedResignationSchema,
 ])
 export type SharedDocument = z.infer<typeof SharedDocumentSchema>
 
@@ -71,6 +82,10 @@ export const HIDDEN_PERSONAL = {
   phone: '+00 000 000 000',
   link: 'xxxxxxx.xxx/xxxxx',
   location: 'Xxxxxx',
+  /** Resignation letters also hide who they are sent to. */
+  company: 'Xxxxx Xxxxx',
+  address: 'Xxxxxx xx',
+  postalCode: '0000',
 } as const
 
 /** Document paths of the fields that hold stand-ins when personal details are hidden. */
@@ -81,11 +96,20 @@ export const HIDDEN_PERSONAL_PATHS: ReadonlySet<string> = new Set([
   'header.link',
   'header.location',
   'signature',
+  'sender.name',
+  'sender.email',
+  'sender.phone',
+  'sender.residence',
+  'employer.company',
+  'employer.contact',
+  'employer.address',
+  'employer.postalCode',
+  'employer.city',
 ])
 
 /** The header with stand-ins for the name and contact details, and no photo. Empty fields stay empty. */
 function hideHeader(header: CvHeader): CvHeader {
-  const mask = (key: keyof typeof HIDDEN_PERSONAL) =>
+  const mask = (key: 'name' | 'email' | 'phone' | 'link' | 'location') =>
     header[key].trim() ? HIDDEN_PERSONAL[key] : ''
   return {
     ...header,
@@ -105,9 +129,50 @@ function hideHeader(header: CvHeader): CvHeader {
  */
 export function hidePersonalDetails(doc: CvDocument): CvDocument
 export function hidePersonalDetails(doc: CoverLetterDocument): CoverLetterDocument
+export function hidePersonalDetails(doc: ResignationDocument): ResignationDocument
 export function hidePersonalDetails(
-  doc: CvDocument | CoverLetterDocument,
-): CvDocument | CoverLetterDocument {
+  doc: CvDocument | CoverLetterDocument | ResignationDocument,
+): CvDocument | CoverLetterDocument | ResignationDocument {
+  if ('sender' in doc) {
+    const mask = (value: string, stand: string) => (value.trim() ? stand : '')
+    // The letter's own text names the company and the people: swap those words too.
+    const replacements: Array<[string, string]> = [
+      [doc.employer.company, HIDDEN_PERSONAL.company],
+      [doc.employer.contact, HIDDEN_PERSONAL.name],
+      [doc.sender.name, HIDDEN_PERSONAL.name],
+      [doc.sender.email, HIDDEN_PERSONAL.email],
+      [doc.sender.phone, HIDDEN_PERSONAL.phone],
+      [doc.sender.residence, HIDDEN_PERSONAL.location],
+      [doc.employer.address, HIDDEN_PERSONAL.address],
+      [doc.employer.city, HIDDEN_PERSONAL.location],
+    ]
+    const scrub = (text: string) =>
+      replacements.reduce(
+        (result, [real, stand]) => (real.trim() ? result.split(real.trim()).join(stand) : result),
+        text,
+      )
+    return {
+      ...doc,
+      subject: scrub(doc.subject),
+      greeting: scrub(doc.greeting),
+      paragraphs: doc.paragraphs.map(scrub),
+      closing: scrub(doc.closing),
+      sender: {
+        name: mask(doc.sender.name, HIDDEN_PERSONAL.name),
+        email: mask(doc.sender.email, HIDDEN_PERSONAL.email),
+        phone: mask(doc.sender.phone, HIDDEN_PERSONAL.phone),
+        residence: mask(doc.sender.residence, HIDDEN_PERSONAL.location),
+      },
+      employer: {
+        company: mask(doc.employer.company, HIDDEN_PERSONAL.company),
+        contact: mask(doc.employer.contact, HIDDEN_PERSONAL.name),
+        address: mask(doc.employer.address, HIDDEN_PERSONAL.address),
+        postalCode: mask(doc.employer.postalCode, HIDDEN_PERSONAL.postalCode),
+        city: mask(doc.employer.city, HIDDEN_PERSONAL.location),
+      },
+      signature: mask(doc.signature, HIDDEN_PERSONAL.name),
+    }
+  }
   if ('signature' in doc) {
     return {
       ...doc,

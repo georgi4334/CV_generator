@@ -14,6 +14,7 @@ import {
   JobsPage,
   NewCvPage,
   NewLetterPage,
+  NewResignationPage,
   PreviewPage,
   PrivacyPage,
   SharedDocumentPage,
@@ -41,6 +42,7 @@ export const routes: RouteObject[] = [
               { path: 'jobs', element: <JobsPage /> },
               { path: 'cvs/new', element: <NewCvPage /> },
               { path: 'cover-letters/new', element: <NewLetterPage /> },
+              { path: 'resignations/new', element: <NewResignationPage /> },
               // Account settings live in the account drawer; old links open it there.
               { path: 'account', element: <Navigate to="/?menu=account" replace /> },
             ],
@@ -52,6 +54,9 @@ export const routes: RouteObject[] = [
           { path: 'cvs/:id/preview', element: <PreviewPage type="cv" /> },
           { path: 'cover-letters/:id/edit', element: <EditorPage type="coverLetter" /> },
           { path: 'cover-letters/:id/preview', element: <PreviewPage type="coverLetter" /> },
+          { path: 'resignations/new/edit', element: <Navigate to="/resignations/new" replace /> },
+          { path: 'resignations/:id/edit', element: <EditorPage type="resignation" /> },
+          { path: 'resignations/:id/preview', element: <PreviewPage type="resignation" /> },
         ],
       },
       // Public pages.
