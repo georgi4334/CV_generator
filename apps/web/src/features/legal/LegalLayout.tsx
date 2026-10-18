@@ -52,11 +52,11 @@ export function LegalFooter({ children }: { children?: ReactNode }) {
           <span aria-hidden>·</span>
         </>
       )}
-      <Link to="/privacy" className="hover:underline">
+      <Link to="/privacy" className="tap-target hover:underline">
         {t('nav.privacy')}
       </Link>
       <span aria-hidden>·</span>
-      <Link to="/terms" className="hover:underline">
+      <Link to="/terms" className="tap-target hover:underline">
         {t('nav.terms')}
       </Link>
     </footer>

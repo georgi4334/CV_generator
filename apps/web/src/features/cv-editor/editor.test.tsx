@@ -148,7 +148,7 @@ describe('editor', () => {
     const cv = fake.current.seed('Frontend CV')
     renderRoute(`/cvs/${cv.id}/edit`)
     await screen.findByDisplayValue('Frontend CV')
-    const zoom = screen.getByRole('group', { name: 'Page zoom' })
+    const zoom = screen.getByRole('group', { name: 'Zoom controls' })
     expect(within(zoom).getByText('100%')).toBeDefined()
     fireEvent.click(within(zoom).getByRole('button', { name: 'Zoom out' }))
     expect(within(zoom).getByText('90%')).toBeDefined()

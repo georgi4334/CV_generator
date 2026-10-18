@@ -7,7 +7,7 @@ import {
   type TemplateId,
 } from '@cv/shared'
 import { LoaderCircle } from 'lucide-react'
-import { useMemo, useState, type FormEvent } from 'react'
+import { useMemo, useRef, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 import { card, primaryButton } from '@/shared/ui/PageHeader'
@@ -78,6 +78,8 @@ export function StartStep({
   const { t } = useTranslation()
   const navigate = useNavigate()
   const create = useCreateCv()
+  // A quick double click submits twice before the button can disable itself.
+  const submitted = useRef(false)
   const profession = professionId ? t(`labels.profession.${professionId}.name`) : null
   const [startFrom, setStartFrom] = useState<StartFrom>(profession ? 'example' : 'blank')
   const [title, setTitle] = useState(
@@ -98,6 +100,8 @@ export function StartStep({
 
   const submit = (event: FormEvent) => {
     event.preventDefault()
+    if (submitted.current) return
+    submitted.current = true
     create.mutate(
       {
         title: title.trim() || undefined,
@@ -105,6 +109,9 @@ export function StartStep({
         document: documents[startFrom] ?? documents.blank,
       },
       {
+        onError: () => {
+          submitted.current = false
+        },
         // The new CV opens like an app: the wizard steps back as the page grows in.
         onSuccess: (record) =>
           runViewTransition('doc-open', () =>

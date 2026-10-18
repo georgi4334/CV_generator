@@ -139,9 +139,9 @@ export function SharedDocumentPage() {
           )}
         </FitToWidth>
       </main>
-      <footer className="pb-8 text-center text-xs text-fg-muted">
+      <footer className="pb-8 text-center text-xs text-fg-soft">
         {t('share.page.madeWith')}{' '}
-        <Link to="/" className="font-medium text-brand-fg hover:underline">
+        <Link to="/" className="font-medium text-brand-fg-strong hover:underline">
           {APP_NAME}
         </Link>
       </footer>

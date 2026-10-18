@@ -145,7 +145,7 @@ export function PageFrame({
 
   return (
     <div
-      className={`relative flex flex-col overflow-hidden bg-paper ${className ?? ''}`}
+      className={`relative flex flex-col overflow-hidden bg-paper wrap-anywhere ${className ?? ''}`}
       data-cv-page={measuring ? undefined : design.pageSize}
       style={{
         ...pageStyle(design, tokens),

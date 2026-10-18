@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { CvDocumentSchema } from './document'
 import { createEmptyCv, createSection } from './factories'
+import { UpdateCvInputSchema } from '../api/api'
+import { fieldMaxLength, HEADER_LIMITS } from './header'
 import { getSectionTitle } from './i18n'
 import { SECTION_TYPES } from './sections'
 
@@ -64,5 +66,29 @@ describe('getSectionTitle', () => {
   it('prefers a custom title', () => {
     const section = { ...createSection('experience', 'main'), title: 'Work History' }
     expect(getSectionTitle(section, 'bg')).toBe('Work History')
+  })
+})
+
+describe('header limits', () => {
+  it('refuses to save header text longer than its limit, but still reads it', () => {
+    const cv = createEmptyCv()
+    expect(UpdateCvInputSchema.safeParse({ revision: 1, document: cv }).success).toBe(true)
+    for (const key of Object.keys(HEADER_LIMITS) as Array<keyof typeof HEADER_LIMITS>) {
+      const long = { ...cv, header: { ...cv.header, [key]: 'x'.repeat(HEADER_LIMITS[key] + 1) } }
+      expect(UpdateCvInputSchema.safeParse({ revision: 1, document: long }).success, key).toBe(
+        false,
+      )
+      expect(CvDocumentSchema.safeParse(long).success, `${key} still readable`).toBe(true)
+      const atLimit = { ...cv, header: { ...cv.header, [key]: 'x'.repeat(HEADER_LIMITS[key]) } }
+      expect(UpdateCvInputSchema.safeParse({ revision: 1, document: atLimit }).success, key).toBe(
+        true,
+      )
+    }
+  })
+
+  it('knows the limit of a header path, and no other', () => {
+    expect(fieldMaxLength('header.phone')).toBe(HEADER_LIMITS.phone)
+    expect(fieldMaxLength('header.photoUrl')).toBeUndefined()
+    expect(fieldMaxLength('sections.0.items.0.name')).toBeUndefined()
   })
 })

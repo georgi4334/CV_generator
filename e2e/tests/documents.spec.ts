@@ -13,6 +13,20 @@ test('a CV is created, edited, saved and shared', async ({ page, browser }) => {
   await page.reload()
   await expect(page.getByRole('document', { name: 'CV' })).toContainText('Ada Lovelace')
 
+  // Entry actions (move, duplicate, delete) are reachable with the keyboard, not only by hovering.
+  await page
+    .getByRole('document', { name: 'CV' })
+    .getByRole('textbox', { name: /^Job title|Title/ })
+    .first()
+    .focus()
+  let reached = false
+  for (let i = 0; i < 12 && !reached; i++) {
+    await page.keyboard.press('Shift+Tab')
+    reached = await page.evaluate(() => document.activeElement?.ariaLabel === 'Duplicate entry')
+  }
+  expect(reached, 'Duplicate entry reachable by keyboard').toBe(true)
+  await page.keyboard.press('Escape')
+
   // The theme can be changed while editing: the top bar's menu opens over the page.
   for (const [choice, dark] of [
     ['Dark', true],

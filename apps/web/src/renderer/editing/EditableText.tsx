@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, type CSSProperties, type KeyboardEvent } from 'react'
+import { fieldMaxLength } from '@cv/shared'
 import type { EditorApi } from './editorApi'
 
 interface EditableTextProps {
@@ -88,7 +89,15 @@ export function EditableText({
       }}
       onInput={(e) => {
         const el = e.currentTarget
-        const text = el.textContent ?? ''
+        let text = el.textContent ?? ''
+        const max = fieldMaxLength(path)
+        if (max !== undefined && text.length > max) {
+          text = text.slice(0, max)
+          el.textContent = text
+          const selection = window.getSelection()
+          selection?.selectAllChildren(el)
+          selection?.collapseToEnd()
+        }
         if (text === '') el.replaceChildren() // keep :empty working for the placeholder
         editor.setField(path, multiline ? text : text.replace(/\n/g, ' '))
       }}

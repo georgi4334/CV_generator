@@ -56,7 +56,7 @@ function Paragraphs({ paragraphs, actions }: { paragraphs: string[]; actions?: L
         <button
           type="button"
           onClick={() => actions.addParagraph(paragraphs.length - 1)}
-          className="inline-flex w-fit items-center gap-1 rounded px-1 text-[0.85em] opacity-60 hover:bg-[var(--cv-hover)] hover:opacity-100"
+          className="inline-flex w-fit items-center gap-1 rounded px-1 text-[0.85em] hover:bg-[var(--cv-hover)]"
           style={{ color: 'var(--cv-accent-text)' }}
         >
           <Plus className="size-[1em]" aria-hidden /> {t('renderer.addParagraph')}
@@ -77,6 +77,7 @@ export function LetterRenderer({
   actions,
   pageClassName,
   hidePersonal = false,
+  staticLinks = false,
 }: {
   letter: CoverLetterDocument
   mode: RenderMode
@@ -86,6 +87,8 @@ export function LetterRenderer({
   pageClassName?: string
   /** Blur the stand-ins of a share link that hides personal details. */
   hidePersonal?: boolean
+  /** Draw links as plain text, for thumbnails that are themselves a link. */
+  staticLinks?: boolean
 }) {
   const { t } = useTranslation()
   const { design, header, recipient } = letter
@@ -104,6 +107,7 @@ export function LetterRenderer({
     timeline: false,
     measuring: false,
     hidePersonal,
+    staticLinks,
     editor: editor ?? null,
   }
 
@@ -118,7 +122,7 @@ export function LetterRenderer({
           >
             <div
               data-letter-page={design.pageSize}
-              className={`relative flex flex-col bg-paper ${pageClassName ?? ''}`}
+              className={`relative flex flex-col bg-paper wrap-anywhere ${pageClassName ?? ''}`}
               style={{
                 ...pageStyle(design, tokens),
                 ...backgroundStyle(design.background, design.accentColor),

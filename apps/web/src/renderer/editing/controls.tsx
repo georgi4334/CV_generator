@@ -22,15 +22,13 @@ import { Popover } from './Popover'
  * The floating toolbar of an entry, a section title or the header. It sits
  * just above what it belongs to, joined to it by a transparent strip so the
  * pointer never falls into a gap on its way up, and lingers briefly after the
- * pointer leaves. Entry toolbars vanish fully when hidden; section toolbars
- * only fade, so their buttons stay in the Tab order and show when focused.
+ * pointer leaves. When hidden, a toolbar only fades (and ignores the pointer),
+ * so its buttons stay in the Tab order and show when focused.
  */
 const toolbarBase =
   'cv-controls absolute right-2 bottom-full z-(--z-raised) origin-bottom-right pb-1 opacity-0 transition-[opacity,visibility] delay-300 duration-150 group-hover/ctl:opacity-100 group-hover/ctl:delay-0 group-focus-within/ctl:opacity-100 group-focus-within/ctl:delay-0 motion-reduce:transition-none'
-const toolbarHidden = {
-  vanish: 'invisible group-hover/ctl:visible group-focus-within/ctl:visible',
-  fade: 'pointer-events-none group-hover/ctl:pointer-events-auto group-focus-within/ctl:pointer-events-auto',
-}
+const toolbarHidden =
+  'pointer-events-none group-hover/ctl:pointer-events-auto group-focus-within/ctl:pointer-events-auto'
 const toolbarPill =
   'flex items-center gap-0.5 rounded-pill border border-line bg-surface p-1 text-fg-soft shadow-overlay'
 /** Space kept between a toolbar and the page edge, in screen pixels. */
@@ -73,19 +71,11 @@ function useToolbarPlacement(ref: RefObject<HTMLDivElement | null>) {
   }, [ref])
 }
 
-function Toolbar({
-  label,
-  hidden = 'vanish',
-  children,
-}: {
-  label: string
-  hidden?: keyof typeof toolbarHidden
-  children: ReactNode
-}) {
+function Toolbar({ label, children }: { label: string; children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null)
   useToolbarPlacement(ref)
   return (
-    <div ref={ref} className={`${toolbarBase} ${toolbarHidden[hidden]}`}>
+    <div ref={ref} className={`${toolbarBase} ${toolbarHidden}`}>
       <div className={toolbarPill} role="toolbar" aria-label={label}>
         {children}
       </div>
@@ -231,7 +221,7 @@ export function SectionControls({
   if (!editor || !canAdd) return <>{children}</>
   return (
     <div className="group/ctl relative">
-      <Toolbar label={t('renderer.sectionActions')} hidden="fade">
+      <Toolbar label={t('renderer.sectionActions')}>
         <AddEntryButton label={t('renderer.addEntry')} onClick={() => editor.addItem(sectionId)} />
         {skillDisplay && <SkillStyleButton sectionId={sectionId} value={skillDisplay} />}
       </Toolbar>

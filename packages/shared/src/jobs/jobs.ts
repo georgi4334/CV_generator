@@ -37,6 +37,16 @@ export const JOB_TYPE_LABELS: Record<JobType, string> = {
 /** Calendar date without time, e.g. "2026-10-13". */
 export const IsoDateSchema = z.iso.date()
 
+/** Days ahead of the server's date a local date may be (time zones run up to a day ahead). */
+const FUTURE_SLACK_DAYS = 1
+
+/** A date that is not in the future: nobody has applied tomorrow. For what people type, not what is stored. */
+const PastOrTodaySchema = IsoDateSchema.refine(
+  (date) =>
+    date <= new Date(Date.now() + FUTURE_SLACK_DAYS * 86_400_000).toISOString().slice(0, 10),
+  { message: 'Date is in the future' },
+)
+
 /** Longest position, company, location or contact a job may have. */
 export const JOB_TEXT_MAX = 200
 export const JOB_SALARY_MAX = 100
@@ -66,7 +76,7 @@ export const CreateJobInputSchema = z.object({
   ...jobFields,
   status: jobFields.status.default('to_apply'),
   type: jobFields.type.default(null),
-  dateApplied: jobFields.dateApplied.default(null),
+  dateApplied: PastOrTodaySchema.nullable().default(null),
   cvId: jobFields.cvId.default(null),
   coverLetterId: jobFields.coverLetterId.default(null),
   notes: jobFields.notes.default(''),
@@ -80,7 +90,9 @@ export const CreateJobInputSchema = z.object({
 export type CreateJobInput = z.input<typeof CreateJobInputSchema>
 
 /** Inline edits and the drawer send only the fields that changed. */
-export const UpdateJobInputSchema = z.object(jobFields).partial()
+export const UpdateJobInputSchema = z
+  .object({ ...jobFields, dateApplied: PastOrTodaySchema.nullable() })
+  .partial()
 export type UpdateJobInput = z.infer<typeof UpdateJobInputSchema>
 
 export const JobSchema = z.object({
