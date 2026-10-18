@@ -33,6 +33,7 @@ export const share: Messages['share'] = {
     hiddenBanner: 'Der Besitzer hat seine persönlichen Daten in diesem Link ausgeblendet.',
     untitledCv: 'Geteilter Lebenslauf',
     untitledLetter: 'Geteiltes Anschreiben',
+    untitledResignation: 'Geteiltes Kündigungsschreiben',
     madeWith: 'Erstellt mit',
   },
 }

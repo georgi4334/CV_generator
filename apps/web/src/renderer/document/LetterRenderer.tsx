@@ -28,7 +28,16 @@ function paragraphHint(P: Placeholders, index: number, count: number) {
   return index === 1 ? whyYou! : P.paragraph
 }
 
-function Paragraphs({ paragraphs, actions }: { paragraphs: string[]; actions?: LetterActions }) {
+/** The letter's paragraphs, editable in place; `hint` is the grey text of an empty one. */
+export function Paragraphs({
+  paragraphs,
+  actions,
+  hint,
+}: {
+  paragraphs: string[]
+  actions?: LetterActions
+  hint?: (index: number, count: number) => string
+}) {
   const P = usePlaceholders()
   const editor = useEditor()
   const { t } = useTranslation()
@@ -42,7 +51,9 @@ function Paragraphs({ paragraphs, actions }: { paragraphs: string[]; actions?: L
             <Field
               value={text}
               path={`paragraphs.${index}`}
-              placeholder={paragraphHint(P, index, paragraphs.length)}
+              placeholder={
+                hint ? hint(index, paragraphs.length) : paragraphHint(P, index, paragraphs.length)
+              }
               className="block"
               onEnter={actions ? () => actions.addParagraph(index) : undefined}
               onBackspaceEmpty={

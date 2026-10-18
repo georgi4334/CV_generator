@@ -44,7 +44,7 @@ export function useTestApp() {
       })
     }
     await context.database.db.execute(
-      sql`truncate users, cvs, cv_versions, uploads, share_links, jobs, cover_letters, sessions, auth_tokens cascade`,
+      sql`truncate users, cvs, cv_versions, uploads, share_links, jobs, cover_letters, resignations, sessions, auth_tokens cascade`,
     )
     context.mailer.outbox.length = 0
     Object.assign(context, await context.signUp('user@example.com'))

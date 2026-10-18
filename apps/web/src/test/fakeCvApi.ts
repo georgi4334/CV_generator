@@ -1,5 +1,6 @@
 import {
   createCoverLetter,
+  createResignationLetter,
   createEmptyCv,
   createExampleCv,
   PROFESSIONS,
@@ -7,6 +8,7 @@ import {
   type CvRecord,
   type CvVersionSummary,
   type CoverLetterRecord,
+  type ResignationRecord,
   type CreateJobInput,
   CreateJobInputSchema,
   type DocumentSummary,
@@ -19,6 +21,7 @@ import {
 import { ApiRequestError } from '@/shared/api/client'
 import type { CvApi } from '@/features/cv-editor/api'
 import type { CoverLetterApi } from '@/features/cover-letters/api'
+import type { resignationApi as ResignationApi } from '@/features/resignation/api'
 import type { JobsApi } from '@/features/jobs/api'
 
 interface Version extends CvVersionSummary {
@@ -32,6 +35,7 @@ export function createFakeCvApi() {
   const shares = new Map<string, ShareLink>()
   const jobs = new Map<string, Job>()
   const letters = new Map<string, CoverLetterRecord>()
+  const resignations = new Map<string, ResignationRecord>()
   let clock = Date.parse('2026-10-14T09:00:00Z')
   let seq = 0
   const now = () => new Date((clock += 1000)).toISOString()
@@ -221,6 +225,19 @@ export function createFakeCvApi() {
             }
           : { type: 'coverLetter' as const, title, document, updatedAt, hidePersonal }
       }
+      const resignation = entry && resignations.get(entry[0])
+      if (resignation) {
+        const { title, document, updatedAt } = structuredClone(resignation)
+        return hidePersonal
+          ? {
+              type: 'resignation' as const,
+              title: '',
+              document: hidePersonalDetails(document),
+              updatedAt,
+              hidePersonal,
+            }
+          : { type: 'resignation' as const, title, document, updatedAt, hidePersonal }
+      }
       throw new ApiRequestError(404, 'not_found', 'Shared document not found')
     },
     async uploadImage() {
@@ -357,10 +374,120 @@ export function createFakeCvApi() {
     },
   }
 
+  const findResignation = (resignationId: string) => {
+    const record = resignations.get(resignationId)
+    if (!record) throw new ApiRequestError(404, 'not_found', 'Resignation letter not found')
+    return record
+  }
+  const resignationSummary = (record: ResignationRecord): DocumentSummary => ({
+    id: record.id,
+    type: 'resignation',
+    title: record.title,
+    jobId: null,
+    shared: shares.get(record.id)?.isActive ?? false,
+    createdAt: record.createdAt,
+    updatedAt: record.updatedAt,
+  })
+
+  const resignationApi: typeof ResignationApi = {
+    async list() {
+      return [...resignations.values()]
+        .map(resignationSummary)
+        .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+    },
+    async get(resignationId) {
+      return structuredClone(findResignation(resignationId))
+    },
+    async create(input = {}) {
+      const time = now()
+      const record: ResignationRecord = {
+        id: id(),
+        type: 'resignation',
+        title: input.title ?? 'Resignation letter',
+        jobId: null,
+        revision: 1,
+        document: input.document ?? createResignationLetter(),
+        createdAt: time,
+        updatedAt: time,
+      }
+      resignations.set(record.id, record)
+      return structuredClone(record)
+    },
+    async update(resignationId, input) {
+      const current = findResignation(resignationId)
+      if (input.document && input.revision !== current.revision) {
+        throw new ApiRequestError(
+          409,
+          'conflict',
+          'This resignation letter was changed somewhere else',
+          { revision: current.revision },
+        )
+      }
+      const next: ResignationRecord = {
+        ...current,
+        ...(input.title !== undefined && { title: input.title }),
+        ...(input.document !== undefined && {
+          document: input.document,
+          revision: current.revision + 1,
+        }),
+        updatedAt: now(),
+      }
+      resignations.set(resignationId, next)
+      return structuredClone(next)
+    },
+    async remove(resignationId) {
+      findResignation(resignationId)
+      resignations.delete(resignationId)
+      shares.delete(resignationId)
+    },
+    async duplicate(resignationId) {
+      const source = findResignation(resignationId)
+      return resignationApi.create({
+        title: `Copy of ${source.title}`,
+        document: structuredClone(source.document),
+      })
+    },
+    async getShare(resignationId) {
+      findResignation(resignationId)
+      return share.get(resignationId)
+    },
+    async setShare(resignationId, change) {
+      findResignation(resignationId)
+      return share.set(resignationId, change)
+    },
+    async resetShare(resignationId) {
+      findResignation(resignationId)
+      return share.reset(resignationId)
+    },
+  }
+
   return {
     api,
     jobsApi,
     coverLetterApi,
+    resignationApi,
+    resignations,
+    /** Adds a resignation letter directly, as if it already existed on the server. */
+    seedResignation(title: string, fields: Partial<ResignationRecord> = {}) {
+      const time = now()
+      const record: ResignationRecord = {
+        id: id(),
+        type: 'resignation',
+        title,
+        jobId: null,
+        revision: 1,
+        document: createResignationLetter({
+          company: 'Pixel & Pine',
+          contact: 'Jordan Reyes',
+          today: new Date(2026, 9, 15),
+        }),
+        createdAt: time,
+        updatedAt: time,
+        ...fields,
+      }
+      resignations.set(record.id, record)
+      return record
+    },
     letters,
     /** Adds a cover letter directly, as if it already existed on the server. */
     seedLetter(title: string, fields: Partial<CoverLetterRecord> = {}) {
@@ -420,6 +547,7 @@ export function createFakeCvApi() {
       shares.clear()
       jobs.clear()
       letters.clear()
+      resignations.clear()
     },
   }
 }

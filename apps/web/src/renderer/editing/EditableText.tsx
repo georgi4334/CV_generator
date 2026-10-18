@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, type CSSProperties, type KeyboardEvent } from 'react'
-import { fieldMaxLength } from '@cv/shared'
+import { fieldMaxLength, resignationFieldMaxLength } from '@cv/shared'
 import type { EditorApi } from './editorApi'
 
 interface EditableTextProps {
@@ -90,7 +90,7 @@ export function EditableText({
       onInput={(e) => {
         const el = e.currentTarget
         let text = el.textContent ?? ''
-        const max = fieldMaxLength(path)
+        const max = fieldMaxLength(path) ?? resignationFieldMaxLength(path)
         if (max !== undefined && text.length > max) {
           text = text.slice(0, max)
           el.textContent = text

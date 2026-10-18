@@ -3,6 +3,7 @@ import type { CoverLetterDocument } from '../cover-letter/coverLetter'
 import { CvLanguageSchema, type CvLanguage } from '../cv/common'
 import type { CvDocument } from '../cv/document'
 import type { Section } from '../cv/sections'
+import type { ResignationDocument } from '../resignation/resignation'
 
 /*
  * AI features (Step 16): Fix Mistakes, Check & Tailor and the AI Assistant.
@@ -271,6 +272,21 @@ export function letterFields(letter: CoverLetterDocument): AiField[] {
   const add = (path: string, label: string, text: string) => {
     if (text.trim()) fields.push({ path, label, text })
   }
+  add('greeting', 'Greeting', letter.greeting)
+  letter.paragraphs.forEach((text, index) =>
+    add(`paragraphs.${index}`, `Paragraph ${index + 1}`, text),
+  )
+  add('closing', 'Closing', letter.closing)
+  return fields
+}
+
+/** The text of a resignation letter that the AI may proofread (not names or addresses). */
+export function resignationFields(letter: ResignationDocument): AiField[] {
+  const fields: AiField[] = []
+  const add = (path: string, label: string, text: string) => {
+    if (text.trim()) fields.push({ path, label, text })
+  }
+  add('subject', 'Subject', letter.subject)
   add('greeting', 'Greeting', letter.greeting)
   letter.paragraphs.forEach((text, index) =>
     add(`paragraphs.${index}`, `Paragraph ${index + 1}`, text),

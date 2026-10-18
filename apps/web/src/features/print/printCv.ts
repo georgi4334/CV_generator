@@ -1,9 +1,11 @@
-import type { CoverLetterDocument, CvDocument } from '@cv/shared'
+import type { CoverLetterDocument, CvDocument, ResignationDocument } from '@cv/shared'
 import { create } from 'zustand'
 
 /** What to print: a CV or a cover letter. */
 export type Printable =
-  { kind: 'cv'; cv: CvDocument } | { kind: 'coverLetter'; letter: CoverLetterDocument }
+  | { kind: 'cv'; cv: CvDocument }
+  | { kind: 'coverLetter'; letter: CoverLetterDocument }
+  | { kind: 'resignation'; letter: ResignationDocument }
 
 export interface PrintJob {
   /** A new number per request, so asking again prints again. */

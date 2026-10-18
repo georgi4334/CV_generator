@@ -62,6 +62,25 @@ test('a CV is created, edited, saved and shared', async ({ page, browser }) => {
   await expect(visitor.locator('body')).not.toContainText('Ada Lovelace')
   await visitor.close()
 
+  // A resignation letter is created from Documents only, filled in from this CV.
+  await page.goto('/')
+  await expect(page.getByRole('link', { name: /resignation/i })).toHaveCount(0)
+  await page.goto('/documents/all')
+  await page.getByRole('button', { name: 'Create new' }).click()
+  await page.getByRole('menuitem', { name: 'Resignation letter' }).click()
+  await page.getByLabel(/Fill in from a CV/).selectOption({ label: 'Portfolio CV' })
+  await expect(page.getByRole('textbox', { name: 'Name', exact: true })).toHaveValue('Ada Lovelace')
+  await page.getByRole('textbox', { name: 'Company name' }).fill('Analytical Engines Ltd')
+  await page.getByRole('textbox', { name: 'Contact name' }).fill('Charles Babbage')
+  await page.getByRole('button', { name: 'Create resignation letter' }).click()
+  const letter = page.getByRole('document', { name: 'Resignation letter' })
+  await expect(letter).toContainText('Dear Charles Babbage,')
+  await expect(letter).toContainText('Analytical Engines Ltd')
+  await expect(letter).toContainText('Ada Lovelace')
+  await expect(page.getByText('Saved', { exact: true })).toBeVisible({ timeout: 10_000 })
+  await page.goto('/documents/resignations')
+  await expect(page.getByRole('link', { name: /Analytical Engines Ltd/ })).toBeVisible()
+
   // It is listed under Documents.
   await page.goto('/documents/cvs')
   await expect(page.getByText('Portfolio CV')).toBeVisible()

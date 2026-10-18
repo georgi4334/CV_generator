@@ -52,5 +52,6 @@ export const labels: Messages['labels'] = {
   documentType: {
     cv: 'CV',
     coverLetter: 'Мотивационно писмо',
+    resignation: 'Заявление за напускане',
   },
 }

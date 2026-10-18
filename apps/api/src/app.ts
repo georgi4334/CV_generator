@@ -12,6 +12,7 @@ import type { AiProvider } from './modules/ai/provider'
 import { aiRoutes } from './modules/ai/routes'
 import { authRoutes } from './modules/auth/routes'
 import { coverLetterRoutes } from './modules/cover-letters/routes'
+import { resignationRoutes } from './modules/resignations/routes'
 import { cvRoutes } from './modules/cvs/routes'
 import { healthRoutes } from './modules/health/routes'
 import { jobRoutes } from './modules/jobs/routes'
@@ -160,6 +161,7 @@ export async function buildApp(opts: AppOptions) {
           await scope.register(shareRoutes, { database })
           await scope.register(jobRoutes, { database })
           await scope.register(coverLetterRoutes, { database })
+          await scope.register(resignationRoutes, { database })
           await scope.register(uploadRoutes, { database, storage: opts.storage })
           await scope.register(aiRoutes, {
             database,

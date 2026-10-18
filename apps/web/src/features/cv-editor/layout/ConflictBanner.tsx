@@ -1,3 +1,4 @@
+import type { DocumentType } from '@cv/shared'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { errorMessage } from '@/shared/api/errorMessage'
@@ -31,7 +32,7 @@ export function ConflictBanner({
   reload,
   overwrite,
 }: {
-  kind: 'cv' | 'coverLetter'
+  kind: DocumentType
   /** Replaces the editor content with the server's version. */
   reload: () => Promise<void>
   /** Keeps this editor's version, saving it over the server's revision. */
@@ -60,9 +61,7 @@ export function ConflictBanner({
       role="alert"
       className="flex flex-wrap items-center gap-3 border-b border-danger-line bg-danger-soft px-4 py-2 text-sm text-danger-fg"
     >
-      <span className="flex-1">
-        {t(kind === 'cv' ? 'editor.conflict.cv' : 'editor.conflict.coverLetter')}
-      </span>
+      <span className="flex-1">{t(`editor.conflict.${kind}`)}</span>
       <button
         type="button"
         disabled={busy}

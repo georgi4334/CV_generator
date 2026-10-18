@@ -2,6 +2,7 @@ import type { LoginInput, RegisterInput } from '@cv/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { flushSave } from '@/features/cv-editor/state/editorSession'
 import { flushLetterSave } from '@/features/cover-letters/state/letterSession'
+import { flushResignationSave } from '@/features/resignation/state/resignationSession'
 import { authApi } from './api'
 import { authKeys } from '@/shared/api/authKeys'
 import { resetClientState } from './sessionState'
@@ -37,7 +38,7 @@ export function useLogout() {
   return useMutation({
     mutationFn: async () => {
       // Pending edits are saved while the session still exists.
-      await Promise.all([flushSave(), flushLetterSave()])
+      await Promise.all([flushSave(), flushLetterSave(), flushResignationSave()])
       await authApi.logout()
     },
     onSettled: () => resetClientState(queryClient, null),

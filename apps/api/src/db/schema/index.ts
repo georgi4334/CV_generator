@@ -4,6 +4,7 @@
  */
 export * from './aiUsage'
 export * from './coverLetters'
+export * from './resignations'
 export * from './cvs'
 export * from './jobs'
 export * from './shareLinks'

@@ -1,10 +1,10 @@
-import type { CvDesign, CvHeader, CvLanguage, TemplateId } from '@cv/shared'
+import type { CvDesign, CvHeader, CvLanguage, DocumentType, TemplateId } from '@cv/shared'
 import { createContext, useContext, type ReactNode } from 'react'
 import { useCvEditor } from './cvEditorStore'
 
 /** What the Templates and Design & Font panels change: the open CV or cover letter. */
 export interface DesignTarget {
-  kind: 'cv' | 'coverLetter'
+  kind: DocumentType
   design: CvDesign | null
   language: CvLanguage
   /** Pass a key per control so dragging a slider is one undo step. */

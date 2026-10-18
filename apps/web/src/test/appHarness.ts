@@ -26,6 +26,13 @@ vi.mock('@/features/cover-letters/api', async () => {
   return { coverLetterApi: fake.current.coverLetterApi }
 })
 
+vi.mock('@/features/resignation/api', async () => {
+  const { createFakeCvApi } = await import('./fakeCvApi')
+  const { fake } = await import('./fakeHolders')
+  fake.current ??= createFakeCvApi()
+  return { resignationApi: fake.current.resignationApi }
+})
+
 vi.mock('@/features/jobs/api', async () => {
   const { createFakeCvApi } = await import('./fakeCvApi')
   const { fake } = await import('./fakeHolders')

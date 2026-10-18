@@ -7,12 +7,19 @@ import { FitToWidth } from '@/shared/ui/FitToWidth'
 import { LogoMark } from '@/shared/ui/Logo'
 import { EditorLoading } from '@/shared/ui/LoadStates'
 import { primaryButton, secondaryButton } from '@/shared/ui/PageHeader'
-import { CvRenderer, LetterRenderer } from '@/renderer'
+import { CvRenderer, LetterRenderer, ResignationRenderer } from '@/renderer'
 import { PAGE_SIZE_PX } from '@/renderer/templates/tokens'
 import { toApiRequestError } from '@/shared/api/client'
 import { errorMessage } from '@/shared/api/errorMessage'
 import { useSharedDocument } from './queries'
 import { printDocument } from '@/features/print/printCv'
+
+/** The title of a shared document that hides its real title, per type. */
+const UNTITLED = {
+  cv: 'share.page.untitledCv',
+  coverLetter: 'share.page.untitledLetter',
+  resignation: 'share.page.untitledResignation',
+} as const
 
 /** Keeps shared CVs out of search results while the page is open. */
 function useNoIndex() {
@@ -53,10 +60,7 @@ export function SharedDocumentPage() {
   useNoIndex()
   const data = query.data
   // A link that hides personal details has no title (titles often hold the name).
-  const title = data
-    ? data.title ||
-      (data.type === 'cv' ? t('share.page.untitledCv') : t('share.page.untitledLetter'))
-    : ''
+  const title = data ? data.title || t(UNTITLED[data.type]) : ''
   useDocumentTitle(title || undefined)
 
   if (query.isPending) {
@@ -99,7 +103,9 @@ export function SharedDocumentPage() {
               printDocument(
                 shared.type === 'cv'
                   ? { kind: 'cv', cv: shared.document }
-                  : { kind: 'coverLetter', letter: shared.document },
+                  : shared.type === 'coverLetter'
+                    ? { kind: 'coverLetter', letter: shared.document }
+                    : { kind: 'resignation', letter: shared.document },
                 title,
                 { hidePersonal },
               )
@@ -129,8 +135,15 @@ export function SharedDocumentPage() {
               pageClassName="shadow-paper"
               hidePersonal={hidePersonal}
             />
-          ) : (
+          ) : shared.type === 'coverLetter' ? (
             <LetterRenderer
+              letter={shared.document}
+              mode="preview"
+              pageClassName="shadow-paper"
+              hidePersonal={hidePersonal}
+            />
+          ) : (
+            <ResignationRenderer
               letter={shared.document}
               mode="preview"
               pageClassName="shadow-paper"

@@ -6,9 +6,11 @@ export const documents = {
     all: 'All documents',
     'cover-letters': 'Cover letters',
     cvs: 'CVs',
+    resignations: 'Resignation letters',
   },
   createCv: 'Create new CV',
   createLetter: 'Create new cover letter',
+  createResignation: 'Create new resignation letter',
   createNew: 'Create new',
   actionsFor: 'Actions for {{title}}',
   menu: {
@@ -66,10 +68,12 @@ export const documents = {
   confirm: {
     deleteCvTitle: 'Delete this CV?',
     deleteLetterTitle: 'Delete this cover letter?',
+    deleteResignationTitle: 'Delete this resignation letter?',
     deleteManyTitle_one: 'Delete {{count}} documents?',
     deleteManyTitle_other: 'Delete {{count}} documents?',
     deleteCvMessage: '"{{title}}" and its version history will be deleted. This cannot be undone.',
     deleteLetterMessage: '"{{title}}" will be deleted. This cannot be undone.',
+    deleteResignationMessage: '"{{title}}" will be deleted. This cannot be undone.',
     deleteManyMessage:
       'They will be deleted, CVs with their version history. This cannot be undone.',
   },

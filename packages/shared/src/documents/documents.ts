@@ -1,9 +1,10 @@
 import { z } from 'zod'
 import { CoverLetterDocumentSchema } from '../cover-letter/coverLetter'
 import { IdSchema } from '../cv/common'
+import { ResignationDocumentSchema } from '../resignation/resignation'
 import { CvDocumentSchema } from '../cv/document'
 
-export const DocumentTypeSchema = z.enum(['cv', 'coverLetter'])
+export const DocumentTypeSchema = z.enum(['cv', 'coverLetter', 'resignation'])
 export type DocumentType = z.infer<typeof DocumentTypeSchema>
 
 const recordBase = {
@@ -35,6 +36,15 @@ export const CoverLetterRecordSchema = z.object({
   document: CoverLetterDocumentSchema,
 })
 export type CoverLetterRecord = z.infer<typeof CoverLetterRecordSchema>
+
+export const ResignationRecordSchema = z.object({
+  ...recordBase,
+  type: z.literal('resignation'),
+  /** Increases on every save of the document, like a CV's revision. */
+  revision: z.number().int().positive(),
+  document: ResignationDocumentSchema,
+})
+export type ResignationRecord = z.infer<typeof ResignationRecordSchema>
 
 /** One row in Documents → All documents (no full document body). */
 export const DocumentSummarySchema = z.object({

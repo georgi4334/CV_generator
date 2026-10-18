@@ -50,6 +50,19 @@ const EN = {
   paragraph: 'Another paragraph.',
   closing: 'Kind regards,',
   signature: 'Your Name',
+  // Resignation letters
+  senderName: 'Your name',
+  senderResidence: 'Your address and city',
+  senderPhone: 'Your phone',
+  senderEmail: 'Your email',
+  employerCompany: 'Company name',
+  employerContact: 'Contact person',
+  employerAddress: 'Street and number',
+  employerPostalCode: 'Postal code',
+  employerCity: 'City',
+  resignationSubject: 'Subject, e.g. Resignation',
+  resignationGreeting: 'Dear Sir or Madam,',
+  resignationParagraph: 'Another paragraph.',
 }
 
 export type Placeholders = typeof EN
@@ -105,6 +118,18 @@ export const PLACEHOLDERS: Record<CvLanguage, Placeholders> = {
     paragraph: 'Още един абзац.',
     closing: 'С уважение,',
     signature: 'Вашето име',
+    senderName: 'Вашето име',
+    senderResidence: 'Вашият адрес и град',
+    senderPhone: 'Вашият телефон',
+    senderEmail: 'Вашият имейл',
+    employerCompany: 'Име на компанията',
+    employerContact: 'Лице за контакт',
+    employerAddress: 'Улица и номер',
+    employerPostalCode: 'Пощенски код',
+    employerCity: 'Град',
+    resignationSubject: 'Тема, напр. Заявление за напускане',
+    resignationGreeting: 'Уважаеми г-н/г-жо,',
+    resignationParagraph: 'Още един абзац.',
   },
 }
 

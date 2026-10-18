@@ -1,4 +1,5 @@
 import { ArrowLeft, CircleHelp, History, PanelLeft, Redo2, Undo2 } from 'lucide-react'
+import type { DocumentType } from '@cv/shared'
 import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TransitionLink } from '@/shared/ui/TransitionLink'
@@ -24,7 +25,7 @@ interface EditorTopBarProps {
   /** Undo/redo of the open document (default: the CV editor). */
   undoRedo?: UndoRedo
   /** Which tools apply: a cover letter has no sections to rearrange. */
-  kind?: 'cv' | 'coverLetter'
+  kind?: DocumentType
   /** Phones and small tablets: tools move to the bottom toolbar, the rest to a "More" menu. */
   compact?: boolean
   previewTo: string

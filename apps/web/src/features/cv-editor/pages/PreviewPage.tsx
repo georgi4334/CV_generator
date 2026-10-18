@@ -8,12 +8,14 @@ import { Link, useParams } from 'react-router'
 import { toApiRequestError } from '@/shared/api/client'
 import { useCv } from '@/features/cv-editor/queries'
 import { NotFoundPage } from '@/app/pages/NotFoundPage'
-import { printCv, printLetter } from '@/features/print/printCv'
+import { printCv, printLetter, printDocument } from '@/features/print/printCv'
 import { ShareDialog } from '@/features/share/ShareDialog'
 import { useCvEditor } from '@/features/cv-editor/state/cvEditorStore'
 import { EditorLoading, LoadError } from '@/shared/ui/LoadStates'
 import { PageCanvas } from '@/features/cv-editor/layout/PageCanvas'
-import { LetterRenderer } from '@/renderer'
+import { LetterRenderer, ResignationRenderer } from '@/renderer'
+import { useResignation } from '@/features/resignation/queries'
+import { useResignationEditor } from '@/features/resignation/state/resignationEditorStore'
 import { useCoverLetter } from '@/features/cover-letters/queries'
 import { useLetterEditor } from '@/features/cover-letters/state/letterEditorStore'
 
@@ -152,6 +154,48 @@ function CoverLetterPreview() {
   )
 }
 
+function ResignationPreview() {
+  const { id } = useParams()
+  const query = useResignation(id)
+  // Coming straight from the editor, show its content even if the last save is still running.
+  const editing = useResignationEditor((s) => (s.docId === id ? s.letter : null))
+  const [sharing, setSharing] = useState(false)
+
+  if (query.isPending) return <EditorLoading />
+  if (query.isError) {
+    const error = toApiRequestError(query.error)
+    if (error.status === 404 || error.status === 400) return <NotFoundPage />
+    return <LoadError error={error} onRetry={() => void query.refetch()} />
+  }
+  const { title } = query.data
+  const letter = editing ?? query.data.document
+  return (
+    <PreviewFrame
+      editTo={`/resignations/${query.data.id}/edit`}
+      title={title}
+      actions={
+        <PreviewActions
+          onShare={() => setSharing(true)}
+          onDownload={() => printDocument({ kind: 'resignation', letter }, title)}
+        />
+      }
+    >
+      <FitToWidth width={PAGE_SIZE_PX[letter.design.pageSize].width}>
+        <ResignationRenderer letter={letter} mode="preview" pageClassName="shadow-paper" />
+      </FitToWidth>
+      {sharing && (
+        <ShareDialog
+          type="resignation"
+          id={query.data.id}
+          title={title}
+          onClose={() => setSharing(false)}
+        />
+      )}
+    </PreviewFrame>
+  )
+}
+
 export function PreviewPage({ type }: { type: DocumentType }) {
-  return type === 'cv' ? <CvPreview /> : <CoverLetterPreview />
+  if (type === 'cv') return <CvPreview />
+  return type === 'coverLetter' ? <CoverLetterPreview /> : <ResignationPreview />
 }
