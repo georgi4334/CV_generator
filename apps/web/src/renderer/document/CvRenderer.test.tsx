@@ -138,6 +138,31 @@ describe('templates', () => {
     for (const id of TEMPLATE_IDS) expect(getTemplate(id).id).toBe(id)
   })
 
+  it('puts the name at the top of the sidebar in the Portfolio and Spotlight templates', () => {
+    for (const templateId of ['portfolio', 'spotlight'] as const) {
+      const cv = createExampleCv('designer')
+      cv.design.templateId = templateId
+      const { container, unmount } = render(<CvRenderer cv={cv} mode="preview" />)
+      const page = container.querySelector('[data-cv-page]')!
+      const sidebar = page.querySelector('[data-column=sidebar]')!
+      // The sidebar holds the name and the sidebar's sections; the main column does not.
+      expect(within(sidebar as HTMLElement).getByText(cv.header.name)).toBeDefined()
+      expect(within(sidebar as HTMLElement).getByText('Skills')).toBeDefined()
+      expect(
+        within(page.querySelector('[data-column=main]') as HTMLElement).queryByText(cv.header.name),
+      ).toBeNull()
+      unmount()
+    }
+  })
+
+  it('shows the initials instead of a photo in the Monogram template', () => {
+    const cv = createExampleCv('sales-marketing')
+    cv.design.templateId = 'monogram'
+    cv.header = { ...cv.header, name: 'Aman Verma', showPhoto: false }
+    render(<CvRenderer cv={cv} mode="preview" />)
+    expect(visiblePages().getByText('AV')).toBeDefined()
+  })
+
   it('draws dated entries on a line in the Timeline template', () => {
     const cv = createExampleCv('software-developer')
     cv.design.templateId = 'timeline'

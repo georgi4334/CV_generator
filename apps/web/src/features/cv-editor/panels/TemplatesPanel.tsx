@@ -1,7 +1,10 @@
 import {
   CV_LANGUAGES,
+  LETTER_TEMPLATE_IDS,
   PROFESSIONS,
+  TEMPLATE_CATEGORIES,
   TEMPLATE_IDS,
+  templatesIn,
   type CvDocument,
   type CvLanguage,
   type ProfessionId,
@@ -45,39 +48,61 @@ export function TemplatesPanel({ professionId = null }: { professionId?: Profess
   const recommended: readonly TemplateId[] = professionId
     ? PROFESSIONS[professionId].recommendedTemplates
     : []
+  // The extra CV templates are for CVs only.
+  const available: readonly TemplateId[] = kind === 'cv' ? TEMPLATE_IDS : LETTER_TEMPLATE_IDS
 
   return (
     <>
-      <ul className="grid grid-cols-2 gap-3" aria-label={t('editor.panels.templates')}>
-        {TEMPLATE_IDS.map((id) => {
-          const selected = id === current
-          const isRecommended = recommended.includes(id)
+      <div className="space-y-4" role="group" aria-label={t('editor.panels.templates')}>
+        {TEMPLATE_CATEGORIES.map((category) => {
+          const ids = templatesIn(category, available)
+          if (ids.length === 0) return null
           return (
-            <li key={id}>
-              <button
-                type="button"
-                aria-pressed={selected}
-                onClick={() => updateDesign(templateChoice(id))}
-                className={`group relative w-full rounded-control p-1 text-center text-xs ${
-                  selected ? 'ring-2 ring-brand-line' : 'hover:ring-2 hover:ring-line-strong '
-                }`}
+            <section key={category} aria-labelledby={`template-category-${category}`}>
+              <h3
+                id={`template-category-${category}`}
+                className="mb-2 text-xs font-semibold tracking-wide text-fg-muted uppercase"
               >
-                {/* Fits the column, so the selection ring lines up and nothing scrolls sideways. */}
-                <FitToWidth width={TEMPLATE_THUMBNAIL_WIDTH}>{thumbnail(id)}</FitToWidth>
-                <span className={`mt-1 block ${selected ? 'font-semibold text-brand-fg ' : ''}`}>
-                  {t(`labels.template.${id}`)}
-                </span>
-                {isRecommended && (
-                  <>
-                    {' '}
-                    <RecommendedBadge compact className="absolute top-1.5 left-1.5" />
-                  </>
-                )}
-              </button>
-            </li>
+                {t(`labels.templateCategory.${category}`)}
+              </h3>
+              <ul className="grid grid-cols-2 gap-3">
+                {ids.map((id) => {
+                  const selected = id === current
+                  const isRecommended = recommended.includes(id)
+                  return (
+                    <li key={id}>
+                      <button
+                        type="button"
+                        aria-pressed={selected}
+                        onClick={() => updateDesign(templateChoice(id))}
+                        className={`group relative w-full rounded-control p-1 text-center text-xs ${
+                          selected
+                            ? 'ring-2 ring-brand-line'
+                            : 'hover:ring-2 hover:ring-line-strong '
+                        }`}
+                      >
+                        {/* Fits the column, so the selection ring lines up and nothing scrolls sideways. */}
+                        <FitToWidth width={TEMPLATE_THUMBNAIL_WIDTH}>{thumbnail(id)}</FitToWidth>
+                        <span
+                          className={`mt-1 block ${selected ? 'font-semibold text-brand-fg ' : ''}`}
+                        >
+                          {t(`labels.template.${id}`)}
+                        </span>
+                        {isRecommended && (
+                          <>
+                            {' '}
+                            <RecommendedBadge compact className="absolute top-1.5 left-1.5" />
+                          </>
+                        )}
+                      </button>
+                    </li>
+                  )
+                })}
+              </ul>
+            </section>
           )
         })}
-      </ul>
+      </div>
 
       <button
         type="button"

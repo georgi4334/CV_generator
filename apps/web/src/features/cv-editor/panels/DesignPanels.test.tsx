@@ -14,10 +14,25 @@ const design = () => state().cv!.design
 beforeEach(() => state().load('cv-test', createEmptyCv()))
 
 describe('TemplatesPanel', () => {
-  it('shows all 8 templates and switches template', () => {
+  it('shows all 16 templates grouped by kind of work, and switches template', () => {
     render(<TemplatesPanel />)
-    const list = within(screen.getByRole('list', { name: 'Templates' }))
-    expect(list.getAllByRole('button')).toHaveLength(8)
+    const list = within(screen.getByRole('group', { name: 'Templates' }))
+    expect(list.getAllByRole('button')).toHaveLength(16)
+    for (const [group, count] of [
+      ['Professional', 4],
+      ['Design & creative', 5],
+      ['Marketing', 3],
+      ['Sales', 4],
+    ] as const) {
+      expect(within(list.getByRole('region', { name: group })).getAllByRole('button')).toHaveLength(
+        count,
+      )
+    }
+    expect(
+      within(list.getByRole('region', { name: 'Design & creative' })).getByRole('button', {
+        name: 'Portfolio',
+      }),
+    ).toBeDefined()
     fireEvent.click(list.getByRole('button', { name: 'Timeline' }))
     expect(design().templateId).toBe('timeline')
     expect(list.getByRole('button', { name: 'Timeline' }).getAttribute('aria-pressed')).toBe('true')
@@ -48,9 +63,9 @@ describe('TemplatesPanel', () => {
 
   it("marks the templates recommended for the CV's profession", () => {
     render(<TemplatesPanel professionId="designer" />)
-    const list = within(screen.getByRole('list', { name: 'Templates' }))
+    const list = within(screen.getByRole('group', { name: 'Templates' }))
     expect(list.getAllByRole('button', { name: /Recommended$/ })).toEqual(
-      ['Contemporary', 'Creative', 'Stylish'].map((name) =>
+      ['Creative', 'Portfolio', 'Vivid'].map((name) =>
         list.getByRole('button', { name: `${name} Recommended` }),
       ),
     )

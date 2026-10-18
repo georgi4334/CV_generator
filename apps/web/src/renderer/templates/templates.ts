@@ -2,12 +2,20 @@ import type { CvDesign, CvDocument, CvHeader, TemplateId } from '@cv/shared'
 import type { FC } from 'react'
 import type { TitleVariant } from '@/renderer/context'
 import {
+  BoldHeader,
   CompactHeader,
   ContemporaryHeader,
   CreativeHeader,
+  ElegantHeader,
+  ExecutiveHeader,
+  ModernHeader,
+  MonogramHeader,
   PolishedHeader,
+  PortfolioHeader,
   SingleColumnHeader,
+  SpotlightHeader,
   StylishHeader,
+  VividHeader,
 } from './headers'
 
 export type SidebarFill = 'none' | 'tint' | 'solid'
@@ -23,8 +31,11 @@ export interface TemplateDefinition {
   name: string
   columns: 1 | 2
   sidebarSide: 'left' | 'right'
-  /** "main": header sits at the top of the main column; "full": spans the page. */
-  headerPlacement: 'main' | 'full'
+  /**
+   * "main": header sits at the top of the main column; "full": spans the page;
+   * "sidebar": at the top of the sidebar (two columns only).
+   */
+  headerPlacement: 'main' | 'full' | 'sidebar'
   /** A full-width header drawn on an accent-colored band. */
   headerBand?: boolean
   titleVariant: TitleVariant
@@ -212,6 +223,184 @@ export const TEMPLATES: Record<TemplateId, TemplateDefinition> = {
     suggested: {
       fontFamily: 'PT Sans',
       columnLayout: 3,
+      sectionSpacing: 2,
+      fontSize: 2,
+      lineHeight: 2,
+    },
+  },
+  portfolio: {
+    id: 'portfolio',
+    name: 'Portfolio',
+    columns: 2,
+    sidebarSide: 'left',
+    headerPlacement: 'sidebar',
+    titleVariant: 'caps',
+    Header: PortfolioHeader,
+    sidebarOptions: [
+      { width: 0.32, fill: 'none' },
+      { width: 0.34, fill: 'tint' },
+      { width: 0.36, fill: 'solid' },
+      { width: 0.38, fill: 'solid' },
+    ],
+    suggested: {
+      fontFamily: 'Source Sans 3',
+      columnLayout: 4,
+      sectionSpacing: 2,
+      fontSize: 2,
+      lineHeight: 2,
+    },
+  },
+  elegant: {
+    id: 'elegant',
+    name: 'Elegant',
+    columns: 2,
+    sidebarSide: 'right',
+    headerPlacement: 'full',
+    titleVariant: 'elegant',
+    Header: ElegantHeader,
+    sidebarOptions: [
+      { width: 0.3, fill: 'none' },
+      { width: 0.34, fill: 'none' },
+      { width: 0.34, fill: 'tint' },
+      { width: 0.36, fill: 'tint' },
+    ],
+    suggested: {
+      fontFamily: 'Lora',
+      columnLayout: 3,
+      sectionSpacing: 2,
+      fontSize: 2,
+      lineHeight: 3,
+    },
+  },
+  vivid: {
+    id: 'vivid',
+    name: 'Vivid',
+    columns: 2,
+    sidebarSide: 'left',
+    headerPlacement: 'full',
+    headerBand: true,
+    titleVariant: 'block',
+    Header: VividHeader,
+    sidebarOptions: [
+      { width: 0.3, fill: 'none' },
+      { width: 0.34, fill: 'tint' },
+      { width: 0.36, fill: 'tint' },
+      { width: 0.36, fill: 'solid' },
+    ],
+    suggested: {
+      fontFamily: 'Rubik',
+      columnLayout: 3,
+      sectionSpacing: 2,
+      fontSize: 2,
+      lineHeight: 2,
+    },
+  },
+  spotlight: {
+    id: 'spotlight',
+    name: 'Spotlight',
+    columns: 2,
+    sidebarSide: 'right',
+    headerPlacement: 'sidebar',
+    titleVariant: 'pill',
+    Header: SpotlightHeader,
+    sidebarOptions: [
+      { width: 0.32, fill: 'none' },
+      { width: 0.34, fill: 'tint' },
+      { width: 0.36, fill: 'solid' },
+      { width: 0.38, fill: 'solid' },
+    ],
+    suggested: {
+      fontFamily: 'Roboto',
+      columnLayout: 4,
+      sectionSpacing: 2,
+      fontSize: 2,
+      lineHeight: 2,
+    },
+  },
+  modern: {
+    id: 'modern',
+    name: 'Modern',
+    columns: 2,
+    sidebarSide: 'right',
+    headerPlacement: 'full',
+    titleVariant: 'accent-rule',
+    Header: ModernHeader,
+    sidebarOptions: [
+      { width: 0.3, fill: 'none' },
+      { width: 0.34, fill: 'none' },
+      { width: 0.34, fill: 'tint' },
+      { width: 0.36, fill: 'tint' },
+    ],
+    suggested: {
+      fontFamily: 'Open Sans',
+      columnLayout: 2,
+      sectionSpacing: 2,
+      fontSize: 2,
+      lineHeight: 2,
+    },
+  },
+  bold: {
+    id: 'bold',
+    name: 'Bold',
+    columns: 2,
+    sidebarSide: 'right',
+    headerPlacement: 'full',
+    titleVariant: 'caps',
+    Header: BoldHeader,
+    sidebarOptions: [
+      { width: 0.3, fill: 'none' },
+      { width: 0.34, fill: 'none' },
+      { width: 0.34, fill: 'tint' },
+      { width: 0.36, fill: 'tint' },
+    ],
+    suggested: {
+      fontFamily: 'Montserrat',
+      columnLayout: 2,
+      sectionSpacing: 2,
+      fontSize: 2,
+      lineHeight: 2,
+    },
+  },
+  monogram: {
+    id: 'monogram',
+    name: 'Monogram',
+    columns: 2,
+    sidebarSide: 'left',
+    headerPlacement: 'full',
+    titleVariant: 'accent-small',
+    Header: MonogramHeader,
+    sidebarOptions: [
+      { width: 0.28, fill: 'none' },
+      { width: 0.32, fill: 'none' },
+      { width: 0.32, fill: 'tint' },
+      { width: 0.34, fill: 'solid' },
+    ],
+    suggested: {
+      fontFamily: 'Inter',
+      columnLayout: 2,
+      sectionSpacing: 2,
+      fontSize: 2,
+      lineHeight: 2,
+    },
+  },
+  executive: {
+    id: 'executive',
+    name: 'Executive',
+    columns: 2,
+    sidebarSide: 'left',
+    headerPlacement: 'full',
+    headerBand: true,
+    titleVariant: 'block',
+    Header: ExecutiveHeader,
+    sidebarOptions: [
+      { width: 0.3, fill: 'none' },
+      { width: 0.32, fill: 'tint' },
+      { width: 0.34, fill: 'tint' },
+      { width: 0.34, fill: 'solid' },
+    ],
+    suggested: {
+      fontFamily: 'Noto Serif',
+      columnLayout: 2,
       sectionSpacing: 2,
       fontSize: 2,
       lineHeight: 2,

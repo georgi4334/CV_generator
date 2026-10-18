@@ -1,7 +1,9 @@
 import {
   createExampleCv,
   PROFESSIONS,
+  TEMPLATE_CATEGORIES,
   TEMPLATE_IDS,
+  templatesIn,
   type CvDocument,
   type ProfessionId,
   type TemplateId,
@@ -89,12 +91,19 @@ export function TemplateStep({
           onChoose={onChoose}
         />
       )}
-      <TemplateGroup
-        title={professionId ? t('newCv.moreTemplates') : t('newCv.allTemplates')}
-        ids={others}
-        sample={sample}
-        onChoose={onChoose}
-      />
+      {/* The rest, grouped by the kind of work they suit. */}
+      {TEMPLATE_CATEGORIES.map((category) => {
+        const ids = templatesIn(category, others)
+        return ids.length === 0 ? null : (
+          <TemplateGroup
+            key={category}
+            title={t(`labels.templateCategory.${category}`)}
+            ids={ids}
+            sample={sample}
+            onChoose={onChoose}
+          />
+        )
+      })}
       <p className="text-xs text-fg-muted">{t('newCv.previewsNote')}</p>
     </div>
   )

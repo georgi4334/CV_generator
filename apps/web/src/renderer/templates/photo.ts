@@ -27,7 +27,13 @@ export function placePhoto(
   template: Pick<TemplateDefinition, 'columns' | 'sidebarSide' | 'headerPlacement'>,
 ): PhotoPlacement {
   const position = header.photoPosition ?? 'name'
-  if (!header.showPhoto || !header.photoUrl || position === 'name') {
+  // A header in the sidebar has the photo above the name, whatever the position.
+  if (
+    !header.showPhoto ||
+    !header.photoUrl ||
+    position === 'name' ||
+    template.headerPlacement === 'sidebar'
+  ) {
     return { header, corner: null, inSidebar: false }
   }
   const side = position === 'top-left' ? 'left' : 'right'

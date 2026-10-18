@@ -1,7 +1,8 @@
 import { z } from 'zod'
 import { HexColorSchema, LevelSchema } from './common'
 
-export const TEMPLATE_IDS = [
+/** Templates that cover and resignation letters can use too. */
+export const LETTER_TEMPLATE_IDS = [
   'polished',
   'contemporary',
   'creative',
@@ -11,8 +12,70 @@ export const TEMPLATE_IDS = [
   'compact',
   'multicolumn',
 ] as const
+export type LetterTemplateId = (typeof LETTER_TEMPLATE_IDS)[number]
+
+export const TEMPLATE_IDS = [
+  ...LETTER_TEMPLATE_IDS,
+  // CV only.
+  'portfolio',
+  'elegant',
+  'vivid',
+  'spotlight',
+  'modern',
+  'bold',
+  'monogram',
+  'executive',
+] as const
 export const TemplateIdSchema = z.enum(TEMPLATE_IDS)
 export type TemplateId = z.infer<typeof TemplateIdSchema>
+
+/** The kinds of work the template pickers group templates by. */
+export const TEMPLATE_CATEGORIES = ['professional', 'design', 'marketing', 'sales'] as const
+export type TemplateCategory = (typeof TEMPLATE_CATEGORIES)[number]
+
+/** Each template's category (the pickers group by it). */
+export const TEMPLATE_CATEGORY: Record<TemplateId, TemplateCategory> = {
+  polished: 'professional',
+  'single-column': 'professional',
+  compact: 'professional',
+  multicolumn: 'professional',
+  creative: 'design',
+  stylish: 'design',
+  portfolio: 'design',
+  elegant: 'design',
+  vivid: 'design',
+  contemporary: 'marketing',
+  spotlight: 'marketing',
+  modern: 'marketing',
+  timeline: 'sales',
+  bold: 'sales',
+  monogram: 'sales',
+  executive: 'sales',
+}
+
+/** The templates of a category, in the order of TEMPLATE_IDS. */
+export const templatesIn = (
+  category: TemplateCategory,
+  ids: readonly TemplateId[] = TEMPLATE_IDS,
+): TemplateId[] => ids.filter((id) => TEMPLATE_CATEGORY[id] === category)
+
+/** The closest letter template for a CV-only one, so a letter made from such a CV still matches it. */
+const LETTER_FALLBACK: Record<Exclude<TemplateId, LetterTemplateId>, LetterTemplateId> = {
+  portfolio: 'creative',
+  elegant: 'stylish',
+  vivid: 'contemporary',
+  spotlight: 'creative',
+  modern: 'polished',
+  bold: 'compact',
+  monogram: 'polished',
+  executive: 'contemporary',
+}
+
+export const isLetterTemplate = (id: TemplateId): id is LetterTemplateId =>
+  (LETTER_TEMPLATE_IDS as readonly string[]).includes(id)
+
+export const letterTemplateFor = (id: TemplateId): LetterTemplateId =>
+  isLetterTemplate(id) ? id : LETTER_FALLBACK[id]
 
 /** Free Google Fonts that also cover Cyrillic, so Bulgarian CVs render correctly. */
 export const FONT_FAMILIES = [
@@ -75,3 +138,9 @@ export const DEFAULT_DESIGN: CvDesign = {
   background: 'none',
   showIcons: true,
 }
+
+/** A CV's design for a letter: the same look, on a template letters can use. */
+export const letterDesign = (design: CvDesign): CvDesign => ({
+  ...design,
+  templateId: letterTemplateFor(design.templateId),
+})

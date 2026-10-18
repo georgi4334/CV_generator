@@ -1,4 +1,4 @@
-import type { ResignationDocument } from '@cv/shared'
+import { letterTemplateFor, type ResignationDocument } from '@cv/shared'
 import { useTranslation } from 'react-i18next'
 import { RenderContext, useRender, type RenderMode } from '@/renderer/context'
 import type { EditorApi } from '@/renderer/editing/editorApi'
@@ -124,7 +124,7 @@ export function ResignationRenderer({
 }) {
   const { t } = useTranslation()
   const { design } = letter
-  const template = getTemplate(design.templateId)
+  const template = getTemplate(letterTemplateFor(design.templateId))
   const tokens = layoutTokens(design)
   const { margin } = tokens
   const context = {

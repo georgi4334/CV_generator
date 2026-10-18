@@ -100,14 +100,17 @@ export function CvRenderer({
     // main column is measured without it.
     const headerSpace =
       template.headerPlacement === 'full' ? measured.header - tokens.margin : measured.header
-    const first = content - headerSpace - tokens.sectionGap
+    const underHeader = content - headerSpace - tokens.sectionGap
+    // A header in the sidebar leaves the whole first page to the main column.
+    const inSidebar = template.headerPlacement === 'sidebar' && template.columns === 2
+    const mainFirst = inSidebar ? content : underHeader
     const toMeasured = (blocks: Block[]) =>
       blocks.map((b) => ({
         height: measured.blocks[b.key] ?? 0,
         gapBefore: b.kind === 'section' ? tokens.sectionGap : tokens.itemGap,
       }))
-    const mainPages = paginateColumn(toMeasured(main), first, content)
-    const sidebarPages = paginateColumn(toMeasured(sidebar), first, content)
+    const mainPages = paginateColumn(toMeasured(main), mainFirst, content)
+    const sidebarPages = paginateColumn(toMeasured(sidebar), underHeader, content)
     const count = Math.max(mainPages.length, sidebarPages.length)
     return Array.from({ length: count }, (_, i) => ({
       main: (mainPages[i] ?? []).map((index) => main[index]!),
@@ -122,6 +125,7 @@ export function CvRenderer({
     tokens.sectionGap,
     tokens.itemGap,
     template.headerPlacement,
+    template.columns,
   ])
 
   const frameProps = {

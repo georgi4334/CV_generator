@@ -1,4 +1,4 @@
-import type { CoverLetterDocument } from '@cv/shared'
+import { letterTemplateFor, type CoverLetterDocument } from '@cv/shared'
 import { Plus } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -103,7 +103,7 @@ export function LetterRenderer({
 }) {
   const { t } = useTranslation()
   const { design, header, recipient } = letter
-  const template = getTemplate(design.templateId)
+  const template = getTemplate(letterTemplateFor(design.templateId))
   const tokens = layoutTokens(design)
   const { margin } = tokens
   const { Header } = template
