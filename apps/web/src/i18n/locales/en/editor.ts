@@ -25,6 +25,7 @@ export const editor = {
   printHint: 'In the print dialog, choose “Save as PDF” as the destination.',
   printTitle: 'Opens the print dialog: choose “Save as PDF”',
   zoom: {
+    group: 'Zoom controls',
     label: 'Page zoom',
     zoomIn: 'Zoom in',
     zoomOut: 'Zoom out',

@@ -34,6 +34,8 @@ interface CvRendererProps {
   pageClassName?: string
   /** Blur the stand-ins of a share link that hides personal details. */
   hidePersonal?: boolean
+  /** Draw links as plain text, for thumbnails that are themselves a link. */
+  staticLinks?: boolean
 }
 
 /**
@@ -47,6 +49,7 @@ export function CvRenderer({
   editor,
   pageClassName,
   hidePersonal = false,
+  staticLinks = false,
 }: CvRendererProps) {
   const { t } = useTranslation()
   const template = getTemplate(cv.design.templateId)
@@ -136,6 +139,7 @@ export function CvRenderer({
     timeline: template.timeline ?? false,
     measuring: false,
     hidePersonal,
+    staticLinks,
     editor: editor ?? null,
   }
   const measuringContext = { ...context, measuring: true, editor: null }

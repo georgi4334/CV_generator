@@ -26,6 +26,7 @@ export const editor: Messages['editor'] = {
   printHint: 'Wählen Sie im Druckdialog „Als PDF speichern“ als Ziel.',
   printTitle: 'Öffnet den Druckdialog: „Als PDF speichern“ wählen',
   zoom: {
+    group: 'Zoom-Steuerung',
     label: 'Seitenzoom',
     zoomIn: 'Vergrößern',
     zoomOut: 'Verkleinern',

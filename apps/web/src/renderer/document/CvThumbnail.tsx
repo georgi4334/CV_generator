@@ -28,7 +28,7 @@ export const CvThumbnail = memo(function CvThumbnail({
       style={{ width, height: Math.round(page.height * scale) }}
     >
       <div style={{ width: page.width, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
-        <CvRenderer cv={cv} mode={mode} />
+        <CvRenderer cv={cv} mode={mode} staticLinks />
       </div>
     </div>
   )
@@ -55,7 +55,7 @@ export const LetterThumbnail = memo(function LetterThumbnail({
       style={{ width, height: Math.round(page.height * scale) }}
     >
       <div style={{ width: page.width, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
-        <LetterRenderer letter={letter} mode={mode} />
+        <LetterRenderer letter={letter} mode={mode} staticLinks />
       </div>
     </div>
   )

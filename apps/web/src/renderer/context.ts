@@ -17,6 +17,8 @@ export interface RenderContextValue {
   measuring: boolean
   /** A share link that hides personal details: the stand-ins for them are drawn blurred. */
   hidePersonal: boolean
+  /** Thumbnails sit inside a link of their own: links on the page are drawn as plain text. */
+  staticLinks: boolean
   editor: EditorApi | null
 }
 
@@ -28,6 +30,7 @@ export const RenderContext = createContext<RenderContextValue>({
   timeline: false,
   measuring: false,
   hidePersonal: false,
+  staticLinks: false,
   editor: null,
 })
 

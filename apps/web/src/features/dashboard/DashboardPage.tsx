@@ -80,7 +80,7 @@ function RecentDocuments({ docs, loading }: { docs: DocumentSummary[]; loading: 
         <h2 id="recent-heading" className="font-semibold">
           {t('dashboard.recent.heading')}
         </h2>
-        <Link to="/documents" className="text-sm text-brand-fg hover:underline">
+        <Link to="/documents" className="tap-target text-sm text-brand-fg hover:underline">
           {t('dashboard.recent.viewAll')}
         </Link>
       </div>
@@ -156,7 +156,7 @@ function JobPipeline({ jobs }: { jobs: Job[] }) {
           </li>
         ))}
       </ul>
-      <Link to="/jobs" className="mt-3 inline-block text-sm text-brand-fg hover:underline">
+      <Link to="/jobs" className="tap-target mt-3 text-sm text-brand-fg hover:underline">
         {t('dashboard.pipeline.allJobs')}
       </Link>
     </section>

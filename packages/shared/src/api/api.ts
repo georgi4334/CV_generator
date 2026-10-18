@@ -2,7 +2,16 @@ import { z } from 'zod'
 import { IdSchema } from '../cv/common'
 import { CoverLetterDocumentSchema } from '../cover-letter/coverLetter'
 import { CvDocumentSchema } from '../cv/document'
+import { headerWithinLimits } from '../cv/header'
 import { PROFESSION_IDS } from '../cv/professions'
+
+const headerLimitMessage = { message: 'A header field is too long', path: ['header'] }
+/** A CV as it is saved: its header text within the limits. */
+const SaveableCvSchema = CvDocumentSchema.refine(headerWithinLimits, headerLimitMessage)
+const SaveableLetterSchema = CoverLetterDocumentSchema.refine(
+  headerWithinLimits,
+  headerLimitMessage,
+)
 
 /** Shape of every error response from the API. */
 export const ApiErrorSchema = z.object({
@@ -26,7 +35,7 @@ export const CreateCvInputSchema = z.object({
   professionId: ProfessionIdSchema.nullable().optional(),
   jobId: IdSchema.nullable().optional(),
   /** Omit for an empty CV in the default layout. */
-  document: CvDocumentSchema.optional(),
+  document: SaveableCvSchema.optional(),
 })
 export type CreateCvInput = z.infer<typeof CreateCvInputSchema>
 
@@ -40,7 +49,7 @@ export const UpdateCvInputSchema = z
     title: TitleSchema.optional(),
     professionId: ProfessionIdSchema.nullable().optional(),
     jobId: IdSchema.nullable().optional(),
-    document: CvDocumentSchema.optional(),
+    document: SaveableCvSchema.optional(),
   })
   .refine((input) => input.document === undefined || input.revision !== undefined, {
     message: 'revision is required when saving the document',
@@ -57,7 +66,7 @@ export const CreateCoverLetterInputSchema = z.object({
   cvId: IdSchema.nullable().optional(),
   jobId: IdSchema.nullable().optional(),
   /** Omit for an empty letter (without a CV's header and design). */
-  document: CoverLetterDocumentSchema.optional(),
+  document: SaveableLetterSchema.optional(),
 })
 export type CreateCoverLetterInput = z.infer<typeof CreateCoverLetterInputSchema>
 
@@ -68,7 +77,7 @@ export const UpdateCoverLetterInputSchema = z
     title: TitleSchema.optional(),
     cvId: IdSchema.nullable().optional(),
     jobId: IdSchema.nullable().optional(),
-    document: CoverLetterDocumentSchema.optional(),
+    document: SaveableLetterSchema.optional(),
   })
   .refine((input) => input.document === undefined || input.revision !== undefined, {
     message: 'revision is required when saving the document',

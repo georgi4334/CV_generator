@@ -29,7 +29,7 @@ export function StatusSelect({
       aria-label={label}
       value={value}
       onChange={(e) => onChange(e.target.value as JobStatus)}
-      className={`cursor-pointer rounded-pill border-0 py-0.5 pr-7 pl-2.5 text-xs font-medium ${JOB_STATUS_STYLES[value]}`}
+      className={`cursor-pointer rounded-pill border-0 py-1 pr-7 pl-2.5 text-xs font-medium pointer-coarse:min-h-touch ${JOB_STATUS_STYLES[value]}`}
     >
       {JOB_STATUSES.map((status) => (
         <option key={status} value={status}>
@@ -74,17 +74,21 @@ export function DateInput({
   value,
   label,
   onChange,
+  max,
   className = inputClass,
 }: {
   value: string | null
   label: string
   onChange: (date: string | null) => void
+  /** The latest date the picker offers (yyyy-mm-dd). */
+  max?: string
   className?: string
 }) {
   return (
     <input
       type="date"
       aria-label={label}
+      max={max}
       value={value ?? ''}
       onChange={(e) => {
         const next = e.target.value

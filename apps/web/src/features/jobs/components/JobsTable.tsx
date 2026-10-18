@@ -12,7 +12,7 @@ import type { TFunction } from 'i18next'
 import { ArrowDown, ArrowUp, ChevronsUpDown, Pencil, Trash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { formatDate } from '@/shared/lib/format'
+import { formatDate, localToday } from '@/shared/lib/format'
 import { DateInput, DocumentSelect, InlineText, StatusSelect, TypeSelect } from './fields'
 import { statusChange } from '@/features/jobs/jobHelpers'
 import { useJobActions } from '@/features/jobs/jobContext'
@@ -65,6 +65,7 @@ function DateAppliedCell({ job }: { job: Job }) {
       value={job.dateApplied}
       label={t('jobs.cell.dateAppliedFor', { position: job.position })}
       onChange={(dateApplied) => update(job, { dateApplied })}
+      max={localToday()}
       className="w-36 rounded-tight border border-transparent bg-transparent px-1 py-0.5 text-sm hover:border-line-strong focus:border-brand-line"
     />
   )
@@ -245,7 +246,7 @@ export function JobsTable({ jobs }: { jobs: Job[] }) {
                     <button
                       type="button"
                       onClick={header.column.getToggleSortingHandler()}
-                      className="inline-flex items-center gap-1 uppercase hover:text-fg"
+                      className="tap-target gap-1 uppercase hover:text-fg"
                     >
                       {content}
                       {sorted === 'asc' ? (

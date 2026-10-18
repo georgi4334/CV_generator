@@ -193,6 +193,7 @@ export function JobDrawer({
                 value={draft.dateApplied}
                 label={t('jobs.drawer.dateApplied')}
                 onChange={(dateApplied) => set({ dateApplied })}
+                max={localToday()}
                 className={field}
               />
             </Field>

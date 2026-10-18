@@ -1,6 +1,6 @@
 import { createCoverLetter, CV_LANGUAGES, type CvLanguage } from '@cv/shared'
 import { LoaderCircle } from 'lucide-react'
-import { useMemo, useState, type FormEvent } from 'react'
+import { useMemo, useRef, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useSearchParams } from 'react-router'
 import { card, PageHeader, primaryButton, secondaryButton } from '@/shared/ui/PageHeader'
@@ -47,9 +47,13 @@ export function NewLetterPage() {
     [cvDocument, company, language],
   )
   const waitingForCv = Boolean(cvId) && !cv
+  // A quick double click submits twice before the button can disable itself.
+  const submitted = useRef(false)
 
   const submit = (event: FormEvent) => {
     event.preventDefault()
+    if (submitted.current) return
+    submitted.current = true
     create.mutate(
       {
         title: title.trim() || undefined,
@@ -58,6 +62,9 @@ export function NewLetterPage() {
         document: letter,
       },
       {
+        onError: () => {
+          submitted.current = false
+        },
         // The new letter opens like an app: the form steps back as the page grows in.
         onSuccess: (record) =>
           runViewTransition('doc-open', () =>

@@ -61,6 +61,17 @@ describe.skipIf(!dbAvailable)('jobs API', () => {
     ).toBe(400)
   })
 
+  it('refuses an applied date in the future, but not one before it was saved', async () => {
+    const base = { position: 'Dev', company: 'Acme' }
+    expect((await call('POST', '/jobs', { ...base, dateApplied: '2099-01-01' })).statusCode).toBe(
+      400,
+    )
+    const old = await call('POST', '/jobs', { ...base, dateApplied: '2020-01-01' })
+    expect(old.statusCode).toBe(201)
+    const patch = await call('PATCH', `/jobs/${old.json().id}`, { dateApplied: '2099-01-01' })
+    expect(patch.statusCode).toBe(400)
+  })
+
   it('updates only the fields sent', async () => {
     const job = await addJob({ notes: 'Referral', salary: '4000 EUR' })
     const res = await call('PATCH', `/jobs/${job.id}`, {
