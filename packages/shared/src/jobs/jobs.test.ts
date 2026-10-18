@@ -59,3 +59,22 @@ describe('withStatus', () => {
     expect(job.dateApplied).toBeNull()
   })
 })
+
+describe('applied dates', () => {
+  const tomorrow = (days: number) =>
+    new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 10)
+
+  it('accepts a past date, also from before the job was saved', () => {
+    const input = { position: 'Dev', company: 'Acme', dateApplied: '2020-01-01' }
+    expect(CreateJobInputSchema.safeParse(input).success).toBe(true)
+    expect(UpdateJobInputSchema.safeParse({ dateApplied: '2020-01-01' }).success).toBe(true)
+  })
+
+  it('rejects an applied date in the future, but allows a time zone ahead', () => {
+    const create = (dateApplied: string) =>
+      CreateJobInputSchema.safeParse({ position: 'Dev', company: 'Acme', dateApplied }).success
+    expect(create(tomorrow(1))).toBe(true)
+    expect(create(tomorrow(3))).toBe(false)
+    expect(UpdateJobInputSchema.safeParse({ dateApplied: tomorrow(30) }).success).toBe(false)
+  })
+})

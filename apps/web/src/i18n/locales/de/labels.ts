@@ -52,5 +52,6 @@ export const labels: Messages['labels'] = {
   documentType: {
     cv: 'Lebenslauf',
     coverLetter: 'Anschreiben',
+    resignation: 'Kündigungsschreiben',
   },
 }

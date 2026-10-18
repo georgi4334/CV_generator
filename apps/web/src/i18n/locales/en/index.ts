@@ -14,6 +14,7 @@ import { letters } from './letters'
 import { nav } from './nav'
 import { newCv } from './newCv'
 import { renderer } from './renderer'
+import { resignation } from './resignation'
 import { share } from './share'
 import { welcome } from './welcome'
 
@@ -38,6 +39,7 @@ export const en = {
   renderer,
   newCv,
   letters,
+  resignation,
   ai,
   welcome,
 }

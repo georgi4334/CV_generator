@@ -38,6 +38,7 @@ export const renderer: Messages['renderer'] = {
   expires: 'Gültig bis',
   noExpiry: 'Unbefristet',
   yearOnly: 'Nur {{year}}',
+  hiddenPersonal: 'Ausgeblendet',
   clearDate: 'Leeren',
   chooseYear: 'Jahr wählen, {{year}}',
   previousYear: 'Vorheriges Jahr',

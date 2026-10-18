@@ -1,4 +1,4 @@
-import { FileUser, Link2, Mail } from 'lucide-react'
+import { DoorOpen, FileUser, Link2, Mail } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { DOCUMENT_TYPE_STYLES, JOB_STATUS_STYLES } from './badgeStyles'
 import { type DocumentType, type JobStatus, type JobType } from '@cv/shared'
@@ -26,14 +26,14 @@ export function DocumentTypeBadge({ type }: { type: DocumentType }) {
   const { t } = useTranslation()
   return (
     <span className={`${pill} ${DOCUMENT_TYPE_STYLES[type]}`}>
-      {t(type === 'cv' ? 'labels.documentType.cv' : 'labels.documentType.coverLetter')}
+      {t(`labels.documentType.${type}`)}
     </span>
   )
 }
 
 /**
  * A CV is a page with a person on it (teal); a cover letter is an envelope
- * (sky blue). Different in shape and colour, so a list can be scanned at a glance.
+ * (sky blue); a resignation letter is an open door (amber). Different in shape and colour, so a list can be scanned at a glance.
  */
 export function DocumentTypeIcon({
   type,
@@ -42,7 +42,7 @@ export function DocumentTypeIcon({
   type: DocumentType
   className?: string
 }) {
-  const Icon = type === 'cv' ? FileUser : Mail
+  const Icon = { cv: FileUser, coverLetter: Mail, resignation: DoorOpen }[type]
   return <Icon aria-hidden className={className} />
 }
 

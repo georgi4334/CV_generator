@@ -11,8 +11,9 @@ export const JOB_STATUS_STYLES: Record<JobStatus, string> = {
   no_answer: 'bg-zinc-200 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-400',
 }
 
-/** Colours of each document type, shared by its badge and its icon: teal for CVs, sky blue for letters. */
+/** Colours of each document type, shared by its badge and its icon: teal for CVs, sky blue for cover letters, amber for resignation letters. */
 export const DOCUMENT_TYPE_STYLES: Record<DocumentType, string> = {
   cv: 'bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300',
   coverLetter: 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300',
+  resignation: 'bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300',
 }

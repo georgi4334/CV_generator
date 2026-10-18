@@ -14,6 +14,8 @@ export const editor = {
     cv: 'This CV was changed in another tab or window. Your latest edits are not saved yet.',
     coverLetter:
       'This cover letter was changed in another tab or window. Your latest edits are not saved yet.',
+    resignation:
+      'This resignation letter was changed in another tab or window. Your latest edits are not saved yet.',
     loadOther: 'Load the other version',
     keepMine: 'Keep my version',
   },
@@ -25,6 +27,7 @@ export const editor = {
   printHint: 'In the print dialog, choose “Save as PDF” as the destination.',
   printTitle: 'Opens the print dialog: choose “Save as PDF”',
   zoom: {
+    group: 'Zoom controls',
     label: 'Page zoom',
     zoomIn: 'Zoom in',
     zoomOut: 'Zoom out',
@@ -53,6 +56,12 @@ export const editor = {
     noSectionsToRearrange: 'A cover letter has no sections to rearrange.',
     tailorOnCvs: 'Check & Tailor works on CVs. Open the linked CV to tailor it to the job.',
     historyOnCvs: 'Version history is available for CVs.',
+    noSectionsInResignation: 'A resignation letter has no sections to rearrange.',
+    tailorOnCvsOnly: 'Check & Tailor works on CVs.',
+    noTemplatesForResignation:
+      'A resignation letter is a formal letter, so there are no templates. Use Design & Font to change fonts and colours.',
+    noAiForResignation:
+      'The AI assistant writes CVs and cover letters. Fix Mistakes can proofread this letter.',
   },
   history: {
     versionName: 'Version name',

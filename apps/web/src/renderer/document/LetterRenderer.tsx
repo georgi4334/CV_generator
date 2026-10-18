@@ -28,7 +28,16 @@ function paragraphHint(P: Placeholders, index: number, count: number) {
   return index === 1 ? whyYou! : P.paragraph
 }
 
-function Paragraphs({ paragraphs, actions }: { paragraphs: string[]; actions?: LetterActions }) {
+/** The letter's paragraphs, editable in place; `hint` is the grey text of an empty one. */
+export function Paragraphs({
+  paragraphs,
+  actions,
+  hint,
+}: {
+  paragraphs: string[]
+  actions?: LetterActions
+  hint?: (index: number, count: number) => string
+}) {
   const P = usePlaceholders()
   const editor = useEditor()
   const { t } = useTranslation()
@@ -42,7 +51,9 @@ function Paragraphs({ paragraphs, actions }: { paragraphs: string[]; actions?: L
             <Field
               value={text}
               path={`paragraphs.${index}`}
-              placeholder={paragraphHint(P, index, paragraphs.length)}
+              placeholder={
+                hint ? hint(index, paragraphs.length) : paragraphHint(P, index, paragraphs.length)
+              }
               className="block"
               onEnter={actions ? () => actions.addParagraph(index) : undefined}
               onBackspaceEmpty={
@@ -56,7 +67,7 @@ function Paragraphs({ paragraphs, actions }: { paragraphs: string[]; actions?: L
         <button
           type="button"
           onClick={() => actions.addParagraph(paragraphs.length - 1)}
-          className="inline-flex w-fit items-center gap-1 rounded px-1 text-[0.85em] opacity-60 hover:bg-[var(--cv-hover)] hover:opacity-100"
+          className="inline-flex w-fit items-center gap-1 rounded px-1 text-[0.85em] hover:bg-[var(--cv-hover)]"
           style={{ color: 'var(--cv-accent-text)' }}
         >
           <Plus className="size-[1em]" aria-hidden /> {t('renderer.addParagraph')}
@@ -76,6 +87,8 @@ export function LetterRenderer({
   editor,
   actions,
   pageClassName,
+  hidePersonal = false,
+  staticLinks = false,
 }: {
   letter: CoverLetterDocument
   mode: RenderMode
@@ -83,6 +96,10 @@ export function LetterRenderer({
   editor?: EditorApi
   actions?: LetterActions
   pageClassName?: string
+  /** Blur the stand-ins of a share link that hides personal details. */
+  hidePersonal?: boolean
+  /** Draw links as plain text, for thumbnails that are themselves a link. */
+  staticLinks?: boolean
 }) {
   const { t } = useTranslation()
   const { design, header, recipient } = letter
@@ -100,6 +117,8 @@ export function LetterRenderer({
     inlineSkills: false,
     timeline: false,
     measuring: false,
+    hidePersonal,
+    staticLinks,
     editor: editor ?? null,
   }
 
@@ -114,7 +133,7 @@ export function LetterRenderer({
           >
             <div
               data-letter-page={design.pageSize}
-              className={`relative flex flex-col bg-paper ${pageClassName ?? ''}`}
+              className={`relative flex flex-col bg-paper wrap-anywhere ${pageClassName ?? ''}`}
               style={{
                 ...pageStyle(design, tokens),
                 ...backgroundStyle(design.background, design.accentColor),

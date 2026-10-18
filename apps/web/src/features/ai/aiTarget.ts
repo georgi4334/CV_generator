@@ -1,4 +1,4 @@
-import type { AiField, AiSuggestion, CvLanguage } from '@cv/shared'
+import type { AiField, AiSuggestion, CvLanguage, DocumentType } from '@cv/shared'
 import { createContext, useContext } from 'react'
 
 /** An experience or project entry the assistant can write bullets for. */
@@ -12,10 +12,11 @@ export interface BulletEntry {
 
 /**
  * What the AI panels need from the open document. The CV editor and the
- * cover-letter editor each provide one, so the panels work for both.
+ * cover-letter editor each provide one, so the panels work for both. A
+ * resignation letter provides one too, but only for Fix Mistakes.
  */
 export interface AiTarget {
-  kind: 'cv' | 'coverLetter'
+  kind: DocumentType
   language: CvLanguage
   /** The document's text as it is now. */
   fields: AiField[]

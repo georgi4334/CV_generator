@@ -47,6 +47,16 @@ describe('create new CV', () => {
     expect(await screen.findByDisplayValue('Designer CV')).toBeDefined()
   })
 
+  it('creates one CV when Create CV is clicked twice quickly', async () => {
+    renderRoute('/cvs/new?profession=designer&template=creative')
+    const button = screen.getByRole('button', { name: 'Create CV' })
+    fireEvent.click(button)
+    fireEvent.click(button)
+    await waitFor(() => expect(fake.current.cvs.size).toBeGreaterThan(0))
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    expect(fake.current.cvs.size).toBe(1)
+  })
+
   it('starts blank with a custom name and language', async () => {
     renderRoute('/cvs/new')
     fireEvent.click(screen.getByRole('button', { name: /^Healthcare/ }))

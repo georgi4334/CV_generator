@@ -11,9 +11,14 @@ export const share = {
     open: 'Open link',
     replace: 'Replace link',
     activeNote:
-      'The link always shows your latest saved changes, including your contact details. Replace link gives it a new address; the old one stops working.',
+      'The link always shows your latest saved changes. Replace link gives it a new address; the old one stops working.',
     inactiveNote:
       'The link is turned off and shows nothing. Turning it on again brings back the same address.',
+    hideLabel: 'Hide my personal details',
+    hideHint:
+      'For posting the link publicly (e.g. for feedback): your name, photo, email, phone, link and location are blurred, and the title is hidden. The real details never reach the page.',
+    hideCheck:
+      'Your other text (summary, experience) is shown as is, so check it for anything personal.',
     done: 'Done',
   },
   page: {
@@ -24,6 +29,10 @@ export const share = {
     loadErrorTitle: 'Could not load this document',
     downloadPdf: 'Download PDF',
     printTitle: 'Opens the print dialog: choose “Save as PDF”',
+    hiddenBanner: 'The owner hid their personal details on this link.',
+    untitledCv: 'Shared CV',
+    untitledLetter: 'Shared cover letter',
+    untitledResignation: 'Shared resignation letter',
     madeWith: 'Made with',
   },
 }

@@ -15,6 +15,8 @@ export const editor: Messages['editor'] = {
     cv: 'Dieser Lebenslauf wurde in einem anderen Tab oder Fenster geändert. Ihre letzten Änderungen sind noch nicht gespeichert.',
     coverLetter:
       'Dieses Anschreiben wurde in einem anderen Tab oder Fenster geändert. Ihre letzten Änderungen sind noch nicht gespeichert.',
+    resignation:
+      'Dieses Kündigungsschreiben wurde in einem anderen Tab oder Fenster geändert. Ihre letzten Änderungen sind noch nicht gespeichert.',
     loadOther: 'Andere Version laden',
     keepMine: 'Meine Version behalten',
   },
@@ -26,6 +28,7 @@ export const editor: Messages['editor'] = {
   printHint: 'Wählen Sie im Druckdialog „Als PDF speichern“ als Ziel.',
   printTitle: 'Öffnet den Druckdialog: „Als PDF speichern“ wählen',
   zoom: {
+    group: 'Zoom-Steuerung',
     label: 'Seitenzoom',
     zoomIn: 'Vergrößern',
     zoomOut: 'Verkleinern',
@@ -55,6 +58,12 @@ export const editor: Messages['editor'] = {
     tailorOnCvs:
       '„Prüfen & anpassen“ funktioniert bei Lebensläufen. Öffnen Sie den verknüpften Lebenslauf, um ihn auf die Stelle zuzuschneiden.',
     historyOnCvs: 'Der Versionsverlauf ist für Lebensläufe verfügbar.',
+    noSectionsInResignation: 'Ein Kündigungsschreiben hat keine Abschnitte zum Anordnen.',
+    tailorOnCvsOnly: '„Prüfen & Anpassen“ funktioniert für Lebensläufe.',
+    noTemplatesForResignation:
+      'Ein Kündigungsschreiben ist ein formeller Brief, daher gibt es keine Vorlagen. Schriften und Farben ändern Sie unter „Design & Schrift“.',
+    noAiForResignation:
+      'Der KI-Assistent schreibt Lebensläufe und Anschreiben. „Fehler korrigieren“ kann dieses Schreiben prüfen.',
   },
   history: {
     versionName: 'Versionsname',

@@ -12,9 +12,14 @@ export const share: Messages['share'] = {
     open: 'Link öffnen',
     replace: 'Link ersetzen',
     activeNote:
-      'Der Link zeigt immer Ihre zuletzt gespeicherten Änderungen, einschließlich Ihrer Kontaktdaten. „Link ersetzen“ gibt ihm eine neue Adresse; die alte funktioniert nicht mehr.',
+      'Der Link zeigt immer Ihre zuletzt gespeicherten Änderungen. „Link ersetzen“ gibt ihm eine neue Adresse; die alte funktioniert nicht mehr.',
     inactiveNote:
       'Der Link ist ausgeschaltet und zeigt nichts an. Beim erneuten Einschalten gilt wieder dieselbe Adresse.',
+    hideLabel: 'Meine persönlichen Daten ausblenden',
+    hideHint:
+      'Zum öffentlichen Teilen des Links (z. B. für Feedback): Name, Foto, E-Mail, Telefon, Link und Ort werden unscharf, der Titel wird ausgeblendet. Die echten Daten erreichen die Seite nie.',
+    hideCheck:
+      'Ihr übriger Text (Profil, Berufserfahrung) wird unverändert angezeigt – prüfen Sie ihn auf persönliche Angaben.',
     done: 'Fertig',
   },
   page: {
@@ -25,6 +30,10 @@ export const share: Messages['share'] = {
     loadErrorTitle: 'Dieses Dokument konnte nicht geladen werden',
     downloadPdf: 'PDF herunterladen',
     printTitle: 'Öffnet den Druckdialog: „Als PDF speichern“ wählen',
+    hiddenBanner: 'Der Besitzer hat seine persönlichen Daten in diesem Link ausgeblendet.',
+    untitledCv: 'Geteilter Lebenslauf',
+    untitledLetter: 'Geteiltes Anschreiben',
+    untitledResignation: 'Geteiltes Kündigungsschreiben',
     madeWith: 'Erstellt mit',
   },
 }

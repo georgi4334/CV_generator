@@ -22,6 +22,7 @@ import { errorMessage } from '@/shared/api/errorMessage'
 import { useCvList } from '@/features/cv-editor/queries'
 import { useDocumentActions } from './documentActions'
 import { useCoverLetterList } from '@/features/cover-letters/queries'
+import { useResignationList } from '@/features/resignation/queries'
 import { formatDate } from '@/shared/lib/format'
 import {
   DOCUMENT_SUBTABS,
@@ -29,6 +30,7 @@ import {
   isDocumentSubtab,
   NEW_CV_PATH,
   NEW_LETTER_PATH,
+  NEW_RESIGNATION_PATH,
   type DocumentSubtab,
 } from '@/shared/lib/paths'
 import { useJobs } from '@/features/jobs/queries'
@@ -40,6 +42,25 @@ import { showToast, type ToastTone } from '@/shared/stores/toasts'
 type SortKey = 'updated' | 'created' | 'name' | 'type'
 
 const SORTS: SortKey[] = ['updated', 'created', 'name', 'type']
+
+/** The confirmation texts of deleting one document, per type. */
+const DELETE_TITLE = {
+  cv: 'documents.confirm.deleteCvTitle',
+  coverLetter: 'documents.confirm.deleteLetterTitle',
+  resignation: 'documents.confirm.deleteResignationTitle',
+} as const
+const DELETE_MESSAGE = {
+  cv: 'documents.confirm.deleteCvMessage',
+  coverLetter: 'documents.confirm.deleteLetterMessage',
+  resignation: 'documents.confirm.deleteResignationMessage',
+} as const
+
+/** The document type each tab lists (the "All documents" tab lists every type). */
+const DOCUMENT_TYPE_OF_SUBTAB: Record<Exclude<DocumentSubtab, 'all'>, DocumentType> = {
+  cvs: 'cv',
+  'cover-letters': 'coverLetter',
+  resignations: 'resignation',
+}
 
 const compare: Record<SortKey, (a: DocumentSummary, b: DocumentSummary) => number> = {
   updated: (a, b) => b.updatedAt.localeCompare(a.updatedAt),
@@ -66,6 +87,13 @@ function CreateNewButton({ subtab }: { subtab: DocumentSubtab }) {
       </Link>
     )
   }
+  if (subtab === 'resignations') {
+    return (
+      <Link to={NEW_RESIGNATION_PATH} className={primaryButton}>
+        <Plus className="size-4" /> {t('documents.createResignation')}
+      </Link>
+    )
+  }
   return (
     <div className="relative">
       <button
@@ -83,6 +111,9 @@ function CreateNewButton({ subtab }: { subtab: DocumentSubtab }) {
           </Link>
           <Link role="menuitem" to={NEW_LETTER_PATH} className="menu-item">
             {t('labels.documentType.coverLetter')}
+          </Link>
+          <Link role="menuitem" to={NEW_RESIGNATION_PATH} className="menu-item">
+            {t('labels.documentType.resignation')}
           </Link>
         </div>
       )}
@@ -209,6 +240,7 @@ export function DocumentsPage() {
   const { subtab } = useParams()
   const cvs = useCvList()
   const letters = useCoverLetterList()
+  const resignations = useResignationList()
   const actions = useDocumentActions()
   const { remove } = actions
   const jobs = useJobs().data ?? []
@@ -221,22 +253,19 @@ export function DocumentsPage() {
 
   const documents = useMemo(() => {
     if (!isDocumentSubtab(subtab)) return []
-    const all = [...(cvs.data ?? []), ...(letters.data ?? [])]
+    const all = [...(cvs.data ?? []), ...(letters.data ?? []), ...(resignations.data ?? [])]
     const needle = query.trim().toLowerCase()
     return all
-      .filter(
-        (doc) =>
-          subtab === 'all' || (subtab === 'cvs' ? doc.type === 'cv' : doc.type === 'coverLetter'),
-      )
+      .filter((doc) => subtab === 'all' || DOCUMENT_TYPE_OF_SUBTAB[subtab] === doc.type)
       .filter((doc) => !needle || doc.title.toLowerCase().includes(needle))
       .sort(compare[sort])
-  }, [cvs.data, letters.data, subtab, query, sort])
+  }, [cvs.data, letters.data, resignations.data, subtab, query, sort])
 
   if (!isDocumentSubtab(subtab)) return <Navigate to="/documents/all" replace />
 
   const selectable = documents
-  const loading = cvs.isPending || letters.isPending
-  const loadError = cvs.error ?? letters.error
+  const loading = cvs.isPending || letters.isPending || resignations.isPending
+  const loadError = cvs.error ?? letters.error ?? resignations.error
   const selectedDocs = selectable.filter((doc) => selected.has(doc.id))
   const allSelected = selectable.length > 0 && selectedDocs.length === selectable.length
   const toggle = (id: string) =>
@@ -492,21 +521,12 @@ export function DocumentsPage() {
         <ConfirmDialog
           title={
             toDelete.length === 1
-              ? t(
-                  toDelete[0]!.type === 'cv'
-                    ? 'documents.confirm.deleteCvTitle'
-                    : 'documents.confirm.deleteLetterTitle',
-                )
+              ? t(DELETE_TITLE[toDelete[0]!.type])
               : t('documents.confirm.deleteManyTitle', { count: toDelete.length })
           }
           message={
             toDelete.length === 1
-              ? t(
-                  toDelete[0]!.type === 'cv'
-                    ? 'documents.confirm.deleteCvMessage'
-                    : 'documents.confirm.deleteLetterMessage',
-                  { title: toDelete[0]!.title },
-                )
+              ? t(DELETE_MESSAGE[toDelete[0]!.type], { title: toDelete[0]!.title })
               : t('documents.confirm.deleteManyMessage')
           }
           confirmLabel={t('common.delete')}

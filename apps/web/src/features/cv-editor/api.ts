@@ -9,6 +9,7 @@ import {
   type CreateCvInput,
   type CvRecord,
   type UpdateCvInput,
+  type UpdateShareInput,
 } from '@cv/shared'
 import { z } from 'zod'
 import { api } from '@/shared/api/client'
@@ -59,9 +60,9 @@ export const cvApi = {
     const { data } = await api.get(`/cvs/${id}/share`)
     return ShareStateSchema.parse(data)
   },
-  /** The first call creates the link; later calls turn it on or off. */
-  async setShare(id: string, isActive: boolean) {
-    const { data } = await api.put(`/cvs/${id}/share`, { isActive })
+  /** The first call creates the link; later calls change what is sent (on/off, hidden details). */
+  async setShare(id: string, change: UpdateShareInput) {
+    const { data } = await api.put(`/cvs/${id}/share`, change)
     return ShareStateSchema.parse(data)
   },
   /** A new address; the old link stops working. */

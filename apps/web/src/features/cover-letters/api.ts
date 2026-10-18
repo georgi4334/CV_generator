@@ -5,6 +5,7 @@ import {
   type CoverLetterRecord,
   type CreateCoverLetterInput,
   type UpdateCoverLetterInput,
+  type UpdateShareInput,
 } from '@cv/shared'
 import { z } from 'zod'
 import { api } from '@/shared/api/client'
@@ -38,8 +39,8 @@ export const coverLetterApi = {
     const { data } = await api.get(`/cover-letters/${id}/share`)
     return ShareStateSchema.parse(data)
   },
-  async setShare(id: string, isActive: boolean) {
-    const { data } = await api.put(`/cover-letters/${id}/share`, { isActive })
+  async setShare(id: string, change: UpdateShareInput) {
+    const { data } = await api.put(`/cover-letters/${id}/share`, change)
     return ShareStateSchema.parse(data)
   },
   async resetShare(id: string) {

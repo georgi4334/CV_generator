@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { CvRenderer, LetterRenderer } from '@/renderer'
+import { CvRenderer, LetterRenderer, ResignationRenderer } from '@/renderer'
 import { usePrintJob, type PrintJob } from './printCv'
 
 const nextFrame = () =>
@@ -58,9 +58,11 @@ function PrintView({ job }: { job: PrintJob }) {
     <div ref={ref} className="print-root" data-testid="print-root" aria-hidden>
       <style>{`@page { size: ${size} portrait; margin: 0; }`}</style>
       {doc.kind === 'cv' ? (
-        <CvRenderer cv={doc.cv} mode="preview" />
+        <CvRenderer cv={doc.cv} mode="preview" hidePersonal={job.hidePersonal} />
+      ) : doc.kind === 'coverLetter' ? (
+        <LetterRenderer letter={doc.letter} mode="preview" hidePersonal={job.hidePersonal} />
       ) : (
-        <LetterRenderer letter={doc.letter} mode="preview" />
+        <ResignationRenderer letter={doc.letter} mode="preview" hidePersonal={job.hidePersonal} />
       )}
     </div>
   )

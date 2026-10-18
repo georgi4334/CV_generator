@@ -13,6 +13,20 @@ test('a CV is created, edited, saved and shared', async ({ page, browser }) => {
   await page.reload()
   await expect(page.getByRole('document', { name: 'CV' })).toContainText('Ada Lovelace')
 
+  // Entry actions (move, duplicate, delete) are reachable with the keyboard, not only by hovering.
+  await page
+    .getByRole('document', { name: 'CV' })
+    .getByRole('textbox', { name: /^Job title|Title/ })
+    .first()
+    .focus()
+  let reached = false
+  for (let i = 0; i < 12 && !reached; i++) {
+    await page.keyboard.press('Shift+Tab')
+    reached = await page.evaluate(() => document.activeElement?.ariaLabel === 'Duplicate entry')
+  }
+  expect(reached, 'Duplicate entry reachable by keyboard').toBe(true)
+  await page.keyboard.press('Escape')
+
   // The theme can be changed while editing: the top bar's menu opens over the page.
   for (const [choice, dark] of [
     ['Dark', true],
@@ -26,13 +40,46 @@ test('a CV is created, edited, saved and shared', async ({ page, browser }) => {
   // Share it and open the link signed out.
   await page.getByRole('button', { name: 'Share link' }).click()
   const dialog = page.getByRole('dialog')
-  await dialog.getByRole('switch').click()
+  await dialog.getByRole('switch', { name: 'Share a read-only link' }).click()
   const link = await dialog.getByRole('textbox').inputValue()
   expect(link).toContain('/s/')
   const visitor = await browser.newPage()
   await visitor.goto(link)
   await expect(visitor.getByRole('document', { name: 'CV' })).toContainText('Ada Lovelace')
+
+  // Hiding personal details: the visitor gets stand-ins, never the real name or title.
+  await dialog.getByRole('switch', { name: 'Hide my personal details' }).click()
+  await expect(dialog.getByRole('switch', { name: 'Hide my personal details' })).toBeChecked()
+  const response = visitor.waitForResponse((r) => r.url().includes('/api/shared/'))
+  await visitor.reload()
+  const body = await (await response).text()
+  expect(body).not.toContain('Ada Lovelace')
+  expect(body).not.toContain('Portfolio CV')
+  await expect(
+    visitor.getByText('The owner hid their personal details on this link.'),
+  ).toBeVisible()
+  await expect(visitor.getByRole('heading', { name: 'Shared CV' })).toBeVisible()
+  await expect(visitor.locator('body')).not.toContainText('Ada Lovelace')
   await visitor.close()
+
+  // A resignation letter is created from Documents only, filled in from this CV.
+  await page.goto('/')
+  await expect(page.getByRole('link', { name: /resignation/i })).toHaveCount(0)
+  await page.goto('/documents/all')
+  await page.getByRole('button', { name: 'Create new' }).click()
+  await page.getByRole('menuitem', { name: 'Resignation letter' }).click()
+  await page.getByLabel(/Fill in from a CV/).selectOption({ label: 'Portfolio CV' })
+  await expect(page.getByRole('textbox', { name: 'Name', exact: true })).toHaveValue('Ada Lovelace')
+  await page.getByRole('textbox', { name: 'Company name' }).fill('Analytical Engines Ltd')
+  await page.getByRole('textbox', { name: 'Contact name' }).fill('Charles Babbage')
+  await page.getByRole('button', { name: 'Create resignation letter' }).click()
+  const letter = page.getByRole('document', { name: 'Resignation letter' })
+  await expect(letter).toContainText('Dear Charles Babbage,')
+  await expect(letter).toContainText('Analytical Engines Ltd')
+  await expect(letter).toContainText('Ada Lovelace')
+  await expect(page.getByText('Saved', { exact: true })).toBeVisible({ timeout: 10_000 })
+  await page.goto('/documents/resignations')
+  await expect(page.getByRole('link', { name: /Analytical Engines Ltd/ })).toBeVisible()
 
   // It is listed under Documents.
   await page.goto('/documents/cvs')

@@ -1,5 +1,5 @@
 import { APP_NAME } from '@cv/shared'
-import { Download } from 'lucide-react'
+import { Download, EyeOff } from 'lucide-react'
 import { useEffect, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router'
@@ -7,12 +7,19 @@ import { FitToWidth } from '@/shared/ui/FitToWidth'
 import { LogoMark } from '@/shared/ui/Logo'
 import { EditorLoading } from '@/shared/ui/LoadStates'
 import { primaryButton, secondaryButton } from '@/shared/ui/PageHeader'
-import { CvRenderer, LetterRenderer } from '@/renderer'
+import { CvRenderer, LetterRenderer, ResignationRenderer } from '@/renderer'
 import { PAGE_SIZE_PX } from '@/renderer/templates/tokens'
 import { toApiRequestError } from '@/shared/api/client'
 import { errorMessage } from '@/shared/api/errorMessage'
 import { useSharedDocument } from './queries'
 import { printDocument } from '@/features/print/printCv'
+
+/** The title of a shared document that hides its real title, per type. */
+const UNTITLED = {
+  cv: 'share.page.untitledCv',
+  coverLetter: 'share.page.untitledLetter',
+  resignation: 'share.page.untitledResignation',
+} as const
 
 /** Keeps shared CVs out of search results while the page is open. */
 function useNoIndex() {
@@ -51,7 +58,10 @@ export function SharedDocumentPage() {
   const { slug = '' } = useParams()
   const query = useSharedDocument(slug)
   useNoIndex()
-  useDocumentTitle(query.data?.title)
+  const data = query.data
+  // A link that hides personal details has no title (titles often hold the name).
+  const title = data ? data.title || t(UNTITLED[data.type]) : ''
+  useDocumentTitle(title || undefined)
 
   if (query.isPending) {
     return <EditorLoading />
@@ -79,7 +89,7 @@ export function SharedDocumentPage() {
   }
 
   const shared = query.data
-  const { title } = shared
+  const { hidePersonal } = shared
   const pageSize = shared.document.design.pageSize
   return (
     <div className="min-h-screen bg-muted-strong text-fg">
@@ -93,8 +103,11 @@ export function SharedDocumentPage() {
               printDocument(
                 shared.type === 'cv'
                   ? { kind: 'cv', cv: shared.document }
-                  : { kind: 'coverLetter', letter: shared.document },
+                  : shared.type === 'coverLetter'
+                    ? { kind: 'coverLetter', letter: shared.document }
+                    : { kind: 'resignation', letter: shared.document },
                 title,
+                { hidePersonal },
               )
             }
             className={primaryButton}
@@ -108,17 +121,40 @@ export function SharedDocumentPage() {
         </div>
       </header>
       <main className="px-4 py-6 sm:px-6 sm:py-8">
+        {hidePersonal && (
+          <p className="mx-auto mb-4 flex w-fit items-center gap-2 rounded-pill border border-line-strong bg-surface px-3 py-1.5 text-xs text-fg-soft sm:text-sm">
+            <EyeOff className="size-4 shrink-0" aria-hidden />
+            {t('share.page.hiddenBanner')}
+          </p>
+        )}
         <FitToWidth width={PAGE_SIZE_PX[pageSize].width}>
           {shared.type === 'cv' ? (
-            <CvRenderer cv={shared.document} mode="preview" pageClassName="shadow-paper" />
+            <CvRenderer
+              cv={shared.document}
+              mode="preview"
+              pageClassName="shadow-paper"
+              hidePersonal={hidePersonal}
+            />
+          ) : shared.type === 'coverLetter' ? (
+            <LetterRenderer
+              letter={shared.document}
+              mode="preview"
+              pageClassName="shadow-paper"
+              hidePersonal={hidePersonal}
+            />
           ) : (
-            <LetterRenderer letter={shared.document} mode="preview" pageClassName="shadow-paper" />
+            <ResignationRenderer
+              letter={shared.document}
+              mode="preview"
+              pageClassName="shadow-paper"
+              hidePersonal={hidePersonal}
+            />
           )}
         </FitToWidth>
       </main>
-      <footer className="pb-8 text-center text-xs text-fg-muted">
+      <footer className="pb-8 text-center text-xs text-fg-soft">
         {t('share.page.madeWith')}{' '}
-        <Link to="/" className="font-medium text-brand-fg hover:underline">
+        <Link to="/" className="font-medium text-brand-fg-strong hover:underline">
           {APP_NAME}
         </Link>
       </footer>

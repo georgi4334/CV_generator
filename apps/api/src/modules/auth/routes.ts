@@ -27,6 +27,7 @@ import type { Database } from '../../db/client'
 import {
   authTokens,
   coverLetters,
+  resignations,
   cvs,
   jobs,
   sessions,
@@ -189,6 +190,7 @@ export async function authRoutes(app: FastifyInstance, opts: AuthRouteOptions) {
           const move = { userId: user!.id }
           await tx.update(cvs).set(move).where(eq(cvs.userId, dev.id))
           await tx.update(coverLetters).set(move).where(eq(coverLetters.userId, dev.id))
+          await tx.update(resignations).set(move).where(eq(resignations.userId, dev.id))
           await tx.update(jobs).set(move).where(eq(jobs.userId, dev.id))
           await tx.update(uploads).set(move).where(eq(uploads.userId, dev.id))
           await tx.delete(users).where(eq(users.id, dev.id))

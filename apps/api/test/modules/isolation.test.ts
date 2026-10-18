@@ -56,6 +56,22 @@ describe.skipIf(!dbAvailable)('accounts stay apart', () => {
     expect((await a('GET', `/cover-letters/${letter.id}`)).json().title).toBe('Private letter')
   })
 
+  it('resignation letters: only your own', async () => {
+    const { a, b } = await setup()
+    const letter = (await a('POST', '/resignations', { title: 'Private resignation' })).json()
+    expect((await b('GET', '/resignations')).json()).toEqual([])
+    for (const [method, url, payload] of [
+      ['GET', `/resignations/${letter.id}`],
+      ['PATCH', `/resignations/${letter.id}`, { title: 'Hacked', revision: letter.revision }],
+      ['DELETE', `/resignations/${letter.id}`],
+      ['POST', `/resignations/${letter.id}/duplicate`],
+      ['PUT', `/resignations/${letter.id}/share`, { isActive: true }],
+    ] as const) {
+      expect((await b(method, url, payload)).statusCode, `${method} ${url}`).toBe(404)
+    }
+    expect((await a('GET', `/resignations/${letter.id}`)).json().title).toBe('Private resignation')
+  })
+
   it('jobs: only your own, and a job cannot link to someone else’s CV', async () => {
     const { a, b } = await setup()
     const job = (await a('POST', '/jobs', { position: 'Dev', company: 'Acme' })).json()

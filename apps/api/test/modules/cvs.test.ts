@@ -42,6 +42,17 @@ describe.skipIf(!dbAvailable)('CV API', () => {
     expect(res.json().error.details.length).toBeGreaterThan(0)
   })
 
+  it('refuses header text longer than the page can hold', async () => {
+    const cv = await create()
+    const header = { ...cv.document.header, phone: '0'.repeat(5000) }
+    const res = await call('PATCH', `/cvs/${cv.id}`, {
+      revision: 1,
+      document: { ...cv.document, header },
+    })
+    expect(res.statusCode).toBe(400)
+    expect(res.json().error.code).toBe('validation_error')
+  })
+
   it('saves changes and increments the revision', async () => {
     const cv = await create()
     const document = { ...cv.document, header: { ...cv.document.header, name: 'Maria' } }

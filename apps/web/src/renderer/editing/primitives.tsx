@@ -1,4 +1,4 @@
-import { isBefore } from '@cv/shared'
+import { HIDDEN_PERSONAL_PATHS, isBefore } from '@cv/shared'
 import { useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEditor, useRender } from '@/renderer/context'
@@ -38,7 +38,8 @@ export function Field({
   onEnter,
   onBackspaceEmpty,
 }: FieldProps) {
-  const { mode } = useRender()
+  const { t } = useTranslation()
+  const { mode, hidePersonal } = useRender()
   const editor = useEditor()
   const textClass = `${multiline ? 'whitespace-pre-wrap' : ''} ${className ?? ''}`
 
@@ -57,6 +58,16 @@ export function Field({
       />
     )
   }
+  // A stand-in from the server (the real value never reached the page): blurred, read as "hidden".
+  if (value && hidePersonal && path && HIDDEN_PERSONAL_PATHS.has(path))
+    return (
+      <span className={textClass} style={style} data-hidden-personal>
+        <span aria-hidden className="cv-hidden-personal">
+          {value}
+        </span>
+        <span className="sr-only">{t('renderer.hiddenPersonal')}</span>
+      </span>
+    )
   if (value)
     return (
       <span className={textClass} style={style}>

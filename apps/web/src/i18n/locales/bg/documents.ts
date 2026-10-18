@@ -8,9 +8,11 @@ export const documents: Messages['documents'] = {
     all: 'Всички документи',
     'cover-letters': 'Мотивационни писма',
     cvs: 'CV-та',
+    resignations: 'Заявления за напускане',
   },
   createCv: 'Ново CV',
   createLetter: 'Ново мотивационно писмо',
+  createResignation: 'Ново заявление за напускане',
   createNew: 'Създаване',
   actionsFor: 'Действия за {{title}}',
   menu: {
@@ -68,11 +70,13 @@ export const documents: Messages['documents'] = {
   confirm: {
     deleteCvTitle: 'Да се изтрие ли това CV?',
     deleteLetterTitle: 'Да се изтрие ли това мотивационно писмо?',
+    deleteResignationTitle: 'Да се изтрие ли това заявление за напускане?',
     deleteManyTitle_one: 'Да се изтрият ли {{count}} документа?',
     deleteManyTitle_other: 'Да се изтрият ли {{count}} документа?',
     deleteCvMessage:
       '„{{title}}“ и историята на версиите му ще бъдат изтрити. Действието е необратимо.',
     deleteLetterMessage: '„{{title}}“ ще бъде изтрито. Действието е необратимо.',
+    deleteResignationMessage: '„{{title}}“ ще бъде изтрито. Действието е необратимо.',
     deleteManyMessage:
       'Те ще бъдат изтрити, а CV-тата – заедно с историята на версиите. Действието е необратимо.',
   },

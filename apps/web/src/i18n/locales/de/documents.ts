@@ -8,9 +8,11 @@ export const documents: Messages['documents'] = {
     all: 'Alle Dokumente',
     'cover-letters': 'Anschreiben',
     cvs: 'Lebensläufe',
+    resignations: 'Kündigungsschreiben',
   },
   createCv: 'Neuer Lebenslauf',
   createLetter: 'Neues Anschreiben',
+  createResignation: 'Neues Kündigungsschreiben',
   createNew: 'Neu erstellen',
   actionsFor: 'Aktionen für {{title}}',
   menu: {
@@ -68,11 +70,14 @@ export const documents: Messages['documents'] = {
   confirm: {
     deleteCvTitle: 'Diesen Lebenslauf löschen?',
     deleteLetterTitle: 'Dieses Anschreiben löschen?',
+    deleteResignationTitle: 'Dieses Kündigungsschreiben löschen?',
     deleteManyTitle_one: '{{count}} Dokumente löschen?',
     deleteManyTitle_other: '{{count}} Dokumente löschen?',
     deleteCvMessage:
       '„{{title}}“ und der Versionsverlauf werden gelöscht. Das kann nicht rückgängig gemacht werden.',
     deleteLetterMessage: '„{{title}}“ wird gelöscht. Das kann nicht rückgängig gemacht werden.',
+    deleteResignationMessage:
+      '„{{title}}“ wird gelöscht. Das kann nicht rückgängig gemacht werden.',
     deleteManyMessage:
       'Die Dokumente werden gelöscht, Lebensläufe samt Versionsverlauf. Das kann nicht rückgängig gemacht werden.',
   },

@@ -1,9 +1,10 @@
+import type { DocumentType } from '@cv/shared'
 import { useTranslation } from 'react-i18next'
 import { useEditorUi } from '@/features/cv-editor/state/editorUi'
 import { ALL_TOOLS, toolUnavailable } from './tools'
 
 /** Phones and small tablets: the editor's tools as a tab bar at the bottom of the screen. */
-export function EditorToolbar({ kind }: { kind: 'cv' | 'coverLetter' }) {
+export function EditorToolbar({ kind }: { kind: DocumentType }) {
   const { t } = useTranslation()
   const { activePanel, togglePanel, notify } = useEditorUi()
   return (

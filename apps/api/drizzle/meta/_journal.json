@@ -50,6 +50,20 @@
       "when": 1792162895312,
       "tag": "0006_user_locale",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792299800635,
+      "tag": "0007_share_hide_personal",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792343546971,
+      "tag": "0008_resignations",
+      "breakpoints": true
     }
   ]
 }

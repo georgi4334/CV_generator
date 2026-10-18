@@ -71,6 +71,11 @@
 @utility btn-ghost {
   @apply text-fg-soft hover:bg-glass-hover hover:text-fg hover:shadow-btn-glass;
 }
+/* A text link or control with a hit area of at least 24px (44px on touch screens). */
+@utility tap-target {
+  @apply inline-flex min-h-6 items-center pointer-coarse:min-h-touch;
+}
+
 /* Square icon-only button; at least a finger's size on touch screens. */
 @utility btn-icon {
   @apply inline-flex items-center justify-center rounded-control p-2 text-fg-muted transition-[background-color,box-shadow,color] duration-200 hover:bg-glass-hover hover:text-fg hover:shadow-btn-glass disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:shadow-none pointer-coarse:min-h-touch pointer-coarse:min-w-touch;
@@ -246,6 +251,24 @@
     * {
       scrollbar-width: thin;
       scrollbar-color: var(--color-scrollbar) transparent;
+    }
+  }
+}
+
+/* ----- Checkboxes ----- */
+/* Big enough to hit: 18px, and a finger's size on touch screens. */
+@layer base {
+  input[type='checkbox'] {
+    width: 1.125rem;
+    height: 1.125rem;
+    flex-shrink: 0;
+    cursor: pointer;
+    accent-color: var(--color-brand);
+  }
+  @media (pointer: coarse) {
+    input[type='checkbox'] {
+      width: 1.5rem;
+      height: 1.5rem;
     }
   }
 }

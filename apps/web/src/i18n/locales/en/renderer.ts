@@ -37,6 +37,7 @@ export const renderer = {
   expires: 'Expires',
   noExpiry: 'No expiry',
   yearOnly: '{{year}} only',
+  hiddenPersonal: 'Hidden',
   clearDate: 'Clear',
   chooseYear: 'Choose year, {{year}}',
   previousYear: 'Previous year',

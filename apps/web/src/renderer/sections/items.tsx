@@ -381,7 +381,7 @@ const linkHref = (link: string) =>
 function CredentialLink({ link, refs }: { link: string; refs: ItemRef }) {
   const P = usePlaceholders()
   const editor = useEditor()
-  const { mode } = useRender()
+  const { mode, staticLinks } = useRender()
   const row = 'mt-[0.15em] flex min-w-0 items-center gap-[0.35em] text-[0.85em]'
   const icon = <Link2 className="size-[1em] shrink-0" aria-hidden />
 
@@ -394,6 +394,13 @@ function CredentialLink({ link, refs }: { link: string; refs: ItemRef }) {
     )
   }
   if (!link.trim()) return null
+  if (staticLinks)
+    return (
+      <span className={row} style={accent}>
+        {icon}
+        <span className="truncate">{displayLink(link)}</span>
+      </span>
+    )
   return (
     <a
       href={linkHref(link)}

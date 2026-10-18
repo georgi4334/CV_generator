@@ -5,13 +5,14 @@ import { Link } from 'react-router'
 import { DocumentTypeBadge, SharedBadge } from '@/shared/ui/Badges'
 import { JOB_STATUS_STYLES } from '@/shared/ui/badgeStyles'
 import { PageHeader, primaryButton, secondaryButton } from '@/shared/ui/PageHeader'
-import { CvThumbnail, LetterThumbnail } from '@/renderer'
+import { CvThumbnail, LetterThumbnail, ResignationThumbnail } from '@/renderer'
 import { statusChange } from '@/features/jobs/jobHelpers'
 import { errorMessage } from '@/shared/api/errorMessage'
 import { useCv, useCvList } from '@/features/cv-editor/queries'
 import { formatDate, localToday } from '@/shared/lib/format'
 import { useJobs, useUpdateJob } from '@/features/jobs/queries'
 import { useCoverLetter, useCoverLetterList } from '@/features/cover-letters/queries'
+import { useResignation, useResignationList } from '@/features/resignation/queries'
 import { editPath, NEW_CV_PATH, NEW_LETTER_PATH } from '@/shared/lib/paths'
 import { remindersFor } from './reminders'
 import { JobInsights } from './JobInsights'
@@ -34,6 +35,7 @@ const RECENT_PLACEHOLDERS = RECENT_COUNT
 function DocumentThumbnail({ doc }: { doc: DocumentSummary }) {
   const cv = useCv(doc.type === 'cv' ? doc.id : undefined).data
   const letter = useCoverLetter(doc.type === 'coverLetter' ? doc.id : undefined).data
+  const resignation = useResignation(doc.type === 'resignation' ? doc.id : undefined).data
   // The page zooms open from here, and shrinks back here when closed.
   const transitionStyle = useDocTransitionStyle(doc.id)
   return (
@@ -42,6 +44,8 @@ function DocumentThumbnail({ doc }: { doc: DocumentSummary }) {
         <CvThumbnail cv={cv.document} width={THUMBNAIL_WIDTH} />
       ) : letter ? (
         <LetterThumbnail letter={letter.document} width={THUMBNAIL_WIDTH} />
+      ) : resignation ? (
+        <ResignationThumbnail letter={resignation.document} width={THUMBNAIL_WIDTH} />
       ) : (
         <ThumbnailSkeleton />
       )}
@@ -80,7 +84,7 @@ function RecentDocuments({ docs, loading }: { docs: DocumentSummary[]; loading: 
         <h2 id="recent-heading" className="font-semibold">
           {t('dashboard.recent.heading')}
         </h2>
-        <Link to="/documents" className="text-sm text-brand-fg hover:underline">
+        <Link to="/documents" className="tap-target text-sm text-brand-fg hover:underline">
           {t('dashboard.recent.viewAll')}
         </Link>
       </div>
@@ -156,7 +160,7 @@ function JobPipeline({ jobs }: { jobs: Job[] }) {
           </li>
         ))}
       </ul>
-      <Link to="/jobs" className="mt-3 inline-block text-sm text-brand-fg hover:underline">
+      <Link to="/jobs" className="tap-target mt-3 text-sm text-brand-fg hover:underline">
         {t('dashboard.pipeline.allJobs')}
       </Link>
     </section>
@@ -275,10 +279,11 @@ export function DashboardPage() {
   const { t } = useTranslation()
   const cvs = useCvList()
   const letters = useCoverLetterList()
+  const resignations = useResignationList()
   const jobsQuery = useJobs()
   const jobs = jobsQuery.data ?? []
   const today = localToday()
-  const recent = [...(cvs.data ?? []), ...(letters.data ?? [])]
+  const recent = [...(cvs.data ?? []), ...(letters.data ?? []), ...(resignations.data ?? [])]
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
     .slice(0, RECENT_COUNT)
 
@@ -302,7 +307,10 @@ export function DashboardPage() {
       </section>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <RecentDocuments docs={recent} loading={cvs.isPending || letters.isPending} />
+        <RecentDocuments
+          docs={recent}
+          loading={cvs.isPending || letters.isPending || resignations.isPending}
+        />
         {jobsQuery.isError ? (
           <JobCardsError error={jobsQuery.error} onRetry={() => void jobsQuery.refetch()} />
         ) : jobsQuery.isPending ? (

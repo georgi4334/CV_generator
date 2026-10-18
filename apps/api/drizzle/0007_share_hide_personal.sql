@@ -1,0 +1,1 @@
+ALTER TABLE "share_links" ADD COLUMN "hide_personal" boolean DEFAULT false NOT NULL;

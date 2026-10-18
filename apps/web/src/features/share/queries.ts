@@ -1,28 +1,32 @@
-import type { DocumentSummary, DocumentType, ShareState } from '@cv/shared'
+import type { DocumentSummary, DocumentType, ShareState, UpdateShareInput } from '@cv/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { coverLetterApi } from '@/features/cover-letters/api'
 import { cvApi } from '@/features/cv-editor/api'
 import { cvKeys } from '@/features/cv-editor/queries'
 import { letterKeys } from '@/features/cover-letters/queries'
+import { resignationApi } from '@/features/resignation/api'
+import { resignationKeys } from '@/features/resignation/queries'
 
-const SHARE_API = { cv: cvApi, coverLetter: coverLetterApi }
+const SHARE_API = { cv: cvApi, coverLetter: coverLetterApi, resignation: resignationApi }
 const KEYS = {
   cv: { share: cvKeys.share, list: cvKeys.list },
   coverLetter: { share: letterKeys.share, list: letterKeys.list },
+  resignation: { share: resignationKeys.share, list: resignationKeys.list },
 }
 
 export function useDocumentShare(type: DocumentType, id: string) {
   return useQuery({ queryKey: KEYS[type].share(id), queryFn: () => SHARE_API[type].getShare(id) })
 }
 
-/** Turns a share link on or off, or replaces it (`reset`); the list's "Shared" badge follows. */
+/**
+ * Turns a share link on or off, hides personal details on it, or replaces it
+ * (`reset`); the list's "Shared" badge follows.
+ */
 export function useUpdateDocumentShare(type: DocumentType, id: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (change: { isActive: boolean } | 'reset') =>
-      change === 'reset'
-        ? SHARE_API[type].resetShare(id)
-        : SHARE_API[type].setShare(id, change.isActive),
+    mutationFn: (change: UpdateShareInput | 'reset') =>
+      change === 'reset' ? SHARE_API[type].resetShare(id) : SHARE_API[type].setShare(id, change),
     onSuccess: (state: ShareState) => {
       queryClient.setQueryData(KEYS[type].share(id), state)
       queryClient.setQueryData<DocumentSummary[]>(KEYS[type].list, (list) =>
