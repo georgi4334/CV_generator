@@ -26,12 +26,26 @@ test('a CV is created, edited, saved and shared', async ({ page, browser }) => {
   // Share it and open the link signed out.
   await page.getByRole('button', { name: 'Share link' }).click()
   const dialog = page.getByRole('dialog')
-  await dialog.getByRole('switch').click()
+  await dialog.getByRole('switch', { name: 'Share a read-only link' }).click()
   const link = await dialog.getByRole('textbox').inputValue()
   expect(link).toContain('/s/')
   const visitor = await browser.newPage()
   await visitor.goto(link)
   await expect(visitor.getByRole('document', { name: 'CV' })).toContainText('Ada Lovelace')
+
+  // Hiding personal details: the visitor gets stand-ins, never the real name or title.
+  await dialog.getByRole('switch', { name: 'Hide my personal details' }).click()
+  await expect(dialog.getByRole('switch', { name: 'Hide my personal details' })).toBeChecked()
+  const response = visitor.waitForResponse((r) => r.url().includes('/api/shared/'))
+  await visitor.reload()
+  const body = await (await response).text()
+  expect(body).not.toContain('Ada Lovelace')
+  expect(body).not.toContain('Portfolio CV')
+  await expect(
+    visitor.getByText('The owner hid their personal details on this link.'),
+  ).toBeVisible()
+  await expect(visitor.getByRole('heading', { name: 'Shared CV' })).toBeVisible()
+  await expect(visitor.locator('body')).not.toContainText('Ada Lovelace')
   await visitor.close()
 
   // It is listed under Documents.

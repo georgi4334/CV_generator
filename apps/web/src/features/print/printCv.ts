@@ -11,6 +11,8 @@ export interface PrintJob {
   doc: Printable
   /** Browsers suggest the page title as the PDF file name. */
   title: string
+  /** A share link that hides personal details: blur the stand-ins (see the renderer). */
+  hidePersonal?: boolean
 }
 
 export const usePrintJob = create<{ job: PrintJob | null }>()(() => ({ job: null }))
@@ -22,8 +24,8 @@ let nextId = 0
  * document, in preview mode, at its page size. "Save as PDF" there keeps the
  * text selectable, which applicant tracking systems need.
  */
-export function printDocument(doc: Printable, title: string) {
-  usePrintJob.setState({ job: { id: ++nextId, doc, title } })
+export function printDocument(doc: Printable, title: string, options?: { hidePersonal?: boolean }) {
+  usePrintJob.setState({ job: { id: ++nextId, doc, title, ...options } })
 }
 
 export const printCv = (cv: CvDocument, title: string) => printDocument({ kind: 'cv', cv }, title)

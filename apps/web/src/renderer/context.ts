@@ -15,6 +15,8 @@ export interface RenderContextValue {
   timeline: boolean
   /** True inside the hidden copy used for measuring: render static text, no controls. */
   measuring: boolean
+  /** A share link that hides personal details: the stand-ins for them are drawn blurred. */
+  hidePersonal: boolean
   editor: EditorApi | null
 }
 
@@ -25,6 +27,7 @@ export const RenderContext = createContext<RenderContextValue>({
   inlineSkills: false,
   timeline: false,
   measuring: false,
+  hidePersonal: false,
   editor: null,
 })
 

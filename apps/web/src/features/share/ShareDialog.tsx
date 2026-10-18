@@ -1,5 +1,5 @@
 import type { DocumentType } from '@cv/shared'
-import { Check, Copy, ExternalLink, X } from 'lucide-react'
+import { Check, Copy, EyeOff, ExternalLink, X } from 'lucide-react'
 import { useId, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Modal } from '@/shared/ui/Modal'
@@ -25,6 +25,8 @@ export function ShareDialog({
   const { t } = useTranslation()
   const headingId = useId()
   const switchId = useId()
+  const hideId = useId()
+  const hideHintId = useId()
   const share = useDocumentShare(type, id)
   const update = useUpdateDocumentShare(type, id)
   const input = useRef<HTMLInputElement>(null)
@@ -33,6 +35,7 @@ export function ShareDialog({
 
   const link = share.data?.link ?? null
   const active = link?.isActive ?? false
+  const hidePersonal = link?.hidePersonal ?? false
   const url = link ? shareUrl(link.slug) : ''
   const error = update.error ?? share.error
 
@@ -90,27 +93,44 @@ export function ShareDialog({
                 {t('share.dialog.switchHint')}
               </span>
             </span>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={active}
-              aria-labelledby={switchId}
+            <Switch
+              checked={active}
+              labelledBy={switchId}
               disabled={update.isPending || share.isError}
-              onClick={() => {
+              onToggle={() => {
                 setCopied(false)
                 update.mutate({ isActive: !active })
               }}
-              className={`relative h-6 w-11 shrink-0 rounded-pill transition-colors disabled:opacity-60 ${
-                active ? 'bg-brand' : 'bg-line-strong'
-              }`}
-            >
-              <span
-                className={`absolute top-0.5 left-0.5 size-5 rounded-pill bg-surface shadow transition-transform ${
-                  active ? 'translate-x-5' : ''
-                }`}
-              />
-            </button>
+            />
           </div>
+
+          {active && link && (
+            <div className="mt-3 rounded-control border border-line p-3">
+              <div className="flex items-center justify-between gap-4">
+                <span className="flex items-start gap-2">
+                  <EyeOff className="mt-0.5 size-4 shrink-0 text-fg-muted" aria-hidden />
+                  <span>
+                    <span id={hideId} className="block text-sm font-medium">
+                      {t('share.dialog.hideLabel')}
+                    </span>
+                    <span id={hideHintId} className="mt-0.5 block text-xs text-fg-muted">
+                      {t('share.dialog.hideHint')}
+                    </span>
+                  </span>
+                </span>
+                <Switch
+                  checked={hidePersonal}
+                  labelledBy={hideId}
+                  describedBy={hideHintId}
+                  disabled={update.isPending}
+                  onToggle={() => update.mutate({ hidePersonal: !hidePersonal })}
+                />
+              </div>
+              {hidePersonal && (
+                <p className="mt-2 text-xs text-fg-muted">{t('share.dialog.hideCheck')}</p>
+              )}
+            </div>
+          )}
 
           {active && link && (
             <div className="mt-4 space-y-3">
@@ -170,5 +190,40 @@ export function ShareDialog({
         </button>
       </div>
     </Modal>
+  )
+}
+
+function Switch({
+  checked,
+  labelledBy,
+  describedBy,
+  disabled,
+  onToggle,
+}: {
+  checked: boolean
+  labelledBy: string
+  describedBy?: string
+  disabled: boolean
+  onToggle: () => void
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-labelledby={labelledBy}
+      aria-describedby={describedBy}
+      disabled={disabled}
+      onClick={onToggle}
+      className={`relative h-6 w-11 shrink-0 rounded-pill transition-colors disabled:opacity-60 ${
+        checked ? 'bg-brand' : 'bg-line-strong'
+      }`}
+    >
+      <span
+        className={`absolute top-0.5 left-0.5 size-5 rounded-pill bg-surface shadow transition-transform ${
+          checked ? 'translate-x-5' : ''
+        }`}
+      />
+    </button>
   )
 }

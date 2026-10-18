@@ -76,6 +76,7 @@ export function LetterRenderer({
   editor,
   actions,
   pageClassName,
+  hidePersonal = false,
 }: {
   letter: CoverLetterDocument
   mode: RenderMode
@@ -83,6 +84,8 @@ export function LetterRenderer({
   editor?: EditorApi
   actions?: LetterActions
   pageClassName?: string
+  /** Blur the stand-ins of a share link that hides personal details. */
+  hidePersonal?: boolean
 }) {
   const { t } = useTranslation()
   const { design, header, recipient } = letter
@@ -100,6 +103,7 @@ export function LetterRenderer({
     inlineSkills: false,
     timeline: false,
     measuring: false,
+    hidePersonal,
     editor: editor ?? null,
   }
 

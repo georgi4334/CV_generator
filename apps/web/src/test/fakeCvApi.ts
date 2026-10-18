@@ -13,6 +13,8 @@ import {
   type Job,
   type ProfessionId,
   type ShareLink,
+  type UpdateShareInput,
+  hidePersonalDetails,
 } from '@cv/shared'
 import { ApiRequestError } from '@/shared/api/client'
 import type { CvApi } from '@/features/cv-editor/api'
@@ -53,17 +55,23 @@ export function createFakeCvApi() {
   /** Share links of any document (CV or cover letter), by document id. */
   const share = {
     get: (docId: string) => ({ link: structuredClone(shares.get(docId) ?? null) }),
-    set(docId: string, isActive: boolean) {
+    set(docId: string, change: UpdateShareInput) {
       const time = now()
       const current = shares.get(docId)
       const link: ShareLink = current
-        ? { ...current, isActive, updatedAt: time }
-        : { slug: `slug${++seq}AbCdEfGh`, isActive, createdAt: time, updatedAt: time }
+        ? { ...current, ...change, updatedAt: time }
+        : {
+            slug: `slug${++seq}AbCdEfGh`,
+            isActive: change.isActive ?? false,
+            hidePersonal: change.hidePersonal ?? false,
+            createdAt: time,
+            updatedAt: time,
+          }
       shares.set(docId, link)
       return { link: structuredClone(link) }
     },
     reset(docId: string) {
-      share.set(docId, true)
+      share.set(docId, { isActive: true })
       const link = { ...shares.get(docId)!, slug: `slug${++seq}NewLink0` }
       shares.set(docId, link)
       return { link: structuredClone(link) }
@@ -175,9 +183,9 @@ export function createFakeCvApi() {
       find(cvId)
       return share.get(cvId)
     },
-    async setShare(cvId, isActive) {
+    async setShare(cvId, change) {
       find(cvId)
-      return share.set(cvId, isActive)
+      return share.set(cvId, change)
     },
     async resetShare(cvId) {
       find(cvId)
@@ -185,15 +193,33 @@ export function createFakeCvApi() {
     },
     async getShared(slug) {
       const entry = [...shares.entries()].find(([, link]) => link.slug === slug && link.isActive)
+      // Like the API: hidden personal details are replaced before they are sent.
+      const hidePersonal = entry?.[1].hidePersonal ?? false
       const cv = entry && cvs.get(entry[0])
       if (cv) {
         const { title, document, updatedAt } = structuredClone(cv)
-        return { type: 'cv' as const, title, document, updatedAt }
+        return hidePersonal
+          ? {
+              type: 'cv' as const,
+              title: '',
+              document: hidePersonalDetails(document),
+              updatedAt,
+              hidePersonal,
+            }
+          : { type: 'cv' as const, title, document, updatedAt, hidePersonal }
       }
       const letter = entry && letters.get(entry[0])
       if (letter) {
         const { title, document, updatedAt } = structuredClone(letter)
-        return { type: 'coverLetter' as const, title, document, updatedAt }
+        return hidePersonal
+          ? {
+              type: 'coverLetter' as const,
+              title: '',
+              document: hidePersonalDetails(document),
+              updatedAt,
+              hidePersonal,
+            }
+          : { type: 'coverLetter' as const, title, document, updatedAt, hidePersonal }
       }
       throw new ApiRequestError(404, 'not_found', 'Shared document not found')
     },
@@ -321,9 +347,9 @@ export function createFakeCvApi() {
       findLetter(letterId)
       return share.get(letterId)
     },
-    async setShare(letterId, isActive) {
+    async setShare(letterId, change) {
       findLetter(letterId)
-      return share.set(letterId, isActive)
+      return share.set(letterId, change)
     },
     async resetShare(letterId) {
       findLetter(letterId)

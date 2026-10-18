@@ -1,5 +1,5 @@
 import { APP_NAME } from '@cv/shared'
-import { Download } from 'lucide-react'
+import { Download, EyeOff } from 'lucide-react'
 import { useEffect, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router'
@@ -51,7 +51,13 @@ export function SharedDocumentPage() {
   const { slug = '' } = useParams()
   const query = useSharedDocument(slug)
   useNoIndex()
-  useDocumentTitle(query.data?.title)
+  const data = query.data
+  // A link that hides personal details has no title (titles often hold the name).
+  const title = data
+    ? data.title ||
+      (data.type === 'cv' ? t('share.page.untitledCv') : t('share.page.untitledLetter'))
+    : ''
+  useDocumentTitle(title || undefined)
 
   if (query.isPending) {
     return <EditorLoading />
@@ -79,7 +85,7 @@ export function SharedDocumentPage() {
   }
 
   const shared = query.data
-  const { title } = shared
+  const { hidePersonal } = shared
   const pageSize = shared.document.design.pageSize
   return (
     <div className="min-h-screen bg-muted-strong text-fg">
@@ -95,6 +101,7 @@ export function SharedDocumentPage() {
                   ? { kind: 'cv', cv: shared.document }
                   : { kind: 'coverLetter', letter: shared.document },
                 title,
+                { hidePersonal },
               )
             }
             className={primaryButton}
@@ -108,11 +115,27 @@ export function SharedDocumentPage() {
         </div>
       </header>
       <main className="px-4 py-6 sm:px-6 sm:py-8">
+        {hidePersonal && (
+          <p className="mx-auto mb-4 flex w-fit items-center gap-2 rounded-pill border border-line-strong bg-surface px-3 py-1.5 text-xs text-fg-soft sm:text-sm">
+            <EyeOff className="size-4 shrink-0" aria-hidden />
+            {t('share.page.hiddenBanner')}
+          </p>
+        )}
         <FitToWidth width={PAGE_SIZE_PX[pageSize].width}>
           {shared.type === 'cv' ? (
-            <CvRenderer cv={shared.document} mode="preview" pageClassName="shadow-paper" />
+            <CvRenderer
+              cv={shared.document}
+              mode="preview"
+              pageClassName="shadow-paper"
+              hidePersonal={hidePersonal}
+            />
           ) : (
-            <LetterRenderer letter={shared.document} mode="preview" pageClassName="shadow-paper" />
+            <LetterRenderer
+              letter={shared.document}
+              mode="preview"
+              pageClassName="shadow-paper"
+              hidePersonal={hidePersonal}
+            />
           )}
         </FitToWidth>
       </main>

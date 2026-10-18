@@ -29,6 +29,8 @@ export const shareLinks = pgTable(
       .references((): AnyPgColumn => coverLetters.id, { onDelete: 'cascade' }),
     slug: text('slug').notNull().unique(),
     isActive: boolean('is_active').notNull().default(true),
+    /** Show stand-ins for the name, photo and contact details (sharing for public feedback). */
+    hidePersonal: boolean('hide_personal').notNull().default(false),
     createdAt: createdAt(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },

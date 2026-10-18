@@ -1,5 +1,6 @@
 // Route-level tests: the real app with fake APIs (see test/appHarness.ts).
 import '@/test/appHarness'
+import { HIDDEN_PERSONAL } from '@cv/shared'
 import { fake } from '@/test/fakeHolders'
 import { page } from '@/test/appHelpers'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
@@ -120,7 +121,7 @@ describe('download and share', () => {
 
   it('shows a shared CV to anyone with the link, read-only', async () => {
     const cv = fake.current.seed('Frontend CV')
-    const { link } = await fake.current.api.setShare(cv.id, true)
+    const { link } = await fake.current.api.setShare(cv.id, { isActive: true })
     renderRoute(`/s/${link!.slug}`)
 
     expect(await screen.findByRole('heading', { name: 'Frontend CV' })).toBeDefined()
@@ -135,10 +136,48 @@ describe('download and share', () => {
     expect(printed()).toMatchObject({ title: 'Frontend CV' })
   })
 
+  it('hides personal details on the link from the dialog', async () => {
+    const cv = fake.current.seed('Frontend CV')
+    renderRoute(`/cvs/${cv.id}/edit`)
+    await screen.findByDisplayValue('Frontend CV')
+    const dialog = await openShareDialog()
+    // Only offered once the link is on.
+    expect(dialog.queryByRole('switch', { name: 'Hide my personal details' })).toBeNull()
+    fireEvent.click(dialog.getByRole('switch', { name: 'Share a read-only link' }))
+
+    const hide = await dialog.findByRole('switch', { name: 'Hide my personal details' })
+    expect(hide.getAttribute('aria-checked')).toBe('false')
+    fireEvent.click(hide)
+    await waitFor(() => expect(hide.getAttribute('aria-checked')).toBe('true'))
+    expect(fake.current.shares.get(cv.id)).toMatchObject({ isActive: true, hidePersonal: true })
+    expect(dialog.getByText(/check it for anything personal/)).toBeDefined()
+  })
+
+  it('blurs stand-ins, not real details, on a link that hides them', async () => {
+    const cv = fake.current.seed('Frontend CV')
+    const { name, email } = cv.document.header
+    expect(name && email).toBeTruthy()
+    const { link } = await fake.current.api.setShare(cv.id, { isActive: true, hidePersonal: true })
+    renderRoute(`/s/${link!.slug}`)
+
+    expect(await screen.findByRole('heading', { name: 'Shared CV' })).toBeDefined()
+    expect(screen.getByText('The owner hid their personal details on this link.')).toBeDefined()
+    expect(document.body.textContent).not.toContain(name)
+    expect(document.body.textContent).not.toContain(email)
+    expect(document.body.textContent).not.toContain('Frontend CV')
+    const hidden = page().getAllByText(HIDDEN_PERSONAL.name)[0]!
+    expect(hidden.className).toContain('cv-hidden-personal')
+    expect(hidden.getAttribute('aria-hidden')).toBe('true')
+    expect(page().getAllByText('Hidden').length).toBeGreaterThan(0)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Download PDF' }))
+    expect(printed()).toMatchObject({ title: 'Shared CV', hidePersonal: true })
+  })
+
   it('explains a link that was turned off', async () => {
     const cv = fake.current.seed('Frontend CV')
-    const { link } = await fake.current.api.setShare(cv.id, true)
-    await fake.current.api.setShare(cv.id, false)
+    const { link } = await fake.current.api.setShare(cv.id, { isActive: true })
+    await fake.current.api.setShare(cv.id, { isActive: false })
     renderRoute(`/s/${link!.slug}`)
     expect(await screen.findByRole('heading', { name: 'This link does not work' })).toBeDefined()
     expect(screen.queryByText(cv.document.header.name)).toBeNull()

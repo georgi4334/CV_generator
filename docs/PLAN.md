@@ -390,7 +390,8 @@ Specification: §3.2 and §3.3.
   - Turning it on creates a random, unguessable address (16 characters). Turning it off makes the link stop working; turning it on again brings back the same address. _Replace link_ gives a new address and the old one stops working.
   - The shared page is read-only, shows the latest saved version, offers _Download PDF_, fits phones, and is kept out of search engines (`noindex`). It shows no ids or owner details.
   - Shared CVs get a _Shared_ badge in Documents. Deleting a CV deletes its link; copies are not shared.
-- API: `GET/PUT /cvs/:id/share`, `POST /cvs/:id/share/reset`, public `GET /shared/:slug`. New table `share_links` (migration `0001_share_links`, applied automatically on start).
+  - ✅ **Hide my personal details** (for posting the link publicly, e.g. for feedback): a second switch in the share dialog. The API replaces the name, email, phone, link, location and cover-letter signature with stand-ins (`Xxxxx Xxxxxxx`, `xxxxx@xxxxx.xxx`…), removes the photo and sends no title, so the real details never reach the visitor's browser. The shared page and its PDF draw the stand-ins blurred (not selectable, read as "Hidden" by screen readers), show "The owner hid their personal details on this link" and are titled "Shared CV" / "Shared cover letter". The setting survives turning the link off and on and _Replace link_. Other text (summary, experience) is shown as is; the dialog asks the owner to check it. Column `share_links.hide_personal` (migration `0007_share_hide_personal`).
+- API: `GET/PUT /cvs/:id/share` (`PUT` takes `isActive` and/or `hidePersonal`), `POST /cvs/:id/share/reset`, public `GET /shared/:slug`. New table `share_links` (migration `0001_share_links`, applied automatically on start).
 
 ### Step 12: Saved Jobs tracker ✅ built (awaiting review)
 

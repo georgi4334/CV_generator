@@ -32,6 +32,8 @@ interface CvRendererProps {
   /** Makes the pages editable in place (edit mode only). */
   editor?: EditorApi
   pageClassName?: string
+  /** Blur the stand-ins of a share link that hides personal details. */
+  hidePersonal?: boolean
 }
 
 /**
@@ -39,7 +41,13 @@ interface CvRendererProps {
  * unpaginated copy of the page to measure their heights; the visible pages are
  * then filled block by block, so content flows onto as many pages as needed.
  */
-export function CvRenderer({ cv, mode, editor, pageClassName }: CvRendererProps) {
+export function CvRenderer({
+  cv,
+  mode,
+  editor,
+  pageClassName,
+  hidePersonal = false,
+}: CvRendererProps) {
   const { t } = useTranslation()
   const template = getTemplate(cv.design.templateId)
   const tokens = layoutTokens(cv.design)
@@ -127,6 +135,7 @@ export function CvRenderer({ cv, mode, editor, pageClassName }: CvRendererProps)
     inlineSkills: template.columns === 1,
     timeline: template.timeline ?? false,
     measuring: false,
+    hidePersonal,
     editor: editor ?? null,
   }
   const measuringContext = { ...context, measuring: true, editor: null }

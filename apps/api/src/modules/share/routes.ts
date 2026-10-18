@@ -1,5 +1,6 @@
 import {
   SHARE_SLUG_PATTERN,
+  hidePersonalDetails,
   UpdateShareInputSchema,
   type ShareLink,
   type SharedDocument,
@@ -22,6 +23,7 @@ const newSlug = () => randomBytes(12).toString('base64url')
 const toShareLink = (row: typeof shareLinks.$inferSelect): ShareLink => ({
   slug: row.slug,
   isActive: row.isActive,
+  hidePersonal: row.hidePersonal,
   createdAt: row.createdAt.toISOString(),
   updatedAt: row.updatedAt.toISOString(),
 })
@@ -59,15 +61,27 @@ export async function shareRoutes(app: FastifyInstance, opts: { database: Databa
       return { link: row ? toShareLink(row) : null }
     })
 
-    // The first time creates the link; later it only turns it on or off, keeping the address.
+    // The first time creates the link; later it changes only what is sent, keeping the address.
     app.put(`${kind.path}/:id/share`, async (request): Promise<ShareState> => {
       const { id } = IdParams.parse(request.params)
-      const { isActive } = UpdateShareInputSchema.parse(request.body)
+      const { isActive, hidePersonal } = UpdateShareInputSchema.parse(request.body)
       await assertOwn(request.user.id, id)
       const [row] = await db
         .insert(shareLinks)
-        .values({ [key]: id, slug: newSlug(), isActive })
-        .onConflictDoUpdate({ target: kind.column, set: { isActive, updatedAt: sql`now()` } })
+        .values({
+          [key]: id,
+          slug: newSlug(),
+          isActive: isActive ?? false,
+          hidePersonal: hidePersonal ?? false,
+        })
+        .onConflictDoUpdate({
+          target: kind.column,
+          set: {
+            ...(isActive !== undefined && { isActive }),
+            ...(hidePersonal !== undefined && { hidePersonal }),
+            updatedAt: sql`now()`,
+          },
+        })
         .returning()
       return { link: toShareLink(row!) }
     })
@@ -99,6 +113,7 @@ export async function publicShareRoutes(app: FastifyInstance, opts: { database: 
     if (!params.success) throw notFound('Shared document')
     const [row] = await db
       .select({
+        hidePersonal: shareLinks.hidePersonal,
         cv: { title: cvs.title, document: cvs.document, updatedAt: cvs.updatedAt },
         letter: {
           title: coverLetters.title,
@@ -116,8 +131,19 @@ export async function publicShareRoutes(app: FastifyInstance, opts: { database: 
         ? ({ type: 'coverLetter', ...row.letter } as const)
         : null
     if (!shared) throw notFound('Shared document')
+    const hidePersonal = row!.hidePersonal
+    // Hidden details are replaced here, so they never leave the server.
+    const visible = hidePersonal
+      ? shared.type === 'cv'
+        ? { ...shared, title: '', document: hidePersonalDetails(shared.document) }
+        : { ...shared, title: '', document: hidePersonalDetails(shared.document) }
+      : shared
     // Shared documents hold contact details: keep them out of search engines and shared caches.
     reply.header('x-robots-tag', 'noindex, nofollow').header('cache-control', 'private, no-store')
-    return { ...shared, updatedAt: shared.updatedAt.toISOString() } as SharedDocument
+    return {
+      ...visible,
+      hidePersonal,
+      updatedAt: shared.updatedAt.toISOString(),
+    } as SharedDocument
   })
 }
