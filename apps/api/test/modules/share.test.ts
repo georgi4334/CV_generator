@@ -1,4 +1,12 @@
-import { CvRecordSchema, SharedCvSchema, ShareStateSchema, type DocumentSummary } from '@cv/shared'
+import {
+  CoverLetterRecordSchema,
+  CvRecordSchema,
+  HIDDEN_PERSONAL,
+  SharedCoverLetterSchema,
+  SharedCvSchema,
+  ShareStateSchema,
+  type DocumentSummary,
+} from '@cv/shared'
 import { describe, expect, it } from 'vitest'
 import { shareLinks } from '../../src/db/schema/index'
 import { dbAvailable, useTestApp } from '../support/context'
@@ -105,5 +113,94 @@ describe.skipIf(!dbAvailable)('share links API', () => {
     await call('DELETE', `/cvs/${cv.id}`)
     expect((await shared(link.slug)).statusCode).toBe(404)
     expect(await ctx.database.db.select().from(shareLinks)).toEqual([])
+  })
+
+  describe('hiding personal details', () => {
+    const personal = {
+      name: 'Maria Petrova',
+      headline: 'Product designer',
+      email: 'maria@example.com',
+      phone: '+359 88 123 4567',
+      location: 'Sofia',
+      link: 'maria.design',
+      photoUrl: '/uploads/maria.jpg',
+      showPhoto: true,
+    }
+    const createPersonalCv = async () => {
+      const cv = await createCv()
+      const document = { ...cv.document, header: { ...cv.document.header, ...personal } }
+      const res = await call('PATCH', `/cvs/${cv.id}`, {
+        revision: cv.revision,
+        title: 'Maria Petrova CV',
+        document,
+      })
+      expect(res.statusCode).toBe(200)
+      return cv
+    }
+    const leaks = /Maria|Petrova|example\.com|123 4567|Sofia|maria\.(design|jpg)/
+
+    it('is off by default and keeps the setting when turned off and on', async () => {
+      const cv = await createCv()
+      expect((await share(cv.id, true)).hidePersonal).toBe(false)
+      const res = await call('PUT', `/cvs/${cv.id}/share`, { hidePersonal: true })
+      expect(ShareStateSchema.parse(res.json()).link).toMatchObject({
+        isActive: true,
+        hidePersonal: true,
+      })
+      expect((await share(cv.id, false)).hidePersonal).toBe(true)
+      expect((await share(cv.id, true)).hidePersonal).toBe(true)
+      const reset = await call('POST', `/cvs/${cv.id}/share/reset`)
+      expect(ShareStateSchema.parse(reset.json()).link!.hidePersonal).toBe(true)
+    })
+
+    it('never sends the real name, contacts, photo or title to visitors', async () => {
+      const cv = await createPersonalCv()
+      const link = await share(cv.id, true)
+      expect(SharedCvSchema.parse((await shared(link.slug)).json())).toMatchObject({
+        hidePersonal: false,
+        title: 'Maria Petrova CV',
+      })
+
+      await call('PUT', `/cvs/${cv.id}/share`, { hidePersonal: true })
+      const res = await shared(link.slug)
+      expect(res.body).not.toMatch(leaks)
+      const body = SharedCvSchema.parse(res.json())
+      expect(body.hidePersonal).toBe(true)
+      expect(body.title).toBe('')
+      expect(body.document.header).toMatchObject({
+        name: HIDDEN_PERSONAL.name,
+        email: HIDDEN_PERSONAL.email,
+        headline: 'Product designer',
+        photoUrl: null,
+        showPhoto: false,
+      })
+      // The owner's own CV is unchanged.
+      const own = CvRecordSchema.parse((await call('GET', `/cvs/${cv.id}`)).json())
+      expect(own.document.header.name).toBe('Maria Petrova')
+    })
+
+    it('hides them in a shared letter too, signature included', async () => {
+      const cv = await createPersonalCv()
+      const letter = CoverLetterRecordSchema.parse(
+        (await call('POST', '/cover-letters', { cvId: cv.id })).json(),
+      )
+      const document = { ...letter.document, signature: 'Maria Petrova' }
+      await call('PATCH', `/cover-letters/${letter.id}`, { revision: letter.revision, document })
+      const res = await call('PUT', `/cover-letters/${letter.id}/share`, {
+        isActive: true,
+        hidePersonal: true,
+      })
+      const { slug } = ShareStateSchema.parse(res.json()).link!
+      const page = await shared(slug)
+      expect(page.body).not.toMatch(leaks)
+      expect(SharedCoverLetterSchema.parse(page.json()).document.signature).toBe(
+        HIDDEN_PERSONAL.name,
+      )
+    })
+
+    it('rejects an empty change', async () => {
+      const cv = await createCv()
+      expect((await call('PUT', `/cvs/${cv.id}/share`, {})).statusCode).toBe(400)
+    })
   })
 })

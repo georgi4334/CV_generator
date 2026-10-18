@@ -38,6 +38,7 @@ export const renderer: Messages['renderer'] = {
   expires: 'Валиден до',
   noExpiry: 'Безсрочен',
   yearOnly: 'Само {{year}}',
+  hiddenPersonal: 'Скрито',
   clearDate: 'Изчисти',
   chooseYear: 'Изберете година, {{year}}',
   previousYear: 'Предишна година',
