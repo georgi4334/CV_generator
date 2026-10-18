@@ -94,7 +94,7 @@ function Employer({ letter }: { letter: ResignationDocument }) {
 }
 
 function resignationHint(P: ReturnType<typeof usePlaceholders>) {
-  return (index: number) => (index === 0 ? P.resignationGreeting : P.resignationParagraph)
+  return (index: number) => (index === 0 ? P.resignationOpening : P.resignationParagraph)
 }
 
 /**

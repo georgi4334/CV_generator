@@ -53,6 +53,8 @@ export const documents: Messages['documents'] = {
     noMatch: 'Keine Dokumente entsprechen Ihrer Suche.',
     empty: 'Noch nichts vorhanden.',
     createFirst: 'Ersten Lebenslauf erstellen',
+    createFirstLetter: 'Erstes Anschreiben erstellen',
+    createFirstResignation: 'Erstes Kündigungsschreiben erstellen',
     forJob: 'Für {{position}} bei {{company}}',
     noJob: 'Mit keiner Stelle verknüpft',
   },

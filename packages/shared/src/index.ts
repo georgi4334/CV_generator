@@ -4,6 +4,7 @@
  */
 export * from './common/id'
 export * from './common/brand'
+export * from './common/textLimit'
 export * from './common/health'
 export * from './api/api'
 export * from './auth/auth'

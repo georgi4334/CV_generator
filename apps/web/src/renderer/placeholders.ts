@@ -63,6 +63,7 @@ const EN = {
   resignationSubject: 'Subject, e.g. Resignation',
   resignationGreeting: 'Dear Sir or Madam,',
   resignationParagraph: 'Another paragraph.',
+  resignationOpening: 'Opening: say that you are resigning, from which position, and from when.',
 }
 
 export type Placeholders = typeof EN
@@ -130,6 +131,7 @@ export const PLACEHOLDERS: Record<CvLanguage, Placeholders> = {
     resignationSubject: 'Тема, напр. Заявление за напускане',
     resignationGreeting: 'Уважаеми г-н/г-жо,',
     resignationParagraph: 'Още един абзац.',
+    resignationOpening: 'Начало: напишете, че напускате, от коя позиция и от кога.',
   },
 }
 

@@ -1,3 +1,4 @@
+import { MAIN_CONTENT_ID, SkipLink } from '@/shared/ui/SkipLink'
 import { Briefcase, Files, LayoutDashboard, type LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Suspense, useState } from 'react'
@@ -57,6 +58,7 @@ export function AppLayout() {
 
   return (
     <div className="app-backdrop flex min-h-dvh flex-col text-fg">
+      <SkipLink />
       {/* Always visible: it stays at the top while the page scrolls under it. */}
       <header className={`sticky top-0 z-(--z-nav) ${wide ? 'pointer-events-none' : 'glass-bar'}`}>
         {wide ? (
@@ -88,7 +90,9 @@ export function AppLayout() {
       <VerifyReminder />
 
       <main
-        className={`page-container flex-1 py-section md:py-8 ${wide ? '' : 'clear-bottom-nav'}`}
+        id={MAIN_CONTENT_ID}
+        tabIndex={-1}
+        className={`page-container flex-1 py-section outline-none md:py-8 ${wide ? '' : 'clear-bottom-nav'}`}
       >
         <div key={currentTab} className={`motion-reduce:animate-none ${enter}`}>
           {/* Its own boundary: a page still loading shows a skeleton here, not a blank app. */}

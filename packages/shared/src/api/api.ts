@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { TEXT_MAX, withinTextLimit } from '../common/textLimit'
 import { IdSchema } from '../cv/common'
 import { CoverLetterDocumentSchema } from '../cover-letter/coverLetter'
 import { CvDocumentSchema } from '../cv/document'
@@ -7,15 +8,19 @@ import { PROFESSION_IDS } from '../cv/professions'
 import { ResignationDocumentSchema, resignationWithinLimits } from '../resignation/resignation'
 
 const headerLimitMessage = { message: 'A header field is too long', path: ['header'] }
-/** A CV as it is saved: its header text within the limits. */
-const SaveableCvSchema = CvDocumentSchema.refine(headerWithinLimits, headerLimitMessage)
+const textLimitMessage = { message: `A text is longer than ${TEXT_MAX} characters` }
+/** A CV as it is saved: its header text and every text within the limits. */
+const SaveableCvSchema = CvDocumentSchema.refine(headerWithinLimits, headerLimitMessage).refine(
+  (doc) => withinTextLimit(doc),
+  textLimitMessage,
+)
 const SaveableLetterSchema = CoverLetterDocumentSchema.refine(
   headerWithinLimits,
   headerLimitMessage,
-)
+).refine((doc) => withinTextLimit(doc), textLimitMessage)
 const SaveableResignationSchema = ResignationDocumentSchema.refine(resignationWithinLimits, {
   message: 'A field of the letter is too long',
-})
+}).refine((doc) => withinTextLimit(doc), textLimitMessage)
 
 /** Shape of every error response from the API. */
 export const ApiErrorSchema = z.object({

@@ -2,6 +2,7 @@ import type { Messages } from '@/i18n/types'
 
 export const nav: Messages['nav'] = {
   main: 'Hauptnavigation',
+  skipToContent: 'Zum Inhalt springen',
   dashboard: 'Übersicht',
   documents: 'Dokumente',
   savedJobs: 'Gespeicherte Stellen',

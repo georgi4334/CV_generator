@@ -85,6 +85,28 @@ test('a CV is created, edited, saved and shared', async ({ page, browser }) => {
   await page.goto('/documents/cvs')
   await expect(page.getByText('Portfolio CV')).toBeVisible()
   expect(id).toMatch(/^[0-9a-f-]{36}$/)
+
+  // The keyboard works: a skip link first, and a row menu with arrows and Escape.
+  await page.goto('/documents/all')
+  await page.getByRole('heading', { level: 1 }).waitFor()
+  await page.keyboard.press('Tab')
+  await expect(page.getByRole('link', { name: 'Skip to content' })).toBeFocused()
+  const actions = page.getByRole('button', { name: /^Actions for/ }).first()
+  await actions.focus()
+  await page.keyboard.press('Enter')
+  await expect(page.getByRole('menuitem', { name: 'Open' })).toBeFocused()
+  await page.keyboard.press('ArrowDown')
+  await expect(page.getByRole('menuitem', { name: 'Rename' })).toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('menu')).toHaveCount(0)
+  await expect(actions).toBeFocused()
+  // A dialog opened from the menu gives focus back to the same button.
+  await page.keyboard.press('Enter')
+  await page.getByRole('menuitem', { name: 'Share link' }).click()
+  await expect(page.getByRole('dialog')).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+  await expect(actions).toBeFocused()
 })
 
 test('a saved job keeps its description', async ({ page }) => {

@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { TransitionLink } from '@/shared/ui/TransitionLink'
 import { LanguageSelect } from '@/shared/ui/LanguageSelect'
 import { ThemeSelect } from '@/shared/ui/ThemeSelect'
+import { useMenu } from '@/shared/ui/useMenu'
 import { useEditorUi } from '@/features/cv-editor/state/editorUi'
 import { useCvEditor } from '@/features/cv-editor/state/cvEditorStore'
 import { EditorMoreMenu } from './EditorMoreMenu'
@@ -65,6 +66,11 @@ export function EditorTopBar({
     redo: cvRedo,
   }
   const [helpOpen, setHelpOpen] = useState(false)
+  const {
+    triggerRef: helpTrigger,
+    menuRef: helpMenuRef,
+    onKeyDown: helpKeyDown,
+  } = useMenu(helpOpen, setHelpOpen)
 
   const undoRedoButtons = (buttonClass: string) => (
     <>
@@ -195,18 +201,24 @@ export function EditorTopBar({
             <History className="size-4" />{' '}
             <span className="hidden 2xl:inline">{t('editor.panels.history')}</span>
           </button>
-          <div className="relative">
+          <div className="relative" onKeyDown={helpKeyDown}>
             <button
+              ref={helpTrigger}
               type="button"
               className={pillIcon}
               aria-label={t('editor.topBar.help')}
+              aria-haspopup="menu"
               aria-expanded={helpOpen}
               onClick={() => setHelpOpen((o) => !o)}
             >
               <CircleHelp className="size-4" />
             </button>
             {helpOpen && (
-              <div role="menu" className="glass-menu absolute right-0 z-(--z-dropdown) mt-2 w-menu">
+              <div
+                ref={helpMenuRef}
+                role="menu"
+                className="glass-menu absolute right-0 z-(--z-dropdown) mt-2 w-menu"
+              >
                 {(['helpCenter', 'contactUs'] as const).map((key) => (
                   <button
                     key={key}
