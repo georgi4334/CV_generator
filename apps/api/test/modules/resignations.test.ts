@@ -67,6 +67,17 @@ describe.skipIf(!dbAvailable)('resignation letters API', () => {
     expect(res.json().error.code).toBe('validation_error')
   })
 
+  it('refuses a paragraph longer than 5,000 characters', async () => {
+    const letter = await create()
+    const document = { ...letter.document, paragraphs: ['w'.repeat(5001)] }
+    const res = await call('PATCH', `/resignations/${letter.id}`, { revision: 1, document })
+    expect(res.statusCode).toBe(400)
+    const ok = { ...letter.document, paragraphs: ['w'.repeat(5000)] }
+    expect(
+      (await call('PATCH', `/resignations/${letter.id}`, { revision: 1, document: ok })).statusCode,
+    ).toBe(200)
+  })
+
   it('saves changes and increments the revision; an old revision is a conflict', async () => {
     const letter = await create()
     const document = { ...letter.document, subject: 'My resignation' }

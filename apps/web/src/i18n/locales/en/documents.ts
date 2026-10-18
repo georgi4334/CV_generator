@@ -51,6 +51,8 @@ export const documents = {
     noMatch: 'No documents match your search.',
     empty: 'Nothing here yet.',
     createFirst: 'Create your first CV',
+    createFirstLetter: 'Create your first cover letter',
+    createFirstResignation: 'Create your first resignation letter',
     forJob: 'For {{position}} at {{company}}',
     noJob: 'Not linked to a job',
   },

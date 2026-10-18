@@ -36,12 +36,21 @@ import {
 import { useJobs } from '@/features/jobs/queries'
 import { ListSkeleton } from '@/shared/ui/Skeleton'
 import { TransitionLink } from '@/shared/ui/TransitionLink'
+import { useMenu } from '@/shared/ui/useMenu'
 import { useDocTransitionStyle } from '@/shared/lib/viewTransitions'
 import { showToast, type ToastTone } from '@/shared/stores/toasts'
 
 type SortKey = 'updated' | 'created' | 'name' | 'type'
 
 const SORTS: SortKey[] = ['updated', 'created', 'name', 'type']
+
+/** The button of an empty list: create the kind of document the tab lists (a CV on "All"). */
+const FIRST_DOCUMENT = {
+  all: { to: NEW_CV_PATH, label: 'documents.list.createFirst' },
+  cvs: { to: NEW_CV_PATH, label: 'documents.list.createFirst' },
+  'cover-letters': { to: NEW_LETTER_PATH, label: 'documents.list.createFirstLetter' },
+  resignations: { to: NEW_RESIGNATION_PATH, label: 'documents.list.createFirstResignation' },
+} as const
 
 /** The confirmation texts of deleting one document, per type. */
 const DELETE_TITLE = {
@@ -72,6 +81,7 @@ const compare: Record<SortKey, (a: DocumentSummary, b: DocumentSummary) => numbe
 function CreateNewButton({ subtab }: { subtab: DocumentSubtab }) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
+  const { triggerRef, menuRef, onKeyDown } = useMenu(open, setOpen)
 
   if (subtab === 'cvs') {
     return (
@@ -95,17 +105,23 @@ function CreateNewButton({ subtab }: { subtab: DocumentSubtab }) {
     )
   }
   return (
-    <div className="relative">
+    <div className="relative" onKeyDown={onKeyDown}>
       <button
+        ref={triggerRef}
         type="button"
         className={primaryButton}
+        aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
       >
         <Plus className="size-4" /> {t('documents.createNew')} <ChevronDown className="size-4" />
       </button>
       {open && (
-        <div role="menu" className="glass-menu absolute right-0 z-(--z-dropdown) mt-2 w-menu">
+        <div
+          ref={menuRef}
+          role="menu"
+          className="glass-menu absolute right-0 z-(--z-dropdown) mt-2 w-menu"
+        >
           <Link role="menuitem" to={NEW_CV_PATH} className="menu-item">
             {t('labels.documentType.cv')}
           </Link>
@@ -150,19 +166,25 @@ function DocumentIcon({ docId, type }: { docId: string; type: DocumentType }) {
 function RowMenu({ doc, actions }: { doc: DocumentSummary; actions: RowActions }) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
+  const { triggerRef, menuRef, onKeyDown } = useMenu(open, setOpen)
   const item = 'menu-item'
   const run = (action: () => void) => () => {
     setOpen(false)
+    // Focus goes back to the button first, so a dialog the action opens returns it there when closed.
+    triggerRef.current?.focus()
     action()
   }
   return (
     <div
       className="relative"
+      onKeyDown={onKeyDown}
       onBlur={(e) => !e.currentTarget.contains(e.relatedTarget) && setOpen(false)}
     >
       <button
+        ref={triggerRef}
         type="button"
         aria-label={t('documents.actionsFor', { title: doc.title })}
+        aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
         className="btn-icon p-1.5"
@@ -170,7 +192,11 @@ function RowMenu({ doc, actions }: { doc: DocumentSummary; actions: RowActions }
         <MoreVertical className="size-4" />
       </button>
       {open && (
-        <div role="menu" className="glass-menu absolute right-0 z-(--z-dropdown) mt-1 w-menu">
+        <div
+          ref={menuRef}
+          role="menu"
+          className="glass-menu absolute right-0 z-(--z-dropdown) mt-1 w-menu"
+        >
           <TransitionLink
             role="menuitem"
             to={editPath(doc)}
@@ -429,10 +455,10 @@ export function DocumentsPage() {
         {!loading && documents.length === 0 && (
           <div className="px-4 py-10 text-center text-sm text-fg-muted">
             {query ? t('documents.list.noMatch') : t('documents.list.empty')}
-            {!query && subtab !== 'cover-letters' && (
+            {!query && (
               <div className="mt-3">
-                <Link to={NEW_CV_PATH} className={primaryButton}>
-                  <Plus className="size-4" /> {t('documents.list.createFirst')}
+                <Link to={FIRST_DOCUMENT[subtab].to} className={primaryButton}>
+                  <Plus className="size-4" /> {t(FIRST_DOCUMENT[subtab].label)}
                 </Link>
               </div>
             )}

@@ -1,8 +1,13 @@
-import { createEmptyCv, createExampleCv } from '@cv/shared'
+import {
+  createCoverLetter,
+  createEmptyCv,
+  createExampleCv,
+  createResignationLetter,
+} from '@cv/shared'
 import { act, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { PrintHost } from './PrintHost'
-import { printCv, usePrintJob } from './printCv'
+import { printCv, printDocument, usePrintJob } from './printCv'
 
 const printRoot = () => screen.queryByTestId('print-root')
 
@@ -54,5 +59,27 @@ describe('printing (Download PDF)', () => {
     act(() => printCv(createEmptyCv(), 'Two'))
     await waitFor(() => expect(print).toHaveBeenCalledTimes(2))
     expect(document.title).toBe('Two')
+  })
+
+  it("keeps a letter's margins on every page after the first, and a CV edge to edge", async () => {
+    render(<PrintHost />)
+    const letter = createResignationLetter()
+    act(() => printDocument({ kind: 'resignation', letter }, 'Leaving'))
+    const style = printRoot()!.querySelector('style')!.textContent!
+    expect(style).toMatch(/@page \{ size: A4 portrait; margin: \d+px 0; \}/)
+    expect(style).toContain('@page :first { margin-top: 0; }')
+    expect(printRoot()!.style.getPropertyValue('--letter-margin')).toMatch(/^\d+px$/)
+    await waitFor(() => expect(print).toHaveBeenCalledOnce())
+    act(() => void window.dispatchEvent(new Event('afterprint')))
+
+    act(() => printDocument({ kind: 'coverLetter', letter: createCoverLetter() }, 'Letter'))
+    expect(printRoot()!.querySelector('style')!.textContent).toContain('@page :first')
+    act(() => void window.dispatchEvent(new Event('afterprint')))
+
+    act(() => printCv(createEmptyCv(), 'CV'))
+    const cvStyle = printRoot()!.querySelector('style')!.textContent!
+    expect(cvStyle).toContain('margin: 0;')
+    expect(cvStyle).not.toContain(':first')
+    expect(printRoot()!.style.getPropertyValue('--letter-margin')).toBe('0px')
   })
 })

@@ -96,6 +96,9 @@ export const HIDDEN_PERSONAL_PATHS: ReadonlySet<string> = new Set([
   'header.link',
   'header.location',
   'signature',
+  'recipient.name',
+  'recipient.company',
+  'recipient.address',
   'sender.name',
   'sender.email',
   'sender.phone',
@@ -123,9 +126,74 @@ function hideHeader(header: CvHeader): CvHeader {
   }
 }
 
+const maskText = (value: string, stand: string) => (value.trim() ? stand : '')
+
+/** The stand-in for a single word of a hidden name. */
+const NAME_WORD = 'Xxxxx'
+
+/** What to swap for each real word or phrase that names a person or place. */
+type Swaps = Array<[real: string, stand: string]>
+
+/**
+ * The words of a name (3 letters or more) as swaps for a stand-in word, so a
+ * first name on its own ("Thanks, Maria") is hidden too.
+ */
+const nameWords = (name: string): Swaps =>
+  name
+    .split(/\s+/)
+    .filter((word) => word.replace(/[^\p{L}]/gu, '').length >= 3)
+    .map((word) => [word, NAME_WORD])
+
+const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+/**
+ * Replaces whole-word occurrences of the real values in a text (any case,
+ * longest first), so "Pixel & Pine Ltd" goes before "Pine" and "Ana" does not
+ * touch "Analytics".
+ */
+function scrubber(swaps: Swaps): (text: string) => string {
+  const active = swaps
+    .map(([real, stand]) => [real.trim(), stand] as const)
+    .filter(([real]) => real.length >= 2)
+    .sort((a, b) => b[0].length - a[0].length)
+  if (active.length === 0) return (text) => text
+  const stands = new Map(active.map(([real, stand]) => [real.toLowerCase(), stand]))
+  const pattern = new RegExp(
+    `(?<![\\p{L}\\p{N}])(?:${active.map(([real]) => escapeRegExp(real)).join('|')})(?![\\p{L}\\p{N}])`,
+    'giu',
+  )
+  return (text) => text.replace(pattern, (found) => stands.get(found.toLowerCase()) ?? found)
+}
+
+/** The same swap in every text of a document (arrays and objects are copied, other values kept). */
+function scrubTexts<T>(value: T, scrub: (text: string) => string): T {
+  if (typeof value === 'string') return scrub(value) as T
+  if (Array.isArray(value)) return value.map((item) => scrubTexts(item, scrub)) as T
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [
+        key,
+        key === 'id' ? item : scrubTexts(item, scrub),
+      ]),
+    ) as T
+  }
+  return value
+}
+
+/** Swaps for the person whose CV or letter it is: the name and contact details. */
+const personSwaps = (header: CvHeader): Swaps => [
+  [header.name, HIDDEN_PERSONAL.name],
+  ...nameWords(header.name),
+  [header.email, HIDDEN_PERSONAL.email],
+  [header.phone, HIDDEN_PERSONAL.phone],
+  [header.link, HIDDEN_PERSONAL.link],
+]
+
 /**
  * A CV or letter for a share link that hides personal details. Runs on the
- * server, so the real details never reach the visitor's browser.
+ * server, so the real details never reach the visitor's browser. The name and
+ * contacts are also swapped wherever the text mentions them; other words
+ * (cities, employers) are the author's to check.
  */
 export function hidePersonalDetails(doc: CvDocument): CvDocument
 export function hidePersonalDetails(doc: CoverLetterDocument): CoverLetterDocument
@@ -133,24 +201,21 @@ export function hidePersonalDetails(doc: ResignationDocument): ResignationDocume
 export function hidePersonalDetails(
   doc: CvDocument | CoverLetterDocument | ResignationDocument,
 ): CvDocument | CoverLetterDocument | ResignationDocument {
+  const mask = maskText
   if ('sender' in doc) {
-    const mask = (value: string, stand: string) => (value.trim() ? stand : '')
     // The letter's own text names the company and the people: swap those words too.
-    const replacements: Array<[string, string]> = [
+    const scrub = scrubber([
       [doc.employer.company, HIDDEN_PERSONAL.company],
       [doc.employer.contact, HIDDEN_PERSONAL.name],
+      ...nameWords(doc.employer.contact),
       [doc.sender.name, HIDDEN_PERSONAL.name],
+      ...nameWords(doc.sender.name),
       [doc.sender.email, HIDDEN_PERSONAL.email],
       [doc.sender.phone, HIDDEN_PERSONAL.phone],
       [doc.sender.residence, HIDDEN_PERSONAL.location],
       [doc.employer.address, HIDDEN_PERSONAL.address],
       [doc.employer.city, HIDDEN_PERSONAL.location],
-    ]
-    const scrub = (text: string) =>
-      replacements.reduce(
-        (result, [real, stand]) => (real.trim() ? result.split(real.trim()).join(stand) : result),
-        text,
-      )
+    ])
     return {
       ...doc,
       subject: scrub(doc.subject),
@@ -174,11 +239,35 @@ export function hidePersonalDetails(
     }
   }
   if ('signature' in doc) {
+    // The recipient is a person and a company too, and the text may name them.
+    const scrub = scrubber([
+      ...personSwaps(doc.header),
+      [doc.signature, HIDDEN_PERSONAL.name],
+      ...nameWords(doc.signature),
+      [doc.recipient.name, HIDDEN_PERSONAL.name],
+      ...nameWords(doc.recipient.name),
+      [doc.recipient.company, HIDDEN_PERSONAL.company],
+      [doc.recipient.address, HIDDEN_PERSONAL.address],
+    ])
     return {
       ...doc,
       header: hideHeader(doc.header),
-      signature: doc.signature.trim() ? HIDDEN_PERSONAL.name : '',
+      recipient: {
+        name: mask(doc.recipient.name, HIDDEN_PERSONAL.name),
+        title: doc.recipient.title,
+        company: mask(doc.recipient.company, HIDDEN_PERSONAL.company),
+        address: mask(doc.recipient.address, HIDDEN_PERSONAL.address),
+      },
+      greeting: scrub(doc.greeting),
+      paragraphs: doc.paragraphs.map(scrub),
+      closing: scrub(doc.closing),
+      signature: mask(doc.signature, HIDDEN_PERSONAL.name),
     }
   }
-  return { ...doc, header: hideHeader(doc.header) }
+  const scrub = scrubber(personSwaps(doc.header))
+  return {
+    ...doc,
+    header: hideHeader({ ...doc.header, headline: scrub(doc.header.headline) }),
+    sections: scrubTexts(doc.sections, scrub),
+  }
 }

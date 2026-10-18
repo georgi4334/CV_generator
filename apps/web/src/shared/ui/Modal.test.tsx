@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
+import { useState } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { Modal } from './Modal'
 
@@ -44,5 +45,38 @@ describe('Modal', () => {
     fireEvent.pointerDown(dialog, { clientX: 600, clientY: 300 })
     fireEvent.click(dialog, { clientX: 100, clientY: 300 })
     expect(onClose).not.toHaveBeenCalled()
+  })
+
+  it('gives focus back to the button that opened it when it closes', () => {
+    function Opener() {
+      const [open, setOpen] = useState(false)
+      return (
+        <>
+          <button onClick={() => setOpen(true)}>Open</button>
+          {open && (
+            <Modal labelledBy="title" onClose={() => setOpen(false)}>
+              <h2 id="title">Dialog</h2>
+              <button>Inside</button>
+            </Modal>
+          )}
+        </>
+      )
+    }
+    render(<Opener />)
+    const opener = screen.getByRole('button', { name: 'Open' })
+    opener.focus()
+    fireEvent.click(opener)
+    // Focus moves into the dialog, as showModal() does in a browser.
+    screen.getByRole('button', { name: 'Inside', hidden: true }).focus()
+    expect(document.activeElement).not.toBe(opener)
+
+    // Escape asks to close; the parent removes the dialog.
+    act(() => {
+      screen
+        .getByRole('dialog', { hidden: true })
+        .dispatchEvent(new Event('cancel', { cancelable: true }))
+    })
+    expect(screen.queryByRole('dialog', { hidden: true })).toBeNull()
+    expect(document.activeElement).toBe(opener)
   })
 })

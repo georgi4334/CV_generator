@@ -198,6 +198,51 @@ describe.skipIf(!dbAvailable)('share links API', () => {
       )
     })
 
+    it('hides the recipient of a shared cover letter and names in its text', async () => {
+      const cv = await createPersonalCv()
+      const letter = CoverLetterRecordSchema.parse(
+        (await call('POST', '/cover-letters', { cvId: cv.id })).json(),
+      )
+      const document = {
+        ...letter.document,
+        recipient: {
+          name: 'Dana Whitfield',
+          title: 'Head of People',
+          company: 'Northwind Labs',
+          address: '9 Canal Street, Leeds',
+        },
+        greeting: 'Dear Dana,',
+        paragraphs: ['I am excited about Northwind Labs. Thank you, Dana Whitfield.', '', ''],
+      }
+      await call('PATCH', `/cover-letters/${letter.id}`, { revision: letter.revision, document })
+      const res = await call('PUT', `/cover-letters/${letter.id}/share`, {
+        isActive: true,
+        hidePersonal: true,
+      })
+      const { slug } = ShareStateSchema.parse(res.json()).link!
+      const page = await shared(slug)
+      for (const secret of ['Dana', 'Whitfield', 'Northwind', 'Canal Street'])
+        expect(page.body, secret).not.toContain(secret)
+      expect(SharedCoverLetterSchema.parse(page.json()).document.recipient).toMatchObject({
+        name: HIDDEN_PERSONAL.name,
+        title: 'Head of People',
+      })
+    })
+
+    it("swaps the CV owner's name where the text mentions it", async () => {
+      const cv = await createPersonalCv()
+      const summary = cv.document.sections.find((section) => section.type === 'summary')!
+      if (summary.type !== 'summary') throw new Error('expected a summary')
+      summary.text = 'Maria Petrova designs interfaces.'
+      await call('PATCH', `/cvs/${cv.id}`, {
+        revision: 2,
+        document: { ...cv.document, header: { ...cv.document.header, ...personal } },
+      })
+      const link = await share(cv.id, true)
+      await call('PUT', `/cvs/${cv.id}/share`, { hidePersonal: true })
+      expect((await shared(link.slug)).body).not.toMatch(/Maria|Petrova/)
+    })
+
     it('rejects an empty change', async () => {
       const cv = await createCv()
       expect((await call('PUT', `/cvs/${cv.id}/share`, {})).statusCode).toBe(400)

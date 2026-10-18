@@ -1,5 +1,6 @@
 export const nav = {
   main: 'Main',
+  skipToContent: 'Skip to content',
   dashboard: 'Dashboard',
   documents: 'Documents',
   savedJobs: 'Saved Jobs',

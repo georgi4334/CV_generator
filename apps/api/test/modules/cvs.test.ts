@@ -42,6 +42,15 @@ describe.skipIf(!dbAvailable)('CV API', () => {
     expect(res.json().error.details.length).toBeGreaterThan(0)
   })
 
+  it('refuses a text longer than 5,000 characters anywhere in the CV', async () => {
+    const cv = await create()
+    const summary = cv.document.sections.find((section) => section.type === 'summary')!
+    if (summary.type !== 'summary') throw new Error('expected a summary')
+    summary.text = 'w'.repeat(5001)
+    const res = await call('PATCH', `/cvs/${cv.id}`, { revision: 1, document: cv.document })
+    expect(res.statusCode).toBe(400)
+  })
+
   it('refuses header text longer than the page can hold', async () => {
     const cv = await create()
     const header = { ...cv.document.header, phone: '0'.repeat(5000) }
