@@ -109,10 +109,45 @@ export function SectionTitle({ children }: { children: ReactNode }) {
       <h2 className="mb-[0.6em]">
         <span
           className="inline-block rounded-pill px-[0.8em] py-[0.15em] text-[0.85em] font-semibold tracking-wider text-white uppercase"
-          style={{ background: 'var(--cv-accent)' }}
+          style={{ background: 'var(--cv-title-bg)' }}
         >
           {children}
         </span>
+      </h2>
+    )
+  }
+  if (titleVariant === 'block') {
+    return (
+      <h2
+        className="mb-[0.6em] rounded-[0.25em] px-[0.6em] py-[0.2em] text-[0.95em] font-semibold tracking-[0.1em] text-white uppercase"
+        style={{ background: 'var(--cv-title-bg)' }}
+      >
+        {children}
+      </h2>
+    )
+  }
+  if (titleVariant === 'caps') {
+    return (
+      <h2 className="mb-[0.6em] text-[1.15em] leading-tight font-black tracking-wide uppercase">
+        <span className="block" style={{ color: 'var(--cv-strong)' }}>
+          {children}
+        </span>
+        <span
+          aria-hidden
+          className="mt-[0.25em] block h-[0.22em] w-[2.2em]"
+          style={{ background: 'var(--cv-accent-text)' }}
+        />
+      </h2>
+    )
+  }
+  if (titleVariant === 'elegant') {
+    return (
+      <h2
+        className="mb-[0.55em] flex items-center gap-[0.6em] text-[1.2em] leading-tight font-medium italic"
+        style={{ color: 'var(--cv-accent-text)' }}
+      >
+        <span className="shrink-0">{children}</span>
+        <span aria-hidden className="h-px flex-1" style={{ background: 'var(--cv-rule)' }} />
       </h2>
     )
   }

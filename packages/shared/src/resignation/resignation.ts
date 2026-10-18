@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { CvLanguageSchema, type CvLanguage } from '../cv/common'
-import { CvDesignSchema, DEFAULT_DESIGN } from '../cv/design'
+import { CvDesignSchema, DEFAULT_DESIGN, letterDesign } from '../cv/design'
 import type { CvDocument } from '../cv/document'
 import { formatLetterDate } from '../cover-letter/coverLetter'
 
@@ -155,6 +155,6 @@ export function createResignationLetter({
     paragraphs: texts.paragraphs(company),
     closing: texts.closing,
     signature: name,
-    design: cv ? { ...cv.design } : { ...DEFAULT_DESIGN },
+    design: cv ? letterDesign(cv.design) : { ...DEFAULT_DESIGN },
   }
 }

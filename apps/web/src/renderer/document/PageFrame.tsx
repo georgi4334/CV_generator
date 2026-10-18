@@ -52,6 +52,7 @@ export function PageFrame({
   const fullHeader = template.headerPlacement === 'full'
   const { width: sidebarWidth, fill } = sidebarFor(template, design.columnLayout)
   const twoColumns = template.columns === 2
+  const sidebarHeader = twoColumns && template.headerPlacement === 'sidebar'
   const filledSidebar = fill !== 'none'
 
   // A full-width header is measured with its padding (and band), a header in
@@ -69,11 +70,12 @@ export function PageFrame({
       <div data-measure-header={measuring || undefined}>{headerContent}</div>
     ) : null
 
-  const renderBlocks = (blocks: Block[]) =>
+  /** `belowHeader`: the column's first block on the first page sits under the header. */
+  const renderBlocks = (blocks: Block[], belowHeader = true) =>
     blocks.map((block, index) => {
       const startsColumn = index === 0
       const marginTop = startsColumn
-        ? isFirstPage
+        ? isFirstPage && belowHeader
           ? sectionGap
           : 0
         : block.kind === 'section'
@@ -97,6 +99,7 @@ export function PageFrame({
   const mainColumn = (
     <div
       className="min-w-0 flex-1"
+      data-column="main"
       style={{
         paddingTop: columnPaddingTop,
         paddingBottom: margin,
@@ -104,14 +107,15 @@ export function PageFrame({
         paddingRight: !twoColumns || template.sidebarSide === 'left' ? margin : innerGap,
       }}
     >
-      {!fullHeader && headerNode}
-      {renderBlocks(main)}
+      {!fullHeader && !sidebarHeader && headerNode}
+      {renderBlocks(main, !sidebarHeader)}
     </div>
   )
 
   const sidebarColumn = twoColumns ? (
     <div
       className="shrink-0"
+      data-column="sidebar"
       style={{
         width: `${sidebarWidth * 100}%`,
         paddingTop: columnPaddingTop,
@@ -132,7 +136,8 @@ export function PageFrame({
       }}
     >
       {/* Line the sidebar up with the main column's first section, below the header; the photo can sit in that space. */}
-      {!fullHeader && isFirstPage && (
+      {sidebarHeader && headerNode}
+      {!fullHeader && !sidebarHeader && isFirstPage && (
         <div className="flex items-center justify-center" style={{ height: headerHeight }}>
           {photo.inSidebar && (
             <PhotoImage header={header} className="aspect-square h-full max-h-[10em] max-w-full" />

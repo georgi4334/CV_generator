@@ -46,7 +46,7 @@ export const PROFESSIONS: Record<ProfessionId, Profession> = {
     id: 'designer',
     name: 'Designer',
     description: 'UI/UX, graphic and product designers',
-    recommendedTemplates: ['creative', 'stylish', 'contemporary'],
+    recommendedTemplates: ['creative', 'portfolio', 'vivid'],
     sections: [
       ['summary', 'main'],
       ['experience', 'main'],
@@ -61,7 +61,7 @@ export const PROFESSIONS: Record<ProfessionId, Profession> = {
     id: 'sales-marketing',
     name: 'Sales & Marketing',
     description: 'Sales, marketing, account and business roles',
-    recommendedTemplates: ['polished', 'contemporary', 'timeline'],
+    recommendedTemplates: ['polished', 'spotlight', 'bold'],
     sections: [
       ['summary', 'main'],
       ['experience', 'main'],

@@ -2,6 +2,8 @@
 // subsets; the browser only downloads the files for fonts and characters actually used.
 import '@fontsource-variable/inter'
 import '@fontsource-variable/lora'
+// The Elegant template's name is in italics.
+import '@fontsource-variable/lora/wght-italic.css'
 import '@fontsource-variable/merriweather'
 import '@fontsource-variable/montserrat'
 import '@fontsource-variable/noto-serif'

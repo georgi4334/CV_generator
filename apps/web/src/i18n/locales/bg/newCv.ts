@@ -14,8 +14,6 @@ export const newCv: Messages['newCv'] = {
   otherDescription: 'Всяка друга работа. Започнете от общ изглед.',
   professions: 'Професии',
   recommendedFor: 'Препоръчани за: {{profession}}',
-  moreTemplates: 'Още шаблони',
-  allTemplates: 'Всички шаблони',
   previewsNote: 'Прегледите показват примерно съдържание.',
   startLegend: 'Как искате да започнете?',
   startExample: 'Започни от пример',

@@ -15,8 +15,6 @@ export const newCv: Messages['newCv'] = {
   otherDescription: 'Jeder andere Beruf. Starten Sie mit einem allgemeinen Layout.',
   professions: 'Berufe',
   recommendedFor: 'Empfohlen für: {{profession}}',
-  moreTemplates: 'Weitere Vorlagen',
-  allTemplates: 'Alle Vorlagen',
   previewsNote: 'Die Vorschauen zeigen Beispielinhalte.',
   startLegend: 'Wie möchten Sie beginnen?',
   startExample: 'Mit einem Beispiel beginnen',

@@ -23,7 +23,7 @@ describe('create new CV', () => {
 
     const recommended = within(screen.getByRole('region', { name: 'Recommended for Designer' }))
     expect(recommended.getAllByRole('button')).toEqual(
-      ['Creative', 'Stylish', 'Contemporary'].map((name) =>
+      ['Creative', 'Portfolio', 'Vivid'].map((name) =>
         recommended.getByRole('button', { name: `${name} Recommended` }),
       ),
     )
@@ -92,10 +92,14 @@ describe('create new CV', () => {
   it('offers every template and a blank start for "Other"', async () => {
     renderRoute('/cvs/new')
     fireEvent.click(screen.getByRole('button', { name: /^Other/ }))
-    const all = within(screen.getByRole('region', { name: 'All templates' }))
-    expect(all.getAllByRole('button')).toHaveLength(8)
+    // Every template, grouped by the kind of work it suits.
+    const groups = ['Professional', 'Design & creative', 'Marketing', 'Sales'].map((name) =>
+      within(screen.getByRole('region', { name })),
+    )
+    expect(groups.flatMap((group) => group.getAllByRole('button'))).toHaveLength(16)
+    expect(groups[3]!.getByRole('button', { name: 'Monogram' })).toBeDefined()
     expect(screen.queryByText('Recommended')).toBeNull()
-    fireEvent.click(all.getByRole('button', { name: 'Compact' }))
+    fireEvent.click(groups[0]!.getByRole('button', { name: 'Compact' }))
 
     expect(screen.queryByRole('radio', { name: /Start from an example/ })).toBeNull()
     expect(screen.getByRole('radio', { name: /Start blank/ })).toHaveProperty('checked', true)
@@ -138,7 +142,7 @@ describe('create new CV', () => {
     renderRoute(`/cvs/${cv.id}/edit`)
     await screen.findByDisplayValue('Nurse CV')
     fireEvent.click(screen.getByRole('button', { name: 'Templates' }))
-    const list = within(await screen.findByRole('list', { name: 'Templates' }))
+    const list = within(await screen.findByRole('group', { name: 'Templates' }))
     expect(list.getByRole('button', { name: 'Timeline Recommended' })).toBeDefined()
     expect(list.getByRole('button', { name: 'Compact' })).toBeDefined()
   })
