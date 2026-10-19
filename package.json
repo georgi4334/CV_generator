@@ -18,7 +18,6 @@
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",
     "prepare": "husky",
-    "e2e:update": "pnpm --filter @cv/e2e e2e:update",
     "coverage": "pnpm -r test:coverage",
     "smoke": "pnpm --filter @cv/e2e smoke"
   },

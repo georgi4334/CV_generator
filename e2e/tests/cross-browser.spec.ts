@@ -85,7 +85,8 @@ test('a job is saved with its date and description', async ({ page }) => {
     .getByRole('button', { name: /^(Add job|Save)$/ })
     .last()
     .click()
-  await expect(page.getByRole('button', { name: 'Product Designer', exact: true })).toBeVisible()
+  // A table row on wide screens, a card on phones: look for the text, not a button name.
+  await expect(page.getByText('Product Designer', { exact: true }).first()).toBeVisible()
   const jobs = await (await page.request.get('/api/jobs')).json()
   expect(jobs[0].description).toContain('Figma')
   expect(jobs[0].dateSaved).toMatch(/^\d{4}-\d{2}-\d{2}$/)

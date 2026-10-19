@@ -3,8 +3,10 @@ import { expect, signUp, test } from './fixtures'
 /*
  * Screenshots of the CV templates. The text and data are the example CV's, which never change,
  * so a difference means the layout changed: a header that moved, a sidebar that shrank, a title
- * style that broke. After a change you meant to make, refresh them with `pnpm e2e:update` and
- * look at the new pictures before committing them.
+ * style that broke. Pixels differ a little between computers, so the pictures are made by CI:
+ * after a change you meant to make, add the label "update-screenshots" to the pull request
+ * (.github/workflows/update-screenshots.yml), then look at the new pictures in the commit it adds.
+ * Locally this runs only with E2E_VISUAL=1, against pictures made on the same computer.
  */
 test.describe('CV templates', () => {
   test.beforeEach(async ({ page }) => {

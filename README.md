@@ -187,7 +187,7 @@ Production-only settings (storage, email, proxy secret, error reporting) are in 
   - failures (two tabs editing one CV, server errors and going offline while saving, AI busy or over its limit, a session that ends, a server error when a document opens),
   - PDFs (page size, Cyrillic text, margins on every page of a long letter, a CV that spans several pages),
   - odd data (Cyrillic, emoji, markup that must not run, one very long word),
-  - the look of every template (screenshots; after a change you meant to make, run `pnpm e2e:update` and look at the new pictures before committing them),
+  - the look of every template (screenshots made and compared by CI, because pixels differ a little between computers: after a design change you meant to make, add the label `update-screenshots` to the pull request and CI commits the new pictures; look at them before merging),
   - accessibility (axe) and a phone,
   - Safari's engine (WebKit) on a desktop and an iPhone, which CI installs; locally set `E2E_WEBKIT=1` after `playwright install webkit`.
 - `pnpm coverage`: the unit and API tests with a coverage report for every package (CI shows the table in the run summary). There is no minimum yet; it shows where tests are thin.
