@@ -2,6 +2,12 @@ import { z } from 'zod'
 
 export const IdSchema = z.string().min(1)
 
+/**
+ * An id that a request points at (a job, a CV, a cover letter): a malformed one is refused as
+ * invalid input (400) instead of reaching the database, which would answer with a 500.
+ */
+export const RefIdSchema = z.guid()
+
 /** "2024" or "2024-05". Dates on a CV rarely need a day. */
 export const YearMonthSchema = z
   .string()

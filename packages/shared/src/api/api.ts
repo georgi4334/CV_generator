@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { TEXT_MAX, withinTextLimit } from '../common/textLimit'
-import { IdSchema } from '../cv/common'
+import { IdSchema, RefIdSchema } from '../cv/common'
 import { CoverLetterDocumentSchema } from '../cover-letter/coverLetter'
 import { CvDocumentSchema } from '../cv/document'
 import { headerWithinLimits } from '../cv/header'
@@ -42,7 +42,7 @@ const TitleSchema = z.string().trim().min(1).max(TITLE_MAX)
 export const CreateCvInputSchema = z.object({
   title: TitleSchema.optional(),
   professionId: ProfessionIdSchema.nullable().optional(),
-  jobId: IdSchema.nullable().optional(),
+  jobId: RefIdSchema.nullable().optional(),
   /** Omit for an empty CV in the default layout. */
   document: SaveableCvSchema.optional(),
 })
@@ -57,7 +57,7 @@ export const UpdateCvInputSchema = z
     revision: z.number().int().positive().optional(),
     title: TitleSchema.optional(),
     professionId: ProfessionIdSchema.nullable().optional(),
-    jobId: IdSchema.nullable().optional(),
+    jobId: RefIdSchema.nullable().optional(),
     document: SaveableCvSchema.optional(),
   })
   .refine((input) => input.document === undefined || input.revision !== undefined, {
@@ -67,13 +67,13 @@ export const UpdateCvInputSchema = z
 export type UpdateCvInput = z.infer<typeof UpdateCvInputSchema>
 
 /** Copy a CV; with `jobId`, a copy tailored for that saved job, which then points at it. */
-export const DuplicateCvInputSchema = z.object({ jobId: IdSchema.optional() })
+export const DuplicateCvInputSchema = z.object({ jobId: RefIdSchema.optional() })
 export type DuplicateCvInput = z.infer<typeof DuplicateCvInputSchema>
 
 export const CreateCoverLetterInputSchema = z.object({
   title: TitleSchema.optional(),
-  cvId: IdSchema.nullable().optional(),
-  jobId: IdSchema.nullable().optional(),
+  cvId: RefIdSchema.nullable().optional(),
+  jobId: RefIdSchema.nullable().optional(),
   /** Omit for an empty letter (without a CV's header and design). */
   document: SaveableLetterSchema.optional(),
 })
@@ -84,8 +84,8 @@ export const UpdateCoverLetterInputSchema = z
   .object({
     revision: z.number().int().positive().optional(),
     title: TitleSchema.optional(),
-    cvId: IdSchema.nullable().optional(),
-    jobId: IdSchema.nullable().optional(),
+    cvId: RefIdSchema.nullable().optional(),
+    jobId: RefIdSchema.nullable().optional(),
     document: SaveableLetterSchema.optional(),
   })
   .refine((input) => input.document === undefined || input.revision !== undefined, {
