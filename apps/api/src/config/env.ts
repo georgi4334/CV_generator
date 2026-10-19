@@ -52,6 +52,10 @@ const EnvSchema = z.object({
     .transform((v) => v === 'true'),
   /** Folder for uploaded images in development. */
   UPLOAD_DIR: z.string().default('uploads'),
+  /** Browser tests only: emails are appended to this file (JSON lines) so a test can read the links. */
+  E2E_MAIL_FILE: z.string().default(''),
+  /** Browser tests only: multiplies the sign-in and sign-up rate limits (1 in real use). */
+  AUTH_LIMIT_SCALE: z.coerce.number().int().min(1).max(1000).default(1),
 })
 
 export const env = EnvSchema.parse(process.env)
