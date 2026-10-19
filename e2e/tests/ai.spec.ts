@@ -10,7 +10,7 @@ test('Fix Mistakes, Check & Tailor and the assistant (mock AI)', async ({ page }
   // Put a typo into the summary.
   const summary = page.getByRole('document', { name: 'CV' }).getByText(/^Product designer focused/)
   await summary.click()
-  await page.keyboard.press('End')
+  await page.keyboard.press('ControlOrMeta+End')
   await page.keyboard.type(' Worked with teh team.')
   await expect(page.getByText('Saved', { exact: true })).toBeVisible({ timeout: 10_000 })
 

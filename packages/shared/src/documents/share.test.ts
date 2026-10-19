@@ -103,4 +103,23 @@ describe('hiding names inside the text', () => {
     letter.paragraphs = ['Thanks, Ivan.']
     expect(JSON.stringify(hidePersonalDetails(letter))).not.toContain('Ivan')
   })
+
+  it('never rewrites the fixed values the app reads, even when a name equals one', () => {
+    const odd = {
+      ...cv,
+      header: { ...cv.header, name: 'Main Sidebar Skills' },
+    }
+    const hidden = hidePersonalDetails(odd)
+    expect(hidden.sections.map((s) => [s.type, s.column])).toEqual(
+      odd.sections.map((s) => [s.type, s.column]),
+    )
+  })
+
+  it("hides the owner's name in a cover letter's headline too", () => {
+    const letter = createCoverLetter({
+      cv: { ...cv, header: { ...cv.header, headline: 'Maria Petrova, designer' } },
+    })
+    const hidden = hidePersonalDetails(letter)
+    expect(hidden.header.headline).toBe(`${HIDDEN_PERSONAL.name}, designer`)
+  })
 })

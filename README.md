@@ -193,7 +193,7 @@ Production-only settings (storage, email, proxy secret, error reporting) are in 
 - `pnpm coverage`: the unit and API tests with a coverage report for every package (CI shows the table in the run summary). There is no minimum yet; it shows where tests are thin.
 - `pnpm smoke`: a short check of the **live** site after a deploy, with the real database, photo storage and (if you ask) AI; see [`docs/DEPLOY.md`](docs/DEPLOY.md).
 
-CI runs the format check, lint, type checks, tests and build, then the browser tests, on every push and pull request.
+CI runs the format check, lint, type checks, tests and build, on every push and pull request, and the browser tests on every pull request.
 
 ## Deployment
 
