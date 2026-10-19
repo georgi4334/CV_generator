@@ -29,6 +29,7 @@
 - [Tests](#tests)
 - [Deployment](#deployment)
 - [Project structure](#project-structure)
+- [Documentation](#documentation)
 - [Roadmap](#roadmap)
 - [How to contribute](#how-to-contribute)
 - [Credits](#credits)
@@ -222,6 +223,31 @@ docs/         Plan, deployment guide, architecture, screenshots
 ```
 
 Inside the apps, code is organised by feature; see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the folder map and the import rules.
+
+## Documentation
+
+Start at [`docs/README.md`](docs/README.md): it has the map, a reading order for new developers
+and a "where do I find...?" table.
+
+| Document                                                     | What is in it                                                                  |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| [`docs/README.md`](docs/README.md)                           | The documentation map and reading order                                        |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)               | Folder map and rules for imports and styles                                    |
+| [`docs/domain-model.md`](docs/domain-model.md)               | Documents, sections, design, limits, share links, glossary                     |
+| [`docs/web/README.md`](docs/web/README.md)                   | The web app: boot, routes, features, state, i18n, styling                      |
+| [`docs/web/editor.md`](docs/web/editor.md)                   | Editing in place: autosave, conflicts, undo, panels                            |
+| [`docs/web/renderer.md`](docs/web/renderer.md)               | Drawing documents: pagination, templates, print and PDF                        |
+| [`docs/api/README.md`](docs/api/README.md)                   | The backend: lifecycle, auth, limits, storage, mail, AI, environment variables |
+| [`docs/api/endpoints.md`](docs/api/endpoints.md)             | Every endpoint                                                                 |
+| [`docs/data-model.md`](docs/data-model.md)                   | Database tables and migrations                                                 |
+| [`docs/testing.md`](docs/testing.md)                         | Every kind of test, CI, troubleshooting                                        |
+| [`docs/guides/README.md`](docs/guides/README.md)             | Recipes: add a template, a section, an endpoint, a language, an AI feature     |
+| [`docs/DEPLOY.md`](docs/DEPLOY.md)                           | Deploying on free plans and checking the live site                             |
+| [`docs/known-issues.md`](docs/known-issues.md)               | Problems and oddities found while documenting                                  |
+| [`docs/PLAN.md`](docs/PLAN.md)                               | The development plan and a log of what was built                               |
+| [`apps/web/src/i18n/README.md`](apps/web/src/i18n/README.md) | Adding or changing translations                                                |
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Roadmap
 
