@@ -15,6 +15,8 @@ export function productionProblems(env: Env): string[] {
     const r2 = missing(['R2_ACCOUNT_ID', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY', 'R2_BUCKET'])
     if (r2.length) problems.push(`R2 storage needs ${r2.join(', ')}`)
   }
+  if (env.E2E_MAIL_FILE) problems.push('E2E_MAIL_FILE is for browser tests only')
+  if (env.AUTH_LIMIT_SCALE > 1) problems.push('AUTH_LIMIT_SCALE is for browser tests only')
   const mail = missing(['BREVO_API_KEY', 'MAIL_FROM'])
   if (mail.length) problems.push(`Emails need ${mail.join(', ')}`)
   if (env.APP_URL.startsWith('http://localhost'))

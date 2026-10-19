@@ -36,6 +36,8 @@ export interface AppOptions {
   cookie?: Partial<CookieSettings>
   /** The first account takes over the data of the old pre-login "dev" user. */
   claimDevData?: boolean
+  /** Multiplies the sign-in and sign-up rate limits (browser tests only). */
+  authLimitScale?: number
   /** Trust X-Forwarded-For (behind a hosting proxy), so rate limits see real addresses. */
   trustProxy?: boolean
   /** The AI service; absent or null turns the AI features off. */
@@ -152,6 +154,7 @@ export async function buildApp(opts: AppOptions) {
           appUrl: opts.appUrl ?? 'http://localhost:5173',
           cookie: cookieSettings,
           claimDevData: opts.claimDevData ?? false,
+          limitScale: opts.authLimitScale,
         })
 
         // Acting for the signed-in user

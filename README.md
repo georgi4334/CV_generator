@@ -29,6 +29,7 @@
 - [Tests](#tests)
 - [Deployment](#deployment)
 - [Project structure](#project-structure)
+- [Documentation](#documentation)
 - [Roadmap](#roadmap)
 - [How to contribute](#how-to-contribute)
 - [Credits](#credits)
@@ -105,6 +106,8 @@ Notes:
 | `pnpm build`                        | Build all packages                              |
 | `pnpm test`                         | Vitest in every package                         |
 | `pnpm e2e`                          | Browser tests (Playwright)                      |
+| `pnpm coverage`                     | Tests with a coverage report                    |
+| `pnpm smoke`                        | Check the live site after a deploy              |
 | `pnpm lint`                         | ESLint across the repo                          |
 | `pnpm typecheck`                    | TypeScript check in every package               |
 | `pnpm format`                       | Format with Prettier                            |
@@ -179,9 +182,19 @@ Production-only settings (storage, email, proxy secret, error reporting) are in 
 ## Tests
 
 - `pnpm test`: unit and API tests. The API tests use a `cv_generator_test` database, created automatically on the Postgres from `pnpm db:up`. Without a running Postgres they are skipped with a warning (CI always runs them).
-- `pnpm e2e`: browser tests with Playwright against the production builds, a fresh `cv_generator_e2e` database and the mock AI, including automatic accessibility checks (axe). They cover desktop and a phone. The first time, install the browser: `pnpm --filter @cv/e2e exec playwright install chromium`.
+- `pnpm e2e`: browser tests with Playwright against the production builds, a fresh `cv_generator_e2e` database, the mock AI and a mailer that records emails, so the tests can open the links. The first time, install the browser: `pnpm --filter @cv/e2e exec playwright install chromium`. They cover:
+  - the main journeys (sign up, a CV edited, saved, restyled and shared; cover and resignation letters; saved jobs; the AI panels),
+  - the email flows (confirm, resend, forgot and reset password, delete account),
+  - failures (two tabs editing one CV, server errors and going offline while saving, AI busy or over its limit, a session that ends, a server error when a document opens),
+  - PDFs (page size, Cyrillic text, margins on every page of a long letter, a CV that spans several pages),
+  - odd data (Cyrillic, emoji, markup that must not run, one very long word),
+  - the look of every template (screenshots made and compared by CI, because pixels differ a little between computers: after a design change you meant to make, add the label `update-screenshots` to the pull request and CI commits the new pictures; look at them before merging, and approve the waiting CI run, because GitHub holds back checks on a commit that a workflow made),
+  - accessibility (axe) and a phone,
+  - Safari's engine (WebKit) on a desktop and an iPhone, which CI installs; locally set `E2E_WEBKIT=1` after `playwright install webkit`.
+- `pnpm coverage`: the unit and API tests with a coverage report for every package (CI shows the table in the run summary). There is no minimum yet; it shows where tests are thin.
+- `pnpm smoke`: a short check of the **live** site after a deploy, with the real database, photo storage and (if you ask) AI; see [`docs/DEPLOY.md`](docs/DEPLOY.md).
 
-CI runs the format check, lint, type checks, tests and build, then the browser tests, on every push and pull request.
+CI runs the format check, lint, type checks, tests and build, on every push and pull request, and the browser tests on every pull request.
 
 ## Deployment
 
@@ -210,6 +223,31 @@ docs/         Plan, deployment guide, architecture, screenshots
 ```
 
 Inside the apps, code is organised by feature; see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the folder map and the import rules.
+
+## Documentation
+
+Start at [`docs/README.md`](docs/README.md): it has the map, a reading order for new developers
+and a "where do I find...?" table.
+
+| Document                                                     | What is in it                                                                  |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| [`docs/README.md`](docs/README.md)                           | The documentation map and reading order                                        |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)               | Folder map and rules for imports and styles                                    |
+| [`docs/domain-model.md`](docs/domain-model.md)               | Documents, sections, design, limits, share links, glossary                     |
+| [`docs/web/README.md`](docs/web/README.md)                   | The web app: boot, routes, features, state, i18n, styling                      |
+| [`docs/web/editor.md`](docs/web/editor.md)                   | Editing in place: autosave, conflicts, undo, panels                            |
+| [`docs/web/renderer.md`](docs/web/renderer.md)               | Drawing documents: pagination, templates, print and PDF                        |
+| [`docs/api/README.md`](docs/api/README.md)                   | The backend: lifecycle, auth, limits, storage, mail, AI, environment variables |
+| [`docs/api/endpoints.md`](docs/api/endpoints.md)             | Every endpoint                                                                 |
+| [`docs/data-model.md`](docs/data-model.md)                   | Database tables and migrations                                                 |
+| [`docs/testing.md`](docs/testing.md)                         | Every kind of test, CI, troubleshooting                                        |
+| [`docs/guides/README.md`](docs/guides/README.md)             | Recipes: add a template, a section, an endpoint, a language, an AI feature     |
+| [`docs/DEPLOY.md`](docs/DEPLOY.md)                           | Deploying on free plans and checking the live site                             |
+| [`docs/known-issues.md`](docs/known-issues.md)               | Problems and oddities found while documenting                                  |
+| [`docs/PLAN.md`](docs/PLAN.md)                               | The development plan and a log of what was built                               |
+| [`apps/web/src/i18n/README.md`](apps/web/src/i18n/README.md) | Adding or changing translations                                                |
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Roadmap
 

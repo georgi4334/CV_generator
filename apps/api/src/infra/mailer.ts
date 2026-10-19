@@ -1,3 +1,5 @@
+import { appendFile } from 'node:fs/promises'
+
 export interface Email {
   to: string
   subject: string
@@ -20,6 +22,19 @@ export function createLogMailer(log: (message: string) => void = console.info): 
     delivers: false,
     async send({ to, subject, text }) {
       log(`\n--- Email to ${to}: ${subject} ---\n${text}\n---`)
+    },
+  }
+}
+
+/**
+ * Browser-test mailer: appends each email to a file as one JSON line, so a test
+ * running in another process can read the links the API would have sent.
+ */
+export function createFileMailer(path: string): Mailer {
+  return {
+    delivers: true,
+    async send(email) {
+      await appendFile(path, `${JSON.stringify(email)}\n`)
     },
   }
 }

@@ -72,7 +72,7 @@ const TEXTS: Record<
     reset: {
       subject: 'Passwort zurücksetzen',
       lines: (link) => [
-        'Jemand hat angefordert, das Passwort Ihres CV-Generator-Kontos zurückzusetzen.',
+        `Jemand hat angefordert, das Passwort Ihres ${APP_NAME}-Kontos zurückzusetzen.`,
         '',
         'Wählen Sie über diesen Link ein neues Passwort (1 Stunde gültig):',
         link,

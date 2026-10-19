@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { JOB_DESCRIPTION_MAX } from '../ai/ai'
-import { IdSchema } from '../cv/common'
+import { IdSchema, RefIdSchema } from '../cv/common'
 
 export const JOB_STATUSES = [
   'to_apply',
@@ -77,8 +77,8 @@ export const CreateJobInputSchema = z.object({
   status: jobFields.status.default('to_apply'),
   type: jobFields.type.default(null),
   dateApplied: PastOrTodaySchema.nullable().default(null),
-  cvId: jobFields.cvId.default(null),
-  coverLetterId: jobFields.coverLetterId.default(null),
+  cvId: RefIdSchema.nullable().default(null),
+  coverLetterId: RefIdSchema.nullable().default(null),
   notes: jobFields.notes.default(''),
   location: jobFields.location.default(''),
   salary: jobFields.salary.default(''),
@@ -91,7 +91,12 @@ export type CreateJobInput = z.input<typeof CreateJobInputSchema>
 
 /** Inline edits and the drawer send only the fields that changed. */
 export const UpdateJobInputSchema = z
-  .object({ ...jobFields, dateApplied: PastOrTodaySchema.nullable() })
+  .object({
+    ...jobFields,
+    cvId: RefIdSchema.nullable(),
+    coverLetterId: RefIdSchema.nullable(),
+    dateApplied: PastOrTodaySchema.nullable(),
+  })
   .partial()
 export type UpdateJobInput = z.infer<typeof UpdateJobInputSchema>
 

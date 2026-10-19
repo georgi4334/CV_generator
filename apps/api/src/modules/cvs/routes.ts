@@ -88,7 +88,7 @@ export async function cvRoutes(app: FastifyInstance, opts: { database: Database 
     }
   }
 
-  /** Deletes the oldest automatic snapshots beyond the plan's limit. */
+  /** Deletes the oldest versions (automatic or named) beyond the plan's limit. */
   async function pruneVersions(cvId: string, plan: keyof typeof PLAN_LIMITS) {
     const keep = PLAN_LIMITS[plan].maxVersionsPerCv
     const stale = await db

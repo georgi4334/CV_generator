@@ -9,7 +9,7 @@ import { LanguageSelect } from '@/shared/ui/LanguageSelect'
 import { UserMenu } from '@/features/auth/components/UserMenu'
 import { LegalFooter } from '@/features/legal/LegalLayout'
 import { VerifyReminder } from '@/features/auth/components/VerifyReminder'
-import { NEW_CV_PATH, NEW_LETTER_PATH } from '@/shared/lib/paths'
+import { NEW_CV_PATH, NEW_LETTER_PATH, NEW_RESIGNATION_PATH } from '@/shared/lib/paths'
 import { useHealth } from '@/shared/api/useHealth'
 import { useBreakpoint } from '@/shared/lib/useBreakpoint'
 import { PageContentLoading } from '@/shared/ui/LoadStates'
@@ -23,7 +23,7 @@ const TABS: (Tab & { icon: LucideIcon; also?: string[] })[] = [
     label: 'nav.documents',
     icon: Files,
     end: false,
-    also: [NEW_CV_PATH, NEW_LETTER_PATH],
+    also: [NEW_CV_PATH, NEW_LETTER_PATH, NEW_RESIGNATION_PATH],
   },
   { to: '/jobs', label: 'nav.savedJobs', icon: Briefcase, end: false },
 ]

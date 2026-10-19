@@ -6,7 +6,7 @@ import { createDb } from './db/client'
 import { createMigrator, runMigrations } from './db/migrate'
 import { productionProblems, productionWarnings } from './config/production'
 import { env } from './config/env'
-import { createBrevoMailer, createLogMailer } from './infra/mailer'
+import { createBrevoMailer, createFileMailer, createLogMailer } from './infra/mailer'
 import { createR2Storage } from './infra/storage/r2'
 import { createLocalStorage } from './infra/storage/index'
 
@@ -57,12 +57,14 @@ if (aiProvider === 'mock' && env.NODE_ENV === 'production') {
   throw new Error('AI_PROVIDER=mock is for development only')
 }
 
-const mailer = env.BREVO_API_KEY
-  ? createBrevoMailer({
-      apiKey: env.BREVO_API_KEY,
-      from: { email: env.MAIL_FROM, name: env.MAIL_FROM_NAME },
-    })
-  : createLogMailer()
+const mailer = env.E2E_MAIL_FILE
+  ? createFileMailer(env.E2E_MAIL_FILE)
+  : env.BREVO_API_KEY
+    ? createBrevoMailer({
+        apiKey: env.BREVO_API_KEY,
+        from: { email: env.MAIL_FROM, name: env.MAIL_FROM_NAME },
+      })
+    : createLogMailer()
 
 const app = await buildApp({
   corsOrigin: env.CORS_ORIGIN,
@@ -98,6 +100,7 @@ const app = await buildApp({
   // Never hand a production database's first account someone else's data.
   claimDevData: env.NODE_ENV !== 'production',
   trustProxy: env.TRUST_PROXY,
+  authLimitScale: env.AUTH_LIMIT_SCALE,
   ai: {
     provider:
       aiProvider === 'gemini'
