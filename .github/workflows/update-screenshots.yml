@@ -4,6 +4,9 @@
 #
 # Use it: add the label "update-screenshots" to the pull request. After a few minutes a commit
 # "Update template screenshots" appears on the branch. Look at the new pictures in the commit.
+#
+# GitHub holds back the other checks on a commit that a workflow made: open the waiting CI run
+# and press "Approve and run", or push any change to the branch.
 name: Update screenshots
 
 on:
