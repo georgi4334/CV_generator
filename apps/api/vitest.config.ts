@@ -7,5 +7,12 @@ export default defineConfig({
     fileParallelism: false,
     // Password hashing is slow on purpose; a busy machine (CI, other tests) needs more than 5 s.
     testTimeout: 20_000,
+    coverage: {
+      provider: 'v8',
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: ['src/**/*.test.{ts,tsx}', 'src/**/*.test.ts', 'src/**/*.d.ts'],
+      reporter: ['text-summary', 'json-summary', 'lcov'],
+      reportsDirectory: 'coverage',
+    },
   },
 })

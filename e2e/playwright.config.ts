@@ -37,7 +37,10 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      testIgnore: /mobile\.spec\.ts|cross-browser\.spec\.ts/,
+      // The Safari journeys can be tried in Chromium too (E2E_CROSS_ON_CHROMIUM=1), to debug them.
+      testIgnore: process.env.E2E_CROSS_ON_CHROMIUM
+        ? /mobile\.spec\.ts/
+        : /mobile\.spec\.ts|cross-browser\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1440, height: 950 },

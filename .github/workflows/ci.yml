@@ -41,7 +41,16 @@ jobs:
       - run: pnpm format:check
       - run: pnpm lint
       - run: pnpm typecheck
-      - run: pnpm test
+      - run: pnpm coverage
+      - name: Coverage summary
+        run: node scripts/coverage-summary.mjs >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: |
+            apps/*/coverage
+            packages/*/coverage
+          retention-days: 7
       - run: pnpm build
 
   # Browser tests against the production builds, a real database and the mock AI.
@@ -73,7 +82,7 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @cv/e2e exec playwright install --with-deps chromium
+      - run: pnpm --filter @cv/e2e exec playwright install --with-deps chromium webkit
       - run: pnpm --filter @cv/e2e e2e
       - uses: actions/upload-artifact@v4
         if: failure()

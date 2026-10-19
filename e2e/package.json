@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "e2e": "playwright test",
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json",
+    "e2e:update": "playwright test --update-snapshots",
+    "smoke": "playwright test -c playwright.smoke.config.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",

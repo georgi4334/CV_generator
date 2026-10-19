@@ -138,6 +138,27 @@ database, so Neon can still sleep and stay within its free compute hours.
 - Open a share link in a private window.
 - Run the browser's accessibility/Lighthouse check if you like.
 
+### Or let a script check the live site
+
+`pnpm smoke` runs a short Playwright check against the deployed site: the API and database answer,
+the security headers are there, a CV can be created, edited, given a photo (R2) and shared, it is
+all still there after a reload, and a reset email is accepted for sending. It cleans up after itself.
+
+1. Sign up once by hand with an address you can read, and confirm the email. This is the smoke-test account.
+2. Run it (it works with the Chromium that Playwright already installed for `pnpm e2e`):
+
+   ```bash
+   SMOKE_URL=https://<project>.pages.dev \
+   SMOKE_EMAIL=you@example.com SMOKE_PASSWORD='the password' \
+   pnpm smoke
+   ```
+
+   Add `SMOKE_AI=1` to also call the real AI (it uses 1 of the account's 30 daily requests).
+
+3. The last check only asks for a reset email: look in the inbox (and spam) to see that it arrived.
+
+The first request can take a minute while the free API wakes up.
+
 ## Updating
 
 Merging to `main` redeploys both: Render runs the database migrations on start, Pages

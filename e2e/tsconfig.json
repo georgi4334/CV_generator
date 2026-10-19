@@ -4,5 +4,12 @@
     "lib": ["ES2023", "DOM"],
     "types": ["node"]
   },
-  "include": ["tests", "playwright.config.ts"]
+  "include": [
+    "tests",
+    "smoke",
+    "pdf.ts",
+    "paths.ts",
+    "playwright.config.ts",
+    "playwright.smoke.config.ts"
+  ]
 }
