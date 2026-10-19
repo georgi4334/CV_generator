@@ -21,6 +21,9 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
+    // Route-level tests render the whole app; with coverage on a shared CI runner the slowest take
+    // 5 to 6 seconds, right at Vitest's default limit (2 to 3 seconds on a laptop).
+    testTimeout: 20_000,
     coverage: {
       provider: 'v8',
       include: ['src/**/*.{ts,tsx}'],

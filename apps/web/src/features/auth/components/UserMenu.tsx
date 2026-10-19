@@ -1,21 +1,32 @@
-import { Check, ChevronDown, ChevronLeft, ChevronRight, LogOut, Settings, X } from 'lucide-react'
+import {
+  Check,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  KeyRound,
+  LogOut,
+  Settings,
+  X,
+} from 'lucide-react'
 import { useEffect, useId, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router'
 import { useCurrentUser, useLogout } from '@/features/auth/queries'
 import { AccountSettings } from './AccountSettings'
+import { AiKeySettings } from '@/features/ai/AiKeySettings'
+import { useAiStatus } from '@/features/ai/queries'
 import { Modal } from '@/shared/ui/Modal'
 import { useModalClose } from '@/shared/ui/useModalClose'
 import { THEME_MODES } from '@/shared/ui/themeModes'
 import { useThemeStore } from '@/shared/stores/theme'
 
 /** What the drawer shows: its menu, or one of the views it opens. */
-type View = 'menu' | 'account' | 'theme'
+type View = 'menu' | 'account' | 'theme' | 'ai'
 
-/** `?menu=account` (or `theme`) opens the drawer on that view, e.g. from an old /account link. */
+/** `?menu=account` (or `theme`, `ai`) opens the drawer on that view, e.g. from an old /account link. */
 const MENU_PARAM = 'menu'
 const isView = (value: string | null): value is View =>
-  value === 'menu' || value === 'account' || value === 'theme'
+  value === 'menu' || value === 'account' || value === 'theme' || value === 'ai'
 
 /** First letters of the name (or of the email), shown in the round avatar. */
 function initials(name: string, email: string) {
@@ -117,6 +128,7 @@ export function UserMenu() {
     if (isView(requested)) setView(requested)
   }
   const themeMode = useThemeStore((s) => s.mode)
+  const aiStatus = useAiStatus().data
   const headingId = useId()
 
   // The drawer is open now; take the request out of the address.
@@ -138,7 +150,11 @@ export function UserMenu() {
   const label = user.name || user.email
   const avatar = initials(user.name, user.email)
   const ThemeIcon = THEME_MODES.find((m) => m.mode === themeMode)?.icon ?? Settings
-  const titles = { account: t('auth.accountSettings'), theme: t('common.theme.label') }
+  const titles = {
+    account: t('auth.accountSettings'),
+    theme: t('common.theme.label'),
+    ai: t('ai.key.title'),
+  }
 
   return (
     <>
@@ -192,6 +208,12 @@ export function UserMenu() {
                     value={t(`common.theme.${themeMode}`)}
                     onClick={() => setView('theme')}
                   />
+                  <MenuRow
+                    icon={<KeyRound className="size-4 text-fg-muted" aria-hidden />}
+                    label={t('ai.key.menu')}
+                    value={aiStatus?.keySource === 'own' ? aiStatus.keyHint : t('ai.key.notSet')}
+                    onClick={() => setView('ai')}
+                  />
                 </nav>
                 <div className="pb-safe-card border-t border-line p-card">
                   <button
@@ -231,7 +253,13 @@ export function UserMenu() {
                   key={view}
                   className="pb-safe-card flex-1 animate-view-in overflow-y-auto p-card motion-reduce:animate-none"
                 >
-                  {view === 'account' ? <AccountSettings /> : <ThemeOptions />}
+                  {view === 'account' ? (
+                    <AccountSettings />
+                  ) : view === 'theme' ? (
+                    <ThemeOptions />
+                  ) : (
+                    <AiKeySettings />
+                  )}
                 </div>
               </>
             )}

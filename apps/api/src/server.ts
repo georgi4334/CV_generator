@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/node'
-import { createGeminiProvider } from './modules/ai/gemini'
+import { createGeminiProvider, validateGeminiKey } from './modules/ai/gemini'
 import { createMockProvider } from './modules/ai/mock'
 import { buildApp } from './app'
 import { createDb } from './db/client'
@@ -109,7 +109,16 @@ const app = await buildApp({
           ? createMockProvider()
           : null,
     maxPerMinute: env.AI_MAX_PER_MINUTE,
+    // People's own keys go to Google; the mock AI (tests, demos) answers everyone itself.
+    userKeys:
+      aiProvider === 'mock'
+        ? null
+        : {
+            createProvider: (apiKey, model) => createGeminiProvider({ apiKey, model }),
+            validate: (apiKey) => validateGeminiKey(apiKey),
+          },
   },
+  secretsKey: env.SECRETS_KEY,
 })
 
 const shutdown = async () => {

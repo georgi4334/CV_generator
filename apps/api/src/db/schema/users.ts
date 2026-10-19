@@ -1,5 +1,5 @@
 /** Accounts, sessions and one-time email links. */
-import type { Locale, Plan } from '@cv/shared'
+import type { AiModel, Locale, Plan } from '@cv/shared'
 import { index, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 import { createdAt } from './columns'
 
@@ -14,6 +14,12 @@ export const users = pgTable('users', {
   emailVerifiedAt: timestamp('email_verified_at', { withTimezone: true }),
   /** Interface language; account emails are written in it. */
   locale: text('locale').$type<Locale>().notNull().default('en'),
+  /** The person's own Gemini API key, encrypted (see infra/secrets.ts); null without one. */
+  aiKeyEncrypted: text('ai_key_encrypted'),
+  /** The last characters of that key, to show which one is saved. */
+  aiKeyHint: text('ai_key_hint'),
+  /** The Gemini model used with the person's own key. */
+  aiModel: text('ai_model').$type<AiModel>().notNull().default('gemini-flash-latest'),
   createdAt: createdAt(),
 })
 

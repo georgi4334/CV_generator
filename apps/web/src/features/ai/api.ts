@@ -3,6 +3,7 @@ import {
   AssistResultSchema,
   FixMistakesResultSchema,
   TailorResultSchema,
+  type AiKeyInput,
   type AssistInput,
   type FixMistakesInput,
   type TailorInput,
@@ -13,6 +14,14 @@ import { api } from '@/shared/api/client'
 export const aiApi = {
   async status() {
     const { data } = await api.get('/ai/status')
+    return AiStatusSchema.parse(data)
+  },
+  async saveKey(input: AiKeyInput) {
+    const { data } = await api.put('/ai/key', input, { timeout: 30_000 })
+    return AiStatusSchema.parse(data)
+  },
+  async removeKey() {
+    const { data } = await api.delete('/ai/key')
     return AiStatusSchema.parse(data)
   },
   async fixMistakes(input: FixMistakesInput) {

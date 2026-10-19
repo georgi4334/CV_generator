@@ -20,6 +20,7 @@ web panel  ->  features/ai/queries.ts  ->  features/ai/api.ts  ->  POST /api/ai/
 ```
 
 - **Provider interface** (`apps/api/src/modules/ai/provider.ts`): `AiProvider { label, complete(request) }`. `AiRequest` has `task` (`'fix' | 'tailor' | 'assist'`), `system`, `prompt`, `temperature`, and `input` (the structured request, used by the mock only). A provider returns text; `generateJson` pulls the JSON object out, validates it with a Zod schema and retries once if it is malformed.
+- **Whose key answers:** `run()` in `modules/ai/routes.ts` uses the person's own Gemini key when they saved one (account menu → AI key; read from `users.ai_key_encrypted`, decrypted with `SECRETS_KEY`; not counted against the daily limit), otherwise the server provider below. A rejected own key becomes `422 ai_key_rejected`.
 - **Which provider runs** is chosen in `apps/api/src/server.ts` from `AI_PROVIDER` (`gemini`, `mock`, `off`; default is `gemini` when `GEMINI_API_KEY` is set, otherwise off). `mock` is refused in production.
 - The browser never sees a key. It sends the document text as a list of **fields** (`AiField`: `path`, `label`, `text`), built from the document by `cvFields`, `letterFields` or `resignationFields` in `packages/shared/src/ai/ai.ts`.
 - Prompts give each field a short id (`f1`, `f2`...) through `numberFields`; the route maps the ids from the answer back to editor paths and drops anything that does not apply.

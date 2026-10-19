@@ -28,5 +28,9 @@ export const errors: Messages['errors'] = {
   ai_busy: 'Die KI ist gerade ausgelastet. Versuchen Sie es in einer Minute erneut.',
   ai_failed: 'Die KI konnte nicht antworten. Bitte versuchen Sie es erneut.',
   ai_blocked: 'Die KI hat diese Anfrage abgelehnt.',
+  ai_key_rejected:
+    'Google hat Ihren Gemini-API-Schlüssel nicht akzeptiert. Prüfen Sie ihn in Ihrem Konto.',
+  invalid_ai_key:
+    'Google hat diesen Schlüssel nicht akzeptiert. Prüfen Sie, ob Sie ihn vollständig kopiert haben.',
   invalid_target: 'Wählen Sie aus, was geschrieben werden soll.',
 }

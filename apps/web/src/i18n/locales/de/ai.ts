@@ -5,9 +5,35 @@ export const ai: Messages['ai'] = {
     checking: 'KI wird geprüft…',
     notSetUp: 'KI ist auf diesem Server nicht eingerichtet.',
     setupHint:
-      'Tragen Sie einen kostenlosen Google-Gemini-API-Schlüssel als <key>GEMINI_API_KEY</key> in <env>apps/api/.env</env> ein und starten Sie die API neu.',
+      'Öffnen Sie das Kontomenü (oben rechts) und tragen Sie unter „KI-Schlüssel“ Ihren eigenen kostenlosen Google-Gemini-API-Schlüssel ein.',
     usage:
       'Heute noch {{left}} von {{limit}} KI-Anfragen übrig. Ihr Text wird an {{provider}} gesendet, um Vorschläge zu erstellen; nichts ändert sich, bevor Sie zustimmen.',
+    ownUsage:
+      'Ihr eigener Gemini-Schlüssel {{hint}} wird verwendet. Ihr Text wird an Google gesendet, um Vorschläge zu erstellen; nichts ändert sich, bis Sie zustimmen.',
+  },
+  key: {
+    menu: 'KI-Schlüssel',
+    notSet: 'Nicht gesetzt',
+    title: 'Gemini-API-Schlüssel',
+    intro:
+      'Die KI-Funktionen laufen mit Google Gemini. Tragen Sie Ihren eigenen kostenlosen Schlüssel ein, damit sie für Ihr Konto funktionieren.',
+    getKey: 'Kostenlosen Schlüssel in Google AI Studio holen',
+    field: 'API-Schlüssel',
+    model: 'Modell',
+    modelFlash: 'Flash (empfohlen)',
+    modelFlashLite: 'Flash-Lite (mehr kostenlose Anfragen pro Tag)',
+    save: 'Schlüssel prüfen und speichern',
+    checking: 'Wird geprüft…',
+    saved: 'Schlüssel gespeichert',
+    remove: 'Schlüssel entfernen',
+    removed: 'Schlüssel entfernt',
+    current: 'Ihr Schlüssel {{hint}} ist gespeichert und wird für alle KI-Funktionen verwendet.',
+    server:
+      'Sie haben keinen eigenen Schlüssel: Es wird der gemeinsame Schlüssel dieses Servers verwendet, mit Tageslimit.',
+    none: 'Noch kein Schlüssel: Die KI-Funktionen sind aus.',
+    replaceHint: 'Fügen Sie einen neuen Schlüssel ein, um den gespeicherten zu ersetzen.',
+    privacy:
+      'Ihr Schlüssel wird verschlüsselt gespeichert und nie wieder angezeigt. Er wird nur an Google gesendet, wenn Sie eine KI-Funktion nutzen. Mit eigenem Schlüssel gelten die kostenlosen Limits von Google statt des Tageslimits dieser App.',
   },
   entry: {
     experience: 'Berufserfahrung: {{name}}',

@@ -6,6 +6,9 @@ if (existsSync('.env')) {
   process.loadEnvFile('.env')
 }
 
+/** The stand-in key for development and tests; production refuses it. */
+export const DEV_SECRETS_KEY = 'development-only-secrets-key-not-for-production'
+
 const EnvSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(3001),
@@ -22,6 +25,11 @@ const EnvSchema = z.object({
   AI_PROVIDER: z.enum(['gemini', 'mock', 'off']).optional(),
   GEMINI_API_KEY: z.string().default(''),
   /** "gemini-flash-latest" always points at Google's current Flash model. */
+  /**
+   * Encrypts the Gemini keys people save in their account (AES-256-GCM). Production needs its own
+   * long random value; changing it makes the saved keys unreadable (people add them again).
+   */
+  SECRETS_KEY: z.string().default(DEV_SECRETS_KEY),
   GEMINI_MODEL: z.string().default('gemini-flash-latest'),
   /** AI requests per minute for the whole API (the provider's free quota is per minute too). */
   AI_MAX_PER_MINUTE: z.coerce.number().int().positive().default(10),

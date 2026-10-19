@@ -19,6 +19,18 @@ export class AccountDrawer {
     return this
   }
 
+  /** Menu → "AI key": the view where people add their own Gemini key. */
+  async openAiKey() {
+    await this.page.getByRole('button', { name: /^AI key/ }).click()
+    return this
+  }
+
+  /** In the AI key view: types a key and saves it. */
+  async saveAiKey(apiKey: string) {
+    await this.page.getByLabel('API key', { exact: true }).fill(apiKey)
+    await this.page.getByRole('button', { name: 'Check and save key' }).click()
+  }
+
   async back() {
     await this.page.getByRole('button', { name: 'Back' }).click()
   }

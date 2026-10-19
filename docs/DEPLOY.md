@@ -62,7 +62,18 @@ Check these in order:
 
 ## 4. AI: Google Gemini
 
-1. Get a key at <https://aistudio.google.com/apikey>. → `GEMINI_API_KEY`
+There are two ways to give people AI, and you can use both:
+
+- **Their own key (recommended).** Nothing to set up on the server except `SECRETS_KEY` (step 7: Render
+  generates it). Each person opens the account menu → **AI key**, pastes a free key from
+  <https://aistudio.google.com/apikey> and picks a model. The API checks the key with Google, stores it
+  encrypted with `SECRETS_KEY` and never returns it. Google's limits for that key apply, and the
+  terms of service are between that person and Google.
+- **A shared key.** Optional fallback for people without their own: `GEMINI_API_KEY` on the server,
+  limited to 30 requests per account per day. → `GEMINI_API_KEY`
+
+If you change `SECRETS_KEY` later, saved keys cannot be read any more and people add them again.
+
 2. **Before real users in the EU/EEA, UK or Switzerland use the app, turn on billing** for the
    Google Cloud project of that key. Google's Gemini API terms only allow _paid_ services for
    apps used by people in those regions, and on the free tier Google may use the text sent to it
@@ -88,7 +99,8 @@ Reports contain the error and the user id, never document contents.
    | `PROXY_SECRET`               | from above                                                                                    |
    | `R2_*`                       | from step 2                                                                                   |
    | `BREVO_API_KEY`, `MAIL_FROM` | from step 3                                                                                   |
-   | `GEMINI_API_KEY`             | from step 4                                                                                   |
+   | `GEMINI_API_KEY`             | optional shared key from step 4                                                               |
+   | `SECRETS_KEY`                | random, 32+ characters (`render.yaml` generates it); encrypts the keys people save            |
    | `SENTRY_DSN`                 | from step 5 (optional)                                                                        |
 
 3. Deploy. The API refuses to start if something required is missing and says what

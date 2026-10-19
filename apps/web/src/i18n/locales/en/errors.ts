@@ -28,5 +28,7 @@ export const errors = {
   ai_busy: 'The AI is busy right now. Try again in a minute.',
   ai_failed: 'The AI could not answer. Please try again.',
   ai_blocked: 'The AI refused to answer this request.',
+  ai_key_rejected: 'Google did not accept your Gemini API key. Check it in your account.',
+  invalid_ai_key: 'Google did not accept this key. Check that you copied all of it.',
   invalid_target: 'Choose what to write.',
 }
