@@ -8,8 +8,6 @@
 
 **CVs, cover letters and job tracking, with a little help from AI.**
 
-Build and style CVs, cover letters and resignation letters, share them as read-only links, and keep track of every job you apply for.
-
 [![CI](https://github.com/georgi4334/CV_generator/actions/workflows/ci.yml/badge.svg)](https://github.com/georgi4334/CV_generator/actions/workflows/ci.yml)
 ![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
@@ -17,104 +15,60 @@ Build and style CVs, cover letters and resignation letters, share them as read-o
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Drizzle-4169E1?logo=postgresql&logoColor=white)
 ![Node](https://img.shields.io/badge/Node-22%2B-5FA04E?logo=nodedotjs&logoColor=white)
 
-[Features](#features) · [Getting started](#getting-started) · [AI features](#ai-features) · [Deployment](#deployment) · [Documentation](#documentation)
-
 <img src="docs/screenshots/editor.webp" alt="The CV editor with the Templates panel open" width="900">
 
 </div>
 
-<details>
-<summary><b>Table of contents</b></summary>
+## Table of contents
 
-- [About the project](#about-the-project)
-- [Features](#features)
-- [Screenshots](#screenshots)
-- [Built with](#built-with)
-- [Getting started](#getting-started)
-- [Configuration](#configuration)
+- [Description](#description)
+- [How to install and run the project](#how-to-install-and-run-the-project)
+- [How to use the project](#how-to-use-the-project)
 - [AI features](#ai-features)
-- [Languages](#languages)
+- [Configuration](#configuration)
 - [Tests](#tests)
-- [Scripts](#scripts)
 - [Deployment](#deployment)
 - [Project structure](#project-structure)
-- [Documentation](#documentation)
 - [Roadmap](#roadmap)
-- [Contributing](#contributing)
+- [How to contribute](#how-to-contribute)
+- [Credits](#credits)
 - [License](#license)
-- [Contact](#contact)
-- [Acknowledgments](#acknowledgments)
 
-</details>
+## Description
 
-## About the project
+Vitae (from _curriculum vitae_) is a hobby project for writing a CV once and sending it many times. You edit the document right on the page, switch the template with one click, and keep a list of the jobs you applied to next to it. It runs entirely on free plans and is meant for personal and family use, not as a business. It is also a playground for trying AI features on the free Google Gemini tier.
 
-Vitae (from _curriculum vitae_) is a hobby project for writing a CV once and sending it many times: edit the document right on the page, switch the template with one click, and keep a list of the jobs you applied to next to it.
-It is also a playground for trying AI features (spell and wording fixes, matching a CV to a job description, a writing assistant) on top of the free Google Gemini tier.
+### What it does
 
-It runs entirely on free plans and is meant for personal and family use, not as a business.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Features
-
-**Documents**
-
-- **CVs** you edit in place, with autosave, undo/redo, version history, zoom and a live multi-page layout.
-- **16 templates** grouped by kind of work (Professional, Design & creative, Marketing, Sales), and a Design & Font panel for colours, fonts, spacing, column layout, background patterns and photo.
+- **CVs** you edit in place, with autosave, undo/redo, version history, zoom and a live multi-page layout. **16 templates** are grouped by kind of work (Professional, Design & creative, Marketing, Sales), and a Design & Font panel controls colours, fonts, spacing, columns, background patterns and the photo.
 - **Examples to start from** for developers, designers, sales and marketing, healthcare and academic CVs, or start blank.
-- **Cover letters** and **resignation letters** that match the CV's look, filled in from a CV or a saved job.
-- **PDF download** and a **print layout** with proper page margins.
-- **Share links**: a read-only page anyone can open, with an option to hide your name, contacts and photo (done on the server, so the real details never reach the visitor).
+- **Cover letters** and **resignation letters** that match the CV's look and can be filled in from a CV or a saved job.
+- **PDF download** with proper page margins, and **share links**: a read-only page anyone can open, with an option to hide your name, contacts and photo.
+- **Job tracking:** saved jobs with status, dates, notes and the CV used, plus a dashboard with the pipeline, an application funnel, response rate and reminders.
+- **AI (Google Gemini, free tier):** Fix Mistakes, Check & Tailor (compare a CV with a job description) and an AI Assistant.
+- Accounts with email confirmation and password reset; English, Bulgarian and German; light and dark themes; phone layouts; keyboard-friendly menus and automatic accessibility tests.
 
-**Job tracking**
+### Why these technologies
 
-- **Saved jobs** with status, dates, notes, salary, contact and the CV used.
-- A **dashboard** with the pipeline, an application funnel, response rate and reminders (no answer for 14 days, saved for a week without applying).
+- **React, Vite and Tailwind** for a fast editor where every field is edited in place on the page itself.
+- **Fastify, Drizzle and PostgreSQL** for a small, typed API; **Zod schemas in a shared package** so the web app and the API agree on every document and request.
+- **Gemini behind the API's own provider layer**, so the key never reaches the browser, a mock provider works in development and tests, and another model could be added later.
+- **Free plans only** (Cloudflare Pages, Render, Neon, R2, Brevo), which shaped several choices below.
 
-**AI** (Google Gemini, free tier)
+### Challenges
 
-- **Fix Mistakes**: spelling and wording suggestions you accept one by one.
-- **Check & Tailor**: compares a CV with a job description and suggests honest edits.
-- **AI Assistant**: a writing helper for summaries and bullet points.
+- **Real pages in the browser:** a CV flows across as many pages as it needs. The renderer first draws a hidden, unpaginated copy to measure every block, then fills the visible pages block by block, and the same layout is used for the editor, the preview, the PDF and share links.
+- **Hiding personal details on a share link:** the swap happens on the server, not by blurring in the browser, so the real name and contacts never reach the visitor, including names mentioned inside the text.
+- **Staying inside free tiers:** the AI has per-minute and per-user daily limits, the free API sleeps when idle (a keep-awake ping is documented), and uploaded photos go to object storage because the server's disk is not kept.
+- **Three languages, one source of truth:** typed translation keys fail the build when Bulgarian or German miss a text.
 
-**Around it**
+### What is planned
 
-- Accounts with email confirmation and password reset.
-- English, Bulgarian and German interface, and Cyrillic-capable fonts.
-- Light and dark themes; layouts for phones; keyboard-friendly menus, a skip link and automatic accessibility tests (axe).
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Screenshots
-
-<table>
-  <tr>
-    <td width="50%"><img src="docs/screenshots/dashboard.webp" alt="Dashboard with recent documents, job pipeline and funnel"><br><sub>Dashboard</sub></td>
-    <td width="50%"><img src="docs/screenshots/dashboard-dark.webp" alt="The dashboard in the dark theme"><br><sub>Dark theme</sub></td>
-  </tr>
-  <tr>
-    <td width="50%"><img src="docs/screenshots/documents.webp" alt="The Documents list"><br><sub>Documents: CVs, cover letters and resignation letters</sub></td>
-    <td width="50%"><img src="docs/screenshots/phone.webp" alt="Dashboard and a CV on a phone"><br><sub>On a phone</sub></td>
-  </tr>
-</table>
+First deployment on free plans, trying the AI features in real use, and later maybe importing existing CVs and a custom domain for reliable email. See the [roadmap](#roadmap).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## Built with
-
-| Part       | Technology                                                                                                      |
-| ---------- | --------------------------------------------------------------------------------------------------------------- |
-| Web app    | React 19, TypeScript, Vite, Tailwind CSS 4, React Router, TanStack Query, Zustand, i18next                      |
-| API        | Fastify 5, TypeScript, Drizzle ORM, PostgreSQL                                                                  |
-| Shared     | Zod schemas and types used by both the web app and the API (`packages/shared`)                                  |
-| AI         | Google Gemini through the API's own provider layer (a mock provider for development and tests)                  |
-| Tests      | Vitest, Testing Library, Playwright (with axe accessibility checks)                                             |
-| Production | Cloudflare Pages, Render, Neon, Cloudflare R2, Brevo, Sentry (all on free plans, see [Deployment](#deployment)) |
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Getting started
+## How to install and run the project
 
 ### Requirements
 
@@ -125,6 +79,8 @@ It runs entirely on free plans and is meant for personal and family use, not as 
 ### Installation
 
 ```bash
+git clone https://github.com/georgi4334/CV_generator.git
+cd CV_generator
 pnpm install
 pnpm db:up                                   # start Postgres (docker compose, port 5433)
 cp apps/api/.env.example apps/api/.env
@@ -139,8 +95,66 @@ Notes:
 - Docker's Postgres listens on port **5433** so it does not clash with a PostgreSQL installed directly on your computer (which usually uses 5432). If you created `apps/api/.env` before this change, update its `DATABASE_URL` to port 5433.
 - If you used the app before accounts existed, the **first account you create takes over** those CVs, cover letters, saved jobs and images. Accounts created afterwards start empty. (This is switched off when `NODE_ENV=production`.)
 - After a `git pull`, just run `pnpm dev` again: if dependencies changed, pnpm installs them first (`verifyDepsBeforeRun` in `pnpm-workspace.yaml`).
+- The API applies database migrations when it starts, and in development the web app proxies `/api` to it. See the endpoint table in [`docs/PLAN.md`](docs/PLAN.md) (Step 8).
 
-The API applies database migrations when it starts, and in development the web app proxies `/api` to it. See the endpoint table in [`docs/PLAN.md`](docs/PLAN.md) (Step 8).
+### Commands
+
+| Command                             | What it does                                    |
+| ----------------------------------- | ----------------------------------------------- |
+| `pnpm dev`                          | Run web and api in watch mode                   |
+| `pnpm build`                        | Build all packages                              |
+| `pnpm test`                         | Vitest in every package                         |
+| `pnpm e2e`                          | Browser tests (Playwright)                      |
+| `pnpm lint`                         | ESLint across the repo                          |
+| `pnpm typecheck`                    | TypeScript check in every package               |
+| `pnpm format`                       | Format with Prettier                            |
+| `pnpm db:up` / `pnpm db:down`       | Start / stop local services                     |
+| `pnpm --filter @cv/api db:generate` | Generate SQL migrations from the Drizzle schema |
+| `pnpm --filter @cv/api db:migrate`  | Apply migrations                                |
+
+A pre-commit hook (Husky + lint-staged) lints and formats staged files.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## How to use the project
+
+1. **Create an account** and confirm your email (in development the link is printed in the API terminal).
+2. **Create a CV:** on the dashboard choose _New CV_, pick what you do (or _Other_ for a blank start), then pick a template. Recommended templates for your profession come first.
+3. **Edit it on the page:** click any text to change it; hover a section or an entry for its toolbar (move, duplicate, delete). Use **Rearrange** to move sections and **Design & Font** for colours, fonts, spacing, columns and a photo. **Templates** switches the look at any time, and the clock icon shows earlier versions.
+4. **Use the AI** (when a Gemini key is set): **Fix Mistakes** suggests spelling and wording changes, **Check & Tailor** compares the CV with a job description, and the **AI Assistant** helps write a summary or bullet points. See [AI features](#ai-features).
+5. **Send it:** download a PDF, or switch on a **share link** and, if you like, **Hide my personal details** so visitors see stand-ins instead of your name, contacts and photo.
+6. **Write letters:** _Create new_ in Documents makes a cover letter (from a CV or a saved job) or a resignation letter, in the CV's look.
+7. **Track jobs:** save jobs, move them through the pipeline and let the dashboard remind you to follow up.
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/dashboard.webp" alt="Dashboard with recent documents, job pipeline and funnel"><br><sub>Dashboard</sub></td>
+    <td width="50%"><img src="docs/screenshots/dashboard-dark.webp" alt="The dashboard in the dark theme"><br><sub>Dark theme</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/documents.webp" alt="The Documents list"><br><sub>Documents: CVs, cover letters and resignation letters</sub></td>
+    <td width="50%"><img src="docs/screenshots/phone.webp" alt="Dashboard and a CV on a phone"><br><sub>On a phone</sub></td>
+  </tr>
+</table>
+
+The interface is available in English, Bulgarian and German (dropdown in the header). Texts live in `apps/web/src/i18n/locales/{en,bg,de}`; see [`apps/web/src/i18n/README.md`](apps/web/src/i18n/README.md) for how to add or change them.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## AI features
+
+Fix Mistakes, Check & Tailor and the AI Assistant use Google Gemini. Get a free API key at [Google AI Studio](https://aistudio.google.com/apikey) (no card needed) and add it to `apps/api/.env`:
+
+| Variable            | Default                         | Meaning                                                                        |
+| ------------------- | ------------------------------- | ------------------------------------------------------------------------------ |
+| `GEMINI_API_KEY`    | (empty: AI off)                 | Your Gemini API key. Stays on the server; the browser never sees it            |
+| `GEMINI_MODEL`      | `gemini-flash-latest`           | The Gemini model; the default always points at Google's current Flash model    |
+| `AI_PROVIDER`       | `gemini` with a key, else `off` | `mock` gives fake answers to try the features without a key (development only) |
+| `AI_MAX_PER_MINUTE` | `10`                            | AI requests per minute for the whole API, to stay inside the free quota        |
+
+Each account can make 30 AI requests per day. When Gemini's quota is reached the app says the AI is busy and does not count that request.
+
+> **Privacy note:** on Google's free tier, the text you send may be used to improve Google's products, and Google's terms only allow paid use for people in the EU, UK and Switzerland. Fine for trying things out; avoid putting sensitive details (ID numbers, health information) into CVs you run through the AI.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -162,53 +176,12 @@ Production-only settings (storage, email, proxy secret, error reporting) are in 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## AI features
-
-Fix Mistakes, Check & Tailor and the AI Assistant use Google Gemini. Get a free API key at [Google AI Studio](https://aistudio.google.com/apikey) (no card needed) and add it to `apps/api/.env`:
-
-| Variable            | Default                         | Meaning                                                                        |
-| ------------------- | ------------------------------- | ------------------------------------------------------------------------------ |
-| `GEMINI_API_KEY`    | (empty: AI off)                 | Your Gemini API key. Stays on the server; the browser never sees it            |
-| `GEMINI_MODEL`      | `gemini-flash-latest`           | The Gemini model; the default always points at Google's current Flash model    |
-| `AI_PROVIDER`       | `gemini` with a key, else `off` | `mock` gives fake answers to try the features without a key (development only) |
-| `AI_MAX_PER_MINUTE` | `10`                            | AI requests per minute for the whole API, to stay inside the free quota        |
-
-Each account can make 30 AI requests per day. When Gemini's quota is reached the app says the AI is busy and does not count that request.
-
-> **Privacy note:** on Google's free tier, the text you send may be used to improve Google's products, and Google's terms only allow paid use for people in the EU, UK and Switzerland. Fine for trying things out; avoid putting sensitive details (ID numbers, health information) into CVs you run through the AI.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Languages
-
-The interface is available in English, Bulgarian and German (dropdown in the header). Texts live in
-`apps/web/src/i18n/locales/{en,bg,de}`; see [`apps/web/src/i18n/README.md`](apps/web/src/i18n/README.md) for how to add or change them.
-
 ## Tests
 
 - `pnpm test`: unit and API tests. The API tests use a `cv_generator_test` database, created automatically on the Postgres from `pnpm db:up`. Without a running Postgres they are skipped with a warning (CI always runs them).
 - `pnpm e2e`: browser tests with Playwright against the production builds, a fresh `cv_generator_e2e` database and the mock AI, including automatic accessibility checks (axe). They cover desktop and a phone. The first time, install the browser: `pnpm --filter @cv/e2e exec playwright install chromium`.
 
 CI runs the format check, lint, type checks, tests and build, then the browser tests, on every push and pull request.
-
-## Scripts
-
-| Command                             | What it does                                    |
-| ----------------------------------- | ----------------------------------------------- |
-| `pnpm dev`                          | Run web and api in watch mode                   |
-| `pnpm build`                        | Build all packages                              |
-| `pnpm test`                         | Vitest in every package                         |
-| `pnpm e2e`                          | Browser tests (Playwright)                      |
-| `pnpm lint`                         | ESLint across the repo                          |
-| `pnpm typecheck`                    | TypeScript check in every package               |
-| `pnpm format`                       | Format with Prettier                            |
-| `pnpm db:up` / `pnpm db:down`       | Start / stop local services                     |
-| `pnpm --filter @cv/api db:generate` | Generate SQL migrations from the Drizzle schema |
-| `pnpm --filter @cv/api db:migrate`  | Apply migrations                                |
-
-A pre-commit hook (Husky + lint-staged) lints and formats staged files.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Deployment
 
@@ -238,17 +211,6 @@ docs/         Plan, deployment guide, architecture, screenshots
 
 Inside the apps, code is organised by feature; see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the folder map and the import rules.
 
-## Documentation
-
-| Document                                                     | What is in it                                                     |
-| ------------------------------------------------------------ | ----------------------------------------------------------------- |
-| [`docs/PLAN.md`](docs/PLAN.md)                               | The development plan, decisions, API endpoints and what was built |
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)               | Folder map and import rules                                       |
-| [`docs/DEPLOY.md`](docs/DEPLOY.md)                           | Deploying on free plans and troubleshooting emails                |
-| [`apps/web/src/i18n/README.md`](apps/web/src/i18n/README.md) | Adding or changing translations                                   |
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 ## Roadmap
 
 - [x] CV editor with templates, design settings, photo, version history and PDF
@@ -259,36 +221,30 @@ Inside the apps, code is organised by feature; see [`docs/ARCHITECTURE.md`](docs
 - [x] English, Bulgarian and German, light and dark themes, phone layouts
 - [ ] First deployment on free plans
 - [ ] Try the AI features with real use on the Gemini free tier
+- [ ] Import an existing CV (later)
 
-Ideas are collected in [`docs/PLAN.md`](docs/PLAN.md); there is no fixed schedule.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Contributing
-
-This is a personal project, but suggestions and bug reports are welcome.
-
-1. Open an issue describing the idea or the bug.
-2. For a change, fork the repository and create a branch from `dev`.
-3. Run `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm e2e` before you push; the pre-commit hook formats staged files.
-4. Open a pull request against `dev`.
+The plan, decisions and what was built in each step are in [`docs/PLAN.md`](docs/PLAN.md).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## License
+## How to contribute
 
-No license has been chosen yet, so all rights are reserved. Please ask before reusing the code.
+This is a personal project, but suggestions and bug reports are welcome. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the short version: open an issue, branch from `dev`, run the checks, and open a pull request against `dev`.
 
-## Contact
+## Credits
 
-Georgi: [@georgi4334](https://github.com/georgi4334). Project link: <https://github.com/georgi4334/CV_generator>
+Built by [Georgi](https://github.com/georgi4334), with Claude Code as a coding assistant.
 
-## Acknowledgments
+Thanks to:
 
 - [Google Gemini](https://ai.google.dev/) for the AI features
 - [Fontsource](https://fontsource.org/) for the self-hosted open-source fonts
 - [Lucide](https://lucide.dev/) for the icons
 - [Shields.io](https://shields.io/) for the badges
-- Free plans of Cloudflare, Render, Neon, Brevo and Sentry that make a hobby deployment possible
+- The free plans of Cloudflare, Render, Neon, Brevo and Sentry that make a hobby deployment possible
+
+## License
+
+No license has been chosen yet, so all rights are reserved. Please ask before reusing the code.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
