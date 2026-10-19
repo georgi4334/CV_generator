@@ -1,47 +1,46 @@
-import { createExampleCv, expect, expectAccessible, signUp, test } from './fixtures'
+import { expect, test } from '../fixtures'
 
-const languageSelect = (page: import('@playwright/test').Page) =>
-  page.getByRole('combobox', {
-    name: /Interface language|Език на интерфейса|Sprache der Oberfläche/,
-  })
-
-test('switching the language changes the page in place and is remembered', async ({ page }) => {
-  await page.goto('/login')
+test('switching the language changes the page in place and is remembered', async ({
+  page,
+  loginPage,
+}) => {
+  await loginPage.open()
   // A marker that would be lost if the page reloaded.
   await page.evaluate(() => ((window as unknown as { marker: number }).marker = 42))
 
-  await languageSelect(page).selectOption('bg')
-  await expect(page.getByRole('heading', { level: 1 })).not.toHaveText('Sign in')
+  await loginPage.selectLanguage('bg')
+  await expect(loginPage.heading()).not.toHaveText('Sign in')
   await expect(page.locator('html')).toHaveAttribute('lang', 'bg')
   expect(await page.evaluate(() => (window as unknown as { marker?: number }).marker)).toBe(42)
-  await expectAccessible(page)
+  await loginPage.expectAccessible()
 
-  await languageSelect(page).selectOption('de')
+  await loginPage.selectLanguage('de')
   await expect(page.locator('html')).toHaveAttribute('lang', 'de')
   await page.reload()
   await expect(page.locator('html')).toHaveAttribute('lang', 'de')
-  await expect(languageSelect(page)).toHaveValue('de')
+  await expect(loginPage.languageSelect()).toHaveValue('de')
 })
 
-test('the editor keeps unsaved work when the language changes', async ({ page }) => {
-  await signUp(page)
-  await createExampleCv(page, 'Mehrsprachig')
-  const name = page.getByRole('textbox', { name: 'Your Name' })
-  await name.click()
-  await page.keyboard.press('ControlOrMeta+a')
-  await page.keyboard.type('Grace Hopper')
+test.use({ cvTitle: 'Mehrsprachig' })
 
-  await languageSelect(page).selectOption('de')
+test('the editor keeps unsaved work when the language changes', async ({
+  page,
+  api,
+  cvEditor,
+  dashboard,
+}) => {
+  await cvEditor.setName('Grace Hopper')
+
+  await cvEditor.selectLanguage('de')
   await expect(page.locator('html')).toHaveAttribute('lang', 'de')
-  await expect(page.getByRole('document', { name: /CV|Lebenslauf/ })).toContainText('Grace Hopper')
+  await expect(cvEditor.documentInAnyLanguage()).toContainText('Grace Hopper')
   // The CV itself keeps its own language (English placeholders and section titles).
-  await expect(page.getByRole('document', { name: /CV|Lebenslauf/ })).toContainText('Experience')
-  await expectAccessible(page)
+  await expect(cvEditor.documentInAnyLanguage()).toContainText('Experience')
+  await cvEditor.expectAccessible()
 
-  await page.goto('/')
-  await page.getByRole('heading', { level: 1 }).first().waitFor()
-  await expectAccessible(page)
+  await dashboard.open()
+  await dashboard.expectAccessible()
   // The account remembers the language (used for emails and other browsers).
-  const me = await (await page.request.get('/api/auth/me')).json()
+  const me = await api.get('/api/auth/me')
   expect(me.user.locale).toBe('de')
 })

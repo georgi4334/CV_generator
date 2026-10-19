@@ -1,58 +1,63 @@
-import { expect, expectAccessible, PASSWORD, test } from './fixtures'
+import { expect, PASSWORD, test } from '../fixtures'
+import { verifyReminder } from '../pages/AuthPages'
 
-test('sign up, sign out and sign in again', async ({ page }) => {
+test('sign up, sign out and sign in again', async ({
+  page,
+  loginPage,
+  registerPage,
+  jobs,
+  dashboard,
+}) => {
   const email = `e2e-ui-${Date.now()}@example.com`
   await page.goto('/jobs')
-  await expect(page).toHaveURL(/\/login\?next=%2Fjobs$/)
+  await loginPage.expectUrl(/\/login\?next=%2Fjobs$/)
 
-  await page.getByRole('link', { name: 'Create one' }).click()
-  await page.getByLabel('Email').fill(email)
-  await page.getByLabel(/^Password/).fill(PASSWORD)
-  await page.getByRole('button', { name: 'Create account' }).click()
-  await expect(page.getByRole('heading', { name: 'Saved Jobs' })).toBeVisible()
-  await expect(page.getByText('Please confirm your email address')).toBeVisible()
+  await loginPage.goToRegister()
+  await registerPage.register({ email, password: PASSWORD })
+  await expect(jobs.heading('Saved Jobs')).toBeVisible()
+  await expect(verifyReminder(page)).toBeVisible()
   // The reminder is a toast in the corner that can be closed.
-  const notifications = page.getByRole('region', { name: 'Notifications' })
-  await notifications.getByRole('button', { name: 'Close' }).click()
-  await expect(page.getByText('Please confirm your email address')).toHaveCount(0)
+  await jobs.notifications().getByRole('button', { name: 'Close' }).click()
+  await expect(verifyReminder(page)).toHaveCount(0)
 
   const cookie = (await page.context().cookies()).find((c) => c.name === 'cv_session')
   expect(cookie).toMatchObject({ httpOnly: true, sameSite: 'Lax' })
 
-  await page.getByRole('button', { name: /^Account: / }).click()
-  await expect(page.getByRole('dialog')).toContainText(email)
-  await page.getByRole('button', { name: 'Sign out' }).click()
-  await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible()
+  await jobs.accountButton().click()
+  await expect(dashboard.account.dialog()).toContainText(email)
+  await dashboard.account.signOut()
+  await expect(loginPage.heading('Sign in')).toBeVisible()
   expect((await page.request.get('/api/cvs')).status()).toBe(401)
 
-  await page.getByLabel('Email').fill(email)
-  await page.getByLabel(/^Password/).fill('not the password')
+  await loginPage.signIn(email, 'not the password')
+  await expect(loginPage.errorMessage()).toHaveText('Wrong email or password')
+  await loginPage.passwordField().fill(PASSWORD)
   await page.getByRole('button', { name: 'Sign in' }).click()
-  await expect(page.getByRole('alert')).toHaveText('Wrong email or password')
-  await page.getByLabel(/^Password/).fill(PASSWORD)
-  await page.getByRole('button', { name: 'Sign in' }).click()
-  await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
+  await loginPage.expectSignedIn()
 })
 
-test('legal pages are public and linked from sign-up', async ({ page }) => {
-  await page.goto('/register')
-  await page.getByRole('link', { name: 'Privacy policy' }).click()
-  await expect(page.getByRole('heading', { name: 'Privacy policy' })).toBeVisible()
-  await page.getByRole('link', { name: 'Terms' }).click()
-  await expect(page.getByRole('heading', { name: 'Terms of use' })).toBeVisible()
+test('legal pages are public and linked from sign-up', async ({ registerPage }) => {
+  await registerPage.open()
+  await registerPage.openPrivacyPolicy()
+  await expect(registerPage.heading('Privacy policy')).toBeVisible()
+  await registerPage.openTerms()
+  await expect(registerPage.heading('Terms of use')).toBeVisible()
 })
 
 test('first-time visitors see the welcome page, with ways to log in or register', async ({
   page,
+  welcomePage,
+  registerPage,
+  loginPage,
 }) => {
   await page.goto('/')
-  await expect(page).toHaveURL(/\/welcome$/)
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Build a CV')
-  await expectAccessible(page)
+  await welcomePage.expectUrl(/\/welcome$/)
+  await expect(welcomePage.heading()).toContainText('Build a CV')
+  await welcomePage.expectAccessible()
 
-  await page.getByRole('main').getByRole('link', { name: 'Create your CV' }).first().click()
-  await expect(page.getByRole('heading', { name: 'Create your account' })).toBeVisible()
-  await page.goto('/welcome')
-  await page.getByRole('banner').getByRole('link', { name: 'Log in' }).click()
-  await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible()
+  await welcomePage.goToCreateAccount()
+  await expect(registerPage.heading('Create your account')).toBeVisible()
+  await welcomePage.open()
+  await welcomePage.goToLogin()
+  await expect(loginPage.heading('Sign in')).toBeVisible()
 })

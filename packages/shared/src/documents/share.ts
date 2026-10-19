@@ -165,6 +165,9 @@ function scrubber(swaps: Swaps): (text: string) => string {
   return (text) => text.replace(pattern, (found) => stands.get(found.toLowerCase()) ?? found)
 }
 
+/** Keys whose strings are fixed values the app reads (not text a person wrote): never swapped. */
+const STRUCTURAL_KEYS = new Set(['id', 'type', 'column', 'levelDisplay', 'icon'])
+
 /** The same swap in every text of a document (arrays and objects are copied, other values kept). */
 function scrubTexts<T>(value: T, scrub: (text: string) => string): T {
   if (typeof value === 'string') return scrub(value) as T
@@ -173,7 +176,7 @@ function scrubTexts<T>(value: T, scrub: (text: string) => string): T {
     return Object.fromEntries(
       Object.entries(value).map(([key, item]) => [
         key,
-        key === 'id' ? item : scrubTexts(item, scrub),
+        STRUCTURAL_KEYS.has(key) ? item : scrubTexts(item, scrub),
       ]),
     ) as T
   }
@@ -251,7 +254,7 @@ export function hidePersonalDetails(
     ])
     return {
       ...doc,
-      header: hideHeader(doc.header),
+      header: hideHeader({ ...doc.header, headline: scrub(doc.header.headline) }),
       recipient: {
         name: mask(doc.recipient.name, HIDDEN_PERSONAL.name),
         title: doc.recipient.title,

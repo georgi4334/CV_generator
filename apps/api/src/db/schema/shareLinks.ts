@@ -1,4 +1,4 @@
-/** Public read-only links to a CV or cover letter. */
+/** Public read-only links to a CV, a cover letter or a resignation letter (exactly one is set). */
 import { sql } from 'drizzle-orm'
 import {
   boolean,

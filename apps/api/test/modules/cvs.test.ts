@@ -15,6 +15,19 @@ describe.skipIf(!dbAvailable)('CV API', () => {
     return CvRecordSchema.parse(res.json())
   }
 
+  it('refuses a malformed id in the request body with a 400, not a server error', async () => {
+    for (const [url, body] of [
+      ['/cvs', { jobId: 'not-a-uuid' }],
+      ['/cover-letters', { cvId: 'abc' }],
+      ['/cover-letters', { jobId: 'abc' }],
+      ['/jobs', { position: 'A', company: 'B', cvId: 'abc' }],
+    ] as const) {
+      const res = await call('POST', url, body)
+      expect(res.statusCode, `${url} ${JSON.stringify(body)}`).toBe(400)
+      expect(res.json().error.code).toBe('validation_error')
+    }
+  })
+
   it('creates an empty CV, lists and reads it', async () => {
     const cv = await create()
     expect(cv).toMatchObject({ title: 'Untitled CV', revision: 1, professionId: null })

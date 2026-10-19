@@ -140,9 +140,12 @@ database, so Neon can still sleep and stay within its free compute hours.
 
 ### Or let a script check the live site
 
-`pnpm smoke` runs a short Playwright check against the deployed site: the API and database answer,
-the security headers are there, a CV can be created, edited, given a photo (R2) and shared, it is
-all still there after a reload, and a reset email is accepted for sending. It cleans up after itself.
+`pnpm smoke` runs Playwright checks against the deployed site: the API, database and email service
+report as up, the security headers and caching are there, you can sign in (the cookie is HttpOnly and
+Secure), a CV can be created, edited, given a photo (R2), restyled, shared (also with personal details
+hidden) and printed, cover and resignation letters and jobs work, the pages fit a phone, and a reset
+email is accepted for sending. It cleans up after itself. Set `SMOKE_API_URL` to the Render address
+to also check that the API refuses requests that skip the web app's proxy.
 
 1. Sign up once by hand with an address you can read, and confirm the email. This is the smoke-test account.
 2. Run it (it works with the Chromium that Playwright already installed for `pnpm e2e`):
@@ -153,7 +156,7 @@ all still there after a reload, and a reset email is accepted for sending. It cl
    pnpm smoke
    ```
 
-   Add `SMOKE_AI=1` to also call the real AI (it uses 1 of the account's 30 daily requests).
+   Add `SMOKE_AI=1` to also call the real AI (Fix Mistakes, Check & Tailor and the Assistant: 3 of the account's 30 daily requests).
 
 3. The last check only asks for a reset email: look in the inbox (and spam) to see that it arrived.
 

@@ -18,7 +18,6 @@ const EnvSchema = z.object({
   COOKIE_SECURE: z.enum(['true', 'false']).optional(),
   /** "none" is for a web app and API on different sites; it requires COOKIE_SECURE. */
   COOKIE_SAME_SITE: z.enum(['lax', 'strict', 'none']).default('lax'),
-  /** Set to true behind a hosting proxy so the client address is read from X-Forwarded-For. */
   /** gemini (needs GEMINI_API_KEY), mock (fake answers for development), off. Default: gemini when a key is set. */
   AI_PROVIDER: z.enum(['gemini', 'mock', 'off']).optional(),
   GEMINI_API_KEY: z.string().default(''),
@@ -41,6 +40,7 @@ const EnvSchema = z.object({
   SENTRY_DSN: z.string().default(''),
   /** Shared with the web app's proxy; when set, requests must come through it. */
   PROXY_SECRET: z.string().default(''),
+  /** Set to true behind a hosting proxy so the client address is read from X-Forwarded-For. */
   TRUST_PROXY: z
     .enum(['true', 'false'])
     .default('false')
