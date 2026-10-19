@@ -1,0 +1,74 @@
+# Makes the template screenshots on a CI machine and commits them to the pull request's branch.
+# Screenshots from another computer differ by a few pixels, so the pictures the tests compare
+# against must come from the same kind of machine that runs the tests.
+#
+# Use it: add the label "update-screenshots" to the pull request. After a few minutes a commit
+# "Update template screenshots" appears on the branch. Look at the new pictures in the commit.
+#
+# GitHub holds back the other checks on a commit that a workflow made: open the waiting CI run
+# and press "Approve and run", or push any change to the branch.
+name: Update screenshots
+
+on:
+  pull_request:
+    types: [labeled]
+
+jobs:
+  update:
+    if: >-
+      github.event.label.name == 'update-screenshots' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: cv
+          POSTGRES_PASSWORD: cv
+          POSTGRES_DB: cv_generator
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U cv -d cv_generator"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      E2E_DATABASE_URL: postgres://cv:cv@localhost:5432/cv_generator_e2e
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @cv/e2e exec playwright install --with-deps chromium
+      # Writes new and changed pictures. (A first picture counts as a "failure" while it is written.)
+      - run: pnpm --filter @cv/e2e exec playwright test --project=visual --update-snapshots
+        continue-on-error: true
+      # The pictures must now match when compared again.
+      - run: pnpm --filter @cv/e2e exec playwright test --project=visual
+      - name: Commit the pictures
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add e2e/tests/__screenshots__
+          if git diff --cached --quiet; then
+            echo "The pictures are already up to date."
+          else
+            git commit -m "Update template screenshots (made by CI)"
+            git push
+          fi
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: screenshot-report
+          path: |
+            e2e/playwright-report
+            e2e/test-results
+          retention-days: 7

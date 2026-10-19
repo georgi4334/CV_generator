@@ -17,7 +17,9 @@
     "format:check": "prettier --check .",
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",
-    "prepare": "husky"
+    "prepare": "husky",
+    "coverage": "pnpm -r test:coverage",
+    "smoke": "pnpm --filter @cv/e2e smoke"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

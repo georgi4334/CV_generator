@@ -1,9 +1,12 @@
 import { APP_NAME } from '@cv/shared'
+import { mkdtempSync, readFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { buildApp } from '../../src/app'
 import { productionProblems, productionWarnings } from '../../src/config/production'
 import type { Env } from '../../src/config/env'
-import { createBrevoMailer } from '../../src/infra/mailer'
+import { createBrevoMailer, createFileMailer } from '../../src/infra/mailer'
 import { createR2Storage } from '../../src/infra/storage/r2'
 import { createLocalStorage } from '../../src/infra/storage/index'
 import { dbAvailable, useTestApp } from '../support/context'
@@ -99,6 +102,50 @@ describe('Brevo mailer', () => {
       fetch: recordingFetch(() => new Response('unauthorized', { status: 401 })).fn,
     })
     await expect(mailer.send({ to: 'a@b.c', subject: 's', text: 't' })).rejects.toThrow(/401/)
+  })
+})
+
+describe('browser-test helpers', () => {
+  it('the file mailer appends one JSON line per email', async () => {
+    const path = join(mkdtempSync(join(tmpdir(), 'cv-mail-')), 'mail.jsonl')
+    const mailer = createFileMailer(path)
+    await mailer.send({
+      to: 'a@example.com',
+      subject: 'One',
+      text: 'https://x/verify-email?token=1',
+    })
+    await mailer.send({ to: 'b@example.com', subject: 'Two', text: 'second' })
+    const lines = readFileSync(path, 'utf8')
+      .trim()
+      .split('\n')
+      .map((l) => JSON.parse(l))
+    expect(lines).toEqual([
+      { to: 'a@example.com', subject: 'One', text: 'https://x/verify-email?token=1' },
+      { to: 'b@example.com', subject: 'Two', text: 'second' },
+    ])
+    expect(mailer.delivers).toBe(true)
+  })
+
+  it('production refuses the test-only settings', () => {
+    const env = {
+      NODE_ENV: 'production',
+      STORAGE: 'r2',
+      R2_ACCOUNT_ID: 'a',
+      R2_ACCESS_KEY_ID: 'b',
+      R2_SECRET_ACCESS_KEY: 'c',
+      R2_BUCKET: 'd',
+      BREVO_API_KEY: 'k',
+      MAIL_FROM: 'me@example.com',
+      APP_URL: 'https://cv.pages.dev',
+      CORS_ORIGIN: 'https://cv.pages.dev',
+      PROXY_SECRET: 'x'.repeat(40),
+      E2E_MAIL_FILE: '/tmp/mail.jsonl',
+      AUTH_LIMIT_SCALE: 100,
+    } as unknown as Env
+    expect(productionProblems(env)).toEqual([
+      'E2E_MAIL_FILE is for browser tests only',
+      'AUTH_LIMIT_SCALE is for browser tests only',
+    ])
   })
 })
 

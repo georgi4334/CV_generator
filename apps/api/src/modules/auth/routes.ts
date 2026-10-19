@@ -55,6 +55,8 @@ export interface AuthRouteOptions {
   cookie: CookieSettings
   /** The first account takes over the data of the pre-login "dev" user. */
   claimDevData: boolean
+  /** Multiplies the rate limits; only browser tests use more than 1. */
+  limitScale?: number
 }
 
 const toUser = (user: SessionUser & { createdAt: Date }): User => ({
@@ -80,15 +82,16 @@ export async function authRoutes(app: FastifyInstance, opts: AuthRouteOptions) {
   const authenticate = requireUser(opts.database)
 
   // Limits protect against guessing passwords and mail flooding (per API instance).
+  const scale = opts.limitScale ?? 1
   const limits = {
-    loginAccount: createRateLimiter({ max: 10, windowMs: 15 * MINUTE }),
-    loginIp: createRateLimiter({ max: 50, windowMs: 15 * MINUTE }),
-    register: createRateLimiter({ max: 10, windowMs: HOUR }),
-    forgotIp: createRateLimiter({ max: 5, windowMs: HOUR }),
-    forgotEmail: createRateLimiter({ max: 3, windowMs: HOUR }),
-    token: createRateLimiter({ max: 20, windowMs: HOUR }),
-    resend: createRateLimiter({ max: 3, windowMs: HOUR }),
-    password: createRateLimiter({ max: 10, windowMs: 15 * MINUTE }),
+    loginAccount: createRateLimiter({ max: 10 * scale, windowMs: 15 * MINUTE }),
+    loginIp: createRateLimiter({ max: 50 * scale, windowMs: 15 * MINUTE }),
+    register: createRateLimiter({ max: 10 * scale, windowMs: HOUR }),
+    forgotIp: createRateLimiter({ max: 5 * scale, windowMs: HOUR }),
+    forgotEmail: createRateLimiter({ max: 3 * scale, windowMs: HOUR }),
+    token: createRateLimiter({ max: 20 * scale, windowMs: HOUR }),
+    resend: createRateLimiter({ max: 3 * scale, windowMs: HOUR }),
+    password: createRateLimiter({ max: 10 * scale, windowMs: 15 * MINUTE }),
   }
   const allow = (limiter: { hit: (key: string) => boolean }, key: string) => {
     if (!limiter.hit(key)) throw tooMany()
