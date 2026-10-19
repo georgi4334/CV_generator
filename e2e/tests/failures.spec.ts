@@ -7,7 +7,8 @@ const summaryOf = (page: Page) =>
 /** Types at the end of the CV's summary. */
 async function typeInSummary(page: Page, text: string) {
   await summaryOf(page).click()
-  await page.keyboard.press('End')
+  // To the end of the whole text, not just of the line the click landed on.
+  await page.keyboard.press('ControlOrMeta+End')
   await page.keyboard.type(text)
 }
 
@@ -130,7 +131,7 @@ test('when the AI is busy or the daily limit is used up, the panel says so', asy
   expectErrors(consoleErrors, /status of (429|503)/)
 })
 
-test('a session that ends while editing sends you to sign in instead of losing work silently', async ({
+test('a session that ends while editing sends you to sign in', async ({
   page,
   context,
   consoleErrors,
@@ -143,20 +144,32 @@ test('a session that ends while editing sends you to sign in instead of losing w
   expectErrors(consoleErrors, /status of 40[13]/)
 })
 
-test('when the server fails while a document opens, the page offers a way out', async ({
+test('when the server fails while a document opens, the page explains and "Try again" recovers', async ({
   page,
   consoleErrors,
 }) => {
   await signUp(page)
   const id = await createExampleCv(page, 'Server down')
-  await page.route(new RegExp(`/api/cvs/${id}$`), (route) =>
+  const url = new RegExp(`/api/cvs/${id}$`)
+  await page.route(url, (route) =>
     route.request().method() === 'GET'
       ? apiError(route, 500, 'internal_error', 'Something went wrong on the server.')
       : route.continue(),
   )
   await page.reload()
+  await expect(page.getByRole('heading', { name: 'Could not open this document' })).toBeVisible({
+    timeout: 20_000,
+  })
+  await expect(page.getByText('Something went wrong on the server.')).toBeVisible()
   await expect(page.getByRole('document', { name: 'CV' })).toHaveCount(0)
-  await expect(page.getByText(/Something went wrong/).first()).toBeVisible({ timeout: 15_000 })
-  await expect(page.getByRole('link', { name: 'Go to dashboard' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Back to documents' })).toHaveAttribute(
+    'href',
+    '/documents',
+  )
+
+  // The server is back: "Try again" opens the document.
+  await page.unroute(url)
+  await page.getByRole('button', { name: 'Try again' }).click()
+  await expect(page.getByRole('document', { name: 'CV' })).toContainText('Maria Ivanova')
   expectErrors(consoleErrors, /status of 500/)
 })

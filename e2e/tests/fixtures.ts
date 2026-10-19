@@ -118,22 +118,42 @@ export async function linkFromMail(to: string, link: RegExp, count = 1) {
  * makes the PDF itself with `page.pdf()`, from the same print layout.
  */
 export async function interceptPrint(page: Page) {
-  await page.addInitScript(() => {
-    ;(window as unknown as { __printed: number }).__printed = 0
+  const install = () => {
+    const w = window as unknown as { __printed?: number }
+    w.__printed = 0
     window.print = () => {
-      ;(window as unknown as { __printed: number }).__printed++
+      w.__printed = (w.__printed ?? 0) + 1
     }
-  })
+  }
+  // For pages opened later, and for the one that is open now.
+  await page.addInitScript(install)
+  await page.evaluate(install).catch(() => undefined)
   return {
     /** Resolves once the app has built its print layout and called window.print(). */
     async printed() {
       await page.waitForFunction(
-        () => (window as unknown as { __printed: number }).__printed > 0,
+        () => ((window as unknown as { __printed?: number }).__printed ?? 0) > 0,
         null,
         { timeout: 20_000 },
       )
     },
   }
+}
+
+/**
+ * Changes a saved document through the API (GET, edit a copy, PATCH with the revision):
+ * quicker than typing, and lets a test start from a long or unusual document.
+ */
+export async function changeDocument(
+  page: Page,
+  path: string,
+  change: (document: Record<string, any>) => void, // eslint-disable-line @typescript-eslint/no-explicit-any
+) {
+  const record = await (await page.request.get(path)).json()
+  const document = structuredClone(record.document)
+  change(document)
+  const res = await page.request.patch(path, { data: { revision: record.revision, document } })
+  expect(res.status(), await res.text()).toBe(200)
 }
 
 export { expect }
