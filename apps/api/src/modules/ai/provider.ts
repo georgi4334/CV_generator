@@ -21,7 +21,8 @@ export interface AiProvider {
   complete: (request: AiRequest) => Promise<string>
 }
 
-export type AiErrorKind = 'busy' | 'blocked' | 'failed'
+/** `key`: the provider refused the API key (wrong, revoked or without access). */
+export type AiErrorKind = 'busy' | 'blocked' | 'failed' | 'key'
 
 export class AiError extends Error {
   constructor(

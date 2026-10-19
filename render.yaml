@@ -46,5 +46,8 @@ services:
         sync: false
       - key: GEMINI_API_KEY
         sync: false
+      # Encrypts the Gemini keys people save in the app; changing it makes them add them again.
+      - key: SECRETS_KEY
+        generateValue: true
       - key: SENTRY_DSN
         sync: false

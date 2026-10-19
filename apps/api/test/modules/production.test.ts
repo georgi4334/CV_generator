@@ -5,7 +5,7 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { buildApp } from '../../src/app'
 import { productionProblems, productionWarnings } from '../../src/config/production'
-import type { Env } from '../../src/config/env'
+import { DEV_SECRETS_KEY, type Env } from '../../src/config/env'
 import { createBrevoMailer, createFileMailer } from '../../src/infra/mailer'
 import { createR2Storage } from '../../src/infra/storage/r2'
 import { createLocalStorage } from '../../src/infra/storage/index'
@@ -139,6 +139,7 @@ describe('browser-test helpers', () => {
       APP_URL: 'https://cv.pages.dev',
       CORS_ORIGIN: 'https://cv.pages.dev',
       PROXY_SECRET: 'x'.repeat(40),
+      SECRETS_KEY: 's'.repeat(40),
       E2E_MAIL_FILE: '/tmp/mail.jsonl',
       AUTH_LIMIT_SCALE: 100,
     } as unknown as Env
@@ -162,6 +163,7 @@ describe('production configuration', () => {
     APP_URL: 'https://cv.pages.dev',
     CORS_ORIGIN: 'https://cv.pages.dev',
     PROXY_SECRET: 'x'.repeat(40),
+    SECRETS_KEY: 'k'.repeat(40),
     SENTRY_DSN: 'https://dsn',
     GEMINI_API_KEY: 'g',
   } as unknown as Env
@@ -185,6 +187,14 @@ describe('production configuration', () => {
       'APP_URL must be the public web address',
       'PROXY_SECRET must be at least 32 characters',
     ])
+  })
+
+  it('refuses the development secrets key and short ones', () => {
+    for (const SECRETS_KEY of [DEV_SECRETS_KEY, 'short']) {
+      expect(productionProblems({ ...base, SECRETS_KEY } as Env)).toEqual([
+        'SECRETS_KEY must be a random value of at least 32 characters',
+      ])
+    }
   })
 
   it('checks nothing in development', () => {

@@ -48,6 +48,13 @@ export function createGeminiProvider(options: GeminiOptions): AiProvider {
       }
 
       const body = (await response.json().catch(() => ({}))) as GeminiResponse
+      if (
+        response.status === 401 ||
+        response.status === 403 ||
+        (response.status === 400 && /API key/i.test(body.error?.message ?? ''))
+      ) {
+        throw new AiError('key', 'Google did not accept the API key')
+      }
       if (response.status === 429) {
         throw new AiError('busy', body.error?.message ?? 'Gemini quota reached')
       }
@@ -78,4 +85,32 @@ export function createGeminiProvider(options: GeminiOptions): AiProvider {
       return text
     },
   }
+}
+
+/**
+ * Checks a key with a free call that lists one model (it uses no generation quota).
+ * Resolves when Google accepts the key; throws AiError('key') when it does not.
+ */
+export async function validateGeminiKey(
+  apiKey: string,
+  options: { fetch?: typeof fetch; baseUrl?: string; timeoutMs?: number } = {},
+): Promise<void> {
+  const {
+    fetch: doFetch = fetch,
+    baseUrl = 'https://generativelanguage.googleapis.com/v1beta',
+    timeoutMs = 15_000,
+  } = options
+  let response: Response
+  try {
+    response = await doFetch(`${baseUrl}/models?pageSize=1`, {
+      headers: { 'x-goog-api-key': apiKey },
+      signal: AbortSignal.timeout(timeoutMs),
+    })
+  } catch (error) {
+    throw new AiError('failed', `Could not reach Gemini: ${(error as Error).message}`)
+  }
+  if (response.status === 400 || response.status === 401 || response.status === 403) {
+    throw new AiError('key', 'Google did not accept this key')
+  }
+  if (!response.ok) throw new AiError('failed', `Gemini answered ${response.status}`)
 }

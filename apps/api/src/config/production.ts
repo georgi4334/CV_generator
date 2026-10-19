@@ -1,4 +1,4 @@
-import type { Env } from './env'
+import { DEV_SECRETS_KEY, type Env } from './env'
 
 /**
  * What a production deployment must have. Checked when the API starts, so a
@@ -26,6 +26,9 @@ export function productionProblems(env: Env): string[] {
   if (env.PROXY_SECRET.length > 0 && env.PROXY_SECRET.length < 32) {
     problems.push('PROXY_SECRET must be at least 32 characters')
   }
+  if (env.SECRETS_KEY === DEV_SECRETS_KEY || env.SECRETS_KEY.length < 32) {
+    problems.push('SECRETS_KEY must be a random value of at least 32 characters')
+  }
   return problems
 }
 
@@ -36,6 +39,7 @@ export function productionWarnings(env: Env): string[] {
   if (!env.PROXY_SECRET)
     warnings.push('PROXY_SECRET is not set: the API accepts requests that skip the web app proxy')
   if (!env.SENTRY_DSN) warnings.push('SENTRY_DSN is not set: server errors are only in the log')
-  if (!env.GEMINI_API_KEY) warnings.push('GEMINI_API_KEY is not set: AI features are off')
+  if (!env.GEMINI_API_KEY)
+    warnings.push('GEMINI_API_KEY is not set: AI works only for people who add their own key')
   return warnings
 }

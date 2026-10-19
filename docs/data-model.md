@@ -82,6 +82,9 @@ erDiagram
     text password_hash
     timestamptz email_verified_at
     text locale
+    text ai_key_encrypted
+    text ai_key_hint
+    text ai_model
     timestamptz created_at
   }
   sessions {
@@ -179,16 +182,19 @@ referenced row is deleted.
 
 Accounts. Code: `apps/api/src/db/schema/users.ts`.
 
-| Column              | Type                  | Notes                                                                                           |
-| ------------------- | --------------------- | ----------------------------------------------------------------------------------------------- |
-| `id`                | uuid PK               | Default `gen_random_uuid()`.                                                                    |
-| `email`             | text, UK, not null    | Always lower case (the shared `EmailSchema` normalises it).                                     |
-| `name`              | text, not null        | Default `''`.                                                                                   |
-| `plan`              | text, not null        | `free` (default) or `pro`. Typed as `Plan` in code; no database enum or check. Changed by hand. |
-| `password_hash`     | text, nullable        | scrypt string `scrypt$N$r$p$salt$hash`. Null means "cannot sign in with a password".            |
-| `email_verified_at` | timestamptz, nullable | Null = not verified. The API exposes it as `emailVerified`.                                     |
-| `locale`            | text, not null        | `en` (default), `bg` or `de`. Language of account emails.                                       |
-| `created_at`        | timestamptz           | Default `now()`.                                                                                |
+| Column              | Type                  | Notes                                                                                                                             |
+| ------------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                | uuid PK               | Default `gen_random_uuid()`.                                                                                                      |
+| `email`             | text, UK, not null    | Always lower case (the shared `EmailSchema` normalises it).                                                                       |
+| `name`              | text, not null        | Default `''`.                                                                                                                     |
+| `plan`              | text, not null        | `free` (default) or `pro`. Typed as `Plan` in code; no database enum or check. Changed by hand.                                   |
+| `password_hash`     | text, nullable        | scrypt string `scrypt$N$r$p$salt$hash`. Null means "cannot sign in with a password".                                              |
+| `email_verified_at` | timestamptz, nullable | Null = not verified. The API exposes it as `emailVerified`.                                                                       |
+| `locale`            | text, not null        | `en` (default), `bg` or `de`. Language of account emails.                                                                         |
+| `ai_key_encrypted`  | text, nullable        | The person's own Gemini key, sealed with AES-256-GCM (`v1.<iv>.<tag>.<data>`, key from `SECRETS_KEY`). Never returned by the API. |
+| `ai_key_hint`       | text, nullable        | `…` plus the last 4 characters of that key, shown in the UI.                                                                      |
+| `ai_model`          | text, not null        | `gemini-flash-latest` (default) or `gemini-flash-lite-latest`; used with the person's own key.                                    |
+| `created_at`        | timestamptz           | Default `now()`.                                                                                                                  |
 
 ### `sessions`
 
@@ -467,6 +473,7 @@ Current migrations:
 | 0006 | `0006_user_locale.sql`         | `users.locale`                                                                         |
 | 0007 | `0007_share_hide_personal.sql` | `share_links.hide_personal`                                                            |
 | 0008 | `0008_resignations.sql`        | `resignations`; `share_links.resignation_id`; the check becomes "exactly one of three" |
+| 0009 | `0009_user_ai_key.sql`         | `users.ai_key_encrypted`, `users.ai_key_hint`, `users.ai_model`                        |
 
 ### How they run
 

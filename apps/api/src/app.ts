@@ -9,7 +9,9 @@ import { createLogMailer, type Mailer } from './infra/mailer'
 import type { Storage } from './infra/storage/index'
 import { decorateRequests, requireUser } from './modules/auth/requireUser'
 import type { AiProvider } from './modules/ai/provider'
-import { aiRoutes } from './modules/ai/routes'
+import { aiRoutes, type AiRouteOptions } from './modules/ai/routes'
+import { createSecretBox } from './infra/secrets'
+import { DEV_SECRETS_KEY } from './config/env'
 import { authRoutes } from './modules/auth/routes'
 import { coverLetterRoutes } from './modules/cover-letters/routes'
 import { resignationRoutes } from './modules/resignations/routes'
@@ -41,7 +43,14 @@ export interface AppOptions {
   /** Trust X-Forwarded-For (behind a hosting proxy), so rate limits see real addresses. */
   trustProxy?: boolean
   /** The AI service; absent or null turns the AI features off. */
-  ai?: { provider: AiProvider | null; maxPerMinute?: number }
+  ai?: {
+    provider: AiProvider | null
+    maxPerMinute?: number
+    /** Uses people's own Gemini keys; absent: keys are stored but the provider above always answers. */
+    userKeys?: AiRouteOptions['userKeys']
+  }
+  /** Encrypts saved API keys; defaults to the development key (production sets SECRETS_KEY). */
+  secretsKey?: string
   /**
    * Set when the API sits behind the web app's proxy (Cloudflare Pages Function):
    * requests must carry it, and the client address comes from the proxy.
@@ -170,6 +179,8 @@ export async function buildApp(opts: AppOptions) {
             database,
             provider: opts.ai?.provider ?? null,
             maxPerMinute: opts.ai?.maxPerMinute ?? 10,
+            secrets: createSecretBox(opts.secretsKey ?? DEV_SECRETS_KEY),
+            userKeys: opts.ai?.userKeys ?? null,
           })
         })
       })

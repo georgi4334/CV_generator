@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Trans, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import { useAiStatus } from '@/features/ai/queries'
 import { errorMessage } from '@/shared/api/errorMessage'
 import { LoadingRegion, Skeleton, SkeletonText } from '@/shared/ui/Skeleton'
@@ -45,19 +45,20 @@ export function AiGate({ children }: { children: ReactNode }) {
     return (
       <div className="space-y-2 text-sm text-fg-soft ">
         <p className="font-medium">{t('ai.gate.notSetUp')}</p>
-        <p>
-          <Trans i18nKey="ai.gate.setupHint" components={{ key: <code />, env: <code /> }} />
-        </p>
+        <p>{t('ai.gate.setupHint')}</p>
       </div>
     )
   }
   const { used, limit } = status.data.usage
   const left = Math.max(0, limit - used)
+  const own = status.data.keySource === 'own'
   return (
     <div className="flex flex-col gap-4">
       {children}
       <p className="border-t border-line pt-3 text-xs text-fg-muted ">
-        {t('ai.gate.usage', { left, limit, provider: status.data.provider })}
+        {own
+          ? t('ai.gate.ownUsage', { hint: status.data.keyHint })
+          : t('ai.gate.usage', { left, limit, provider: status.data.provider })}
       </p>
     </div>
   )

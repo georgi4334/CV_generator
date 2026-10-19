@@ -1,4 +1,6 @@
 import type {
+  AiKeyInput,
+  AiModel,
   AiStatus,
   AssistInput,
   AssistResult,
@@ -17,6 +19,9 @@ export function createFakeAiApi() {
     enabled: true,
     used: 0,
     limit: 30,
+    ownKey: null as { hint: string; model: AiModel } | null,
+    /** Make saveKey fail (e.g. with an ApiRequestError). */
+    saveError: null as Error | null,
     requests: [] as unknown[],
     fix: (() => ({ suggestions: [] })) as Answer<FixMistakesInput, FixMistakesResult>,
     tailor: (() => ({ keywords: [], advice: [], rewrites: [] })) as Answer<
@@ -32,13 +37,30 @@ export function createFakeAiApi() {
     state.used += 1
     return { ...result, usage: { used: state.used, limit: state.limit } } as R
   }
+  const status = (): AiStatus => ({
+    enabled: state.enabled || state.ownKey !== null,
+    provider: state.ownKey ? 'Google Gemini' : state.enabled ? 'Test AI' : '',
+    usage: state.ownKey ? { used: 0, limit: 0 } : { used: state.used, limit: state.limit },
+    keySource: state.ownKey ? 'own' : state.enabled ? 'server' : 'none',
+    keyHint: state.ownKey?.hint ?? '',
+    model: state.ownKey?.model ?? 'gemini-flash-latest',
+  })
   const api: AiApi = {
     async status(): Promise<AiStatus> {
-      return {
-        enabled: state.enabled,
-        provider: state.enabled ? 'Test AI' : '',
-        usage: { used: state.used, limit: state.limit },
+      return status()
+    },
+    async saveKey(input: AiKeyInput): Promise<AiStatus> {
+      state.requests.push(input)
+      if (state.saveError) throw state.saveError
+      state.ownKey = {
+        hint: `…${input.apiKey.slice(-4)}`,
+        model: input.model ?? 'gemini-flash-latest',
       }
+      return status()
+    },
+    async removeKey(): Promise<AiStatus> {
+      state.ownKey = null
+      return status()
     },
     fixMistakes: async (input) => answer(state.fix, input),
     tailor: async (input) => answer(state.tailor, input),
@@ -51,6 +73,8 @@ export function createFakeAiApi() {
       Object.assign(state, {
         enabled: true,
         used: 0,
+        ownKey: null,
+        saveError: null,
         requests: [],
         fix: () => ({ suggestions: [] }),
         tailor: () => ({ keywords: [], advice: [], rewrites: [] }),

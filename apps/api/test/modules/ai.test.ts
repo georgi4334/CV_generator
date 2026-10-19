@@ -40,15 +40,19 @@ describe.skipIf(!dbAvailable)('AI API', () => {
     await Promise.all(apps.splice(0).map((a) => a.close()))
   })
 
-  const appWith = async (provider: AiProvider | null, maxPerMinute = 100) => {
+  const appWith = async (
+    provider: AiProvider | null,
+    maxPerMinute = 100,
+    userKeys: NonNullable<Parameters<typeof buildApp>[0]['ai']>['userKeys'] = null,
+  ) => {
     const app = await buildApp({
       corsOrigin: 'http://localhost:5173',
       database: ctx.database,
       storage: createLocalStorage('/tmp/unused'),
-      ai: { provider, maxPerMinute },
+      ai: { provider, maxPerMinute, userKeys },
     })
     apps.push(app)
-    return (method: 'GET' | 'POST', url: string, payload?: object) =>
+    return (method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: string, payload?: object) =>
       app.inject({ method, url: `/api/ai${url}`, payload, headers: { cookie: ctx.cookie } })
   }
 
@@ -68,6 +72,9 @@ describe.skipIf(!dbAvailable)('AI API', () => {
       enabled: false,
       provider: '',
       usage: { used: 0, limit: PLAN_LIMITS.free.aiRequestsPerDay },
+      keySource: 'none',
+      keyHint: '',
+      model: 'gemini-flash-latest',
     })
     const res = await call('POST', '/fix-mistakes', { language: 'en-US', fields })
     expect(res.statusCode).toBe(503)
@@ -317,6 +324,115 @@ describe.skipIf(!dbAvailable)('AI API', () => {
         targetPath: 'sections.x.items.y',
       })
       expect(res.json().error.code).toBe('invalid_target')
+    })
+  })
+
+  describe("a person's own Gemini key", () => {
+    const KEY = 'AIzaSyA1b2C3d4E5f6G7h8I9j0K1l2M3n4O5p6Q'
+    const keyed = (provider: AiProvider | null = null) => {
+      const used: { apiKey: string; model: string }[] = []
+      const checked: string[] = []
+      const own = scripted()
+      return {
+        used,
+        checked,
+        own,
+        userKeys: {
+          createProvider: (apiKey: string, model: string) => {
+            used.push({ apiKey, model })
+            return own.provider
+          },
+          validate: async (apiKey: string) => {
+            checked.push(apiKey)
+            if (apiKey.includes('BAD')) throw new AiError('key', 'no')
+          },
+        },
+        provider,
+      }
+    }
+
+    it('is checked, saved without ever being returned, and shown as a hint', async () => {
+      const k = keyed()
+      const call = await appWith(null, 100, k.userKeys as never)
+      const saved = await call('PUT', '/key', { apiKey: KEY, model: 'gemini-flash-lite-latest' })
+      expect(saved.statusCode).toBe(200)
+      expect(saved.json()).toMatchObject({
+        enabled: true,
+        keySource: 'own',
+        keyHint: `…${KEY.slice(-4)}`,
+        model: 'gemini-flash-lite-latest',
+        usage: { used: 0, limit: 0 },
+      })
+      expect(JSON.stringify(saved.json())).not.toContain(KEY)
+      expect(k.checked).toEqual([KEY])
+
+      // At rest it is encrypted.
+      const rows = await ctx.database.db.execute(sql`select ai_key_encrypted from users`)
+      const stored = String(rows[0]!.ai_key_encrypted)
+      expect(stored).toMatch(/^v1\./)
+      expect(stored).not.toContain(KEY)
+    })
+
+    it('answers requests instead of the server key, and is not counted against the daily limit', async () => {
+      const server = scripted()
+      const k = keyed(server.provider)
+      const call = await appWith(server.provider, 100, k.userKeys as never)
+      await call('PUT', '/key', { apiKey: KEY })
+      k.own.answer({ suggestions: [] })
+      const res = await call('POST', '/fix-mistakes', { language: 'en-US', fields })
+      expect(res.statusCode).toBe(200)
+      expect(res.json().usage).toEqual({ used: 0, limit: 0 })
+      expect(k.used).toEqual([{ apiKey: KEY, model: 'gemini-flash-latest' }])
+      expect(server.requests).toHaveLength(0)
+    })
+
+    it('turns AI on even when the server has no key, and removing it turns it off again', async () => {
+      const k = keyed()
+      const call = await appWith(null, 100, k.userKeys as never)
+      await call('PUT', '/key', { apiKey: KEY })
+      expect((await call('GET', '/status')).json().enabled).toBe(true)
+      const removed = await call('DELETE', '/key')
+      expect(removed.json()).toMatchObject({ enabled: false, keySource: 'none', keyHint: '' })
+    })
+
+    it('is refused when Google does not accept it, and nothing is saved', async () => {
+      const k = keyed()
+      const call = await appWith(null, 100, k.userKeys as never)
+      const res = await call('PUT', '/key', { apiKey: 'BAD-key-BAD-key-BAD-key-1234' })
+      expect(res.statusCode).toBe(400)
+      expect(res.json().error.code).toBe('invalid_ai_key')
+      expect((await call('GET', '/status')).json().keySource).toBe('none')
+    })
+
+    it('must look like a key and a known model', async () => {
+      const call = await appWith(null, 100, keyed().userKeys as never)
+      expect((await call('PUT', '/key', { apiKey: 'short' })).statusCode).toBe(400)
+      expect((await call('PUT', '/key', { apiKey: `${KEY} !` })).statusCode).toBe(400)
+      expect((await call('PUT', '/key', { apiKey: KEY, model: 'gpt-5' })).statusCode).toBe(400)
+    })
+
+    it('says so when Google later rejects the saved key', async () => {
+      const k = keyed()
+      const call = await appWith(null, 100, k.userKeys as never)
+      await call('PUT', '/key', { apiKey: KEY })
+      k.own.fail(new AiError('key', 'revoked'))
+      const res = await call('POST', '/fix-mistakes', { language: 'en-US', fields })
+      expect(res.statusCode).toBe(422)
+      expect(res.json().error.code).toBe('ai_key_rejected')
+    })
+
+    it('belongs to one person only', async () => {
+      const k = keyed()
+      const call = await appWith(null, 100, k.userKeys as never)
+      await call('PUT', '/key', { apiKey: KEY })
+      const other = await ctx.signUp('other@example.com')
+      const app = apps.at(-1)!
+      const status = await app.inject({
+        method: 'GET',
+        url: '/api/ai/status',
+        headers: { cookie: other.cookie },
+      })
+      expect(status.json().keySource).toBe('none')
     })
   })
 
