@@ -37,16 +37,16 @@ flowchart TB
     api --- shared
 ```
 
-| Layer                         | Where                                                                | What it is for                                                                                                                          | Speed                           |
-| ----------------------------- | -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
-| Shared unit tests             | `packages/shared/src/**/*.test.ts`                                   | Schemas, limits, example data, formatting. The contract both apps rely on.                                                              | Seconds                         |
-| API tests                     | `apps/api/test/modules/*.test.ts`                                    | Routes, validation, auth, ownership, revisions, rate limits, providers. Uses a real Postgres, never a database mock.                    | Seconds (needs Postgres)        |
-| Web component and route tests | `apps/web/src/**/*.test.ts(x)`                                       | UI behaviour. Small components render alone; features render the real route tree against in-memory fake APIs.                           | About one minute for everything |
-| Renderer tests                | `apps/web/src/renderer/**`                                           | The CV document renderer, pagination, templates (see [Renderer](web/renderer.md)).                                                      | Fast                            |
-| Browser e2e                   | `e2e/tests/*.spec.ts`                                                | Whole journeys across browser, web build, API and database: sign-up, editing, autosave, PDF, share links, email, accessibility, phones. | Minutes                         |
-| Visual screenshots            | `e2e/tests/visual.spec.ts`, pictures in `e2e/tests/__screenshots__/` | Catches accidental layout changes in the CV templates.                                                                                  | Part of e2e                     |
-| Smoke                         | `e2e/smoke/live.spec.ts`                                             | Checks the deployed site and the real services (database, photo storage, optionally AI).                                                | One minute, by hand             |
-| Coverage                      | `pnpm coverage`, `scripts/coverage-summary.mjs`                      | Shows where unit and API tests are thin. Not a gate.                                                                                    | Slower than `pnpm test`         |
+| Layer                         | Where                                                                | What it is for                                                                                                                           | Speed                           |
+| ----------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| Shared unit tests             | `packages/shared/src/**/*.test.ts`                                   | Schemas, limits, example data, formatting. The contract both apps rely on.                                                               | Seconds                         |
+| API tests                     | `apps/api/test/modules/*.test.ts`                                    | Routes, validation, auth, ownership, revisions, rate limits, providers. Uses a real Postgres, never a database mock.                     | Seconds (needs Postgres)        |
+| Web component and route tests | `apps/web/src/**/*.test.ts(x)`                                       | UI behaviour. Small components render alone; features render the real route tree against in-memory fake APIs.                            | About one minute for everything |
+| Renderer tests                | `apps/web/src/renderer/**`                                           | The CV document renderer, pagination, templates (see [Renderer](web/renderer.md)).                                                       | Fast                            |
+| Browser e2e                   | `e2e/tests/*.spec.ts`                                                | Whole journeys across browser, web build, API and database: sign-up, editing, autosave, PDF, share links, email, accessibility, phones.  | Minutes                         |
+| Visual screenshots            | `e2e/tests/visual.spec.ts`, pictures in `e2e/tests/__screenshots__/` | Catches accidental layout changes in the CV templates.                                                                                   | Part of e2e                     |
+| Smoke                         | `e2e/smoke/*.spec.ts`                                                | Checks the deployed site and the real services (database, photo storage, email, optionally AI). Also runs in CI against the local stack. | A few minutes, by hand          |
+| Coverage                      | `pnpm coverage`, `scripts/coverage-summary.mjs`                      | Shows where unit and API tests are thin. Not a gate.                                                                                     | Slower than `pnpm test`         |
 
 ### I changed X, which test do I write?
 
@@ -135,6 +135,7 @@ E2E_CROSS_ON_CHROMIUM=1 pnpm e2e
 
 # Live site (see section 8)
 SMOKE_URL=https://example.pages.dev SMOKE_EMAIL=... SMOKE_PASSWORD=... pnpm smoke
+SMOKE_LOCAL=1 pnpm smoke      # the same tests against the local stack
 ```
 
 ### Postgres: when it is needed and what happens without it
@@ -359,22 +360,42 @@ With `E2E_CROSS_ON_CHROMIUM=1`, `cross-browser.spec.ts` moves from the WebKit pr
 
 Other settings: `workers: 1` and `fullyParallel: false` (one database, one API; parallel tests would also mix up the mail file), `retries: 1` only when `CI` is set (none locally, so flakiness is visible to you), `forbidOnly` in CI, `trace: 'retain-on-failure'`, `screenshot: 'only-on-failure'`, and `toHaveScreenshot` allows `maxDiffPixelRatio: 0.02`. Screenshots are stored without a platform suffix: `{testDir}/__screenshots__/{testFileName}/{arg}{ext}`.
 
-### Fixtures and helpers (`e2e/tests/fixtures.ts`)
+### Page objects and fixtures
 
-Every spec imports `test` and `expect` from `./fixtures` instead of from `@playwright/test`.
+The suite is built in two layers. Specs read like a story and hold the **assertions**; the layers below hold the **selectors and actions**, so a changed label is fixed in one file.
 
-| Helper                           | What it does                                                                                                                                                                                           |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `signUp(page, name?)`            | Registers a unique account through `POST /api/auth/register` (the session cookie lands in the browser) and hides the "confirm your email" toast through `sessionStorage` so it does not cover buttons. |
-| `createExampleCv(page, title?)`  | Opens the new-CV wizard for the designer profession with the `creative` template, creates the CV and waits for the editor. Returns the CV id.                                                          |
-| `consoleErrors` (auto fixture)   | Runs in **every** test. Collects `pageerror` and `console.error` messages (ignoring the expected 401 from "am I signed in?") and fails the test at the end if there are any.                           |
-| `expectErrors(errors, pattern)`  | Removes errors a test caused on purpose (use the `consoleErrors` array and a regex), for example a 400 for an already used link.                                                                       |
-| `expectAccessible(page)`         | Waits for animations to finish, then runs axe with WCAG 2.0/2.1 A and AA rules and fails on serious or critical violations, listing the first elements.                                                |
-| `sentMails(to)`                  | Reads the mail file and returns the emails sent to an address (`to`, `subject`, `text`).                                                                                                               |
-| `linkFromMail(to, regex, n?)`    | Polls (15 s) until the n-th email to the address has a link matching the regex, and returns the newest link.                                                                                           |
-| `interceptPrint(page)`           | Replaces `window.print` so the print dialog never opens, and gives you `printed()` to wait until the app asked to print. Then the test creates the PDF itself with `page.pdf()`.                       |
-| `changeDocument(page, path, fn)` | Loads a document through the API, lets you change a copy, and saves it with the current `revision`. Quick way to start from a very long or unusual document.                                           |
-| `PASSWORD`                       | The password used by `signUp`.                                                                                                                                                                         |
+```
+e2e/
+  pages/                 page objects (POM): one class per screen or component
+    BasePage.ts            heading, language, theme, account button, axe check, no-sideways-scroll check
+    AuthPages.ts           LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage, WelcomePage
+    AppPages.ts            DashboardPage, DocumentsPage, JobsPage, NewCvPage, NewLetterPage, NewResignationPage, SharedDocumentPage
+    editor/                EditorPage (shared shell), CvEditorPage, LetterEditorPages (cover and resignation letter)
+    components/            AccountDrawer, ShareDialog, the editor side panels (templates, design and font, fix mistakes, check and tailor, assistant)
+  fixtures/
+    base.ts                `test` with page objects, api, mailbox, printing, visitors, console-error check; no account
+    index.ts               `test` with a signed-in `account`, `cvEditor` and the `accountName` / `cvTitle` options
+    helpers.ts             ApiClient, Mailbox, Printing, Visitors
+```
+
+**Rules for page objects.** A page object has locators (methods returning a `Locator`) and actions (methods that click, type, wait). It does not hold `expect` calls about behaviour; the only exceptions are small "wait until ready" checks and `expectSaved` / `expectAccessible` / `expectNoSideScroll`. An action that leads to another screen returns that screen's page object (`newCv.createExample()` returns a `CvEditorPage`). Selectors use roles and the English interface texts.
+
+**Fixtures** (import `test` and `expect` from `'../fixtures'`, not from `@playwright/test`):
+
+| Fixture                                                     | What you get                                                                                                                                                                                                     |
+| ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `account`                                                   | A fresh user, registered through the API and signed in (cookie in the browser). **Lazy**: only created when a test asks for it, so sign-up and sign-in tests start with nobody. Hides the "confirm email" toast. |
+| `cvEditor`                                                  | An `account` plus an example designer CV (template Creative) open in the editor.                                                                                                                                 |
+| `accountName`, `cvTitle`                                    | Options: `test.use({ accountName: 'Георги', cvTitle: 'Portfolio CV' })` sets the user's name or the CV title for the file or a `describe`.                                                                       |
+| `loginPage`, `dashboard`, `documents`, `jobs`, `newCv`, ... | The page objects, ready to use on the test's `page`.                                                                                                                                                             |
+| `letterEditor(page)`, `resignationEditor(page)`             | Page objects for an editor that is already open.                                                                                                                                                                 |
+| `api`                                                       | `get`, `post`, `delete`, `register` and `changeDocument(path, fn)` (GET, edit a copy, PATCH with the revision) using the browser's cookie.                                                                       |
+| `mailbox`                                                   | `sent(to)` and `linkFor(to, regex, count?)`: the emails the API "sent" (it writes them to a file in e2e); `linkFor` polls for 15 s.                                                                              |
+| `printing`                                                  | `install()` replaces `window.print`; `printed()` waits until the app asked to print; `capture()` returns the PDF made with `page.pdf()`.                                                                         |
+| `visitors`                                                  | `open(link)` opens a share link in a fresh signed-out context and returns `{ page, shared, body }`. Closed after the test.                                                                                       |
+| `consoleErrors` (automatic)                                 | Runs in **every** test. Collects `pageerror` and `console.error` (not the expected 401) and fails the test if any were not allowed.                                                                              |
+| `allowConsoleErrors(pattern)`                               | Allows an error the test causes on purpose: `allowConsoleErrors(/status of 400/)`.                                                                                                                               |
+| `PASSWORD`                                                  | The password of every test account.                                                                                                                                                                              |
 
 ### PDF helper (`e2e/pdf.ts`)
 
@@ -387,6 +408,7 @@ Every spec imports `test` and `expect` from `./fixtures` instead of from `@playw
 | `auth.spec.ts`          | Sign up, sign out, sign in; public legal pages; the welcome page for first-time visitors.                                                                                                   |
 | `email.spec.ts`         | Email confirmation, "send it again", password reset from the emailed link, reset for an unknown address reveals nothing, deleting the account removes its data.                             |
 | `documents.spec.ts`     | Create, edit, autosave and share a CV; a saved job keeps its description.                                                                                                                   |
+| `headline.spec.ts`      | The worked example of the e2e guide: edit, autosave, reload, PDF.                                                                                                                           |
 | `letters.spec.ts`       | Cover letter and resignation letter: write, save, restyle, print, share with details hidden, delete.                                                                                        |
 | `ai.spec.ts`            | Fix Mistakes, Check and Tailor, and the assistant, using the mock AI.                                                                                                                       |
 | `failures.spec.ts`      | Same CV in two tabs (conflict handling), server errors and lost connection while saving, AI busy or daily limit used, session expiry while editing, server failure when opening a document. |
@@ -400,14 +422,14 @@ Every spec imports `test` and `expect` from `./fixtures` instead of from `@playw
 
 ### Conventions and pitfalls
 
-- **Start with `signUp(page)`.** Each test gets its own account, so tests do not depend on each other or on test order.
+- **Ask for `account` or `cvEditor`.** Each test gets its own account, so tests do not depend on each other or on test order.
 - **Find things by role and name**, as in the web tests. Avoid CSS selectors unless there is no role (the visual spec uses `.grid-templates` and `[data-cv-page]`).
 - **Wait for the "Saved" text** (`page.getByText('Saved', { exact: true })`) before reloading, so you do not reload before autosave finished.
 - **`End` versus `Ctrl+End` in editable text.** The CV is edited in place in `contenteditable` elements. `End` moves to the end of the _visual line_ the click landed on; `ControlOrMeta+End` moves to the end of the _whole text_. If the text wraps over several lines, `End` appends in the middle. `failures.spec.ts` therefore uses `ControlOrMeta+End`, with a comment. `ai.spec.ts` uses `End` on a summary that is one line in that test.
 - **Use `ControlOrMeta`** instead of `Control` for shortcuts, so the same test works on macOS and in WebKit.
-- **The console error fixture is on for every test.** A blocked script, a failed request logged by the browser or a React error fails the test. If your test causes an error on purpose, call `expectErrors(consoleErrors, /pattern/)`.
-- **Mail is a file, not an inbox.** Use `linkFromMail`, which polls, instead of reading the file once.
-- **Do not click the real print dialog.** Use `interceptPrint` and `page.pdf()`.
+- **The console error fixture is on for every test.** A blocked script, a failed request logged by the browser or a React error fails the test. If your test causes an error on purpose, call `allowConsoleErrors(/pattern/)`.
+- **Mail is a file, not an inbox.** Use `mailbox.linkFor`, which polls, instead of reading the file once.
+- **Do not click the real print dialog.** Use the `printing` fixture (`install`, `capture`).
 - **Wait for fonts** (`document.fonts.ready`) before measuring or taking pictures. Fonts decide line breaks.
 - **No retries locally.** A test that passes only on retry in CI is flaky: fix it, do not rely on the retry.
 - **`workers: 1`.** Do not turn on parallel workers; tests share one database and one mail file.
@@ -433,29 +455,37 @@ Do not accept new pictures blindly. Open the bot commit on GitHub and use the im
 
 GitHub does not start new workflow runs for a commit pushed with the built-in workflow token, to avoid loops. The checks on the new commit show **"action required"** (waiting for approval). Open the waiting run and press **Approve and run**, or push any new commit to the branch. This is described in the header of `update-screenshots.yml`. Until then the pull request does not show a green result for the new commit.
 
-## 8. The smoke test
+## 8. The smoke tests
 
-The smoke test checks the **deployed** site, which the automatic tests cannot do: the real database, real photo storage and (if you ask) the real AI. It is not part of `pnpm e2e` and not part of CI.
+The smoke tests check the **deployed** site, which the automatic tests cannot do: the real database, real photo storage, the real email service and (if you ask) the real AI. They are not part of `pnpm e2e`. Run them by hand after every deploy or change to environment settings (steps in [Deploying](DEPLOY.md)).
 
-- Config: `e2e/playwright.smoke.config.ts` (test folder `e2e/smoke`, one worker, no retries, 90 s timeout, Desktop Chrome; no web servers are started).
-- Test: `e2e/smoke/live.spec.ts`.
-- Run: `pnpm smoke` with these variables:
+They use the same page objects and fixtures as e2e (`e2e/smoke/fixtures.ts` extends `fixtures/base`), plus:
 
-| Variable                        | Meaning                                                                                                                   |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `SMOKE_URL` (required)          | The address of the deployed web app. Without it the test throws an error.                                                 |
-| `SMOKE_EMAIL`, `SMOKE_PASSWORD` | An account made for this: sign up once by hand and confirm the email. Without them, the "real account" tests are skipped. |
-| `SMOKE_AI=1`                    | Also calls the real AI. It uses one of the account's 30 daily requests.                                                   |
-| `PLAYWRIGHT_CHROMIUM_PATH`      | Optional preinstalled Chromium.                                                                                           |
+- `smoke`: what the run was told (`local`, `url`, `apiOrigin`, `email`, `password`, `ai`).
+- `session`: a worker-wide sign-in done once through the real login page and shared as a storage state, so tests do not sign in again. Tests that must start signed out use `test.use({ storageState: undefined })`. A test that signs out (which ends the session on the server) signs in on its own first.
+- `cleanup`: `cleanup.push('/api/cvs/<id>')` deletes what the test made when it ends, even when it fails.
 
-What it checks:
+Config: `e2e/playwright.smoke.config.ts` (folder `e2e/smoke`, one worker, no retries, 90 s timeout). Projects: `desktop` (Chrome, 1440 x 950) and `phone` (Pixel 7, only `phone.spec.ts`).
 
-1. `/api/ping` answers `{ ok: true }`, `/api/health` answers 200 (the database is reachable), `/api/cvs` without a session answers 401, and `/login` has a content security policy with `frame-ancestors 'none'`. The first request may take a minute if a free API host is asleep.
-2. With the account: create a CV, edit it, wait for "Saved", reload and see the edit (database); upload a photo, reload and check the picture loads (photo storage); turn on a share link and open it in a signed-out page. The CV is deleted at the end, even when the test fails.
-3. With `SMOKE_AI=1`: add a typo and see that "Fix Mistakes" returns suggestions.
-4. Request a password-reset email. The test only checks that the app accepts the request; **you check the inbox yourself**.
+| Variable                        | Meaning                                                                                                                                    |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `SMOKE_URL` (required)          | The address of the deployed web app.                                                                                                       |
+| `SMOKE_EMAIL`, `SMOKE_PASSWORD` | An account made for this: sign up once by hand and confirm the email. Without them, everything that needs an account is skipped.           |
+| `SMOKE_API_URL`                 | Optional: the API's own address (e.g. the Render URL). Adds the check that the API refuses requests that skip the web app's proxy.         |
+| `SMOKE_AI=1`                    | Also calls the real AI (each AI test uses one of the account's 30 daily requests).                                                         |
+| `SMOKE_LOCAL=1`                 | Starts the local stack (like `pnpm e2e`: see `e2e/stack.ts`), registers a fresh account and runs everything, with the mock AI. Used in CI. |
+| `PLAYWRIGHT_CHROMIUM_PATH`      | Optional preinstalled Chromium.                                                                                                            |
 
-When to run it: after every deploy or change to environment settings. The full steps are in [Deploying](DEPLOY.md).
+| Spec                   | What it checks                                                                                                                                                                                                                                                                                                                                                                                              |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `availability.spec.ts` | No account. `/api/ping`, `/api/health` (database up, email provider is a real service), private routes answer 401, unknown API routes answer JSON 404, a warm ping is fast, the API refuses direct access; public pages load, deep links go to sign in, unknown pages and share links show friendly pages; security headers and immutable caching of hashed files (Cloudflare Pages only, skipped locally). |
+| `account.spec.ts`      | A wrong password is refused, the right one signs in with an HttpOnly, SameSite=Lax (and Secure on https) cookie; a reset email is accepted (check the inbox yourself); the session survives a reload and sign-out ends it; language and theme are kept.                                                                                                                                                     |
+| `documents.spec.ts`    | A CV: create, edit, photo upload (storage), template change, reload, listed under Documents; share link works signed out, hiding personal details removes them from the response, turning the link off gives 404; cover letter and resignation letter from a CV; Download PDF builds the print layout.                                                                                                      |
+| `jobs.spec.ts`         | A job is saved, stored with its description, shown after reload, and removed again.                                                                                                                                                                                                                                                                                                                         |
+| `ai.spec.ts`           | `SMOKE_AI=1` only: Fix Mistakes, Check and Tailor and the Assistant return answers without an error.                                                                                                                                                                                                                                                                                                        |
+| `phone.spec.ts`        | Main pages do not scroll sideways on a phone; the editor has its bottom toolbar.                                                                                                                                                                                                                                                                                                                            |
+
+CI runs `SMOKE_LOCAL=1 pnpm smoke` after the e2e suite, so the smoke code keeps working between deploys. Run it locally the same way (it needs Postgres, like e2e).
 
 ## 9. Coverage
 
@@ -511,7 +541,7 @@ flowchart LR
   4. `pnpm coverage` (this is where unit, API and web tests run)
   5. The coverage summary step and the `coverage` artifact (`apps/*/coverage`, `packages/*/coverage`, 7 days)
   6. `pnpm build`
-- **Job `e2e`**, only when `github.event_name == 'pull_request'`: sets `E2E_DATABASE_URL`, installs Chromium and WebKit with system dependencies, runs `pnpm --filter @cv/e2e e2e`, and on failure uploads the `playwright-report` artifact (`e2e/playwright-report` and `e2e/test-results`, 7 days). `CI` is set by GitHub, so the `visual`, `webkit` and `webkit-iphone` projects are included and failed tests retry once.
+- **Job `e2e`**, only when `github.event_name == 'pull_request'`: sets `E2E_DATABASE_URL`, installs Chromium and WebKit with system dependencies, runs `pnpm --filter @cv/e2e e2e` and then `SMOKE_LOCAL=1 pnpm smoke` (the smoke tests against the local stack), and on failure uploads the `playwright-report` artifact (`e2e/playwright-report` and `e2e/test-results`, 7 days). `CI` is set by GitHub, so the `visual`, `webkit` and `webkit-iphone` projects are included and failed tests retry once.
 
 **Why e2e is pull-request only:** the comment in `ci.yml` says it saves Actions minutes on a private repository. A push to `main` or `dev` normally comes from a merged pull request that already passed e2e. The consequence: a direct push to `dev` or `main` is **not** browser-tested. (The root `README.md` says CI runs the browser tests "on every push and pull request"; the workflow file is the truth, and it is pull-request only.)
 

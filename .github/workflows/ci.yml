@@ -84,6 +84,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @cv/e2e exec playwright install --with-deps chromium webkit
       - run: pnpm --filter @cv/e2e e2e
+      # The live smoke suite against the local stack, so its code stays working between deploys.
+      - run: SMOKE_LOCAL=1 pnpm smoke
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

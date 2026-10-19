@@ -1,4 +1,4 @@
-import { expect, signUp, test } from './fixtures'
+import { expect, test } from '../fixtures'
 
 /*
  * Screenshots of the CV templates. The text and data are the example CV's, which never change,
@@ -9,15 +9,18 @@ import { expect, signUp, test } from './fixtures'
  * Locally this runs only with E2E_VISUAL=1, against pictures made on the same computer.
  */
 test.describe('CV templates', () => {
-  test.beforeEach(async ({ page }) => {
-    await signUp(page)
+  test.beforeEach(async ({ account }) => {
+    void account
   })
 
-  test('every template looks as it did (thumbnails from the template step)', async ({ page }) => {
-    await page.goto('/cvs/new?profession=designer')
+  test('every template looks as it did (thumbnails from the template step)', async ({
+    page,
+    newCv,
+  }) => {
+    await newCv.openWizard('designer')
     // Fonts decide line breaks: wait for them before taking pictures.
     await page.evaluate(() => document.fonts.ready)
-    const buttons = page.locator('.grid-templates button')
+    const buttons = newCv.templateButtons()
     await expect(buttons).toHaveCount(16)
     for (let i = 0; i < 16; i++) {
       const button = buttons.nth(i)
@@ -33,12 +36,10 @@ test.describe('CV templates', () => {
 
   // Full-size first pages of one template per kind of header and sidebar.
   for (const id of ['polished', 'portfolio', 'vivid', 'bold', 'elegant', 'monogram'] as const) {
-    test(`the ${id} template, full size`, async ({ page }) => {
-      await page.goto(`/cvs/new?profession=designer&template=${id}`)
-      await page.getByRole('button', { name: 'Create CV' }).click()
-      await page.waitForURL(/\/cvs\/([^/]+)\/edit$/)
-      await page.goto(page.url().replace(/edit$/, 'preview'))
-      const paper = page.locator('[data-cv-page]').first()
+    test(`the ${id} template, full size`, async ({ page, newCv }) => {
+      const editor = await newCv.createExample({ template: id })
+      await editor.openPreview()
+      const paper = editor.firstPage()
       await expect(paper).toBeVisible()
       await page.evaluate(() => document.fonts.ready)
       await expect(paper).toHaveScreenshot(`page-${id}.png`)

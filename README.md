@@ -192,7 +192,7 @@ Production-only settings (storage, email, proxy secret, error reporting) are in 
   - accessibility (axe) and a phone,
   - Safari's engine (WebKit) on a desktop and an iPhone, which CI installs; locally set `E2E_WEBKIT=1` after `playwright install webkit`.
 - `pnpm coverage`: the unit and API tests with a coverage report for every package (CI shows the table in the run summary). There is no minimum yet; it shows where tests are thin.
-- `pnpm smoke`: a short check of the **live** site after a deploy, with the real database, photo storage and (if you ask) AI; see [`docs/DEPLOY.md`](docs/DEPLOY.md).
+- `pnpm smoke`: checks of the **live** site after a deploy (availability and headers, sign-in, documents with photo upload and share links, jobs, phone layout, and with `SMOKE_AI=1` the real AI), built on the same page objects and fixtures as e2e; `SMOKE_LOCAL=1 pnpm smoke` runs them against the local stack. See [`docs/DEPLOY.md`](docs/DEPLOY.md).
 
 CI runs the format check, lint, type checks, tests and build, on every push and pull request, and the browser tests on every pull request.
 
