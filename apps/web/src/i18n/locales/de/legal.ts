@@ -32,7 +32,7 @@ export const legal: Messages['legal'] = {
     },
     ai: {
       title: 'KI-Funktionen',
-      body: 'Wenn Sie „Fehler korrigieren“, „Prüfen & anpassen“ oder den KI-Assistenten nutzen, wird der Text des geöffneten Dokuments (und gegebenenfalls der Stellenanzeige) an Google (Gemini API) gesendet, um Vorschläge zu erstellen. Es wird nichts gesendet, solange Sie keine dieser Funktionen starten. Geben Sie keine personenbezogenen Daten anderer Personen in Ihre Dokumente ein, es sei denn, Sie sind dazu berechtigt.',
+      body: 'Wenn Sie „Fehler korrigieren“, „Prüfen & anpassen“ oder den KI-Assistenten nutzen, wird der Text des geöffneten Dokuments (und gegebenenfalls der Stellenanzeige) an Google (Gemini API) gesendet, um Vorschläge zu erstellen. Es wird nichts gesendet, solange Sie keine dieser Funktionen starten. Geben Sie keine personenbezogenen Daten anderer Personen in Ihre Dokumente ein, es sei denn, Sie sind dazu berechtigt. Wenn Sie in Ihrem Konto einen eigenen Gemini-API-Schlüssel hinterlegen, speichern wir ihn verschlüsselt, verwenden ihn nur für diese Anfragen in Ihrem Auftrag und zeigen ihn nie wieder an; Sie können ihn jederzeit entfernen.',
     },
     providers: {
       title: 'Dienstleister',

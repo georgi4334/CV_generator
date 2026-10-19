@@ -3,8 +3,12 @@ import {
   FixMistakesInputSchema,
   PLAN_LIMITS,
   TailorInputSchema,
+  AiKeyInputSchema,
+  DEFAULT_AI_MODEL,
   type AiField,
   type AiSuggestion,
+  type AiModel,
+  type AiStatus,
   type AiUsage,
   type AssistResult,
   type FixMistakesResult,
@@ -24,9 +28,10 @@ import {
   TailorOutputSchema,
 } from './prompts'
 import type { Database } from '../../db/client'
-import { aiUsage } from '../../db/schema/index'
+import { aiUsage, users } from '../../db/schema/index'
 import { HttpError } from '../../infra/errors'
 import { createRateLimiter } from '../../infra/rateLimit'
+import type { SecretBox } from '../../infra/secrets'
 
 export interface AiRouteOptions {
   database: Database
@@ -34,6 +39,22 @@ export interface AiRouteOptions {
   provider: AiProvider | null
   /** Requests per minute for the whole API, to stay inside the provider's free quota. */
   maxPerMinute: number
+  /** Encrypts the API keys people save. */
+  secrets: SecretBox
+  /**
+   * How to use a person's own Gemini key. null (the mock AI): keys are saved without a check and
+   * the server's provider answers everyone.
+   */
+  userKeys: {
+    createProvider: (apiKey: string, model: AiModel) => AiProvider
+    validate: (apiKey: string) => Promise<void>
+  } | null
+}
+
+interface OwnKey {
+  apiKey: string
+  model: AiModel
+  hint: string
 }
 
 const today = () => new Date().toISOString().slice(0, 10)
@@ -44,6 +65,8 @@ export async function aiRoutes(app: FastifyInstance, opts: AiRouteOptions) {
   const { db } = opts.database
   const { provider } = opts
   const perMinute = createRateLimiter({ max: opts.maxPerMinute, windowMs: 60_000 })
+  // Saving a key calls Google to check it: keep that from being used as a free proxy.
+  const perKey = createRateLimiter({ max: 10, windowMs: 10 * 60_000 })
 
   const limitFor = (request: FastifyRequest) => PLAN_LIMITS[request.user.plan].aiRequestsPerDay
 
@@ -55,13 +78,76 @@ export async function aiRoutes(app: FastifyInstance, opts: AiRouteOptions) {
     return { used: row?.count ?? 0, limit: limitFor(request) }
   }
 
+  /** The person's saved key, when there is one this server can read and use. */
+  async function ownKey(request: FastifyRequest): Promise<OwnKey | null> {
+    const [row] = await db
+      .select({ sealed: users.aiKeyEncrypted, hint: users.aiKeyHint, model: users.aiModel })
+      .from(users)
+      .where(eq(users.id, request.user.id))
+    if (!row?.sealed) return null
+    const apiKey = opts.secrets.decrypt(row.sealed)
+    return apiKey ? { apiKey, model: row.model, hint: row.hint ?? '' } : null
+  }
+
+  async function status(request: FastifyRequest): Promise<AiStatus> {
+    const own = await ownKey(request)
+    const model = own?.model ?? DEFAULT_AI_MODEL
+    if (own) {
+      // Google's own limits apply to a person's key, so the app counts nothing.
+      return {
+        enabled: true,
+        provider: 'Google Gemini',
+        usage: { used: 0, limit: 0 },
+        keySource: 'own',
+        keyHint: own.hint,
+        model,
+      }
+    }
+    return {
+      enabled: provider !== null,
+      provider: provider?.label ?? '',
+      usage: await usage(request),
+      keySource: provider ? 'server' : 'none',
+      keyHint: '',
+      model,
+    }
+  }
+
+  const failure = (request: FastifyRequest, error: AiError) => {
+    request.log.warn({ err: error }, 'AI request failed')
+    if (error.kind === 'key') {
+      return new HttpError(
+        422,
+        'ai_key_rejected',
+        'Google did not accept your Gemini API key. Check it in your account.',
+      )
+    }
+    if (error.kind === 'busy') {
+      return new HttpError(429, 'ai_busy', 'The AI is busy right now. Try again in a minute.')
+    }
+    if (error.kind === 'blocked') {
+      return new HttpError(422, 'ai_blocked', 'The AI refused to answer this request.')
+    }
+    return new HttpError(502, 'ai_failed', 'The AI could not answer. Please try again.')
+  }
+
   /** Counts one request against today's limit; refunded if the AI fails. */
   async function run<T>(request: FastifyRequest, call: (ai: AiProvider) => Promise<T>) {
+    const own = opts.userKeys ? await ownKey(request) : null
+    if (own && opts.userKeys) {
+      try {
+        const result = await call(opts.userKeys.createProvider(own.apiKey, own.model))
+        return { result, usage: { used: 0, limit: 0 } }
+      } catch (error) {
+        if (error instanceof AiError) throw failure(request, error)
+        throw error
+      }
+    }
     if (!provider) {
       throw new HttpError(
         503,
         'ai_unavailable',
-        'AI features are not set up on this server (GEMINI_API_KEY is missing).',
+        'AI features are not set up on this server. Add your own Gemini API key in your account.',
       )
     }
     if (!perMinute.hit('all')) {
@@ -93,30 +179,58 @@ export async function aiRoutes(app: FastifyInstance, opts: AiRouteOptions) {
         .update(aiUsage)
         .set({ count: sql`greatest(${aiUsage.count} - 1, 0)` })
         .where(and(eq(aiUsage.userId, request.user.id), eq(aiUsage.day, day)))
-      if (error instanceof AiError) {
-        request.log.warn({ err: error }, 'AI request failed')
-        if (error.kind === 'busy') {
-          throw new HttpError(429, 'ai_busy', 'The AI is busy right now. Try again in a minute.')
-        }
-        if (error.kind === 'blocked') {
-          throw new HttpError(422, 'ai_blocked', 'The AI refused to answer this request.')
-        }
-        throw new HttpError(502, 'ai_failed', 'The AI could not answer. Please try again.')
-      }
+      if (error instanceof AiError) throw failure(request, error)
       throw error
     }
   }
 
-  app.get('/ai/status', async (request) => ({
-    enabled: provider !== null,
-    provider: provider?.label ?? '',
-    usage: await usage(request),
-  }))
+  app.get('/ai/status', async (request) => status(request))
+
+  /** Saves (or replaces) the person's own Gemini key, after Google confirms it works. */
+  app.put('/ai/key', async (request): Promise<AiStatus> => {
+    if (!perKey.hit(request.user.id)) {
+      throw new HttpError(429, 'rate_limited', 'Too many attempts. Try again in a few minutes.')
+    }
+    const input = AiKeyInputSchema.parse(request.body)
+    if (opts.userKeys) {
+      try {
+        await opts.userKeys.validate(input.apiKey)
+      } catch (error) {
+        if (!(error instanceof AiError)) throw error
+        if (error.kind === 'key') {
+          throw new HttpError(
+            400,
+            'invalid_ai_key',
+            'Google did not accept this key. Check that you copied all of it.',
+          )
+        }
+        request.log.warn({ err: error }, 'Could not check a Gemini key')
+        throw new HttpError(502, 'ai_failed', 'Could not reach Google to check the key. Try again.')
+      }
+    }
+    await db
+      .update(users)
+      .set({
+        aiKeyEncrypted: opts.secrets.encrypt(input.apiKey),
+        aiKeyHint: `…${input.apiKey.slice(-4)}`,
+        aiModel: input.model,
+      })
+      .where(eq(users.id, request.user.id))
+    return status(request)
+  })
+
+  app.delete('/ai/key', async (request): Promise<AiStatus> => {
+    await db
+      .update(users)
+      .set({ aiKeyEncrypted: null, aiKeyHint: null, aiModel: DEFAULT_AI_MODEL })
+      .where(eq(users.id, request.user.id))
+    return status(request)
+  })
 
   app.post('/ai/fix-mistakes', async (request): Promise<FixMistakesResult> => {
     const input = FixMistakesInputSchema.parse(request.body)
     if (input.fields.length === 0) {
-      return { suggestions: [], usage: await usage(request) }
+      return { suggestions: [], usage: (await status(request)).usage }
     }
     const { byId, listing } = numberFields(input.fields)
     const { result, usage: used } = await run(request, (ai) =>

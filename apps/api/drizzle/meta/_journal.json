@@ -64,6 +64,13 @@
       "when": 1792343546971,
       "tag": "0008_resignations",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792413464674,
+      "tag": "0009_user_ai_key",
+      "breakpoints": true
     }
   ]
 }

@@ -1,45 +1,57 @@
-import { createExampleCv, expect, signUp, test } from './fixtures'
+import { expect, test } from '../fixtures'
 
 const POSTING =
   'We are hiring a Senior Frontend Engineer with strong React and TypeScript skills. Experience with Kubernetes, Docker and CI/CD is a must, and you care about accessibility and testing.'
 
-test('Fix Mistakes, Check & Tailor and the assistant (mock AI)', async ({ page }) => {
-  await signUp(page)
-  await createExampleCv(page, 'AI CV')
+test.use({ cvTitle: 'AI CV' })
 
+test('Fix Mistakes, Check & Tailor and the assistant (mock AI)', async ({ cvEditor }) => {
   // Put a typo into the summary.
-  const summary = page.getByRole('document', { name: 'CV' }).getByText(/^Product designer focused/)
-  await summary.click()
-  await page.keyboard.press('ControlOrMeta+End')
-  await page.keyboard.type(' Worked with teh team.')
-  await expect(page.getByText('Saved', { exact: true })).toBeVisible({ timeout: 10_000 })
+  await cvEditor.typeInSummary(' Worked with teh team.')
+  await cvEditor.expectSaved()
 
-  await page.getByRole('button', { name: 'Fix Mistakes' }).click()
-  const fix = page.getByRole('complementary', { name: 'Fix Mistakes' })
-  await fix.getByRole('button', { name: 'Check spelling & grammar' }).click()
-  await fix
-    .getByRole('listitem', { name: 'teh → the' })
-    .getByRole('button', { name: 'Accept' })
-    .click()
-  await expect(page.getByRole('document', { name: 'CV' })).toContainText('Worked with the team.')
+  const fix = await cvEditor.openFixMistakes()
+  await fix.check()
+  await fix.accept('teh → the')
+  await expect(cvEditor.document()).toContainText('Worked with the team.')
 
-  await page.getByRole('button', { name: 'Check & Tailor' }).click()
-  const tailor = page.getByRole('complementary', { name: 'Check & Tailor' })
-  await tailor.getByPlaceholder('Paste the full job description…').fill(POSTING)
-  await tailor.getByRole('button', { name: 'Check match' }).click()
-  const score = tailor.getByLabel(/^Match score \d+%$/)
-  await expect(score).toBeVisible()
-  const before = Number((await score.getAttribute('aria-label'))!.match(/\d+/)![0])
-  await tailor.getByRole('button', { name: 'Apply', exact: true }).first().click()
-  await expect
-    .poll(async () => Number((await score.getAttribute('aria-label'))!.match(/\d+/)![0]))
-    .toBeGreaterThan(before)
+  const tailor = await cvEditor.openCheckTailor()
+  await tailor.checkMatch(POSTING)
+  await expect(tailor.score()).toBeVisible()
+  const before = await tailor.scoreValue()
+  await tailor.applyFirstSuggestion()
+  await expect.poll(() => tailor.scoreValue()).toBeGreaterThan(before)
 
-  await page.getByRole('button', { name: 'AI Assistant' }).first().click()
-  const assistant = page.getByRole('complementary', { name: 'AI Assistant' })
-  await assistant.getByRole('button', { name: /^(Improve|Write)$/ }).click()
-  await assistant.getByRole('region', { name: 'Proposal' }).waitFor()
-  await assistant.getByRole('button', { name: /^(Replace|Insert)$/ }).click()
-  await expect(assistant.getByRole('region', { name: 'Proposal' })).toHaveCount(0)
-  await expect(assistant.getByText(/AI requests left today/)).toContainText('27 of 30')
+  const assistant = await cvEditor.openAssistant()
+  await assistant.run()
+  await assistant.proposal().waitFor()
+  await assistant.accept()
+  await expect(assistant.proposal()).toHaveCount(0)
+  await expect(assistant.quota()).toContainText('27 of 30')
+})
+
+test('a person adds their own Gemini key in the account drawer and can remove it', async ({
+  account,
+  dashboard,
+  page,
+  api,
+}) => {
+  void account
+  const KEY = 'AIzaSyA1b2C3d4E5f6G7h8I9j0K1l2M3n4O5p6Q'
+  await dashboard.open()
+  await dashboard.account.open()
+  await expect(page.getByRole('button', { name: /^AI key.*Not set/ })).toBeVisible()
+  await dashboard.account.openAiKey()
+  await dashboard.account.saveAiKey(KEY)
+  await expect(page.getByText('Key saved')).toBeVisible()
+  await expect(page.getByText(/Your key …5p6Q is saved/)).toBeVisible()
+
+  // The key is never sent back: only its end.
+  const status = await api.get('/api/ai/status')
+  expect(status).toMatchObject({ keySource: 'own', keyHint: '…5p6Q' })
+  expect(JSON.stringify(status)).not.toContain(KEY)
+
+  await page.getByRole('button', { name: 'Remove key' }).click()
+  await expect(page.getByText('Key removed')).toBeVisible()
+  expect((await api.get('/api/ai/status')).keySource).toBe('server')
 })

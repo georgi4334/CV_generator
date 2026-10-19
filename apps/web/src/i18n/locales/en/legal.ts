@@ -29,7 +29,7 @@ export const legal = {
     },
     ai: {
       title: 'AI features',
-      body: 'When you use Fix Mistakes, Check & Tailor or the AI Assistant, the text of the open document (and the job posting, if you use one) is sent to Google (Gemini API) to create suggestions. Nothing is sent unless you start one of these features. Do not put other people’s personal data into your documents unless you are allowed to.',
+      body: 'When you use Fix Mistakes, Check & Tailor or the AI Assistant, the text of the open document (and the job posting, if you use one) is sent to Google (Gemini API) to create suggestions. Nothing is sent unless you start one of these features. Do not put other people’s personal data into your documents unless you are allowed to. If you add your own Gemini API key in your account, we store it encrypted, use it only to make those requests on your behalf, and never show it again; you can remove it at any time.',
     },
     providers: {
       title: 'Service providers',

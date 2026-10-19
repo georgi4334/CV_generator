@@ -3,9 +3,35 @@ export const ai = {
     checking: 'Checking AI…',
     notSetUp: 'AI is not set up on this server.',
     setupHint:
-      'Add a free Google Gemini API key as <key>GEMINI_API_KEY</key> in <env>apps/api/.env</env> and restart the API.',
+      'Open your account menu (top right) and add your own free Google Gemini API key under “AI key”.',
     usage:
       '{{left}} of {{limit}} AI requests left today. Your text is sent to {{provider}} to create suggestions; nothing changes until you accept it.',
+    ownUsage:
+      'Your own Gemini key {{hint}} is used. Your text is sent to Google to create suggestions; nothing changes until you accept it.',
+  },
+  key: {
+    menu: 'AI key',
+    notSet: 'Not set',
+    title: 'Gemini API key',
+    intro:
+      'The AI features run on Google Gemini. Add your own free key so they work for your account.',
+    getKey: 'Get a free key in Google AI Studio',
+    field: 'API key',
+    model: 'Model',
+    modelFlash: 'Flash (recommended)',
+    modelFlashLite: 'Flash-Lite (more free requests per day)',
+    save: 'Check and save key',
+    checking: 'Checking…',
+    saved: 'Key saved',
+    remove: 'Remove key',
+    removed: 'Key removed',
+    current: 'Your key {{hint}} is saved and used for all AI features.',
+    server:
+      'You have no key of your own: the shared key of this server is used, with a daily limit.',
+    none: 'No key yet: the AI features are off.',
+    replaceHint: 'Paste a new key to replace the saved one.',
+    privacy:
+      'Your key is stored encrypted and is never shown again. It is only sent to Google when you use an AI feature. With your own key, Google’s free limits apply instead of this app’s daily limit.',
   },
   entry: {
     experience: 'Experience: {{name}}',

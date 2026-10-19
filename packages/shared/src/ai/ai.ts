@@ -120,11 +120,40 @@ export const AssistResultSchema = z.object({
 })
 export type AssistResult = z.infer<typeof AssistResultSchema>
 
+/**
+ * The Gemini models a person can choose for their own key. The "-latest" names always point at the
+ * current model of that size, so they keep working when Google retires a version.
+ */
+export const AI_MODELS = ['gemini-flash-latest', 'gemini-flash-lite-latest'] as const
+export const AiModelSchema = z.enum(AI_MODELS)
+export type AiModel = z.infer<typeof AiModelSchema>
+export const DEFAULT_AI_MODEL: AiModel = 'gemini-flash-latest'
+
+/** Gemini keys ("AIza…") are about 39 characters of letters, digits, "-" and "_". */
+export const AiKeyInputSchema = z.object({
+  apiKey: z
+    .string()
+    .trim()
+    .min(20)
+    .max(200)
+    .regex(/^[A-Za-z0-9_-]+$/),
+  model: AiModelSchema.default(DEFAULT_AI_MODEL),
+})
+export type AiKeyInput = z.input<typeof AiKeyInputSchema>
+
+/** Whose Gemini key answers: the person's own, the server's, or nobody's (AI is off). */
+export const AI_KEY_SOURCES = ['own', 'server', 'none'] as const
+
 export const AiStatusSchema = z.object({
   enabled: z.boolean(),
   /** Shown to the user: where their text is sent. */
   provider: z.string(),
   usage: AiUsageSchema,
+  keySource: z.enum(AI_KEY_SOURCES),
+  /** The last characters of the person's own key ("…a1b2"), empty without one. */
+  keyHint: z.string(),
+  /** The model used with the person's own key. */
+  model: AiModelSchema,
 })
 export type AiStatus = z.infer<typeof AiStatusSchema>
 

@@ -1,21 +1,12 @@
-import type { Page } from '@playwright/test'
-import { readPdf, margins } from '../pdf'
-import { changeDocument, createExampleCv, expect, interceptPrint, signUp, test } from './fixtures'
-
-/** A PDF of what the app would print: the app builds its print layout, the test saves it as PDF. */
-async function savePdf(page: Page) {
-  const print = await interceptPrint(page)
-  await page.getByRole('button', { name: 'Download PDF' }).click()
-  await print.printed()
-  return page.pdf({ preferCSSPageSize: true, printBackground: true })
-}
+import { margins, readPdf } from '../pdf'
+import { expect, test } from '../fixtures'
 
 const POINTS_PER_MM = 72 / 25.4
 
-test('a CV downloads as one A4 page with its text', async ({ page }) => {
-  await signUp(page)
-  await createExampleCv(page, 'PDF CV')
-  const pages = await readPdf(await savePdf(page))
+test('a CV downloads as one A4 page with its text', async ({ cvEditor, printing }) => {
+  await printing.install()
+  await cvEditor.downloadPdf()
+  const pages = await readPdf(await printing.capture())
   expect(pages).toHaveLength(1)
   expect(Math.round(pages[0]!.width / POINTS_PER_MM)).toBe(210)
   expect(Math.round(pages[0]!.height / POINTS_PER_MM)).toBe(297)
@@ -23,38 +14,39 @@ test('a CV downloads as one A4 page with its text', async ({ page }) => {
   expect(pages[0]!.text).toContain('Senior Product Designer')
 })
 
-test('Cyrillic text comes out in the PDF', async ({ page }) => {
-  await signUp(page)
-  const id = await createExampleCv(page, 'Кирилица')
-  await changeDocument(page, `/api/cvs/${id}`, (document) => {
+test('Cyrillic text comes out in the PDF', async ({ api, cvEditor, printing }) => {
+  await api.changeDocument(cvEditor.apiPath, (document) => {
     document.header.name = 'Георги Петров'
     document.header.headline = 'Продуктов дизайнер'
   })
-  await page.reload()
-  await expect(page.getByRole('document', { name: 'CV' })).toContainText('Георги Петров')
-  const pages = await readPdf(await savePdf(page))
+  await cvEditor.reload()
+  await expect(cvEditor.document()).toContainText('Георги Петров')
+  await printing.install()
+  await cvEditor.downloadPdf()
+  const pages = await readPdf(await printing.capture())
   expect(pages[0]!.text).toContain('Георги Петров')
   // The job title is spaced out and in capitals in this template, so ignore spaces and case.
   expect(pages[0]!.text.replace(/\s/g, '').toUpperCase()).toContain('ПРОДУКТОВДИЗАЙНЕР')
 })
 
-test('a long cover letter keeps its margins on every printed page', async ({ page }) => {
-  await signUp(page)
-  await createExampleCv(page, 'Main CV')
-  await page.goto('/cover-letters/new')
-  await page.getByRole('button', { name: 'Create cover letter' }).click()
-  await page.waitForURL(/\/cover-letters\/([^/]+)\/edit$/)
-  const id = page.url().split('/')[4]!
+test('a long cover letter keeps its margins on every printed page', async ({
+  api,
+  cvEditor,
+  newLetter,
+  printing,
+}) => {
+  void cvEditor
+  const letter = await newLetter.createFromCv()
   const sentence = 'I enjoy turning unclear problems into small, useful and accessible products. '
-  await changeDocument(page, `/api/cover-letters/${id}`, (document) => {
+  await api.changeDocument(letter.apiPath, (document) => {
     document.paragraphs = Array.from({ length: 5 }, () => sentence.repeat(45).trim())
   })
-  await page.reload()
-  await expect(page.getByRole('document', { name: 'Cover letter' })).toContainText(
-    'turning unclear',
-  )
+  await letter.reload()
+  await expect(letter.document()).toContainText('turning unclear')
 
-  const pages = await readPdf(await savePdf(page))
+  await printing.install()
+  await letter.downloadPdf()
+  const pages = await readPdf(await printing.capture())
   expect(pages.length).toBeGreaterThanOrEqual(2)
   for (const [index, pdfPage] of pages.entries()) {
     const gap = margins(pdfPage)
@@ -67,22 +59,23 @@ test('a long cover letter keeps its margins on every printed page', async ({ pag
   }
 })
 
-test('a long CV flows over several pages and nothing runs off the paper', async ({ page }) => {
-  await signUp(page)
-  const id = await createExampleCv(page, 'Long CV')
-  await changeDocument(page, `/api/cvs/${id}`, (document) => {
+test('a long CV flows over several pages and nothing runs off the paper', async ({
+  api,
+  cvEditor,
+  printing,
+}) => {
+  await api.changeDocument(cvEditor.apiPath, (document) => {
     const experience = document.sections.find((s: { type: string }) => s.type === 'experience')
     const first = experience.items[0]
     for (let i = 0; i < 30; i++) {
       experience.items.push({ ...structuredClone(first), id: crypto.randomUUID() })
     }
   })
-  await page.reload()
-  await expect(page.getByRole('document', { name: 'CV' })).toHaveAttribute(
-    'data-page-count',
-    /^[3-9]$/,
-  )
-  const pages = await readPdf(await savePdf(page))
+  await cvEditor.reload()
+  await expect(cvEditor.document()).toHaveAttribute('data-page-count', /^[3-9]$/)
+  await printing.install()
+  await cvEditor.downloadPdf()
+  const pages = await readPdf(await printing.capture())
   expect(pages.length).toBeGreaterThanOrEqual(3)
   for (const [index, pdfPage] of pages.entries()) {
     const gap = margins(pdfPage)

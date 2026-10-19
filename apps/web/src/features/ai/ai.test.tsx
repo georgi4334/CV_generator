@@ -242,3 +242,63 @@ describe('AI Assistant', () => {
     expect(request.fields.some((f) => f.path.startsWith('cv.sections.'))).toBe(true)
   })
 })
+
+describe('your own Gemini key (account drawer)', () => {
+  const KEY = 'AIzaSyA1b2C3d4E5f6G7h8I9j0K1l2M3n4O5p6Q'
+
+  async function openKeyView() {
+    renderRoute('/?menu=ai')
+    return within(await screen.findByRole('dialog', { name: 'Gemini API key' }))
+  }
+
+  it('is reached from the account menu, below Theme', async () => {
+    renderRoute('/')
+    fireEvent.click(await screen.findByRole('button', { name: /^Account:/ }))
+    const buttons = within(screen.getByRole('navigation', { name: 'Account menu' })).getAllByRole(
+      'button',
+    )
+    expect(buttons.map((b) => b.textContent)).toEqual([
+      expect.stringContaining('Account settings'),
+      expect.stringContaining('Theme'),
+      expect.stringContaining('AI key'),
+    ])
+    expect(buttons[2]!.textContent).toContain('Not set')
+    fireEvent.click(buttons[2]!)
+    expect(await screen.findByRole('dialog', { name: 'Gemini API key' })).toBeDefined()
+  })
+
+  it('saves a key with the chosen model and shows only its end', async () => {
+    const dialog = await openKeyView()
+    await waitFor(() =>
+      expect(dialog.getByRole('status').textContent).toContain('shared key of this server'),
+    )
+    fireEvent.change(dialog.getByLabelText('API key'), { target: { value: KEY } })
+    fireEvent.click(dialog.getByRole('radio', { name: /Flash-Lite/ }))
+    fireEvent.click(dialog.getByRole('button', { name: 'Check and save key' }))
+    await dialog.findByText('Key saved')
+    expect(ai.current.state.requests).toContainEqual({
+      apiKey: KEY,
+      model: 'gemini-flash-lite-latest',
+    })
+    expect(dialog.getByText(/Your key …5p6Q is saved/)).toBeDefined()
+    expect(screen.queryByDisplayValue(KEY)).toBeNull()
+  })
+
+  it('shows the reason when Google does not accept the key', async () => {
+    ai.current.state.saveError = new ApiRequestError(400, 'invalid_ai_key', 'bad')
+    const dialog = await openKeyView()
+    fireEvent.change(dialog.getByLabelText('API key'), { target: { value: KEY } })
+    fireEvent.click(dialog.getByRole('button', { name: 'Check and save key' }))
+    expect((await dialog.findByRole('alert')).textContent).toContain('did not accept this key')
+  })
+
+  it('removes the saved key', async () => {
+    ai.current.state.ownKey = { hint: '…5p6Q', model: 'gemini-flash-latest' }
+    const dialog = await openKeyView()
+    await dialog.findByText(/Your key …5p6Q is saved/)
+    fireEvent.click(dialog.getByRole('button', { name: 'Remove key' }))
+    await dialog.findByText('Key removed')
+    expect(ai.current.state.ownKey).toBeNull()
+    expect(dialog.queryByRole('button', { name: 'Remove key' })).toBeNull()
+  })
+})

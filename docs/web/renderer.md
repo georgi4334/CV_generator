@@ -483,7 +483,7 @@ A letter is different: it grows and the **browser** splits it over pages. Its ow
 
 ### How the e2e tests make PDFs
 
-`e2e/tests/pdf.spec.ts` does not use a real print dialog. `interceptPrint` (in `e2e/tests/fixtures.ts`) replaces `window.print` with a counter, the test clicks "Download PDF", waits until the app has built its print layout and called `window.print()`, and then calls Playwright's `page.pdf({ preferCSSPageSize: true, printBackground: true })`. `preferCSSPageSize` makes Chromium use the `@page` rules above. `e2e/pdf.ts` reads the PDF with `pdfjs-dist` and offers `readPdf` (page sizes and the position of each piece of text) and `margins`. The tests check page count and size, Cyrillic text, that a long cover letter keeps at least 8 mm of white on every side of every page, and that a long CV flows over three or more pages without running off the paper.
+`e2e/tests/pdf.spec.ts` does not use a real print dialog. the `printing` fixture (`Printing` in `e2e/fixtures/helpers.ts`; `install()`, then `capture()`) replaces `window.print` with a counter, the test clicks "Download PDF", waits until the app has built its print layout and called `window.print()`, and then calls Playwright's `page.pdf({ preferCSSPageSize: true, printBackground: true })`. `preferCSSPageSize` makes Chromium use the `@page` rules above. `e2e/pdf.ts` reads the PDF with `pdfjs-dist` and offers `readPdf` (page sizes and the position of each piece of text) and `margins`. The tests check page count and size, Cyrillic text, that a long cover letter keeps at least 8 mm of white on every side of every page, and that a long CV flows over three or more pages without running off the paper.
 
 ## The preview page
 

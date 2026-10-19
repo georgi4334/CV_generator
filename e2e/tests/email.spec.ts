@@ -1,114 +1,113 @@
-import { expect, expectErrors, linkFromMail, PASSWORD, sentMails, test } from './fixtures'
+import { expect, PASSWORD, test } from '../fixtures'
+import { verifyReminder } from '../pages/AuthPages'
 
 const stamp = () => `${Date.now()}-${Math.floor(Math.random() * 1e6)}`
 
 test('sign up by hand, confirm the email, and the reminder goes away', async ({
   page,
-  consoleErrors,
+  registerPage,
+  dashboard,
+  verifyEmailPage,
+  mailbox,
+  allowConsoleErrors,
 }) => {
+  // Using the link a second time is refused with a 400.
+  allowConsoleErrors(/status of 400/)
   const email = `confirm-${stamp()}@example.com`
-  await page.goto('/register')
-  await page.getByLabel('Name (optional)').fill('Maria Ivanova')
-  await page.getByLabel('Email').fill(email)
-  await page.getByLabel('Password').fill(PASSWORD)
-  await page.getByRole('button', { name: 'Create account' }).click()
+  await registerPage.open()
+  await registerPage.register({ email, password: PASSWORD, name: 'Maria Ivanova' })
 
   // Signed in at once, with a reminder to confirm the address.
-  await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
-  await expect(page.getByText(/Please confirm your email address/)).toBeVisible()
+  await expect(dashboard.heading('Dashboard')).toBeVisible()
+  await expect(verifyReminder(page)).toBeVisible()
 
-  const link = await linkFromMail(email, /https?:\/\/\S+\/verify-email\?token=\S+/)
-  await page.goto(link)
-  await expect(page.getByText('Your email address is confirmed. Thank you!')).toBeVisible()
-  await page.getByRole('link', { name: 'Go to the app' }).click()
-  await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
-  await expect(page.getByText(/Please confirm your email address/)).toHaveCount(0)
+  const link = await mailbox.confirmationLink(email)
+  await verifyEmailPage.openLink(link)
+  await expect(verifyEmailPage.confirmedMessage()).toBeVisible()
+  await verifyEmailPage.goToApp()
+  await expect(dashboard.heading('Dashboard')).toBeVisible()
+  await expect(verifyReminder(page)).toHaveCount(0)
 
   // The same link cannot be used twice.
-  await page.goto(link)
-  await expect(page.getByText('Your email address is confirmed. Thank you!')).toHaveCount(0)
-  expectErrors(consoleErrors, /status of 400/)
+  await verifyEmailPage.openLink(link)
+  await expect(verifyEmailPage.confirmedMessage()).toHaveCount(0)
 })
 
-test('"Send it again" sends a second confirmation email', async ({ page }) => {
+test('"Send it again" sends a second confirmation email', async ({
+  page,
+  registerPage,
+  mailbox,
+}) => {
   const email = `resend-${stamp()}@example.com`
-  await page.goto('/register')
-  await page.getByLabel('Email').fill(email)
-  await page.getByLabel('Password').fill(PASSWORD)
-  await page.getByRole('button', { name: 'Create account' }).click()
-  await expect(page.getByText(/Please confirm your email address/)).toBeVisible()
-  await linkFromMail(email, /verify-email\?token=\S+/)
+  await registerPage.open()
+  await registerPage.register({ email, password: PASSWORD })
+  await expect(verifyReminder(page)).toBeVisible()
+  await mailbox.confirmationLink(email)
 
   await page.getByRole('button', { name: 'Send it again' }).click()
   await expect(page.getByText('A new link is on its way.')).toBeVisible()
-  await expect.poll(async () => (await sentMails(email)).length).toBe(2)
+  await expect.poll(async () => (await mailbox.sent(email)).length).toBe(2)
 })
 
 test('a forgotten password is reset from the emailed link', async ({
-  page,
-  request,
-  consoleErrors,
+  api,
+  loginPage,
+  forgotPasswordPage,
+  resetPasswordPage,
+  mailbox,
+  allowConsoleErrors,
 }) => {
+  // A reset link works once: the second try is refused with a 400.
+  allowConsoleErrors(/status of 400/)
   const email = `forgot-${stamp()}@example.com`
-  const created = await request.post('/api/auth/register', { data: { email, password: PASSWORD } })
-  expect(created.status()).toBe(201)
+  await api.register(email, PASSWORD)
 
-  await page.goto('/forgot-password')
-  await page.getByLabel('Email').fill(email)
-  await page.getByRole('button', { name: 'Send reset link' }).click()
-  await expect(page.getByText(/a reset link is on its way/)).toBeVisible()
+  await forgotPasswordPage.open()
+  await forgotPasswordPage.requestLink(email)
+  await expect(forgotPasswordPage.sentMessage()).toBeVisible()
 
-  const link = await linkFromMail(email, /https?:\/\/\S+\/reset-password\?token=\S+/)
-  await page.goto(link)
-  await page.getByLabel('New password').fill('a brand new password')
-  await page.getByRole('button', { name: 'Change password' }).click()
-  await expect(page.getByText('Your password was changed. Sign in with the new one.')).toBeVisible()
+  const link = await mailbox.resetLink(email)
+  await resetPasswordPage.openLink(link)
+  await resetPasswordPage.changePassword('a brand new password')
+  await expect(resetPasswordPage.doneMessage()).toBeVisible()
 
   // The old password no longer works; the new one does.
-  await page.goto('/login')
-  await page.getByLabel('Email').fill(email)
-  await page.getByLabel('Password').fill(PASSWORD)
-  await page.getByRole('button', { name: 'Sign in' }).click()
-  await expect(page.getByRole('alert')).toHaveText('Wrong email or password')
-  await page.getByLabel('Password').fill('a brand new password')
-  await page.getByRole('button', { name: 'Sign in' }).click()
-  await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
+  await loginPage.open()
+  await loginPage.signIn(email, PASSWORD)
+  await expect(loginPage.errorMessage()).toHaveText('Wrong email or password')
+  await loginPage.passwordField().fill('a brand new password')
+  await loginPage.page.getByRole('button', { name: 'Sign in' }).click()
+  await loginPage.expectSignedIn()
 
   // A reset link works once.
-  await page.goto(link)
-  await page.getByLabel('New password').fill('yet another password')
-  await page.getByRole('button', { name: 'Change password' }).click()
-  await expect(page.getByRole('alert')).toBeVisible()
-  expectErrors(consoleErrors, /status of 400/)
+  await resetPasswordPage.openLink(link)
+  await resetPasswordPage.changePassword('yet another password')
+  await expect(resetPasswordPage.errorMessage()).toBeVisible()
 })
 
 test('asking for a reset for an unknown address reveals nothing and sends nothing', async ({
   page,
+  forgotPasswordPage,
+  mailbox,
 }) => {
   const email = `nobody-${stamp()}@example.com`
-  await page.goto('/forgot-password')
-  await page.getByLabel('Email').fill(email)
-  await page.getByRole('button', { name: 'Send reset link' }).click()
-  await expect(page.getByText(/a reset link is on its way/)).toBeVisible()
+  await forgotPasswordPage.open()
+  await forgotPasswordPage.requestLink(email)
+  await expect(forgotPasswordPage.sentMessage()).toBeVisible()
   await page.waitForTimeout(500)
-  expect(await sentMails(email)).toEqual([])
+  expect(await mailbox.sent(email)).toEqual([])
 })
 
-test('deleting the account removes it and its data', async ({ page, request }) => {
+test('deleting the account removes it and its data', async ({ page, registerPage, dashboard }) => {
   const email = `delete-${stamp()}@example.com`
-  await page.goto('/register')
-  await page.getByLabel('Email').fill(email)
-  await page.getByLabel('Password').fill(PASSWORD)
-  await page.getByRole('button', { name: 'Create account' }).click()
-  await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
+  await registerPage.open()
+  await registerPage.register({ email, password: PASSWORD })
+  await expect(dashboard.heading('Dashboard')).toBeVisible()
 
   await page.goto('/account')
-  const drawer = page.getByRole('dialog', { name: 'Account settings' })
-  await drawer.getByRole('button', { name: 'Delete account…' }).click()
-  await drawer.getByLabel('Password').last().fill(PASSWORD)
-  await drawer.getByRole('button', { name: 'Delete my account' }).click()
-  await expect(page).toHaveURL(/\/(welcome|login|register)/)
+  await dashboard.account.deleteAccount(PASSWORD)
+  await dashboard.expectUrl(/\/(welcome|login|register)/)
 
-  const again = await request.post('/api/auth/login', { data: { email, password: PASSWORD } })
+  const again = await page.request.post('/api/auth/login', { data: { email, password: PASSWORD } })
   expect(again.status()).toBe(401)
 })

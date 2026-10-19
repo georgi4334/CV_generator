@@ -124,7 +124,7 @@ A pre-commit hook (Husky + lint-staged) lints and formats staged files.
 1. **Create an account** and confirm your email (in development the link is printed in the API terminal).
 2. **Create a CV:** on the dashboard choose _New CV_, pick what you do (or _Other_ for a blank start), then pick a template. Recommended templates for your profession come first.
 3. **Edit it on the page:** click any text to change it; hover a section or an entry for its toolbar (move, duplicate, delete). Use **Rearrange** to move sections and **Design & Font** for colours, fonts, spacing, columns and a photo. **Templates** switches the look at any time, and the clock icon shows earlier versions.
-4. **Use the AI** (when a Gemini key is set): **Fix Mistakes** suggests spelling and wording changes, **Check & Tailor** compares the CV with a job description, and the **AI Assistant** helps write a summary or bullet points. See [AI features](#ai-features).
+4. **Use the AI** (after adding your Gemini key under account menu → AI key): **Fix Mistakes** suggests spelling and wording changes, **Check & Tailor** compares the CV with a job description, and the **AI Assistant** helps write a summary or bullet points. See [AI features](#ai-features).
 5. **Send it:** download a PDF, or switch on a **share link** and, if you like, **Hide my personal details** so visitors see stand-ins instead of your name, contacts and photo.
 6. **Write letters:** _Create new_ in Documents makes a cover letter (from a CV or a saved job) or a resignation letter, in the CV's look.
 7. **Track jobs:** save jobs, move them through the pipeline and let the dashboard remind you to follow up.
@@ -146,16 +146,19 @@ The interface is available in English, Bulgarian and German (dropdown in the hea
 
 ## AI features
 
-Fix Mistakes, Check & Tailor and the AI Assistant use Google Gemini. Get a free API key at [Google AI Studio](https://aistudio.google.com/apikey) (no card needed) and add it to `apps/api/.env`:
+Fix Mistakes, Check & Tailor and the AI Assistant use Google Gemini. **Each person adds their own free key in the app:** open the account menu (your avatar) → **AI key**, paste a key from [Google AI Studio](https://aistudio.google.com/apikey) (no card needed) and choose the model (Flash, recommended, or Flash-Lite for more free requests a day). The server checks the key with Google, stores it encrypted (AES-256-GCM, see `SECRETS_KEY`) and never sends it back to the browser. With their own key, Google's limits apply instead of the app's daily limit.
 
-| Variable            | Default                         | Meaning                                                                        |
-| ------------------- | ------------------------------- | ------------------------------------------------------------------------------ |
-| `GEMINI_API_KEY`    | (empty: AI off)                 | Your Gemini API key. Stays on the server; the browser never sees it            |
-| `GEMINI_MODEL`      | `gemini-flash-latest`           | The Gemini model; the default always points at Google's current Flash model    |
-| `AI_PROVIDER`       | `gemini` with a key, else `off` | `mock` gives fake answers to try the features without a key (development only) |
-| `AI_MAX_PER_MINUTE` | `10`                            | AI requests per minute for the whole API, to stay inside the free quota        |
+Optionally, a key in `apps/api/.env` is a shared fallback for everyone who has not added one (with the app's limit of 30 requests per day per account):
 
-Each account can make 30 AI requests per day. When Gemini's quota is reached the app says the AI is busy and does not count that request.
+| Variable            | Default                         | Meaning                                                                               |
+| ------------------- | ------------------------------- | ------------------------------------------------------------------------------------- |
+| `GEMINI_API_KEY`    | (empty: AI off)                 | Your Gemini API key. Stays on the server; the browser never sees it                   |
+| `GEMINI_MODEL`      | `gemini-flash-latest`           | The Gemini model; the default always points at Google's current Flash model           |
+| `AI_PROVIDER`       | `gemini` with a key, else `off` | `mock` gives fake answers to try the features without a key (development only)        |
+| `AI_MAX_PER_MINUTE` | `10`                            | AI requests per minute for the whole API, to stay inside the free quota               |
+| `SECRETS_KEY`       | a built-in development value    | Encrypts the keys people save. Production needs its own random value (32+ characters) |
+
+Without a key of their own, each account can make 30 AI requests per day on the shared key. When Gemini's quota is reached the app says the AI is busy and does not count that request.
 
 > **Privacy note:** on Google's free tier, the text you send may be used to improve Google's products, and Google's terms only allow paid use for people in the EU, UK and Switzerland. Fine for trying things out; avoid putting sensitive details (ID numbers, health information) into CVs you run through the AI.
 
@@ -192,7 +195,7 @@ Production-only settings (storage, email, proxy secret, error reporting) are in 
   - accessibility (axe) and a phone,
   - Safari's engine (WebKit) on a desktop and an iPhone, which CI installs; locally set `E2E_WEBKIT=1` after `playwright install webkit`.
 - `pnpm coverage`: the unit and API tests with a coverage report for every package (CI shows the table in the run summary). There is no minimum yet; it shows where tests are thin.
-- `pnpm smoke`: a short check of the **live** site after a deploy, with the real database, photo storage and (if you ask) AI; see [`docs/DEPLOY.md`](docs/DEPLOY.md).
+- `pnpm smoke`: checks of the **live** site after a deploy (availability and headers, sign-in, documents with photo upload and share links, jobs, phone layout, and with `SMOKE_AI=1` the real AI), built on the same page objects and fixtures as e2e; `SMOKE_LOCAL=1 pnpm smoke` runs them against the local stack. See [`docs/DEPLOY.md`](docs/DEPLOY.md).
 
 CI runs the format check, lint, type checks, tests and build, on every push and pull request, and the browser tests on every pull request.
 
