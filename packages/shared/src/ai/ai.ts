@@ -136,7 +136,7 @@ export const AiKeyInputSchema = z.object({
     .trim()
     .min(20)
     .max(200)
-    .regex(/^[A-Za-z0-9_-]+$/),
+    .regex(/^[A-Za-z0-9._-]+$/),
   model: AiModelSchema.default(DEFAULT_AI_MODEL),
 })
 export type AiKeyInput = z.input<typeof AiKeyInputSchema>
