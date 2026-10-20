@@ -101,8 +101,13 @@ describe('creating an account', () => {
     type(/^Password/, 'a long enough password')
     click('Create account')
     await screen.findByRole('heading', { name: 'Dashboard' })
-    const banner = screen.getAllByRole('status').find((el) => el.textContent?.includes('bea@'))
-    expect(banner?.textContent).toContain('bea@example.com')
+    // The reminder arrives with the signed-in user, a moment after the dashboard heading.
+    const banner = await waitFor(() => {
+      const found = screen.getAllByRole('status').find((el) => el.textContent?.includes('bea@'))
+      if (!found) throw new Error('the confirm-your-email reminder is not shown yet')
+      return found
+    })
+    expect(banner.textContent).toContain('bea@example.com')
     click('Send it again')
     await screen.findByText(/A new link is on its way/)
     expect(auth.current.calls).toContain('resend')
