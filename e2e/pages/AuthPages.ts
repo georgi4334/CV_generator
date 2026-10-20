@@ -45,10 +45,23 @@ export class RegisterPage extends BasePage {
     return '/register'
   }
 
+  emailField(): Locator {
+    return this.page.getByLabel('Email')
+  }
+
+  passwordField(): Locator {
+    return this.page.getByLabel(/^Password/)
+  }
+
+  /** Whether the browser itself accepts what is typed in a field (required, type, minlength). */
+  async isAccepted(field: Locator): Promise<boolean> {
+    return field.evaluate((el: HTMLInputElement) => el.validity.valid)
+  }
+
   async register({ email, password, name }: { email: string; password: string; name?: string }) {
     if (name) await this.page.getByLabel('Name (optional)').fill(name)
-    await this.page.getByLabel('Email').fill(email)
-    await this.page.getByLabel(/^Password/).fill(password)
+    await this.emailField().fill(email)
+    await this.passwordField().fill(password)
     await this.page.getByRole('button', { name: 'Create account' }).click()
   }
 
@@ -138,5 +151,12 @@ export class WelcomePage extends BasePage {
 
   async goToLogin() {
     await this.page.getByRole('banner').getByRole('link', { name: 'Log in' }).click()
+  }
+}
+
+/** Any screen a signed-out visitor can open (welcome, legal pages...): `open('/privacy')`. */
+export class PublicPage extends BasePage {
+  protected route() {
+    return '/welcome'
   }
 }

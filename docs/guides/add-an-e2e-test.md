@@ -77,7 +77,13 @@ Always pass a timeout of about 10 seconds (the default is 5), and **do this befo
 - **Phones**: put the test in `mobile.spec.ts`; it runs with the Pixel 7 profile.
 - **Screenshots**: only for templates, in `visual.spec.ts`. Do not make screenshots on your own machine and commit them; CI makes them. See the screenshot step in [add-a-template.md](add-a-template.md).
 
-### 6. Keep it fast and honest
+### 6. Prefer data over copy-paste for many similar cases
+
+When the same check applies to a list of inputs (bad passwords, wrong file types), put the rows in a JSON file under `e2e/data/` and loop over them: one `test()` per row, with the row's `case` text in the title. See `tests/validation.spec.ts`. JSON files are imported with `import rows from '../data/x.json' with { type: 'json' }`.
+
+Helpers that are not page objects live in `e2e/utils/` (for example `internalLinks(page)` to collect a page's same-site links, `measureWebVitals(page)` for LCP and CLS). To show something in the HTML report, use `testInfo.attach(name, { body })` for text and files and `testInfo.annotations.push({ type, description })` for a value shown beside the test.
+
+### 7. Keep it fast and honest
 
 One test = one story with several assertions along the way (the repo's tests are like this). Do not repeat what unit tests already cover. Create documents through the wizard once per test (`newCv.createExample()`, or just the `cvEditor` fixture) or through `page.request.post('/api/...')` when the creation is not the point.
 

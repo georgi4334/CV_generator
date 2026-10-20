@@ -1,5 +1,5 @@
 import { AI_MODELS, DEFAULT_AI_MODEL, type AiModel } from '@cv/shared'
-import { useState, type FormEvent } from 'react'
+import { useId, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FormError } from '@/features/auth/components/AuthShell'
 import { field } from '@/features/auth/components/authStyles'
@@ -27,6 +27,7 @@ export function AiKeySettings() {
   const [apiKey, setApiKey] = useState('')
   const [model, setModel] = useState<AiModel | null>(null)
   const [done, setDone] = useState<'saved' | 'removed' | null>(null)
+  const hintId = useId()
 
   const own = status.data?.keySource === 'own'
   const chosen = model ?? (own ? status.data!.model : DEFAULT_AI_MODEL)
@@ -82,12 +83,17 @@ export function AiKeySettings() {
             minLength={20}
             maxLength={200}
             placeholder="AIza…"
+            aria-describedby={own ? hintId : undefined}
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
             className={field}
           />
-          {own && <span className="text-xs text-fg-muted">{t('ai.key.replaceHint')}</span>}
         </label>
+        {own && (
+          <p id={hintId} className="-mt-3 text-xs text-fg-muted">
+            {t('ai.key.replaceHint')}
+          </p>
+        )}
 
         <fieldset className="space-y-1">
           <legend className="text-sm font-medium">{t('ai.key.model')}</legend>

@@ -1,0 +1,10 @@
+{
+  "note": "Generous on purpose: a shared CI machine is slow and noisy. They catch big regressions (a huge bundle, a layout that jumps), not small ones.",
+  "lcpMs": 4000,
+  "cls": 0.1,
+  "pages": [
+    { "name": "welcome page", "path": "/welcome" },
+    { "name": "sign-in page", "path": "/login" },
+    { "name": "privacy policy", "path": "/privacy" }
+  ]
+}

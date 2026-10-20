@@ -1,0 +1,25 @@
+{
+  "rejected": [
+    {
+      "case": "a text file renamed to .png",
+      "name": "notes.png",
+      "mimeType": "text/plain",
+      "bytes": 1024,
+      "message": "Please choose an image file."
+    },
+    {
+      "case": "a PDF",
+      "name": "cv.pdf",
+      "mimeType": "application/pdf",
+      "bytes": 2048,
+      "message": "Please choose an image file."
+    },
+    {
+      "case": "an image over 5 MB",
+      "name": "huge.png",
+      "mimeType": "image/png",
+      "bytes": 5242881,
+      "message": "The image must be smaller than 5 MB."
+    }
+  ]
+}
