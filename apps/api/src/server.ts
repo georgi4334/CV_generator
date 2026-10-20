@@ -104,7 +104,11 @@ const app = await buildApp({
   ai: {
     provider:
       aiProvider === 'gemini'
-        ? createGeminiProvider({ apiKey: env.GEMINI_API_KEY, model: env.GEMINI_MODEL })
+        ? createGeminiProvider({
+            apiKey: env.GEMINI_API_KEY,
+            model: env.GEMINI_MODEL,
+            baseUrl: env.GEMINI_BASE_URL,
+          })
         : aiProvider === 'mock'
           ? createMockProvider()
           : null,
@@ -114,8 +118,9 @@ const app = await buildApp({
       aiProvider === 'mock'
         ? null
         : {
-            createProvider: (apiKey, model) => createGeminiProvider({ apiKey, model }),
-            validate: (apiKey) => validateGeminiKey(apiKey),
+            createProvider: (apiKey, model) =>
+              createGeminiProvider({ apiKey, model, baseUrl: env.GEMINI_BASE_URL }),
+            validate: (apiKey) => validateGeminiKey(apiKey, { baseUrl: env.GEMINI_BASE_URL }),
           },
   },
   secretsKey: env.SECRETS_KEY,

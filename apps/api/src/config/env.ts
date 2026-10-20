@@ -31,6 +31,8 @@ const EnvSchema = z.object({
    */
   SECRETS_KEY: z.string().default(DEV_SECRETS_KEY),
   GEMINI_MODEL: z.string().default('gemini-flash-latest'),
+  /** Gemini's REST address; only changed to point tests at a stand-in server. */
+  GEMINI_BASE_URL: z.string().default('https://generativelanguage.googleapis.com/v1beta'),
   /** AI requests per minute for the whole API (the provider's free quota is per minute too). */
   AI_MAX_PER_MINUTE: z.coerce.number().int().positive().default(10),
   /** Where uploaded images go: local disk (development) or Cloudflare R2. */
