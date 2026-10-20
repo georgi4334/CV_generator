@@ -44,11 +44,21 @@ export class DesignFontPanel {
     await expect(this.panel()).toHaveCount(0)
   }
 
-  /** Uploads an image through the photo picker. */
-  async uploadPhoto(file: { name: string; mimeType: string; buffer: Buffer } | string) {
+  /** Offers a file to the photo picker, without waiting for the result. */
+  async chooseFile(file: { name: string; mimeType: string; buffer: Buffer } | string) {
     const chooser = this.page.waitForEvent('filechooser')
     await this.page.getByRole('button', { name: 'Upload photo' }).click()
     await (await chooser).setFiles(file)
+  }
+
+  /** The "Change photo" button: there once a photo is attached. */
+  changePhotoButton(): Locator {
+    return this.panel().getByRole('button', { name: 'Change photo' })
+  }
+
+  /** Uploads an image through the photo picker and waits until it is attached. */
+  async uploadPhoto(file: { name: string; mimeType: string; buffer: Buffer } | string) {
+    await this.chooseFile(file)
     await this.page
       .getByRole('button', { name: 'Change photo' })
       .first()

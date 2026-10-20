@@ -3,6 +3,7 @@ import { test as base, expect } from '@playwright/test'
 import {
   ForgotPasswordPage,
   LoginPage,
+  PublicPage,
   RegisterPage,
   ResetPasswordPage,
   VerifyEmailPage,
@@ -39,6 +40,7 @@ interface Fixtures {
   resetPasswordPage: ResetPasswordPage
   verifyEmailPage: VerifyEmailPage
   welcomePage: WelcomePage
+  publicPage: PublicPage
   dashboard: DashboardPage
   documents: DocumentsPage
   jobs: JobsPage
@@ -87,6 +89,7 @@ export const test = base.extend<Fixtures>({
   resetPasswordPage: async ({ page }, use) => use(new ResetPasswordPage(page)),
   verifyEmailPage: async ({ page }, use) => use(new VerifyEmailPage(page)),
   welcomePage: async ({ page }, use) => use(new WelcomePage(page)),
+  publicPage: async ({ page }, use) => use(new PublicPage(page)),
   dashboard: async ({ page }, use) => use(new DashboardPage(page)),
   documents: async ({ page }, use) => use(new DocumentsPage(page)),
   jobs: async ({ page }, use) => use(new JobsPage(page)),

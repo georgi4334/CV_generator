@@ -5,9 +5,8 @@ import { measureWebVitals } from '../utils/PerformanceHelper'
 // Timing depends on the machine, so this runs in one browser (the desktop one) only.
 test.describe('page load budgets', () => {
   for (const { name, path } of budgets.pages) {
-    test(`the ${name} paints quickly and does not jump`, async ({ page }, testInfo) => {
-      await page.goto(path)
-      await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible()
+    test(`the ${name} paints quickly and does not jump`, async ({ publicPage, page }, testInfo) => {
+      await publicPage.open(path)
       const { lcp, cls } = await measureWebVitals(page)
 
       // The numbers go into the HTML report next to the test.
