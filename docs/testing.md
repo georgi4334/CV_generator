@@ -89,14 +89,15 @@ All root commands are in the root `package.json`. They call the scripts of each 
 
 ### Environment switches for e2e
 
-| Variable                   | Effect (all read in `e2e/playwright.config.ts`)                                                                                                    |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `E2E_DATABASE_URL`         | Database for e2e. Default `postgres://cv:cv@localhost:5433/cv_generator_e2e`. The name must contain `e2e` (checked by `e2e/scripts/reset-db.mjs`). |
-| `E2E_VISUAL=1`             | Adds the `visual` project (screenshots) locally. In CI (`CI` set) it is always on.                                                                 |
-| `E2E_WEBKIT=1`             | Adds the `webkit` and `webkit-iphone` projects locally. Run `pnpm --filter @cv/e2e exec playwright install webkit` first.                          |
-| `E2E_CROSS_ON_CHROMIUM=1`  | Runs the Safari journeys (`cross-browser.spec.ts`) on Chromium (desktop) and Pixel 7 (`mobile` project) instead, to debug them without WebKit.     |
-| `PLAYWRIGHT_CHROMIUM_PATH` | Use an already installed Chromium instead of the one Playwright downloads. Also read by the smoke config.                                          |
-| `CI`                       | Turns on retries (1), `forbidOnly`, the HTML and GitHub reporters, and the `visual` and WebKit projects.                                           |
+| Variable                   | Effect (all read in `e2e/playwright.config.ts`)                                                                                                                      |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `E2E_DATABASE_URL`         | Database for e2e. Default `postgres://cv:cv@localhost:5433/cv_generator_e2e`. The name must contain `e2e` (checked by `e2e/scripts/reset-db.mjs`).                   |
+| `E2E_VISUAL=1`             | Adds the `visual` project (screenshots) locally. In CI (`CI` set) it is always on.                                                                                   |
+| `E2E_WEBKIT=1`             | Adds the `webkit` and `webkit-iphone` projects locally. Run `pnpm --filter @cv/e2e exec playwright install webkit` first.                                            |
+| `E2E_CROSS_ON_CHROMIUM=1`  | Runs the Safari journeys (`cross-browser.spec.ts`) on Chromium (desktop) and Pixel 7 (`mobile` project) instead, to debug them without WebKit.                       |
+| `E2E_WORKERS=4`            | Runs spec files in parallel (default 1). About a third faster on 4 workers, but see [Why the suite runs one test at a time](#why-the-suite-runs-one-test-at-a-time). |
+| `PLAYWRIGHT_CHROMIUM_PATH` | Use an already installed Chromium instead of the one Playwright downloads. Also read by the smoke config.                                                            |
+| `CI`                       | Turns on retries (1), `forbidOnly`, the HTML and GitHub reporters, and the `visual` and WebKit projects.                                                             |
 
 The first time you run e2e, install the browser: `pnpm --filter @cv/e2e exec playwright install chromium`.
 
@@ -376,6 +377,8 @@ e2e/
     base.ts                `test` with page objects, api, mailbox, printing, visitors, console-error check; no account
     index.ts               `test` with a signed-in `account`, `cvEditor` and the `accountName` / `cvTitle` options
     helpers.ts             ApiClient, Mailbox, Printing, Visitors
+  utils/                 small helpers that are not page objects: LinksChecker (the same-site links of a page), PerformanceHelper (LCP and CLS)
+  data/                  JSON test data for data-driven specs: signupRules.json, photos.json, performanceBudgets.json
 ```
 
 **Rules for page objects.** A page object has locators (methods returning a `Locator`) and actions (methods that click, type, wait). It does not hold `expect` calls about behaviour; the only exceptions are small "wait until ready" checks and `expectSaved` / `expectAccessible` / `expectNoSideScroll`. An action that leads to another screen returns that screen's page object (`newCv.createExample()` returns a `CvEditorPage`). Selectors use roles and the English interface texts.
@@ -403,22 +406,42 @@ e2e/
 
 ### The specs
 
-| File                    | What it covers                                                                                                                                                                              |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auth.spec.ts`          | Sign up, sign out, sign in; public legal pages; the welcome page for first-time visitors.                                                                                                   |
-| `email.spec.ts`         | Email confirmation, "send it again", password reset from the emailed link, reset for an unknown address reveals nothing, deleting the account removes its data.                             |
-| `documents.spec.ts`     | Create, edit, autosave and share a CV; a saved job keeps its description.                                                                                                                   |
-| `headline.spec.ts`      | The worked example of the e2e guide: edit, autosave, reload, PDF.                                                                                                                           |
-| `letters.spec.ts`       | Cover letter and resignation letter: write, save, restyle, print, share with details hidden, delete.                                                                                        |
-| `ai.spec.ts`            | Fix Mistakes, Check and Tailor, and the assistant, using the mock AI.                                                                                                                       |
-| `failures.spec.ts`      | Same CV in two tabs (conflict handling), server errors and lost connection while saving, AI busy or daily limit used, session expiry while editing, server failure when opening a document. |
-| `edge-data.spec.ts`     | Cyrillic and emoji survive save, reload and share; markup is shown as text; one very long word wraps; a nearly empty CV opens.                                                              |
-| `i18n.spec.ts`          | Switching language changes the page in place and is remembered; the editor keeps unsaved work when the language changes.                                                                    |
-| `pdf.spec.ts`           | PDF output: A4 size, text, Cyrillic, margins, multi-page flow.                                                                                                                              |
-| `quality.spec.ts`       | Accessibility (axe) of public and app pages, security headers (CSP), "not found" page for a missing document.                                                                               |
-| `mobile.spec.ts`        | Phone layout (Pixel 7): bottom navigation, no sideways scroll, compact editor with a bottom toolbar, account drawer.                                                                        |
-| `cross-browser.spec.ts` | Main journeys in Safari's engine (WebKit desktop and iPhone).                                                                                                                               |
-| `visual.spec.ts`        | Screenshots of the template thumbnails and six full-size templates ([section 7](#7-visual-screenshots)).                                                                                    |
+New specs borrow from the practices of [AutomationCamp-Playwright](https://github.com/varadinos/AutomationCamp-Playwright): data-driven cases kept in JSON, a link checker that attaches what it checked to the report, and page-load measurements written into the report as annotations.
+
+| File                    | What it covers                                                                                                                                                                                                                             |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `auth.spec.ts`          | Sign up, sign out, sign in; public legal pages; the welcome page for first-time visitors.                                                                                                                                                  |
+| `email.spec.ts`         | Email confirmation, "send it again", password reset from the emailed link, reset for an unknown address reveals nothing, deleting the account removes its data.                                                                            |
+| `documents.spec.ts`     | Create, edit, autosave and share a CV; a saved job keeps its description.                                                                                                                                                                  |
+| `links.spec.ts`         | Every same-site link on the six public pages answers 200 (soft assertions list every broken link; the checked links are attached to the report as `checked-links.txt`).                                                                    |
+| `performance.spec.ts`   | Largest Contentful Paint and layout shift of the welcome, sign-in and privacy pages stay inside the budgets in `data/performanceBudgets.json`; the measured values are annotations in the HTML report.                                     |
+| `validation.spec.ts`    | Data-driven: the sign-up form refuses short or empty passwords and malformed emails (rows of `data/signupRules.json`); the photo picker refuses text files, PDFs and images over 5 MB with the right message (rows of `data/photos.json`). |
+| `headline.spec.ts`      | The worked example of the e2e guide: edit, autosave, reload, PDF.                                                                                                                                                                          |
+| `letters.spec.ts`       | Cover letter and resignation letter: write, save, restyle, print, share with details hidden, delete.                                                                                                                                       |
+| `ai.spec.ts`            | Fix Mistakes, Check and Tailor, and the assistant, using the mock AI.                                                                                                                                                                      |
+| `failures.spec.ts`      | Same CV in two tabs (conflict handling), server errors and lost connection while saving, AI busy or daily limit used, session expiry while editing, server failure when opening a document.                                                |
+| `edge-data.spec.ts`     | Cyrillic and emoji survive save, reload and share; markup is shown as text; one very long word wraps; a nearly empty CV opens.                                                                                                             |
+| `i18n.spec.ts`          | Switching language changes the page in place and is remembered; the editor keeps unsaved work when the language changes.                                                                                                                   |
+| `pdf.spec.ts`           | PDF output: A4 size, text, Cyrillic, margins, multi-page flow.                                                                                                                                                                             |
+| `quality.spec.ts`       | Accessibility (axe) of public and app pages, security headers (CSP), "not found" page for a missing document.                                                                                                                              |
+| `mobile.spec.ts`        | Phone layout (Pixel 7): bottom navigation, no sideways scroll, compact editor with a bottom toolbar, account drawer.                                                                                                                       |
+| `cross-browser.spec.ts` | Main journeys in Safari's engine (WebKit desktop and iPhone).                                                                                                                                                                              |
+| `visual.spec.ts`        | Screenshots of the template thumbnails and six full-size templates ([section 7](#7-visual-screenshots)).                                                                                                                                   |
+
+### Why the suite runs one test at a time
+
+`workers: 1` is the default. Spec files use their own accounts, so running them in parallel is possible (`E2E_WORKERS=4 pnpm e2e`), and it took 2.5 to 2.7 minutes instead of 4 to 5 on the development machine. But on two of two parallel runs, two tests failed with timing problems (for example the accessibility sweep and a CV test), different ones each time, and the performance budgets are only meaningful when the machine is not busy. A suite that fails at random costs more than the two minutes it saves, so parallel runs stay opt-in until the suite is run on a machine with more cores.
+
+### Practices taken from other projects, and ones left out
+
+Reviewed against [AutomationCamp-Playwright](https://github.com/varadinos/AutomationCamp-Playwright). Taken: JSON test data with one test per row; a reusable link checker with the checked links attached to the report; Core Web Vitals checks with the values as report annotations; tests named after the behaviour they prove. Already in place here: page objects, fixtures, a lazy per-test account, traces and screenshots on failure, CI with an HTML report. Left out on purpose:
+
+- **Replacing Playwright's `browser` and `page` fixtures** with a hand-launched browser. It switches off per-project settings (device profiles, traces, video, isolation between tests).
+- **`waitForLoadState('networkidle')` in fixtures.** Playwright advises against it; pages here wait for what the user sees ("Saved", a heading), which is faster and does not hang on polling.
+- **CSS and id selectors** (`#click_me_2`). Roles and labels survive redesigns and keep the accessibility of the page honest.
+- **Four retries.** A test that needs retries is hiding a bug; here there are none locally and one in CI.
+- **A skipped test left in the code.** Skipped tests are forgotten; the link check here runs.
+- **A fixed 2 s LCP limit.** Too tight for a shared CI machine, so budgets live in data and are generous.
 
 ### Conventions and pitfalls
 

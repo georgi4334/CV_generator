@@ -9,8 +9,8 @@ const launchOptions = process.env.PLAYWRIGHT_CHROMIUM_PATH
 
 export default defineConfig({
   testDir: 'tests',
-  fullyParallel: false,
-  workers: 1,
+  fullyParallel: true,
+  workers: Number(process.env.E2E_WORKERS ?? 1),
   retries: process.env.CI ? 1 : 0,
   forbidOnly: Boolean(process.env.CI),
   reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'list',

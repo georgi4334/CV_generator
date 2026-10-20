@@ -1,0 +1,12 @@
+{
+  "invalidPasswords": [
+    { "case": "shorter than 8 characters", "password": "short7!" },
+    { "case": "empty", "password": "" }
+  ],
+  "invalidEmails": [
+    { "case": "missing the @", "email": "ada.example.com" },
+    { "case": "missing the domain", "email": "ada@" },
+    { "case": "empty", "email": "" }
+  ],
+  "validPassword": "correct horse battery"
+}

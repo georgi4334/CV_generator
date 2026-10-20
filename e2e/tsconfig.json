@@ -8,6 +8,8 @@
     "tests",
     "smoke",
     "fixtures",
+    "utils",
+    "data",
     "pages",
     "pdf.ts",
     "paths.ts",
