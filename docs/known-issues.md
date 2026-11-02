@@ -18,6 +18,50 @@ anyone relies on them.
 | Stale comments: share links "CV or cover letter" (they also cover resignation letters), a misplaced `TRUST_PROXY` comment, the `pruneVersions` comment                          | Comments corrected                                                                          |
 | The README said browser tests run on every push (they run on pull requests only)                                                                                                | Corrected                                                                                   |
 
+## Open: bugs found by the edge-case tests
+
+Each one has a test marked `it.fails` with a `// BUG:` comment next to it (search for `BUG` in the
+test files). The suites stay green; when a bug is fixed, its test starts failing, and the fix is to
+turn `it.fails` into `it`.
+
+**Fix first (security, availability, privacy)**
+
+- **Saves can deadlock the API.** `PATCH /api/cvs/:id` holds a pooled connection in a transaction
+  and then prunes versions with a second one. Five or six parallel saves of one CV use up the pool
+  of 5 and every database request hangs until a restart (`test/modules/poolExhaustion.test.ts`).
+- **Open redirect after sign-in.** `safeNext` accepts `/\evil.com` and `/<tab>/evil.com`, which
+  browsers read as `//evil.com` (`features/auth/components/authStyles.test.ts`).
+- **Prototype pollution in the editor.** `setAtPath(cv, 'header.__proto__.toString', …)` writes to
+  `Object.prototype`; paths come from the DOM and from AI answers (`state/documentPath.edge.test.ts`).
+- **Plan limit race.** Parallel creates can go past the 20-CV limit (count, then insert, without a
+  lock) (`test/modules/documentsEdge.test.ts`).
+- **Privacy on share links.** A cover letter's `recipient.title` is not hidden; names with combining
+  accents, hyphens or apostrophes ("Anne-Marie", "O'Brien") are not matched
+  (`packages/shared/src/documents/share.edge.test.ts`, `test/modules/shareEdge.test.ts`).
+- **500 instead of 400 on bad text.** A NUL character or a lone UTF-16 surrogate in a document reaches
+  Postgres and fails there (`test/modules/malformedInput.test.ts`).
+
+**Robustness**
+
+- Uploads: a multipart body without a boundary or cut off in the middle answers 500; the over-size
+  answer uses a code the web app does not translate; deleting an upload removes the row before the
+  file (`test/modules/uploadsEdge.test.ts`).
+- Saving a CV while it is being deleted answers 500 (`test/modules/documentsEdge.test.ts`).
+- A mailer whose `send()` throws synchronously is not caught (`test/modules/authAbuse.test.ts`); the
+  common-password list is checked before the password is normalised.
+- An AI answer rejected after the provider replied is not refunded (`test/modules/aiEdge.test.ts`); a
+  literal JSON `null` from Gemini throws a TypeError (`src/modules/ai/gemini.test.ts`).
+- If the error reporter (Sentry) throws, the error handler fails (`test/modules/resilience.test.ts`);
+  Fastify's own "bad URL" answer skips the API error format (`test/modules/malformedInput.test.ts`).
+- Web: a 200 answer that does not match the schema and the `http_error` code have no friendly
+  message (`app/apiModules.test.ts`, `shared/api/errorMessage.test.ts`); `PrintHost` has no catch
+  around `window.print()`; an unknown page size, an unparsable date, a month "13" and an unknown saved
+  theme are not handled (`CvRenderer.edge`, `format`, `dateInputs.edge`, `theme.edge` tests);
+  `removeSection` with an unknown id still changes the document.
+- Shared: `matchKeywords` throws on a ~50 000-character keyword and matches a phrase across two
+  fields; `fieldMaxLength('header.toString')` returns a function; `formatYearMonth('2024-13')`
+  prints "undefined 2024".
+
 ## Open: behaviour worth a decision
 
 | #   | What                                                                                                                                                                                                           | Where                                                                                                                          |
